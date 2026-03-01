@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+.xterm.terminal {
+  width: 100%;
+}
+
+.xterm-viewport {
+  overflow-y: hidden !important;
+}
+
+.cm-scroller {
+  overflow-x: unset !important;
+}
+
+.cm-editor {
+  overflow-x: auto !important;
+}

@@ -1,0 +1,30 @@
+{
+  "[mdx]": {
+    "editor.wordWrap": "on"
+  },
+  "terminal.integrated.defaultProfile.linux": "zsh",
+  "workbench.colorTheme": "Default Dark Modern",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "workbench.startupEditor": "none",
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "cSpell.words": [
+    "octelium",
+    "Octelium",
+    "OCTELIUM",
+    "octeliumctl",
+    "Cordium",
+    "cordium",
+    "Yubikey"
+  ]
+}

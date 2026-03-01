@@ -1,0 +1,17 @@
+go 1.25.7
+
+use (
+	./apis
+	./client/cordium
+	./cluster/genesis
+	./cluster/mockapiserver
+	./cluster/workspace
+	./cluster/apiserver
+	./cluster/common
+	./cluster/nocturne
+	./cluster/portal
+	./cluster/supervisor
+	./cluster/rscserver
+	./cluster/vigil
+	./pkg
+)

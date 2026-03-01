@@ -1,0 +1,57 @@
+name: tests-unit-test
+on:
+  push:
+    tags:
+      - v*
+    branches:
+      - master
+      - main
+      - dev*
+      - t-*
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: postgres
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+      minio:
+        env:
+          AWS_ACCESS_KEY_ID: minioadmin
+          AWS_SECRET_ACCESS_KEY: minioadmin
+        image: fclairamb/minio-github-actions
+        ports:
+          - 9000:9000
+    steps:
+      - name: Set up go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "${{env.GO_VERSION}}"
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v4
+      - name: Install psql
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client git
+      - name: Set ENV variables
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+        run: for v in `cat .github/workflows/env` ; do echo "::set-env name=${v%%=*}::${v##*=}" ; done
+      - name: Create database
+        run: psql -h localhost -U postgres -c 'CREATE DATABASE octelium;'
+        env:
+          PGPASSWORD: postgres
+      - name: Run tests
+        run: |
+          go version
+          which go
+          gocmd=$(which go)
+          sudo -E $gocmd version
+          sudo -E $gocmd test github.com/octelium/cordium/...

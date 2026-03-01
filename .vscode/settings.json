@@ -1,0 +1,39 @@
+{
+  "editor.defaultFormatter": "golang.go",
+  "terminal.integrated.defaultProfile.linux": "zsh",
+  "workbench.colorTheme": "Default Dark Modern",
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  "[proto3]": {
+    "editor.defaultFormatter": "zxh404.vscode-proto3"
+  },
+  "editor.formatOnSave": true,
+  "cSpell.words": [
+    "Debugf",
+    "octelium",
+    "Octelium",
+    "OCTELIUM",
+    "cordium",
+    "Cordium",
+    "CORDIUM",
+    "cordiumctl"
+  ],
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  }
+  /*
+  "go.toolsEnvVars": {
+    "GOOS": "darwin"
+  }
+  */
+}

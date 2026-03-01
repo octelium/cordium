@@ -1,0 +1,21 @@
+import { RouteObject } from "react-router-dom";
+import Create from "./Create";
+import Root from "./index";
+import List from "./List";
+
+export default (): RouteObject => {
+  return {
+    path: "memberships",
+    element: <Root />,
+    children: [
+      {
+        path: "",
+        element: <List />,
+      },
+      {
+        path: "create",
+        element: <Create />,
+      },
+    ],
+  };
+};
