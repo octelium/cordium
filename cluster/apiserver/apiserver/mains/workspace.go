@@ -232,6 +232,18 @@ func (s *Server) setWorkspaceLimit(ctx context.Context, ws *cordiumv1.Workspace,
 		}
 
 		return nil
+	} else if ws.Spec.Limit != nil {
+		if ws.Spec.Limit.Cpu != nil && ws.Spec.Limit.Cpu.Millicores != 0 {
+			ws.Status.Limit.Cpu = ws.Spec.Limit.Cpu
+		}
+
+		if ws.Spec.Limit.Memory != nil && ws.Spec.Limit.Memory.Megabytes != 0 {
+			ws.Status.Limit.Memory = ws.Spec.Limit.Memory
+		}
+
+		if ws.Spec.Limit.Storage != nil && ws.Spec.Limit.Storage.Megabytes != 0 {
+			ws.Status.Limit.Storage = ws.Spec.Limit.Storage
+		}
 	} else if ws.Status.TemplateRef != nil {
 		prj, err = s.octeliumC.CordiumC().GetTemplate(ctx,
 			apivalidation.ObjectReferenceToRGetOptions(ws.Status.TemplateRef))
@@ -251,7 +263,6 @@ func (s *Server) setWorkspaceLimit(ctx context.Context, ws *cordiumv1.Workspace,
 			if prj.Spec.Limit.Storage != nil && prj.Spec.Limit.Storage.Megabytes != 0 {
 				ws.Status.Limit.Storage = prj.Spec.Limit.Storage
 			}
-
 		}
 	} else if org.Status.Type == cordiumv1.Space_Status_ORGANIZATION &&
 		org.Spec.Limit != nil && org.Spec.Limit.DefaultLimit != nil {
