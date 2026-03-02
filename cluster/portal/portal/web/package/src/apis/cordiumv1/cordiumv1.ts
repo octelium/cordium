@@ -1292,15 +1292,11 @@ export interface ServerMessage_ListenTerminalEvent {
  */
 export interface StartWorkspaceRequest {
     /**
-     * @generated from protobuf field: string uid = 1
+     * @generated from protobuf field: octelium.api.main.meta.v1.ObjectReference workspaceRef = 1
      */
-    uid: string;
+    workspaceRef?: ObjectReference;
     /**
-     * @generated from protobuf field: string name = 2
-     */
-    name: string;
-    /**
-     * @generated from protobuf field: octelium.api.main.meta.v1.ObjectReference regionRef = 3
+     * @generated from protobuf field: octelium.api.main.meta.v1.ObjectReference regionRef = 2
      */
     regionRef?: ObjectReference; // 
     // string fromRunID = 4;
@@ -1316,21 +1312,9 @@ export interface StartWorkspaceResponse {
  */
 export interface StopWorkspaceRequest {
     /**
-     * @generated from protobuf field: string uid = 1
+     * @generated from protobuf field: octelium.api.main.meta.v1.ObjectReference workspaceRef = 1
      */
-    uid: string;
-    /**
-     * @generated from protobuf field: string name = 2
-     */
-    name: string;
-    /**
-     * @generated from protobuf field: repeated string tags = 3
-     */
-    tags: string[];
-    /**
-     * @generated from protobuf field: bool isEphemeral = 4
-     */
-    isEphemeral: boolean;
+    workspaceRef?: ObjectReference;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.StopWorkspaceResponse
@@ -2432,19 +2416,15 @@ export interface GetUserConfigRequest {
  */
 export interface ShareWorkspacePortRequest {
     /**
-     * @generated from protobuf field: string uid = 1
+     * @generated from protobuf field: octelium.api.main.meta.v1.ObjectReference workspaceRef = 1
      */
-    uid: string;
+    workspaceRef?: ObjectReference;
     /**
-     * @generated from protobuf field: string name = 2
-     */
-    name: string;
-    /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.ShareWorkspacePortRequest.Mode mode = 3
+     * @generated from protobuf field: octelium.api.main.cordium.v1.ShareWorkspacePortRequest.Mode mode = 2
      */
     mode: ShareWorkspacePortRequest_Mode;
     /**
-     * @generated from protobuf field: string applicationName = 4
+     * @generated from protobuf field: string applicationName = 3
      */
     applicationName: string;
 }
@@ -2475,15 +2455,11 @@ export interface ShareWorkspacePortResponse {
  */
 export interface UnshareWorkspacePortRequest {
     /**
-     * @generated from protobuf field: string uid = 1
+     * @generated from protobuf field: octelium.api.main.meta.v1.ObjectReference workspaceRef = 1
      */
-    uid: string;
+    workspaceRef?: ObjectReference;
     /**
-     * @generated from protobuf field: string name = 2
-     */
-    name: string;
-    /**
-     * @generated from protobuf field: string applicationName = 3
+     * @generated from protobuf field: string applicationName = 2
      */
     applicationName: string;
 }
@@ -2497,13 +2473,9 @@ export interface UnshareWorkspacePortResponse {
  */
 export interface LeaveSpaceRequest {
     /**
-     * @generated from protobuf field: string uid = 1
+     * @generated from protobuf field: octelium.api.main.meta.v1.ObjectReference spaceRef = 1
      */
-    uid: string;
-    /**
-     * @generated from protobuf field: string name = 2
-     */
-    name: string;
+    spaceRef?: ObjectReference;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.LeaveSpaceResponse
@@ -2602,19 +2574,15 @@ export interface ListRegionOptions {
  */
 export interface CreateTerminalRequest {
     /**
-     * @generated from protobuf field: string uid = 1
+     * @generated from protobuf field: octelium.api.main.meta.v1.ObjectReference workspaceRef = 1
      */
-    uid: string;
+    workspaceRef?: ObjectReference;
     /**
-     * @generated from protobuf field: string name = 2
-     */
-    name: string;
-    /**
-     * @generated from protobuf field: uint32 width = 3
+     * @generated from protobuf field: uint32 width = 2
      */
     width: number;
     /**
-     * @generated from protobuf field: uint32 height = 4
+     * @generated from protobuf field: uint32 height = 3
      */
     height: number;
 }
@@ -2655,13 +2623,9 @@ export interface RemoveTerminalResponse {
  */
 export interface ListTerminalRequest {
     /**
-     * @generated from protobuf field: string uid = 1
+     * @generated from protobuf field: octelium.api.main.meta.v1.ObjectReference workspaceRef = 1
      */
-    uid: string;
-    /**
-     * @generated from protobuf field: string name = 2
-     */
-    name: string;
+    workspaceRef?: ObjectReference;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.ListTerminalResponse
@@ -7169,15 +7133,12 @@ export const ServerMessage_ListenTerminalEvent = new ServerMessage_ListenTermina
 class StartWorkspaceRequest$Type extends MessageType<StartWorkspaceRequest> {
     constructor() {
         super("octelium.api.main.cordium.v1.StartWorkspaceRequest", [
-            { no: 1, name: "uid", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "regionRef", kind: "message", T: () => ObjectReference }
+            { no: 1, name: "workspaceRef", kind: "message", T: () => ObjectReference },
+            { no: 2, name: "regionRef", kind: "message", T: () => ObjectReference }
         ]);
     }
     create(value?: PartialMessage<StartWorkspaceRequest>): StartWorkspaceRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.uid = "";
-        message.name = "";
         if (value !== undefined)
             reflectionMergePartial<StartWorkspaceRequest>(this, message, value);
         return message;
@@ -7187,13 +7148,10 @@ class StartWorkspaceRequest$Type extends MessageType<StartWorkspaceRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string uid */ 1:
-                    message.uid = reader.string();
+                case /* octelium.api.main.meta.v1.ObjectReference workspaceRef */ 1:
+                    message.workspaceRef = ObjectReference.internalBinaryRead(reader, reader.uint32(), options, message.workspaceRef);
                     break;
-                case /* string name */ 2:
-                    message.name = reader.string();
-                    break;
-                case /* octelium.api.main.meta.v1.ObjectReference regionRef */ 3:
+                case /* octelium.api.main.meta.v1.ObjectReference regionRef */ 2:
                     message.regionRef = ObjectReference.internalBinaryRead(reader, reader.uint32(), options, message.regionRef);
                     break;
                 default:
@@ -7208,15 +7166,12 @@ class StartWorkspaceRequest$Type extends MessageType<StartWorkspaceRequest> {
         return message;
     }
     internalBinaryWrite(message: StartWorkspaceRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string uid = 1; */
-        if (message.uid !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.uid);
-        /* string name = 2; */
-        if (message.name !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.name);
-        /* octelium.api.main.meta.v1.ObjectReference regionRef = 3; */
+        /* octelium.api.main.meta.v1.ObjectReference workspaceRef = 1; */
+        if (message.workspaceRef)
+            ObjectReference.internalBinaryWrite(message.workspaceRef, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.meta.v1.ObjectReference regionRef = 2; */
         if (message.regionRef)
-            ObjectReference.internalBinaryWrite(message.regionRef, writer.tag(3, WireType.LengthDelimited).fork(), options).join();
+            ObjectReference.internalBinaryWrite(message.regionRef, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -7269,18 +7224,11 @@ export const StartWorkspaceResponse = new StartWorkspaceResponse$Type();
 class StopWorkspaceRequest$Type extends MessageType<StopWorkspaceRequest> {
     constructor() {
         super("octelium.api.main.cordium.v1.StopWorkspaceRequest", [
-            { no: 1, name: "uid", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "tags", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
-            { no: 4, name: "isEphemeral", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
+            { no: 1, name: "workspaceRef", kind: "message", T: () => ObjectReference }
         ]);
     }
     create(value?: PartialMessage<StopWorkspaceRequest>): StopWorkspaceRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.uid = "";
-        message.name = "";
-        message.tags = [];
-        message.isEphemeral = false;
         if (value !== undefined)
             reflectionMergePartial<StopWorkspaceRequest>(this, message, value);
         return message;
@@ -7290,17 +7238,8 @@ class StopWorkspaceRequest$Type extends MessageType<StopWorkspaceRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string uid */ 1:
-                    message.uid = reader.string();
-                    break;
-                case /* string name */ 2:
-                    message.name = reader.string();
-                    break;
-                case /* repeated string tags */ 3:
-                    message.tags.push(reader.string());
-                    break;
-                case /* bool isEphemeral */ 4:
-                    message.isEphemeral = reader.bool();
+                case /* octelium.api.main.meta.v1.ObjectReference workspaceRef */ 1:
+                    message.workspaceRef = ObjectReference.internalBinaryRead(reader, reader.uint32(), options, message.workspaceRef);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -7314,18 +7253,9 @@ class StopWorkspaceRequest$Type extends MessageType<StopWorkspaceRequest> {
         return message;
     }
     internalBinaryWrite(message: StopWorkspaceRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string uid = 1; */
-        if (message.uid !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.uid);
-        /* string name = 2; */
-        if (message.name !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.name);
-        /* repeated string tags = 3; */
-        for (let i = 0; i < message.tags.length; i++)
-            writer.tag(3, WireType.LengthDelimited).string(message.tags[i]);
-        /* bool isEphemeral = 4; */
-        if (message.isEphemeral !== false)
-            writer.tag(4, WireType.Varint).bool(message.isEphemeral);
+        /* octelium.api.main.meta.v1.ObjectReference workspaceRef = 1; */
+        if (message.workspaceRef)
+            ObjectReference.internalBinaryWrite(message.workspaceRef, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -10606,16 +10536,13 @@ export const GetUserConfigRequest = new GetUserConfigRequest$Type();
 class ShareWorkspacePortRequest$Type extends MessageType<ShareWorkspacePortRequest> {
     constructor() {
         super("octelium.api.main.cordium.v1.ShareWorkspacePortRequest", [
-            { no: 1, name: "uid", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "mode", kind: "enum", T: () => ["octelium.api.main.cordium.v1.ShareWorkspacePortRequest.Mode", ShareWorkspacePortRequest_Mode] },
-            { no: 4, name: "applicationName", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 1, name: "workspaceRef", kind: "message", T: () => ObjectReference },
+            { no: 2, name: "mode", kind: "enum", T: () => ["octelium.api.main.cordium.v1.ShareWorkspacePortRequest.Mode", ShareWorkspacePortRequest_Mode] },
+            { no: 3, name: "applicationName", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<ShareWorkspacePortRequest>): ShareWorkspacePortRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.uid = "";
-        message.name = "";
         message.mode = 0;
         message.applicationName = "";
         if (value !== undefined)
@@ -10627,16 +10554,13 @@ class ShareWorkspacePortRequest$Type extends MessageType<ShareWorkspacePortReque
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string uid */ 1:
-                    message.uid = reader.string();
+                case /* octelium.api.main.meta.v1.ObjectReference workspaceRef */ 1:
+                    message.workspaceRef = ObjectReference.internalBinaryRead(reader, reader.uint32(), options, message.workspaceRef);
                     break;
-                case /* string name */ 2:
-                    message.name = reader.string();
-                    break;
-                case /* octelium.api.main.cordium.v1.ShareWorkspacePortRequest.Mode mode */ 3:
+                case /* octelium.api.main.cordium.v1.ShareWorkspacePortRequest.Mode mode */ 2:
                     message.mode = reader.int32();
                     break;
-                case /* string applicationName */ 4:
+                case /* string applicationName */ 3:
                     message.applicationName = reader.string();
                     break;
                 default:
@@ -10651,18 +10575,15 @@ class ShareWorkspacePortRequest$Type extends MessageType<ShareWorkspacePortReque
         return message;
     }
     internalBinaryWrite(message: ShareWorkspacePortRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string uid = 1; */
-        if (message.uid !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.uid);
-        /* string name = 2; */
-        if (message.name !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.name);
-        /* octelium.api.main.cordium.v1.ShareWorkspacePortRequest.Mode mode = 3; */
+        /* octelium.api.main.meta.v1.ObjectReference workspaceRef = 1; */
+        if (message.workspaceRef)
+            ObjectReference.internalBinaryWrite(message.workspaceRef, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.ShareWorkspacePortRequest.Mode mode = 2; */
         if (message.mode !== 0)
-            writer.tag(3, WireType.Varint).int32(message.mode);
-        /* string applicationName = 4; */
+            writer.tag(2, WireType.Varint).int32(message.mode);
+        /* string applicationName = 3; */
         if (message.applicationName !== "")
-            writer.tag(4, WireType.LengthDelimited).string(message.applicationName);
+            writer.tag(3, WireType.LengthDelimited).string(message.applicationName);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -10715,15 +10636,12 @@ export const ShareWorkspacePortResponse = new ShareWorkspacePortResponse$Type();
 class UnshareWorkspacePortRequest$Type extends MessageType<UnshareWorkspacePortRequest> {
     constructor() {
         super("octelium.api.main.cordium.v1.UnshareWorkspacePortRequest", [
-            { no: 1, name: "uid", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "applicationName", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 1, name: "workspaceRef", kind: "message", T: () => ObjectReference },
+            { no: 2, name: "applicationName", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<UnshareWorkspacePortRequest>): UnshareWorkspacePortRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.uid = "";
-        message.name = "";
         message.applicationName = "";
         if (value !== undefined)
             reflectionMergePartial<UnshareWorkspacePortRequest>(this, message, value);
@@ -10734,13 +10652,10 @@ class UnshareWorkspacePortRequest$Type extends MessageType<UnshareWorkspacePortR
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string uid */ 1:
-                    message.uid = reader.string();
+                case /* octelium.api.main.meta.v1.ObjectReference workspaceRef */ 1:
+                    message.workspaceRef = ObjectReference.internalBinaryRead(reader, reader.uint32(), options, message.workspaceRef);
                     break;
-                case /* string name */ 2:
-                    message.name = reader.string();
-                    break;
-                case /* string applicationName */ 3:
+                case /* string applicationName */ 2:
                     message.applicationName = reader.string();
                     break;
                 default:
@@ -10755,15 +10670,12 @@ class UnshareWorkspacePortRequest$Type extends MessageType<UnshareWorkspacePortR
         return message;
     }
     internalBinaryWrite(message: UnshareWorkspacePortRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string uid = 1; */
-        if (message.uid !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.uid);
-        /* string name = 2; */
-        if (message.name !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.name);
-        /* string applicationName = 3; */
+        /* octelium.api.main.meta.v1.ObjectReference workspaceRef = 1; */
+        if (message.workspaceRef)
+            ObjectReference.internalBinaryWrite(message.workspaceRef, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* string applicationName = 2; */
         if (message.applicationName !== "")
-            writer.tag(3, WireType.LengthDelimited).string(message.applicationName);
+            writer.tag(2, WireType.LengthDelimited).string(message.applicationName);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -10816,14 +10728,11 @@ export const UnshareWorkspacePortResponse = new UnshareWorkspacePortResponse$Typ
 class LeaveSpaceRequest$Type extends MessageType<LeaveSpaceRequest> {
     constructor() {
         super("octelium.api.main.cordium.v1.LeaveSpaceRequest", [
-            { no: 1, name: "uid", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 1, name: "spaceRef", kind: "message", T: () => ObjectReference }
         ]);
     }
     create(value?: PartialMessage<LeaveSpaceRequest>): LeaveSpaceRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.uid = "";
-        message.name = "";
         if (value !== undefined)
             reflectionMergePartial<LeaveSpaceRequest>(this, message, value);
         return message;
@@ -10833,11 +10742,8 @@ class LeaveSpaceRequest$Type extends MessageType<LeaveSpaceRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string uid */ 1:
-                    message.uid = reader.string();
-                    break;
-                case /* string name */ 2:
-                    message.name = reader.string();
+                case /* octelium.api.main.meta.v1.ObjectReference spaceRef */ 1:
+                    message.spaceRef = ObjectReference.internalBinaryRead(reader, reader.uint32(), options, message.spaceRef);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -10851,12 +10757,9 @@ class LeaveSpaceRequest$Type extends MessageType<LeaveSpaceRequest> {
         return message;
     }
     internalBinaryWrite(message: LeaveSpaceRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string uid = 1; */
-        if (message.uid !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.uid);
-        /* string name = 2; */
-        if (message.name !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.name);
+        /* octelium.api.main.meta.v1.ObjectReference spaceRef = 1; */
+        if (message.spaceRef)
+            ObjectReference.internalBinaryWrite(message.spaceRef, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -11194,16 +11097,13 @@ export const ListRegionOptions = new ListRegionOptions$Type();
 class CreateTerminalRequest$Type extends MessageType<CreateTerminalRequest> {
     constructor() {
         super("octelium.api.main.cordium.v1.CreateTerminalRequest", [
-            { no: 1, name: "uid", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "width", kind: "scalar", T: 13 /*ScalarType.UINT32*/ },
-            { no: 4, name: "height", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
+            { no: 1, name: "workspaceRef", kind: "message", T: () => ObjectReference },
+            { no: 2, name: "width", kind: "scalar", T: 13 /*ScalarType.UINT32*/ },
+            { no: 3, name: "height", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
         ]);
     }
     create(value?: PartialMessage<CreateTerminalRequest>): CreateTerminalRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.uid = "";
-        message.name = "";
         message.width = 0;
         message.height = 0;
         if (value !== undefined)
@@ -11215,16 +11115,13 @@ class CreateTerminalRequest$Type extends MessageType<CreateTerminalRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string uid */ 1:
-                    message.uid = reader.string();
+                case /* octelium.api.main.meta.v1.ObjectReference workspaceRef */ 1:
+                    message.workspaceRef = ObjectReference.internalBinaryRead(reader, reader.uint32(), options, message.workspaceRef);
                     break;
-                case /* string name */ 2:
-                    message.name = reader.string();
-                    break;
-                case /* uint32 width */ 3:
+                case /* uint32 width */ 2:
                     message.width = reader.uint32();
                     break;
-                case /* uint32 height */ 4:
+                case /* uint32 height */ 3:
                     message.height = reader.uint32();
                     break;
                 default:
@@ -11239,18 +11136,15 @@ class CreateTerminalRequest$Type extends MessageType<CreateTerminalRequest> {
         return message;
     }
     internalBinaryWrite(message: CreateTerminalRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string uid = 1; */
-        if (message.uid !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.uid);
-        /* string name = 2; */
-        if (message.name !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.name);
-        /* uint32 width = 3; */
+        /* octelium.api.main.meta.v1.ObjectReference workspaceRef = 1; */
+        if (message.workspaceRef)
+            ObjectReference.internalBinaryWrite(message.workspaceRef, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* uint32 width = 2; */
         if (message.width !== 0)
-            writer.tag(3, WireType.Varint).uint32(message.width);
-        /* uint32 height = 4; */
+            writer.tag(2, WireType.Varint).uint32(message.width);
+        /* uint32 height = 3; */
         if (message.height !== 0)
-            writer.tag(4, WireType.Varint).uint32(message.height);
+            writer.tag(3, WireType.Varint).uint32(message.height);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -11444,14 +11338,11 @@ export const RemoveTerminalResponse = new RemoveTerminalResponse$Type();
 class ListTerminalRequest$Type extends MessageType<ListTerminalRequest> {
     constructor() {
         super("octelium.api.main.cordium.v1.ListTerminalRequest", [
-            { no: 1, name: "uid", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 1, name: "workspaceRef", kind: "message", T: () => ObjectReference }
         ]);
     }
     create(value?: PartialMessage<ListTerminalRequest>): ListTerminalRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.uid = "";
-        message.name = "";
         if (value !== undefined)
             reflectionMergePartial<ListTerminalRequest>(this, message, value);
         return message;
@@ -11461,11 +11352,8 @@ class ListTerminalRequest$Type extends MessageType<ListTerminalRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string uid */ 1:
-                    message.uid = reader.string();
-                    break;
-                case /* string name */ 2:
-                    message.name = reader.string();
+                case /* octelium.api.main.meta.v1.ObjectReference workspaceRef */ 1:
+                    message.workspaceRef = ObjectReference.internalBinaryRead(reader, reader.uint32(), options, message.workspaceRef);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -11479,12 +11367,9 @@ class ListTerminalRequest$Type extends MessageType<ListTerminalRequest> {
         return message;
     }
     internalBinaryWrite(message: ListTerminalRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string uid = 1; */
-        if (message.uid !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.uid);
-        /* string name = 2; */
-        if (message.name !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.name);
+        /* octelium.api.main.meta.v1.ObjectReference workspaceRef = 1; */
+        if (message.workspaceRef)
+            ObjectReference.internalBinaryWrite(message.workspaceRef, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

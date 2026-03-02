@@ -22,6 +22,7 @@ import { useQuery } from "@tanstack/react-query";
 import InfoItem from "@/components/InfoItem";
 import PageWrap from "@/components/PageWrap";
 import { truncateUtf8 } from "@/utils";
+import { getResourceRef } from "@/utils/pb";
 import TerminalI from "@/utils/types/terminal";
 import { Button } from "@mantine/core";
 import { BiLinkExternal } from "react-icons/bi";
@@ -116,7 +117,7 @@ const TabGroup = (props: { workspace: WsPB.Workspace }) => {
             onClick={async () => {
               const { response } = await wsC.createTerminal(
                 WsPB.CreateTerminalRequest.create({
-                  uid: workspace.metadata!.uid,
+                  workspaceRef: getResourceRef(workspace),
                 }),
               );
               dispatch(
@@ -155,7 +156,7 @@ const TerminalGroupC = (props: { workspace: WsPB.Workspace }) => {
     queryFn: async () => {
       const { response } = await wsC.listTerminal(
         WsPB.ListTerminalRequest.create({
-          uid: item.metadata!.uid,
+          workspaceRef: getResourceRef(item),
         }),
       );
 
@@ -211,7 +212,7 @@ const TerminalGroupC = (props: { workspace: WsPB.Workspace }) => {
                 onClick={async () => {
                   const { response } = await wsC.createTerminal(
                     WsPB.CreateTerminalRequest.create({
-                      uid: item.metadata!.uid,
+                      workspaceRef: getResourceRef(item),
                     }),
                   );
                   dispatch(

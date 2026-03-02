@@ -1,10 +1,10 @@
-import * as MetaPB from "@/apis/metav1/metav1";
 import * as WsPB from "@/apis/cordiumv1/cordiumv1";
+import * as MetaPB from "@/apis/metav1/metav1";
 import * as React from "react";
 
 import { onError } from "@/utils";
 import { getClientWorkspace } from "@/utils/client";
-import { getResourceRef, getShortName } from "@/utils/pb";
+import { getResourceRef } from "@/utils/pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
@@ -18,13 +18,12 @@ import {
 
 import { Select } from "@mantine/core";
 
+import { Button } from "@mantine/core";
 import Field from "../Field";
-import ItemContainer from "../ItemContainer";
 import Label from "../Label";
 import Switch from "../Switch";
 import TimeAgo from "../TimeAgo";
 import WorkspaceEdit from "../WorkspaceEdit";
-import { Button } from "@mantine/core";
 
 const StartWorkspaceTemplate = (props: {
   item: WsPB.Template;
@@ -56,7 +55,11 @@ const StartWorkspaceTemplate = (props: {
 
       const uid = response.metadata!.uid;
       if (doStart) {
-        await client.startWorkspace(WsPB.StartWorkspaceRequest.create({ uid }));
+        await client.startWorkspace(
+          WsPB.StartWorkspaceRequest.create({
+            workspaceRef: getResourceRef(response),
+          }),
+        );
       }
 
       invalidateResource(response);
@@ -177,7 +180,11 @@ const WrapC = (props: {
 
       const uid = response.metadata!.uid;
       if (doStart) {
-        await client.startWorkspace(WsPB.StartWorkspaceRequest.create({ uid }));
+        await client.startWorkspace(
+          WsPB.StartWorkspaceRequest.create({
+            workspaceRef: getResourceRef(response),
+          }),
+        );
       }
 
       invalidateResource(response);

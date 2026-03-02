@@ -59,10 +59,12 @@ const CreateWorkspace = () => {
     mutationFn: async () => {
       const { response } = await client.createWorkspace(req);
 
-      const uid = response.metadata!.uid;
-
       if (doStart) {
-        await client.startWorkspace(WsPB.StartWorkspaceRequest.create({ uid }));
+        await client.startWorkspace(
+          WsPB.StartWorkspaceRequest.create({
+            workspaceRef: getResourceRef(response),
+          }),
+        );
       }
 
       return { response };

@@ -129,14 +129,14 @@ const StartStopButton = (props: { item: WsPB.Workspace }) => {
   let [startWorkspaceRequest, setStartWorkspaceRequest] =
     React.useState<WsPB.StartWorkspaceRequest>(
       WsPB.StartWorkspaceRequest.create({
-        uid: item.metadata!.uid,
+        workspaceRef: getResourceRef(item),
       }),
     );
 
   let [stopWorkspaceRequest, setStopWorkspaceRequest] =
     React.useState<WsPB.StopWorkspaceRequest>(
       WsPB.StopWorkspaceRequest.create({
-        uid: item.metadata!.uid,
+        workspaceRef: getResourceRef(item),
       }),
     );
 

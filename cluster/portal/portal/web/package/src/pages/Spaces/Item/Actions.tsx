@@ -7,6 +7,7 @@ import { onError } from "@/utils";
 import { getClientWorkspace } from "@/utils/client";
 import { useAppSelector } from "@/utils/hooks";
 import { invalidateSpace } from "@/utils/octelium";
+import { getResourceRef } from "@/utils/pb";
 import { Button } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -39,7 +40,7 @@ const Page = () => {
     mutationFn: async () => {
       const { response } = await client.leaveSpace(
         LeaveSpaceRequest.create({
-          uid: data?.metadata?.uid,
+          spaceRef: data ? getResourceRef(data) : undefined,
         }),
       );
 

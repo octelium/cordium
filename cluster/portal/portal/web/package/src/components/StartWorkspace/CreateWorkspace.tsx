@@ -50,7 +50,11 @@ const CreateWorkspace = (props: {
       const uid = response.metadata!.uid;
 
       if (props.doStart) {
-        await client.startWorkspace(WsPB.StartWorkspaceRequest.create({ uid }));
+        await client.startWorkspace(
+          WsPB.StartWorkspaceRequest.create({
+            workspaceRef: getResourceRef(response),
+          }),
+        );
       }
 
       return { response };
