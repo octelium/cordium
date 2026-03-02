@@ -869,7 +869,7 @@ func (s *Server) getMaxActiveWorkspacesPerUser(cc *cordiumv1.ClusterConfig) int 
 		return int(cc.Spec.Workspace.Limit.MaxActivePerUser)
 	}
 
-	return 32
+	return 128
 }
 
 func (s *Server) genWorkspaceName(ctx context.Context) (string, error) {
