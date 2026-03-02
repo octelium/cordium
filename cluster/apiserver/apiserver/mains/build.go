@@ -239,10 +239,6 @@ func (s *Server) createBuildRun(ctx context.Context, req *cordiumv1.BuildTemplat
 		return grpcutils.InternalWithErr(err)
 	}
 
-	if err := s.setWorkspaceStorage(ctx, wsReq); err != nil {
-		return grpcutils.InternalWithErr(err)
-	}
-
 	region, err := s.chooseRegion(ctx, wsReq, nil)
 	if err != nil {
 		return err

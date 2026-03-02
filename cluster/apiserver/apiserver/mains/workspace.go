@@ -89,7 +89,7 @@ func (s *Server) CreateWorkspace(ctx context.Context, req *cordiumv1.Workspace) 
 		},
 	}
 
-	ws.Status.Limit = &cordiumv1.Workspace_Status_Limit{}
+	ws.Status.Limit = &cordiumv1.Workspace_Spec_Limit{}
 
 	var template *cordiumv1.Template
 	if req.Status.TemplateRef == nil {
@@ -188,46 +188,45 @@ func (s *Server) setWorkspaceLimit(ctx context.Context, ws *cordiumv1.Workspace,
 
 	var prj *cordiumv1.Template
 
-	ws.Status.Limit = &cordiumv1.Workspace_Status_Limit{}
+	ws.Status.Limit = &cordiumv1.Workspace_Spec_Limit{}
 
 	if ws.Status.IsBuild && cc.Spec.Workspace != nil &&
 		cc.Spec.Workspace.Limit != nil &&
-		cc.Spec.Workspace.Limit.Resource != nil &&
-		cc.Spec.Workspace.Limit.Resource.BuildLimit != nil {
-		limit := cc.Spec.Workspace.Limit.Resource.BuildLimit
+		cc.Spec.Workspace.Limit.BuildLimit != nil {
+		limit := cc.Spec.Workspace.Limit.BuildLimit
 
 		if limit.Cpu != nil && limit.Cpu.Millicores != 0 {
-			ws.Status.Limit.Cpu = &cordiumv1.Workspace_Status_Limit_CPU{
+			ws.Status.Limit.Cpu = &cordiumv1.Workspace_Spec_Limit_CPU{
 				Millicores: limit.Cpu.Millicores,
 			}
 		}
 
 		if limit.Memory != nil && limit.Memory.Megabytes != 0 {
-			ws.Status.Limit.Memory = &cordiumv1.Workspace_Status_Limit_Memory{
+			ws.Status.Limit.Memory = &cordiumv1.Workspace_Spec_Limit_Memory{
 				Megabytes: limit.Memory.Megabytes,
 			}
 		}
 
 		if limit.Storage != nil && limit.Storage.Megabytes != 0 {
-			ws.Status.Limit.Storage = &cordiumv1.Workspace_Status_Limit_Storage{
+			ws.Status.Limit.Storage = &cordiumv1.Workspace_Spec_Limit_Storage{
 				Megabytes: limit.Storage.Megabytes,
 			}
 		}
 
 		if ws.Status.Limit.Cpu == nil || ws.Status.Limit.Cpu.Millicores <= 0 {
-			ws.Status.Limit.Cpu = &cordiumv1.Workspace_Status_Limit_CPU{
+			ws.Status.Limit.Cpu = &cordiumv1.Workspace_Spec_Limit_CPU{
 				Millicores: 2000,
 			}
 		}
 
 		if ws.Status.Limit.Memory == nil || ws.Status.Limit.Memory.Megabytes <= 0 {
-			ws.Status.Limit.Memory = &cordiumv1.Workspace_Status_Limit_Memory{
+			ws.Status.Limit.Memory = &cordiumv1.Workspace_Spec_Limit_Memory{
 				Megabytes: 6000,
 			}
 		}
 
 		if ws.Status.Limit.Storage == nil || ws.Status.Limit.Storage.Megabytes <= 0 {
-			ws.Status.Limit.Storage = &cordiumv1.Workspace_Status_Limit_Storage{
+			ws.Status.Limit.Storage = &cordiumv1.Workspace_Spec_Limit_Storage{
 				Megabytes: 20000,
 			}
 		}
@@ -270,21 +269,21 @@ func (s *Server) setWorkspaceLimit(ctx context.Context, ws *cordiumv1.Workspace,
 
 	}
 
-	doCCLimit := func(limit *cordiumv1.ClusterConfig_Spec_Workspace_Limit_Resource_Limit) {
+	doCCLimit := func(limit *cordiumv1.Workspace_Spec_Limit) {
 		if ws.Status.Limit.Cpu == nil && limit.Cpu != nil && limit.Cpu.Millicores != 0 {
-			ws.Status.Limit.Cpu = &cordiumv1.Workspace_Status_Limit_CPU{
+			ws.Status.Limit.Cpu = &cordiumv1.Workspace_Spec_Limit_CPU{
 				Millicores: limit.Cpu.Millicores,
 			}
 		}
 
 		if ws.Status.Limit.Memory == nil && limit.Memory != nil && limit.Memory.Megabytes != 0 {
-			ws.Status.Limit.Memory = &cordiumv1.Workspace_Status_Limit_Memory{
+			ws.Status.Limit.Memory = &cordiumv1.Workspace_Spec_Limit_Memory{
 				Megabytes: limit.Memory.Megabytes,
 			}
 		}
 
 		if ws.Status.Limit.Storage == nil && limit.Storage != nil && limit.Storage.Megabytes != 0 {
-			ws.Status.Limit.Storage = &cordiumv1.Workspace_Status_Limit_Storage{
+			ws.Status.Limit.Storage = &cordiumv1.Workspace_Spec_Limit_Storage{
 				Megabytes: limit.Storage.Megabytes,
 			}
 		}
@@ -294,35 +293,33 @@ func (s *Server) setWorkspaceLimit(ctx context.Context, ws *cordiumv1.Workspace,
 	case cordiumv1.Space_Status_USER:
 		if cc.Spec.Workspace != nil &&
 			cc.Spec.Workspace.Limit != nil &&
-			cc.Spec.Workspace.Limit.Resource != nil &&
-			cc.Spec.Workspace.Limit.Resource.DefaultPersonalSpaceLimit != nil {
-			doCCLimit(cc.Spec.Workspace.Limit.Resource.DefaultPersonalSpaceLimit)
+			cc.Spec.Workspace.Limit.DefaultUserSpaceLimit != nil {
+			doCCLimit(cc.Spec.Workspace.Limit.DefaultUserSpaceLimit)
 		}
 	case cordiumv1.Space_Status_ORGANIZATION:
 		if cc.Spec.Workspace != nil &&
 			cc.Spec.Workspace.Limit != nil &&
-			cc.Spec.Workspace.Limit.Resource != nil &&
-			cc.Spec.Workspace.Limit.Resource.DefaultOrganizationSpaceLimit != nil {
-			doCCLimit(cc.Spec.Workspace.Limit.Resource.DefaultOrganizationSpaceLimit)
+			cc.Spec.Workspace.Limit.DefaultOrganizationSpaceLimit != nil {
+			doCCLimit(cc.Spec.Workspace.Limit.DefaultOrganizationSpaceLimit)
 		}
 	default:
 		return grpcutils.InvalidArg("Unset Space type")
 	}
 
 	if ws.Status.Limit.Cpu == nil || ws.Status.Limit.Cpu.Millicores <= 0 {
-		ws.Status.Limit.Cpu = &cordiumv1.Workspace_Status_Limit_CPU{
+		ws.Status.Limit.Cpu = &cordiumv1.Workspace_Spec_Limit_CPU{
 			Millicores: 2000,
 		}
 	}
 
 	if ws.Status.Limit.Memory == nil || ws.Status.Limit.Memory.Megabytes <= 0 {
-		ws.Status.Limit.Memory = &cordiumv1.Workspace_Status_Limit_Memory{
+		ws.Status.Limit.Memory = &cordiumv1.Workspace_Spec_Limit_Memory{
 			Megabytes: 6000,
 		}
 	}
 
 	if ws.Status.Limit.Storage == nil || ws.Status.Limit.Storage.Megabytes <= 0 {
-		ws.Status.Limit.Storage = &cordiumv1.Workspace_Status_Limit_Storage{
+		ws.Status.Limit.Storage = &cordiumv1.Workspace_Spec_Limit_Storage{
 			Megabytes: 20000,
 		}
 	}
@@ -346,9 +343,8 @@ func (s *Server) setWorkspaceLimit(ctx context.Context, ws *cordiumv1.Workspace,
 	}
 
 	if cc.Spec.Workspace != nil && cc.Spec.Workspace.Limit != nil &&
-		cc.Spec.Workspace.Limit.Resource != nil &&
-		cc.Spec.Workspace.Limit.Resource.MaxLimit != nil {
-		max := cc.Spec.Workspace.Limit.Resource.MaxLimit
+		cc.Spec.Workspace.Limit.MaxLimit != nil {
+		max := cc.Spec.Workspace.Limit.MaxLimit
 		if max.Cpu != nil && max.Cpu.Millicores != 0 &&
 			ws.Status.Limit.Cpu.Millicores > max.Cpu.Millicores {
 			ws.Status.Limit.Cpu.Millicores = max.Cpu.Millicores
@@ -586,12 +582,6 @@ func (s *Server) StartWorkspace(ctx context.Context, req *cordiumv1.StartWorkspa
 	if err := s.setWorkspaceLimit(ctx, ws, spc, cco); err != nil {
 		return nil, err
 	}
-
-	/*
-		if err := s.setWorkspaceStorage(ctx, ws); err != nil {
-			return nil, grpcutils.InternalWithErr(err)
-		}
-	*/
 
 	wsSession, err := s.createWorkspaceSession(ctx, i, ws)
 	if err != nil {
@@ -958,67 +948,4 @@ func (s *Server) genWorkspaceName(ctx context.Context) (string, error) {
 	}
 
 	return "", grpcutils.Internal("Could not generate Workspace name")
-}
-
-func (s *Server) setWorkspaceStorage(ctx context.Context, ws *cordiumv1.Workspace) error {
-
-	run := ucordiumv1.ToWorkspace(ws).GetCurrentRun()
-	if run == nil {
-		return grpcutils.InvalidArg("No current run")
-	}
-
-	/*
-		if run.FromID != "" {
-			if fromRun := ucordiumv1.ToWorkspace(ws).GeRunByID(run.FromID); fromRun != nil && fromRun.CloudProviderRef != nil {
-				if _, err := s.octeliumC.CordiumC().GetCloudProvider(ctx, &rmetav1.GetOptions{
-					Uid: fromRun.CloudProviderRef.Uid,
-				}); err == nil {
-					run.CloudProviderRef = fromRun.CloudProviderRef
-					return nil
-				}
-			}
-		}
-
-		if fromRun := ucordiumv1.ToWorkspace(ws).GetRunByTag("latest"); fromRun != nil && fromRun.CloudProviderRef != nil {
-			if _, err := s.octeliumC.CordiumC().GetCloudProvider(ctx, &rmetav1.GetOptions{
-				Uid: fromRun.CloudProviderRef.Uid,
-			}); err == nil {
-				run.CloudProviderRef = fromRun.CloudProviderRef
-				return nil
-			}
-		}
-	*/
-
-	/*
-		cc, err := s.octeliumC.CordiumV1Utils().GetClusterConfig(ctx)
-		if err != nil {
-			return err
-		}
-	*/
-
-	/*
-		if cc.Spec.Workspace != nil && cc.Spec.Workspace.Storage.GetExternalContainerRegistry() != nil &&
-			cc.Spec.Workspace.Storage.GetExternalContainerRegistry().CloudProvider != "" {
-
-			if provider, err := s.octeliumC.CordiumC().GetCloudProvider(ctx, &rmetav1.GetOptions{
-				Name: cc.Spec.Workspace.Storage.GetExternalContainerRegistry().CloudProvider,
-			}); err == nil {
-				run.CloudProviderRef = umetav1.GetObjectReference(provider)
-				return nil
-			}
-		}
-	*/
-
-	/*
-		provider, err := s.octeliumC.CordiumC().GetCloudProvider(ctx, &rmetav1.GetOptions{
-			Name: "sys:internal-registry",
-		})
-		if err != nil {
-			return grpcutils.InternalWithErr(err)
-		}
-
-		run.CloudProviderRef = umetav1.GetObjectReference(provider)
-	*/
-
-	return nil
 }

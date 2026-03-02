@@ -115,8 +115,8 @@ func (c *watcher) getTimeout(ws *cordiumv1.Workspace, cc *cordiumv1.ClusterConfi
 				ret = umetav1.ToDuration(cc.Spec.Workspace.Timeout.OrganizationSpaceDuration).ToGo()
 			}
 		case cordiumv1.Space_Status_USER:
-			if cc.Spec.Workspace.Timeout.PersonalSpaceDuration != nil {
-				ret = umetav1.ToDuration(cc.Spec.Workspace.Timeout.PersonalSpaceDuration).ToGo()
+			if cc.Spec.Workspace.Timeout.UserSpaceDuration != nil {
+				ret = umetav1.ToDuration(cc.Spec.Workspace.Timeout.UserSpaceDuration).ToGo()
 			}
 		}
 

@@ -638,18 +638,17 @@ func TestWorkspaceLimit(t *testing.T) {
 
 	cc.Spec.Workspace = &cordiumv1.ClusterConfig_Spec_Workspace{
 		Limit: &cordiumv1.ClusterConfig_Spec_Workspace_Limit{
-			Resource: &cordiumv1.ClusterConfig_Spec_Workspace_Limit_Resource{
-				DefaultOrganizationSpaceLimit: &cordiumv1.ClusterConfig_Spec_Workspace_Limit_Resource_Limit{
-					Cpu: &cordiumv1.ClusterConfig_Spec_Workspace_Limit_Resource_Limit_CPU{
-						Millicores: uint32(utilrand.GetRandomRangeMath(1000, 2000)),
-					},
-					Memory: &cordiumv1.ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Memory{
-						Megabytes: uint32(utilrand.GetRandomRangeMath(1000, 2000)),
-					},
 
-					Storage: &cordiumv1.ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Storage{
-						Megabytes: uint32(utilrand.GetRandomRangeMath(1000, 2000)),
-					},
+			DefaultOrganizationSpaceLimit: &cordiumv1.Workspace_Spec_Limit{
+				Cpu: &cordiumv1.Workspace_Spec_Limit_CPU{
+					Millicores: uint32(utilrand.GetRandomRangeMath(1000, 2000)),
+				},
+				Memory: &cordiumv1.Workspace_Spec_Limit_Memory{
+					Megabytes: uint32(utilrand.GetRandomRangeMath(1000, 2000)),
+				},
+
+				Storage: &cordiumv1.Workspace_Spec_Limit_Storage{
+					Megabytes: uint32(utilrand.GetRandomRangeMath(1000, 2000)),
 				},
 			},
 		},
@@ -661,23 +660,23 @@ func TestWorkspaceLimit(t *testing.T) {
 	ws.Status.Limit = nil
 	err = srv.setWorkspaceLimit(ctx, ws, spc, cc)
 	assert.Nil(t, err)
-	assert.Equal(t, cc.Spec.Workspace.Limit.Resource.DefaultOrganizationSpaceLimit.Cpu.Millicores,
+	assert.Equal(t, cc.Spec.Workspace.Limit.DefaultOrganizationSpaceLimit.Cpu.Millicores,
 		ws.Status.Limit.Cpu.Millicores)
-	assert.Equal(t, cc.Spec.Workspace.Limit.Resource.DefaultOrganizationSpaceLimit.Memory.Megabytes,
+	assert.Equal(t, cc.Spec.Workspace.Limit.DefaultOrganizationSpaceLimit.Memory.Megabytes,
 		ws.Status.Limit.Memory.Megabytes)
 
-	assert.Equal(t, cc.Spec.Workspace.Limit.Resource.DefaultOrganizationSpaceLimit.Storage.Megabytes,
+	assert.Equal(t, cc.Spec.Workspace.Limit.DefaultOrganizationSpaceLimit.Storage.Megabytes,
 		ws.Status.Limit.Storage.Megabytes)
 
-	cc.Spec.Workspace.Limit.Resource.MaxLimit = &cordiumv1.ClusterConfig_Spec_Workspace_Limit_Resource_Limit{
-		Cpu: &cordiumv1.ClusterConfig_Spec_Workspace_Limit_Resource_Limit_CPU{
+	cc.Spec.Workspace.Limit.MaxLimit = &cordiumv1.Workspace_Spec_Limit{
+		Cpu: &cordiumv1.Workspace_Spec_Limit_CPU{
 			Millicores: uint32(utilrand.GetRandomRangeMath(500, 900)),
 		},
-		Memory: &cordiumv1.ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Memory{
+		Memory: &cordiumv1.Workspace_Spec_Limit_Memory{
 			Megabytes: uint32(utilrand.GetRandomRangeMath(500, 900)),
 		},
 
-		Storage: &cordiumv1.ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Storage{
+		Storage: &cordiumv1.Workspace_Spec_Limit_Storage{
 			Megabytes: uint32(utilrand.GetRandomRangeMath(500, 900)),
 		},
 	}
@@ -687,10 +686,10 @@ func TestWorkspaceLimit(t *testing.T) {
 	ws.Status.Limit = nil
 	err = srv.setWorkspaceLimit(ctx, ws, spc, cc)
 	assert.Nil(t, err)
-	assert.Equal(t, cc.Spec.Workspace.Limit.Resource.MaxLimit.Cpu.Millicores, ws.Status.Limit.Cpu.Millicores)
-	assert.Equal(t, cc.Spec.Workspace.Limit.Resource.MaxLimit.Memory.Megabytes, ws.Status.Limit.Memory.Megabytes)
+	assert.Equal(t, cc.Spec.Workspace.Limit.MaxLimit.Cpu.Millicores, ws.Status.Limit.Cpu.Millicores)
+	assert.Equal(t, cc.Spec.Workspace.Limit.MaxLimit.Memory.Megabytes, ws.Status.Limit.Memory.Megabytes)
 
-	assert.Equal(t, cc.Spec.Workspace.Limit.Resource.MaxLimit.Storage.Megabytes, ws.Status.Limit.Storage.Megabytes)
+	assert.Equal(t, cc.Spec.Workspace.Limit.MaxLimit.Storage.Megabytes, ws.Status.Limit.Storage.Megabytes)
 
 }
 
