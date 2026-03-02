@@ -26,6 +26,7 @@ import (
 	"github.com/octelium/octelium/cluster/common/grpcutils"
 	"github.com/octelium/octelium/cluster/common/urscsrv"
 	"github.com/octelium/octelium/cluster/common/userctx"
+	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"github.com/octelium/octelium/pkg/utils/utilrand"
 )
 
@@ -46,7 +47,7 @@ func (s *Server) WatchWorkspace(req *cordiumv1.WatchWorkspaceRequest, stream cor
 		return grpcutils.InvalidArg("No Workspaces found for this User")
 	}
 
-	sub := s.wsWatchMan.newSub(i, stream)
+	sub := s.wsWatchMan.newSub(i, stream, req)
 	defer s.wsWatchMan.removeSub(sub)
 
 	<-ctx.Done()
@@ -59,11 +60,13 @@ type watchWorkspaceSubscriptionManager struct {
 	mp map[string]*watchWorkspaceSubscription
 }
 
-func (w *watchWorkspaceSubscriptionManager) newSub(i *userctx.UserCtx, stream cordiumv1.MainService_WatchWorkspaceServer) *watchWorkspaceSubscription {
+func (w *watchWorkspaceSubscriptionManager) newSub(i *userctx.UserCtx,
+	stream cordiumv1.MainService_WatchWorkspaceServer, req *cordiumv1.WatchWorkspaceRequest) *watchWorkspaceSubscription {
 	ret := &watchWorkspaceSubscription{
 		id:      utilrand.GetRandomString(16),
 		userUID: i.User.Metadata.Uid,
 		stream:  stream,
+		req:     req,
 	}
 
 	w.mu.Lock()
@@ -91,7 +94,7 @@ func (w *watchWorkspaceSubscriptionManager) onCreate(ctx context.Context, ws *co
 		},
 	}
 
-	return w.publishMsg(msg, ws.Status.UserRef)
+	return w.publishMsg(msg, ws.Status.UserRef, umetav1.GetObjectReference(ws))
 }
 
 func (w *watchWorkspaceSubscriptionManager) onUpdate(ctx context.Context, new, old *cordiumv1.Workspace) error {
@@ -107,7 +110,7 @@ func (w *watchWorkspaceSubscriptionManager) onUpdate(ctx context.Context, new, o
 		},
 	}
 
-	return w.publishMsg(msg, new.Status.UserRef)
+	return w.publishMsg(msg, new.Status.UserRef, umetav1.GetObjectReference(new))
 }
 
 func (w *watchWorkspaceSubscriptionManager) onDelete(ctx context.Context, ws *cordiumv1.Workspace) error {
@@ -122,17 +125,18 @@ func (w *watchWorkspaceSubscriptionManager) onDelete(ctx context.Context, ws *co
 		},
 	}
 
-	return w.publishMsg(msg, ws.Status.UserRef)
+	return w.publishMsg(msg, ws.Status.UserRef, umetav1.GetObjectReference(ws))
 }
 
 func (w *watchWorkspaceSubscriptionManager) publishMsg(msg *cordiumv1.WatchWorkspaceResponse,
-	usrRef *metav1.ObjectReference) error {
+	usrRef *metav1.ObjectReference, wsRef *metav1.ObjectReference) error {
 
 	usrUID := usrRef.Uid
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 	for _, sub := range w.mp {
-		if sub.userUID == usrUID {
+		if sub.userUID == usrUID &&
+			(sub.req.WorkspaceRef == nil || sub.req.WorkspaceRef.Uid == wsRef.Uid) {
 			sub.stream.Send(msg)
 		}
 	}
@@ -144,4 +148,5 @@ type watchWorkspaceSubscription struct {
 	id      string
 	userUID string
 	stream  cordiumv1.MainService_WatchWorkspaceServer
+	req     *cordiumv1.WatchWorkspaceRequest
 }

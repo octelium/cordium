@@ -732,21 +732,20 @@ type StartTerminalResponse_Stdout_ struct {
 func (*StartTerminalResponse_Stdout_) isStartTerminalResponse_Type() {}
 
 type PrepareRequest struct {
-	state               protoimpl.MessageState `protogen:"open.v1"`
-	Domain              string                 `protobuf:"bytes,1,opt,name=domain,proto3" json:"domain,omitempty"`
-	TunnelPrivateKey    string                 `protobuf:"bytes,2,opt,name=tunnelPrivateKey,proto3" json:"tunnelPrivateKey,omitempty"`
-	TunnelPeerPublicKey string                 `protobuf:"bytes,3,opt,name=tunnelPeerPublicKey,proto3" json:"tunnelPeerPublicKey,omitempty"`
-	Ssh                 *InitializeRequest_SSH `protobuf:"bytes,4,opt,name=ssh,proto3" json:"ssh,omitempty"`
-	Workspace           *cordiumv1.Workspace   `protobuf:"bytes,5,opt,name=workspace,proto3" json:"workspace,omitempty"`
-	Space               *cordiumv1.Space       `protobuf:"bytes,6,opt,name=Space,proto3" json:"Space,omitempty"`
-	// octelium.api.main.cordium.v1.Environment environment = 7;
-	Template        *cordiumv1.Template       `protobuf:"bytes,7,opt,name=template,proto3" json:"template,omitempty"`
-	SecretList      *cordiumv1.SecretList     `protobuf:"bytes,8,opt,name=secretList,proto3" json:"secretList,omitempty"`
-	UserSecretList  *cordiumv1.UserSecretList `protobuf:"bytes,9,opt,name=userSecretList,proto3" json:"userSecretList,omitempty"`
-	GitProviderInfo *GitProviderInfo          `protobuf:"bytes,10,opt,name=gitProviderInfo,proto3" json:"gitProviderInfo,omitempty"`
-	UserConfig      *cordiumv1.UserConfig     `protobuf:"bytes,11,opt,name=userConfig,proto3" json:"userConfig,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state               protoimpl.MessageState    `protogen:"open.v1"`
+	Domain              string                    `protobuf:"bytes,1,opt,name=domain,proto3" json:"domain,omitempty"`
+	TunnelPrivateKey    string                    `protobuf:"bytes,2,opt,name=tunnelPrivateKey,proto3" json:"tunnelPrivateKey,omitempty"`
+	TunnelPeerPublicKey string                    `protobuf:"bytes,3,opt,name=tunnelPeerPublicKey,proto3" json:"tunnelPeerPublicKey,omitempty"`
+	Ssh                 *InitializeRequest_SSH    `protobuf:"bytes,4,opt,name=ssh,proto3" json:"ssh,omitempty"`
+	Workspace           *cordiumv1.Workspace      `protobuf:"bytes,5,opt,name=workspace,proto3" json:"workspace,omitempty"`
+	Space               *cordiumv1.Space          `protobuf:"bytes,6,opt,name=Space,proto3" json:"Space,omitempty"`
+	Template            *cordiumv1.Template       `protobuf:"bytes,7,opt,name=template,proto3" json:"template,omitempty"`
+	SecretList          *cordiumv1.SecretList     `protobuf:"bytes,8,opt,name=secretList,proto3" json:"secretList,omitempty"`
+	UserSecretList      *cordiumv1.UserSecretList `protobuf:"bytes,9,opt,name=userSecretList,proto3" json:"userSecretList,omitempty"`
+	GitProviderInfo     *GitProviderInfo          `protobuf:"bytes,10,opt,name=gitProviderInfo,proto3" json:"gitProviderInfo,omitempty"`
+	UserConfig          *cordiumv1.UserConfig     `protobuf:"bytes,11,opt,name=userConfig,proto3" json:"userConfig,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *PrepareRequest) Reset() {
