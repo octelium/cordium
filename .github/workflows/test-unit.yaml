@@ -4,9 +4,9 @@ on:
     tags:
       - v*
     branches:
-      - master
-      - main
-      - dev*
+      # - master
+      # - main
+      # - dev*
       - t-*
 jobs:
   test:

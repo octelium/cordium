@@ -8,8 +8,8 @@ on:
       - "v*.*.*"
     branches:
       - b-*
-      - main
-      - dev
+      # - main
+      # - dev
 jobs:
   build:
     name: build-${{ matrix.component }}-${{ matrix.arch }}
