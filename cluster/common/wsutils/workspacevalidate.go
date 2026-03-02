@@ -488,5 +488,27 @@ func ValidateWorkspace(ctx context.Context, req *ValidateWorkspaceReq) error {
 		}
 	}
 
+	if spec.Limit != nil {
+		limit := spec.Limit
+
+		if limit.Cpu != nil {
+			if limit.Cpu.Millicores > 1000_000 {
+				return serr.InvalidArg("CPU are too large: %d", limit.Cpu.Millicores)
+			}
+		}
+
+		if limit.Memory != nil {
+			if limit.Memory.Megabytes > 10_000_000 {
+				return serr.InvalidArg("Memory is too large: %d", limit.Memory.Megabytes)
+			}
+		}
+
+		if limit.Storage != nil {
+			if limit.Storage.Megabytes > 10_000_000 {
+				return serr.InvalidArg("Storage is too large: %d", limit.Storage.Megabytes)
+			}
+		}
+	}
+
 	return nil
 }

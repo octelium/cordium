@@ -19,7 +19,6 @@ package mains
 import (
 	"context"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/octelium/cordium/cluster/common/ourscsrv"
 	"github.com/octelium/cordium/cluster/common/wsutils"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
@@ -68,23 +67,4 @@ func (s *Server) validateAndSetWorkspace(ctx context.Context, req *cordiumv1.Wor
 	}
 
 	return wsutils.ValidateWorkspace(ctx, validateReq)
-}
-
-func isValidURL(arg string) bool {
-	if !govalidator.IsURL(arg) {
-		return false
-	}
-	if len(arg) > 256 {
-		return false
-	}
-	return true
-}
-
-func isInList(lst []string, arg string) bool {
-	for _, itm := range lst {
-		if itm == arg {
-			return true
-		}
-	}
-	return false
 }
