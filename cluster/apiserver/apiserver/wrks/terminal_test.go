@@ -167,13 +167,13 @@ func TestTerminal(t *testing.T) {
 	time.Sleep(2 * time.Second)
 
 	resp, err := srv.CreateTerminal(usr.Ctx(), &cordiumv1.CreateTerminalRequest{
-		Name: ws.Metadata.Name,
+		WorkspaceRef: umetav1.GetObjectReference(ws),
 	})
 	assert.Nil(t, err)
 
 	{
 		termList, err := srv.ListTerminal(usr.Ctx(), &cordiumv1.ListTerminalRequest{
-			Name: ws.Metadata.Name,
+			WorkspaceRef: umetav1.GetObjectReference(ws),
 		})
 		assert.Nil(t, err)
 		assert.Equal(t, len(termList.Items), 1)

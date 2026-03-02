@@ -100,7 +100,7 @@ func TestSpace(t *testing.T) {
 		}
 		{
 			_, err := srv.LeaveSpace(usr.Ctx(), &cordiumv1.LeaveSpaceRequest{
-				Uid: org.Metadata.Uid,
+				SpaceRef: umetav1.GetObjectReference(org),
 			})
 
 			assert.NotNil(t, err)

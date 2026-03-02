@@ -30,6 +30,7 @@ import (
 	"github.com/octelium/octelium/cluster/apiserver/apiserver/admin"
 	"github.com/octelium/octelium/cluster/common/tests/tstuser"
 	"github.com/octelium/octelium/cluster/common/vutils"
+	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"github.com/octelium/octelium/pkg/grpcerr"
 	"github.com/octelium/octelium/pkg/utils/utilrand"
 	"github.com/stretchr/testify/assert"
@@ -198,7 +199,7 @@ func TestWorkspace(t *testing.T) {
 		assert.Equal(t, 0, len(ws.Status.Runs))
 
 		_, err = srv.StartWorkspace(usr.Ctx(), &cordiumv1.StartWorkspaceRequest{
-			Uid: ws.Metadata.Uid,
+			WorkspaceRef: umetav1.GetObjectReference(ws),
 		})
 		assert.Nil(t, err)
 
@@ -216,7 +217,7 @@ func TestWorkspace(t *testing.T) {
 		// assert.Equal(t, usr.Session.Metadata.Uid, sess.Status.ParentSessionRef.Uid)
 
 		_, err = srv.StopWorkspace(usr.Ctx(), &cordiumv1.StopWorkspaceRequest{
-			Uid: ws.Metadata.Uid,
+			WorkspaceRef: umetav1.GetObjectReference(ws),
 		})
 		assert.Nil(t, err)
 		ws, err = fakeC.OcteliumC.CordiumC().GetWorkspace(ctx, &rmetav1.GetOptions{Uid: ws.Metadata.Uid})
@@ -226,7 +227,7 @@ func TestWorkspace(t *testing.T) {
 		assert.Nil(t, err)
 
 		_, err = srv.StopWorkspace(usr.Ctx(), &cordiumv1.StopWorkspaceRequest{
-			Uid: ws.Metadata.Uid,
+			WorkspaceRef: umetav1.GetObjectReference(ws),
 		})
 		assert.Nil(t, err)
 
@@ -271,13 +272,13 @@ func TestWorkspace(t *testing.T) {
 		assert.Nil(t, ws.Status.SessionRef)
 
 		_, err = srv.StartWorkspace(usr2.Ctx(), &cordiumv1.StartWorkspaceRequest{
-			Uid: ws.Metadata.Uid,
+			WorkspaceRef: umetav1.GetObjectReference(ws),
 		})
 		assert.NotNil(t, err)
 		assert.True(t, grpcerr.IsUnauthorized(err), "%+v", err)
 
 		_, err = srv.StartWorkspace(usr.Ctx(), &cordiumv1.StartWorkspaceRequest{
-			Uid: ws.Metadata.Uid,
+			WorkspaceRef: umetav1.GetObjectReference(ws),
 		})
 		assert.Nil(t, err)
 
@@ -288,13 +289,13 @@ func TestWorkspace(t *testing.T) {
 		assert.Nil(t, err)
 
 		_, err = srv.StopWorkspace(usr2.Ctx(), &cordiumv1.StopWorkspaceRequest{
-			Uid: ws.Metadata.Uid,
+			WorkspaceRef: umetav1.GetObjectReference(ws),
 		})
 		assert.NotNil(t, err)
 		assert.True(t, grpcerr.IsUnauthorized(err), "%+v", err)
 
 		_, err = srv.StopWorkspace(usr.Ctx(), &cordiumv1.StopWorkspaceRequest{
-			Uid: ws.Metadata.Uid,
+			WorkspaceRef: umetav1.GetObjectReference(ws),
 		})
 		assert.Nil(t, err)
 	}
@@ -336,13 +337,13 @@ func TestWorkspace(t *testing.T) {
 		assert.Nil(t, err, "%+v", err)
 
 		_, err = srv.ShareWorkspacePort(usr.Ctx(), &cordiumv1.ShareWorkspacePortRequest{
-			Uid:             ws.Metadata.Uid,
+			WorkspaceRef:    umetav1.GetObjectReference(ws),
 			ApplicationName: "app-1",
 		})
 		assert.NotNil(t, err)
 
 		_, err = srv.ShareWorkspacePort(usr.Ctx(), &cordiumv1.ShareWorkspacePortRequest{
-			Uid:             ws.Metadata.Uid,
+			WorkspaceRef:    umetav1.GetObjectReference(ws),
 			ApplicationName: "does-not-exist",
 			Mode:            cordiumv1.ShareWorkspacePortRequest_MEMBERS,
 		})
@@ -350,7 +351,7 @@ func TestWorkspace(t *testing.T) {
 		assert.True(t, grpcerr.IsInvalidArg(err))
 
 		_, err = srv.ShareWorkspacePort(usr.Ctx(), &cordiumv1.ShareWorkspacePortRequest{
-			Uid:             ws.Metadata.Uid,
+			WorkspaceRef:    umetav1.GetObjectReference(ws),
 			ApplicationName: "app-1",
 			Mode:            cordiumv1.ShareWorkspacePortRequest_MEMBERS,
 		})
@@ -367,7 +368,7 @@ func TestWorkspace(t *testing.T) {
 
 		{
 			_, err = srv.ShareWorkspacePort(usr.Ctx(), &cordiumv1.ShareWorkspacePortRequest{
-				Uid:             ws.Metadata.Uid,
+				WorkspaceRef:    umetav1.GetObjectReference(ws),
 				ApplicationName: "app-1",
 				Mode:            cordiumv1.ShareWorkspacePortRequest_ALL,
 			})
@@ -384,7 +385,7 @@ func TestWorkspace(t *testing.T) {
 		}
 
 		_, err = srv.UnshareWorkspacePort(usr.Ctx(), &cordiumv1.UnshareWorkspacePortRequest{
-			Uid:             ws.Metadata.Uid,
+			WorkspaceRef:    umetav1.GetObjectReference(ws),
 			ApplicationName: "app-1",
 		})
 		assert.Nil(t, err)
@@ -397,13 +398,13 @@ func TestWorkspace(t *testing.T) {
 		assert.Equal(t, 0, len(ws.Status.SharedPorts))
 
 		_, err = srv.UnshareWorkspacePort(usr.Ctx(), &cordiumv1.UnshareWorkspacePortRequest{
-			Uid:             ws.Metadata.Uid,
+			WorkspaceRef:    umetav1.GetObjectReference(ws),
 			ApplicationName: "app-1",
 		})
 		assert.Nil(t, err)
 
 		_, err = srv.UnshareWorkspacePort(usr.Ctx(), &cordiumv1.UnshareWorkspacePortRequest{
-			Uid:             ws.Metadata.Uid,
+			WorkspaceRef:    umetav1.GetObjectReference(ws),
 			ApplicationName: "does-not-exist",
 		})
 		assert.Nil(t, err)

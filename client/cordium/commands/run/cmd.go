@@ -26,6 +26,7 @@ import (
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/client/common/client"
 	"github.com/octelium/octelium/client/common/cliutils"
+	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -115,8 +116,7 @@ func doRun(ctx context.Context, conn *grpc.ClientConn, ws *pb.Workspace) error {
 		return errors.Errorf("Workspace is stopping")
 	case ucordiumv1.ToWorkspace(ws).IsStopped():
 		if _, err := c.StartWorkspace(ctx, &pb.StartWorkspaceRequest{
-			Uid:  ws.Metadata.Uid,
-			Name: ws.Metadata.Name,
+			WorkspaceRef: umetav1.GetObjectReference(ws),
 		}); err != nil {
 			return err
 		}

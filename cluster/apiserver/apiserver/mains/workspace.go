@@ -488,10 +488,7 @@ func (s *Server) StartWorkspace(ctx context.Context, req *cordiumv1.StartWorkspa
 		return nil, err
 	}
 
-	if err := apivalidation.CheckGetOptions(&metav1.GetOptions{
-		Uid:  req.Uid,
-		Name: req.Name,
-	}, &apivalidation.CheckGetOptionsOpts{}); err != nil {
+	if err := apivalidation.CheckObjectRef(req.WorkspaceRef, &apivalidation.CheckGetOptionsOpts{}); err != nil {
 		return nil, err
 	}
 
@@ -504,10 +501,7 @@ func (s *Server) StartWorkspace(ctx context.Context, req *cordiumv1.StartWorkspa
 		return nil, err
 	}
 
-	ws, err := s.octeliumC.CordiumC().GetWorkspace(ctx, &rmetav1.GetOptions{
-		Uid:  req.Uid,
-		Name: req.Name,
-	})
+	ws, err := s.octeliumC.CordiumC().GetWorkspace(ctx, apivalidation.ObjectReferenceToRGetOptions(req.WorkspaceRef))
 	if err != nil {
 		return nil, serr.K8sNotFoundOrInternalWithErr(err)
 	}
@@ -648,18 +642,11 @@ func (s *Server) StopWorkspace(ctx context.Context, req *cordiumv1.StopWorkspace
 		return nil, err
 	}
 
-	if err := apivalidation.CheckGetOptions(&metav1.GetOptions{
-		Uid:  req.Uid,
-		Name: req.Name,
-	}, &apivalidation.CheckGetOptionsOpts{}); err != nil {
+	if err := apivalidation.CheckObjectRef(req.WorkspaceRef, &apivalidation.CheckGetOptionsOpts{}); err != nil {
 		return nil, err
 	}
 
-	ws, err := s.octeliumC.CordiumC().GetWorkspace(ctx,
-		&rmetav1.GetOptions{
-			Uid:  req.Uid,
-			Name: req.Name,
-		})
+	ws, err := s.octeliumC.CordiumC().GetWorkspace(ctx, apivalidation.ObjectReferenceToRGetOptions(req.WorkspaceRef))
 	if err != nil {
 		return nil, serr.K8sNotFoundOrInternalWithErr(err)
 	}
@@ -679,38 +666,6 @@ func (s *Server) StopWorkspace(ctx context.Context, req *cordiumv1.StopWorkspace
 	if ucordiumv1.ToWorkspace(ws).IsStopping() {
 		return &cordiumv1.StopWorkspaceResponse{}, nil
 	}
-
-	if len(req.Tags) > 0 {
-		if len(req.Tags) > 10 {
-			return nil, grpcutils.InvalidArg("Too many tags")
-		}
-
-		checkTag := func(arg string) error {
-			if err := apivalidation.CheckGetOptions(&metav1.GetOptions{
-				Name: arg,
-			}, nil); err != nil {
-				return grpcutils.InvalidArg("Invalid tag: %s", arg)
-			}
-
-			if len(arg) > 16 {
-				return grpcutils.InvalidArg("Tag: %s is too long", arg)
-			}
-
-			return nil
-		}
-
-		for _, tag := range req.Tags {
-			if err := checkTag(tag); err != nil {
-				return nil, err
-			}
-		}
-	}
-
-	// run := ucordiumv1.ToWorkspace(ws).GetCurrentRun()
-	/*
-		run.IsEphemeral = req.IsEphemeral
-		run.Tags = req.Tags
-	*/
 
 	ws.Status.State = cordiumv1.Workspace_Status_STOPPING_REQUEST
 	ws.Status.StoppingReason = cordiumv1.Workspace_Status_STOPPING_REASON_API
@@ -812,17 +767,11 @@ func (s *Server) ShareWorkspacePort(ctx context.Context, req *cordiumv1.ShareWor
 		return nil, grpcutils.InvalidArg("Application name must be set")
 	}
 
-	if err := apivalidation.CheckGetOptions(&metav1.GetOptions{
-		Uid:  req.Uid,
-		Name: req.Name,
-	}, &apivalidation.CheckGetOptionsOpts{}); err != nil {
+	if err := apivalidation.CheckObjectRef(req.WorkspaceRef, &apivalidation.CheckGetOptionsOpts{}); err != nil {
 		return nil, err
 	}
 
-	ws, err := s.GetWorkspace(ctx, &metav1.GetOptions{
-		Uid:  req.Uid,
-		Name: req.Name,
-	})
+	ws, err := s.GetWorkspace(ctx, apivalidation.ObjectReferenceToGetOptions(req.WorkspaceRef))
 	if err != nil {
 		return nil, err
 	}
@@ -863,17 +812,11 @@ func (s *Server) UnshareWorkspacePort(ctx context.Context, req *cordiumv1.Unshar
 		return nil, grpcutils.InvalidArg("Application name must be set")
 	}
 
-	if err := apivalidation.CheckGetOptions(&metav1.GetOptions{
-		Uid:  req.Uid,
-		Name: req.Name,
-	}, &apivalidation.CheckGetOptionsOpts{}); err != nil {
+	if err := apivalidation.CheckObjectRef(req.WorkspaceRef, &apivalidation.CheckGetOptionsOpts{}); err != nil {
 		return nil, err
 	}
 
-	ws, err := s.GetWorkspace(ctx, &metav1.GetOptions{
-		Uid:  req.Uid,
-		Name: req.Name,
-	})
+	ws, err := s.GetWorkspace(ctx, apivalidation.ObjectReferenceToGetOptions(req.WorkspaceRef))
 	if err != nil {
 		return nil, err
 	}

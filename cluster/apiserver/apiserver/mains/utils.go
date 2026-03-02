@@ -269,3 +269,21 @@ func getFullGetOptionsSpace(ctx context.Context, req *metav1.GetOptions) *metav1
 	req.Name = getFullGetOptionsUserCtx(i, req.Name, 1)
 	return req
 }
+
+func getFullResourceRefSpace(ctx context.Context, req *metav1.ObjectReference) *metav1.ObjectReference {
+	if req == nil || req.Name == "" {
+		return req
+	}
+
+	if isNameFQDN(req.Name, 1) {
+		return req
+	}
+
+	i, err := commonw.GetUserCtx(ctx)
+	if err != nil {
+		return req
+	}
+
+	req.Name = getFullGetOptionsUserCtx(i, req.Name, 1)
+	return req
+}

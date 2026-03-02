@@ -24,6 +24,7 @@ import (
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/client/common/client"
 	"github.com/octelium/octelium/client/common/cliutils"
+	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"github.com/octelium/octelium/pkg/common/pbutils"
 	"github.com/spf13/cobra"
 )
@@ -185,7 +186,7 @@ func DoCreateWorkspace(ctx context.Context, c pb.MainServiceClient, o *DoCreateW
 
 	if o.Start {
 		if _, err := c.StartWorkspace(ctx, &pb.StartWorkspaceRequest{
-			Uid: ws.Metadata.Uid,
+			WorkspaceRef: umetav1.GetObjectReference(ws),
 		}); err != nil {
 			return nil, err
 		}

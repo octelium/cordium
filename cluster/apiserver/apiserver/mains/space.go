@@ -496,22 +496,18 @@ func (s *Server) LeaveSpace(ctx context.Context, req *cordiumv1.LeaveSpaceReques
 		return nil, err
 	}
 
-	if err := apivalidation.CheckGetOptions(&metav1.GetOptions{
-		Uid:  req.Uid,
-		Name: req.Name,
-	}, &apivalidation.CheckGetOptionsOpts{}); err != nil {
+	if err := apivalidation.CheckObjectRef(getFullResourceRefSpace(ctx, req.SpaceRef),
+		&apivalidation.CheckGetOptionsOpts{}); err != nil {
 		return nil, err
 	}
 
-	spc, err := s.octeliumC.CordiumC().GetSpace(ctx, &rmetav1.GetOptions{
-		Uid:  req.Uid,
-		Name: req.Name,
-	})
+	spc, err := s.octeliumC.CordiumC().GetSpace(ctx, apivalidation.ObjectReferenceToRGetOptions(req.SpaceRef))
 	if err != nil {
 		return nil, serr.K8sNotFoundOrInternalWithErr(err)
 	}
 
-	mem, err := commonw.GetMembership(ctx, s.octeliumC, umetav1.GetObjectReference(usrCtx.User), umetav1.GetObjectReference(spc))
+	mem, err := commonw.GetMembership(ctx, s.octeliumC,
+		umetav1.GetObjectReference(usrCtx.User), umetav1.GetObjectReference(spc))
 	if err != nil {
 		return nil, err
 	}

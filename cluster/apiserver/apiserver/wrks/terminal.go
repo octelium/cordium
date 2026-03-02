@@ -36,10 +36,12 @@ import (
 )
 
 func (s *Server) CreateTerminal(ctx context.Context, req *cordiumv1.CreateTerminalRequest) (*cordiumv1.CreateTerminalResponse, error) {
-	wssupClient, err := s.getSupC(ctx, &metav1.GetOptions{
-		Name: req.Name,
-		Uid:  req.Uid,
-	})
+
+	if err := apivalidation.CheckObjectRef(req.WorkspaceRef, &apivalidation.CheckGetOptionsOpts{}); err != nil {
+		return nil, err
+	}
+
+	wssupClient, err := s.getSupC(ctx, apivalidation.ObjectReferenceToGetOptions(req.WorkspaceRef))
 	if err != nil {
 		return nil, err
 	}
@@ -84,11 +86,11 @@ func (s *Server) RemoveTerminal(ctx context.Context, req *cordiumv1.RemoveTermin
 
 func (s *Server) ListTerminal(ctx context.Context, req *cordiumv1.ListTerminalRequest) (*cordiumv1.ListTerminalResponse, error) {
 
+	if err := apivalidation.CheckObjectRef(req.WorkspaceRef, &apivalidation.CheckGetOptionsOpts{}); err != nil {
+		return nil, err
+	}
 	zap.L().Debug("Starting listTerminal request", zap.Any("req", req))
-	wssupClient, err := s.getSupC(ctx, &metav1.GetOptions{
-		Name: req.Name,
-		Uid:  req.Uid,
-	})
+	wssupClient, err := s.getSupC(ctx, apivalidation.ObjectReferenceToGetOptions(req.WorkspaceRef))
 	if err != nil {
 		return nil, err
 	}

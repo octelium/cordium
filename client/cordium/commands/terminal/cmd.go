@@ -24,6 +24,7 @@ import (
 	"time"
 
 	pb "github.com/octelium/octelium/apis/main/cordiumv1"
+	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/client/common/client"
 	"github.com/octelium/octelium/client/common/cliutils"
 	"github.com/spf13/cobra"
@@ -96,7 +97,9 @@ func DoCmdTerminal(ctx context.Context, conn *grpc.ClientConn, wsName string) er
 	zap.L().Debug("init window size", zap.Int("cols", cols), zap.Int("rows", rows))
 
 	t, err := c.CreateTerminal(ctx, &pb.CreateTerminalRequest{
-		Name:   wsName,
+		WorkspaceRef: &metav1.ObjectReference{
+			Name: wsName,
+		},
 		Width:  uint32(cols),
 		Height: uint32(rows),
 	})

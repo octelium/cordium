@@ -18,6 +18,7 @@ package start
 
 import (
 	pb "github.com/octelium/octelium/apis/main/cordiumv1"
+	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/client/common/client"
 	"github.com/octelium/octelium/client/common/cliutils"
 	"github.com/spf13/cobra"
@@ -60,7 +61,9 @@ func doCmd(cmd *cobra.Command, args []string) error {
 	c := pb.NewMainServiceClient(conn)
 
 	if _, err := c.StartWorkspace(ctx, &pb.StartWorkspaceRequest{
-		Name: i.FirstArg(),
+		WorkspaceRef: &metav1.ObjectReference{
+			Name: i.FirstArg(),
+		},
 	}); err != nil {
 		return err
 	}
