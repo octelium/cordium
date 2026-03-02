@@ -86,6 +86,10 @@ export interface Workspace_Spec {
      * @generated from protobuf field: repeated octelium.api.main.cordium.v1.Workspace.Spec.Application applications = 5
      */
     applications: Workspace_Spec_Application[];
+    /**
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Limit limit = 6
+     */
+    limit?: Workspace_Spec_Limit;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Image
@@ -565,6 +569,50 @@ export interface Workspace_Spec_Application {
     isDefault: boolean;
 }
 /**
+ * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Limit
+ */
+export interface Workspace_Spec_Limit {
+    /**
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Limit.CPU cpu = 1
+     */
+    cpu?: Workspace_Spec_Limit_CPU;
+    /**
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Limit.Memory memory = 2
+     */
+    memory?: Workspace_Spec_Limit_Memory;
+    /**
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Limit.Storage storage = 3
+     */
+    storage?: Workspace_Spec_Limit_Storage;
+}
+/**
+ * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Limit.CPU
+ */
+export interface Workspace_Spec_Limit_CPU {
+    /**
+     * @generated from protobuf field: uint32 millicores = 1
+     */
+    millicores: number;
+}
+/**
+ * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Limit.Memory
+ */
+export interface Workspace_Spec_Limit_Memory {
+    /**
+     * @generated from protobuf field: uint32 megabytes = 1
+     */
+    megabytes: number;
+}
+/**
+ * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Limit.Storage
+ */
+export interface Workspace_Spec_Limit_Storage {
+    /**
+     * @generated from protobuf field: uint32 megabytes = 2
+     */
+    megabytes: number;
+}
+/**
  * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Status
  */
 export interface Workspace_Status {
@@ -641,9 +689,9 @@ export interface Workspace_Status {
      */
     failure?: Workspace_Status_Failure;
     /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Status.Limit limit = 19
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Limit limit = 19
      */
-    limit?: Workspace_Status_Limit;
+    limit?: Workspace_Spec_Limit;
     /**
      * @generated from protobuf field: repeated octelium.api.main.cordium.v1.Workspace.Status.SharedPort sharedPorts = 20
      */
@@ -854,50 +902,6 @@ export interface Workspace_Status_Failure_AdditionalRepoClone {
      * @generated from protobuf field: string name = 1
      */
     name: string;
-}
-/**
- * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Status.Limit
- */
-export interface Workspace_Status_Limit {
-    /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Status.Limit.CPU cpu = 1
-     */
-    cpu?: Workspace_Status_Limit_CPU;
-    /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Status.Limit.Memory memory = 2
-     */
-    memory?: Workspace_Status_Limit_Memory;
-    /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Status.Limit.Storage storage = 3
-     */
-    storage?: Workspace_Status_Limit_Storage;
-}
-/**
- * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Status.Limit.CPU
- */
-export interface Workspace_Status_Limit_CPU {
-    /**
-     * @generated from protobuf field: uint32 millicores = 1
-     */
-    millicores: number;
-}
-/**
- * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Status.Limit.Memory
- */
-export interface Workspace_Status_Limit_Memory {
-    /**
-     * @generated from protobuf field: uint32 megabytes = 1
-     */
-    megabytes: number;
-}
-/**
- * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Status.Limit.Storage
- */
-export interface Workspace_Status_Limit_Storage {
-    /**
-     * @generated from protobuf field: uint32 megabytes = 2
-     */
-    megabytes: number;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Status.SharedPort
@@ -1379,9 +1383,9 @@ export interface Template_Spec {
      */
     additionalRepositories: Workspace_Spec_AdditionalRepository[];
     /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Status.Limit limit = 5
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Limit limit = 5
      */
-    limit?: Workspace_Status_Limit;
+    limit?: Workspace_Spec_Limit;
     /**
      * @generated from protobuf field: string gitProvider = 6
      */
@@ -1575,13 +1579,13 @@ export interface Space_Spec {
  */
 export interface Space_Spec_Limit {
     /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Status.Limit defaultLimit = 1
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Limit defaultLimit = 1
      */
-    defaultLimit?: Workspace_Status_Limit;
+    defaultLimit?: Workspace_Spec_Limit;
     /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Status.Limit maxLimit = 2
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Limit maxLimit = 2
      */
-    maxLimit?: Workspace_Status_Limit;
+    maxLimit?: Workspace_Spec_Limit;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Space.Spec.Runtime
@@ -2923,36 +2927,6 @@ export interface CancelBuildTemplateRequest {
      */
     templateRef?: ObjectReference;
 }
-// 
-// message ExecRequest {
-// message EnvVar {
-// string key = 1;
-// string value = 2;
-// }
-// 
-// octelium.api.main.meta.v1.ObjectReference workspaceRef = 1;
-// string command = 2;
-// string workingDir = 3;
-// repeated EnvVar envVars = 4;
-// bool runAsRoot = 5;
-// bool hasStdin = 6;
-// }
-// 
-// message ExecResponse { string id = 1; }
-// message ListenExecRequest { string id = 1; }
-// 
-// 
-// message KillExecRequest { string id = 1; }
-// 
-// message KillExecResponse {}
-// 
-// message WriteDataExecRequest {
-// string id = 1;
-// bytes data = 2;
-// }
-// 
-// message WriteDataExecResponse {}
-
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.ExecRequest
  */
@@ -3213,80 +3187,13 @@ export interface ClusterConfig_Spec_Workspace {
  */
 export interface ClusterConfig_Spec_Workspace_Storage {
     /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry imageRegistry = 1
-     */
-    imageRegistry?: ClusterConfig_Spec_Workspace_Storage_ImageRegistry;
-    /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass storageClass = 2
+     * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass storageClass = 1
      */
     storageClass?: ClusterConfig_Spec_Workspace_Storage_StorageClass;
-}
-/**
- * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry
- */
-export interface ClusterConfig_Spec_Workspace_Storage_ImageRegistry {
     /**
-     * @generated from protobuf oneof: type
+     * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass volumeSnapshotClass = 2
      */
-    type: {
-        oneofKind: "local";
-        /**
-         * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local local = 1
-         */
-        local: ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local;
-    } | {
-        oneofKind: "external";
-        /**
-         * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.External external = 2
-         */
-        external: ClusterConfig_Spec_Workspace_Storage_ImageRegistry_External;
-    } | {
-        oneofKind: undefined;
-    };
-}
-/**
- * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local
- */
-export interface ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local {
-    /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local.Backend backend = 1
-     */
-    backend?: ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend;
-}
-/**
- * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local.Backend
- */
-export interface ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend {
-    /**
-     * @generated from protobuf oneof: type
-     */
-    type: {
-        oneofKind: "s3";
-        /**
-         * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local.Backend.S3 s3 = 1
-         */
-        s3: ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend_S3;
-    } | {
-        oneofKind: undefined;
-    };
-}
-/**
- * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local.Backend.S3
- */
-export interface ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend_S3 {
-    /**
-     * @generated from protobuf field: string cloudProvider = 1
-     */
-    cloudProvider: string;
-}
-/**
- * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.External
- */
-export interface ClusterConfig_Spec_Workspace_Storage_ImageRegistry_External {
-    /**
-     * @generated from protobuf field: string cloudProvider = 1
-     */
-    cloudProvider: string;
+    volumeSnapshotClass?: ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass
@@ -3311,86 +3218,55 @@ export interface ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule {
     storageClass: string;
 }
 /**
+ * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass
+ */
+export interface ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass {
+    /**
+     * @generated from protobuf field: repeated octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass.Rule rules = 1
+     */
+    rules: ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule[];
+}
+/**
+ * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass.Rule
+ */
+export interface ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule {
+    /**
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Condition condition = 1
+     */
+    condition?: Condition;
+    /**
+     * @generated from protobuf field: string volumeSnapshotClass = 2
+     */
+    volumeSnapshotClass: string;
+}
+/**
  * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit
  */
 export interface ClusterConfig_Spec_Workspace_Limit {
     /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource resource = 1
-     */
-    resource?: ClusterConfig_Spec_Workspace_Limit_Resource;
-    /**
-     * @generated from protobuf field: uint32 maxPerUser = 2
+     * @generated from protobuf field: uint32 maxPerUser = 1
      */
     maxPerUser: number;
     /**
-     * @generated from protobuf field: uint32 maxActivePerUser = 3
+     * @generated from protobuf field: uint32 maxActivePerUser = 2
      */
     maxActivePerUser: number;
-}
-/**
- * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource
- */
-export interface ClusterConfig_Spec_Workspace_Limit_Resource {
     /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit buildLimit = 4
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Limit buildLimit = 3
      */
-    buildLimit?: ClusterConfig_Spec_Workspace_Limit_Resource_Limit;
+    buildLimit?: Workspace_Spec_Limit;
     /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit defaultOrganizationSpaceLimit = 5
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Limit defaultOrganizationSpaceLimit = 4
      */
-    defaultOrganizationSpaceLimit?: ClusterConfig_Spec_Workspace_Limit_Resource_Limit;
+    defaultOrganizationSpaceLimit?: Workspace_Spec_Limit;
     /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit defaultPersonalSpaceLimit = 6
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Limit defaultUserSpaceLimit = 5
      */
-    defaultPersonalSpaceLimit?: ClusterConfig_Spec_Workspace_Limit_Resource_Limit;
+    defaultUserSpaceLimit?: Workspace_Spec_Limit;
     /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit maxLimit = 7
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Limit maxLimit = 6
      */
-    maxLimit?: ClusterConfig_Spec_Workspace_Limit_Resource_Limit;
-}
-/**
- * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit
- */
-export interface ClusterConfig_Spec_Workspace_Limit_Resource_Limit {
-    /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.CPU cpu = 1
-     */
-    cpu?: ClusterConfig_Spec_Workspace_Limit_Resource_Limit_CPU;
-    /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.Memory memory = 2
-     */
-    memory?: ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Memory;
-    /**
-     * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.Storage storage = 3
-     */
-    storage?: ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Storage;
-}
-/**
- * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.CPU
- */
-export interface ClusterConfig_Spec_Workspace_Limit_Resource_Limit_CPU {
-    /**
-     * @generated from protobuf field: uint32 millicores = 1
-     */
-    millicores: number;
-}
-/**
- * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.Memory
- */
-export interface ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Memory {
-    /**
-     * @generated from protobuf field: uint32 megabytes = 1
-     */
-    megabytes: number;
-}
-/**
- * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.Storage
- */
-export interface ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Storage {
-    /**
-     * @generated from protobuf field: uint32 megabytes = 1
-     */
-    megabytes: number;
+    maxLimit?: Workspace_Spec_Limit;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout
@@ -3401,9 +3277,9 @@ export interface ClusterConfig_Spec_Workspace_Timeout {
      */
     defaultDuration?: Duration;
     /**
-     * @generated from protobuf field: octelium.api.main.meta.v1.Duration personalSpaceDuration = 2
+     * @generated from protobuf field: octelium.api.main.meta.v1.Duration userSpaceDuration = 2
      */
-    personalSpaceDuration?: Duration;
+    userSpaceDuration?: Duration;
     /**
      * @generated from protobuf field: octelium.api.main.meta.v1.Duration organizationSpaceDuration = 3
      */
@@ -3655,7 +3531,8 @@ class Workspace_Spec$Type extends MessageType<Workspace_Spec> {
             { no: 2, name: "runtime", kind: "message", T: () => Workspace_Spec_Runtime },
             { no: 3, name: "repository", kind: "message", T: () => Workspace_Spec_Repository },
             { no: 4, name: "additionalRepositories", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_AdditionalRepository },
-            { no: 5, name: "applications", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_Application }
+            { no: 5, name: "applications", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_Application },
+            { no: 6, name: "limit", kind: "message", T: () => Workspace_Spec_Limit }
         ]);
     }
     create(value?: PartialMessage<Workspace_Spec>): Workspace_Spec {
@@ -3686,6 +3563,9 @@ class Workspace_Spec$Type extends MessageType<Workspace_Spec> {
                 case /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Application applications */ 5:
                     message.applications.push(Workspace_Spec_Application.internalBinaryRead(reader, reader.uint32(), options));
                     break;
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Limit limit */ 6:
+                    message.limit = Workspace_Spec_Limit.internalBinaryRead(reader, reader.uint32(), options, message.limit);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -3713,6 +3593,9 @@ class Workspace_Spec$Type extends MessageType<Workspace_Spec> {
         /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Application applications = 5; */
         for (let i = 0; i < message.applications.length; i++)
             Workspace_Spec_Application.internalBinaryWrite(message.applications[i], writer.tag(5, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Limit limit = 6; */
+        if (message.limit)
+            Workspace_Spec_Limit.internalBinaryWrite(message.limit, writer.tag(6, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -5159,6 +5042,207 @@ class Workspace_Spec_Application$Type extends MessageType<Workspace_Spec_Applica
  */
 export const Workspace_Spec_Application = new Workspace_Spec_Application$Type();
 // @generated message type with reflection information, may provide speed optimized methods
+class Workspace_Spec_Limit$Type extends MessageType<Workspace_Spec_Limit> {
+    constructor() {
+        super("octelium.api.main.cordium.v1.Workspace.Spec.Limit", [
+            { no: 1, name: "cpu", kind: "message", T: () => Workspace_Spec_Limit_CPU },
+            { no: 2, name: "memory", kind: "message", T: () => Workspace_Spec_Limit_Memory },
+            { no: 3, name: "storage", kind: "message", T: () => Workspace_Spec_Limit_Storage }
+        ]);
+    }
+    create(value?: PartialMessage<Workspace_Spec_Limit>): Workspace_Spec_Limit {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<Workspace_Spec_Limit>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Workspace_Spec_Limit): Workspace_Spec_Limit {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Limit.CPU cpu */ 1:
+                    message.cpu = Workspace_Spec_Limit_CPU.internalBinaryRead(reader, reader.uint32(), options, message.cpu);
+                    break;
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Limit.Memory memory */ 2:
+                    message.memory = Workspace_Spec_Limit_Memory.internalBinaryRead(reader, reader.uint32(), options, message.memory);
+                    break;
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Limit.Storage storage */ 3:
+                    message.storage = Workspace_Spec_Limit_Storage.internalBinaryRead(reader, reader.uint32(), options, message.storage);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: Workspace_Spec_Limit, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Limit.CPU cpu = 1; */
+        if (message.cpu)
+            Workspace_Spec_Limit_CPU.internalBinaryWrite(message.cpu, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Limit.Memory memory = 2; */
+        if (message.memory)
+            Workspace_Spec_Limit_Memory.internalBinaryWrite(message.memory, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Limit.Storage storage = 3; */
+        if (message.storage)
+            Workspace_Spec_Limit_Storage.internalBinaryWrite(message.storage, writer.tag(3, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Limit
+ */
+export const Workspace_Spec_Limit = new Workspace_Spec_Limit$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class Workspace_Spec_Limit_CPU$Type extends MessageType<Workspace_Spec_Limit_CPU> {
+    constructor() {
+        super("octelium.api.main.cordium.v1.Workspace.Spec.Limit.CPU", [
+            { no: 1, name: "millicores", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
+        ]);
+    }
+    create(value?: PartialMessage<Workspace_Spec_Limit_CPU>): Workspace_Spec_Limit_CPU {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.millicores = 0;
+        if (value !== undefined)
+            reflectionMergePartial<Workspace_Spec_Limit_CPU>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Workspace_Spec_Limit_CPU): Workspace_Spec_Limit_CPU {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* uint32 millicores */ 1:
+                    message.millicores = reader.uint32();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: Workspace_Spec_Limit_CPU, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* uint32 millicores = 1; */
+        if (message.millicores !== 0)
+            writer.tag(1, WireType.Varint).uint32(message.millicores);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Limit.CPU
+ */
+export const Workspace_Spec_Limit_CPU = new Workspace_Spec_Limit_CPU$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class Workspace_Spec_Limit_Memory$Type extends MessageType<Workspace_Spec_Limit_Memory> {
+    constructor() {
+        super("octelium.api.main.cordium.v1.Workspace.Spec.Limit.Memory", [
+            { no: 1, name: "megabytes", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
+        ]);
+    }
+    create(value?: PartialMessage<Workspace_Spec_Limit_Memory>): Workspace_Spec_Limit_Memory {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.megabytes = 0;
+        if (value !== undefined)
+            reflectionMergePartial<Workspace_Spec_Limit_Memory>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Workspace_Spec_Limit_Memory): Workspace_Spec_Limit_Memory {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* uint32 megabytes */ 1:
+                    message.megabytes = reader.uint32();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: Workspace_Spec_Limit_Memory, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* uint32 megabytes = 1; */
+        if (message.megabytes !== 0)
+            writer.tag(1, WireType.Varint).uint32(message.megabytes);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Limit.Memory
+ */
+export const Workspace_Spec_Limit_Memory = new Workspace_Spec_Limit_Memory$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class Workspace_Spec_Limit_Storage$Type extends MessageType<Workspace_Spec_Limit_Storage> {
+    constructor() {
+        super("octelium.api.main.cordium.v1.Workspace.Spec.Limit.Storage", [
+            { no: 2, name: "megabytes", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
+        ]);
+    }
+    create(value?: PartialMessage<Workspace_Spec_Limit_Storage>): Workspace_Spec_Limit_Storage {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.megabytes = 0;
+        if (value !== undefined)
+            reflectionMergePartial<Workspace_Spec_Limit_Storage>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Workspace_Spec_Limit_Storage): Workspace_Spec_Limit_Storage {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* uint32 megabytes */ 2:
+                    message.megabytes = reader.uint32();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: Workspace_Spec_Limit_Storage, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* uint32 megabytes = 2; */
+        if (message.megabytes !== 0)
+            writer.tag(2, WireType.Varint).uint32(message.megabytes);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Limit.Storage
+ */
+export const Workspace_Spec_Limit_Storage = new Workspace_Spec_Limit_Storage$Type();
+// @generated message type with reflection information, may provide speed optimized methods
 class Workspace_Status$Type extends MessageType<Workspace_Status> {
     constructor() {
         super("octelium.api.main.cordium.v1.Workspace.Status", [
@@ -5180,7 +5264,7 @@ class Workspace_Status$Type extends MessageType<Workspace_Status> {
             { no: 16, name: "lastStateSetAt", kind: "message", T: () => Timestamp },
             { no: 17, name: "lastRunningAt", kind: "message", T: () => Timestamp },
             { no: 18, name: "failure", kind: "message", T: () => Workspace_Status_Failure },
-            { no: 19, name: "limit", kind: "message", T: () => Workspace_Status_Limit },
+            { no: 19, name: "limit", kind: "message", T: () => Workspace_Spec_Limit },
             { no: 20, name: "sharedPorts", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Status_SharedPort },
             { no: 21, name: "spaceType", kind: "enum", T: () => ["octelium.api.main.cordium.v1.Space.Status.Type", Space_Status_Type] },
             { no: 22, name: "stoppingReason", kind: "enum", T: () => ["octelium.api.main.cordium.v1.Workspace.Status.StoppingReason", Workspace_Status_StoppingReason, "STOPPING_REASON_"] },
@@ -5265,8 +5349,8 @@ class Workspace_Status$Type extends MessageType<Workspace_Status> {
                 case /* octelium.api.main.cordium.v1.Workspace.Status.Failure failure */ 18:
                     message.failure = Workspace_Status_Failure.internalBinaryRead(reader, reader.uint32(), options, message.failure);
                     break;
-                case /* octelium.api.main.cordium.v1.Workspace.Status.Limit limit */ 19:
-                    message.limit = Workspace_Status_Limit.internalBinaryRead(reader, reader.uint32(), options, message.limit);
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Limit limit */ 19:
+                    message.limit = Workspace_Spec_Limit.internalBinaryRead(reader, reader.uint32(), options, message.limit);
                     break;
                 case /* repeated octelium.api.main.cordium.v1.Workspace.Status.SharedPort sharedPorts */ 20:
                     message.sharedPorts.push(Workspace_Status_SharedPort.internalBinaryRead(reader, reader.uint32(), options));
@@ -5352,9 +5436,9 @@ class Workspace_Status$Type extends MessageType<Workspace_Status> {
         /* octelium.api.main.cordium.v1.Workspace.Status.Failure failure = 18; */
         if (message.failure)
             Workspace_Status_Failure.internalBinaryWrite(message.failure, writer.tag(18, WireType.LengthDelimited).fork(), options).join();
-        /* octelium.api.main.cordium.v1.Workspace.Status.Limit limit = 19; */
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Limit limit = 19; */
         if (message.limit)
-            Workspace_Status_Limit.internalBinaryWrite(message.limit, writer.tag(19, WireType.LengthDelimited).fork(), options).join();
+            Workspace_Spec_Limit.internalBinaryWrite(message.limit, writer.tag(19, WireType.LengthDelimited).fork(), options).join();
         /* repeated octelium.api.main.cordium.v1.Workspace.Status.SharedPort sharedPorts = 20; */
         for (let i = 0; i < message.sharedPorts.length; i++)
             Workspace_Status_SharedPort.internalBinaryWrite(message.sharedPorts[i], writer.tag(20, WireType.LengthDelimited).fork(), options).join();
@@ -6167,207 +6251,6 @@ class Workspace_Status_Failure_AdditionalRepoClone$Type extends MessageType<Work
  * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Status.Failure.AdditionalRepoClone
  */
 export const Workspace_Status_Failure_AdditionalRepoClone = new Workspace_Status_Failure_AdditionalRepoClone$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class Workspace_Status_Limit$Type extends MessageType<Workspace_Status_Limit> {
-    constructor() {
-        super("octelium.api.main.cordium.v1.Workspace.Status.Limit", [
-            { no: 1, name: "cpu", kind: "message", T: () => Workspace_Status_Limit_CPU },
-            { no: 2, name: "memory", kind: "message", T: () => Workspace_Status_Limit_Memory },
-            { no: 3, name: "storage", kind: "message", T: () => Workspace_Status_Limit_Storage }
-        ]);
-    }
-    create(value?: PartialMessage<Workspace_Status_Limit>): Workspace_Status_Limit {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        if (value !== undefined)
-            reflectionMergePartial<Workspace_Status_Limit>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Workspace_Status_Limit): Workspace_Status_Limit {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* octelium.api.main.cordium.v1.Workspace.Status.Limit.CPU cpu */ 1:
-                    message.cpu = Workspace_Status_Limit_CPU.internalBinaryRead(reader, reader.uint32(), options, message.cpu);
-                    break;
-                case /* octelium.api.main.cordium.v1.Workspace.Status.Limit.Memory memory */ 2:
-                    message.memory = Workspace_Status_Limit_Memory.internalBinaryRead(reader, reader.uint32(), options, message.memory);
-                    break;
-                case /* octelium.api.main.cordium.v1.Workspace.Status.Limit.Storage storage */ 3:
-                    message.storage = Workspace_Status_Limit_Storage.internalBinaryRead(reader, reader.uint32(), options, message.storage);
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: Workspace_Status_Limit, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* octelium.api.main.cordium.v1.Workspace.Status.Limit.CPU cpu = 1; */
-        if (message.cpu)
-            Workspace_Status_Limit_CPU.internalBinaryWrite(message.cpu, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* octelium.api.main.cordium.v1.Workspace.Status.Limit.Memory memory = 2; */
-        if (message.memory)
-            Workspace_Status_Limit_Memory.internalBinaryWrite(message.memory, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
-        /* octelium.api.main.cordium.v1.Workspace.Status.Limit.Storage storage = 3; */
-        if (message.storage)
-            Workspace_Status_Limit_Storage.internalBinaryWrite(message.storage, writer.tag(3, WireType.LengthDelimited).fork(), options).join();
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Status.Limit
- */
-export const Workspace_Status_Limit = new Workspace_Status_Limit$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class Workspace_Status_Limit_CPU$Type extends MessageType<Workspace_Status_Limit_CPU> {
-    constructor() {
-        super("octelium.api.main.cordium.v1.Workspace.Status.Limit.CPU", [
-            { no: 1, name: "millicores", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
-        ]);
-    }
-    create(value?: PartialMessage<Workspace_Status_Limit_CPU>): Workspace_Status_Limit_CPU {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.millicores = 0;
-        if (value !== undefined)
-            reflectionMergePartial<Workspace_Status_Limit_CPU>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Workspace_Status_Limit_CPU): Workspace_Status_Limit_CPU {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* uint32 millicores */ 1:
-                    message.millicores = reader.uint32();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: Workspace_Status_Limit_CPU, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* uint32 millicores = 1; */
-        if (message.millicores !== 0)
-            writer.tag(1, WireType.Varint).uint32(message.millicores);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Status.Limit.CPU
- */
-export const Workspace_Status_Limit_CPU = new Workspace_Status_Limit_CPU$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class Workspace_Status_Limit_Memory$Type extends MessageType<Workspace_Status_Limit_Memory> {
-    constructor() {
-        super("octelium.api.main.cordium.v1.Workspace.Status.Limit.Memory", [
-            { no: 1, name: "megabytes", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
-        ]);
-    }
-    create(value?: PartialMessage<Workspace_Status_Limit_Memory>): Workspace_Status_Limit_Memory {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.megabytes = 0;
-        if (value !== undefined)
-            reflectionMergePartial<Workspace_Status_Limit_Memory>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Workspace_Status_Limit_Memory): Workspace_Status_Limit_Memory {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* uint32 megabytes */ 1:
-                    message.megabytes = reader.uint32();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: Workspace_Status_Limit_Memory, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* uint32 megabytes = 1; */
-        if (message.megabytes !== 0)
-            writer.tag(1, WireType.Varint).uint32(message.megabytes);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Status.Limit.Memory
- */
-export const Workspace_Status_Limit_Memory = new Workspace_Status_Limit_Memory$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class Workspace_Status_Limit_Storage$Type extends MessageType<Workspace_Status_Limit_Storage> {
-    constructor() {
-        super("octelium.api.main.cordium.v1.Workspace.Status.Limit.Storage", [
-            { no: 2, name: "megabytes", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
-        ]);
-    }
-    create(value?: PartialMessage<Workspace_Status_Limit_Storage>): Workspace_Status_Limit_Storage {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.megabytes = 0;
-        if (value !== undefined)
-            reflectionMergePartial<Workspace_Status_Limit_Storage>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Workspace_Status_Limit_Storage): Workspace_Status_Limit_Storage {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* uint32 megabytes */ 2:
-                    message.megabytes = reader.uint32();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: Workspace_Status_Limit_Storage, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* uint32 megabytes = 2; */
-        if (message.megabytes !== 0)
-            writer.tag(2, WireType.Varint).uint32(message.megabytes);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Status.Limit.Storage
- */
-export const Workspace_Status_Limit_Storage = new Workspace_Status_Limit_Storage$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class Workspace_Status_SharedPort$Type extends MessageType<Workspace_Status_SharedPort> {
     constructor() {
@@ -7575,7 +7458,7 @@ class Template_Spec$Type extends MessageType<Template_Spec> {
             { no: 2, name: "runtime", kind: "message", T: () => Workspace_Spec_Runtime },
             { no: 3, name: "repository", kind: "message", T: () => Workspace_Spec_Repository },
             { no: 4, name: "additionalRepositories", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_AdditionalRepository },
-            { no: 5, name: "limit", kind: "message", T: () => Workspace_Status_Limit },
+            { no: 5, name: "limit", kind: "message", T: () => Workspace_Spec_Limit },
             { no: 6, name: "gitProvider", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
@@ -7604,8 +7487,8 @@ class Template_Spec$Type extends MessageType<Template_Spec> {
                 case /* repeated octelium.api.main.cordium.v1.Workspace.Spec.AdditionalRepository additionalRepositories */ 4:
                     message.additionalRepositories.push(Workspace_Spec_AdditionalRepository.internalBinaryRead(reader, reader.uint32(), options));
                     break;
-                case /* octelium.api.main.cordium.v1.Workspace.Status.Limit limit */ 5:
-                    message.limit = Workspace_Status_Limit.internalBinaryRead(reader, reader.uint32(), options, message.limit);
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Limit limit */ 5:
+                    message.limit = Workspace_Spec_Limit.internalBinaryRead(reader, reader.uint32(), options, message.limit);
                     break;
                 case /* string gitProvider */ 6:
                     message.gitProvider = reader.string();
@@ -7634,9 +7517,9 @@ class Template_Spec$Type extends MessageType<Template_Spec> {
         /* repeated octelium.api.main.cordium.v1.Workspace.Spec.AdditionalRepository additionalRepositories = 4; */
         for (let i = 0; i < message.additionalRepositories.length; i++)
             Workspace_Spec_AdditionalRepository.internalBinaryWrite(message.additionalRepositories[i], writer.tag(4, WireType.LengthDelimited).fork(), options).join();
-        /* octelium.api.main.cordium.v1.Workspace.Status.Limit limit = 5; */
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Limit limit = 5; */
         if (message.limit)
-            Workspace_Status_Limit.internalBinaryWrite(message.limit, writer.tag(5, WireType.LengthDelimited).fork(), options).join();
+            Workspace_Spec_Limit.internalBinaryWrite(message.limit, writer.tag(5, WireType.LengthDelimited).fork(), options).join();
         /* string gitProvider = 6; */
         if (message.gitProvider !== "")
             writer.tag(6, WireType.LengthDelimited).string(message.gitProvider);
@@ -8189,8 +8072,8 @@ export const Space_Spec = new Space_Spec$Type();
 class Space_Spec_Limit$Type extends MessageType<Space_Spec_Limit> {
     constructor() {
         super("octelium.api.main.cordium.v1.Space.Spec.Limit", [
-            { no: 1, name: "defaultLimit", kind: "message", T: () => Workspace_Status_Limit },
-            { no: 2, name: "maxLimit", kind: "message", T: () => Workspace_Status_Limit }
+            { no: 1, name: "defaultLimit", kind: "message", T: () => Workspace_Spec_Limit },
+            { no: 2, name: "maxLimit", kind: "message", T: () => Workspace_Spec_Limit }
         ]);
     }
     create(value?: PartialMessage<Space_Spec_Limit>): Space_Spec_Limit {
@@ -8204,11 +8087,11 @@ class Space_Spec_Limit$Type extends MessageType<Space_Spec_Limit> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* octelium.api.main.cordium.v1.Workspace.Status.Limit defaultLimit */ 1:
-                    message.defaultLimit = Workspace_Status_Limit.internalBinaryRead(reader, reader.uint32(), options, message.defaultLimit);
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Limit defaultLimit */ 1:
+                    message.defaultLimit = Workspace_Spec_Limit.internalBinaryRead(reader, reader.uint32(), options, message.defaultLimit);
                     break;
-                case /* octelium.api.main.cordium.v1.Workspace.Status.Limit maxLimit */ 2:
-                    message.maxLimit = Workspace_Status_Limit.internalBinaryRead(reader, reader.uint32(), options, message.maxLimit);
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Limit maxLimit */ 2:
+                    message.maxLimit = Workspace_Spec_Limit.internalBinaryRead(reader, reader.uint32(), options, message.maxLimit);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -8222,12 +8105,12 @@ class Space_Spec_Limit$Type extends MessageType<Space_Spec_Limit> {
         return message;
     }
     internalBinaryWrite(message: Space_Spec_Limit, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* octelium.api.main.cordium.v1.Workspace.Status.Limit defaultLimit = 1; */
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Limit defaultLimit = 1; */
         if (message.defaultLimit)
-            Workspace_Status_Limit.internalBinaryWrite(message.defaultLimit, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* octelium.api.main.cordium.v1.Workspace.Status.Limit maxLimit = 2; */
+            Workspace_Spec_Limit.internalBinaryWrite(message.defaultLimit, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Limit maxLimit = 2; */
         if (message.maxLimit)
-            Workspace_Status_Limit.internalBinaryWrite(message.maxLimit, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+            Workspace_Spec_Limit.internalBinaryWrite(message.maxLimit, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -13381,8 +13264,8 @@ export const ClusterConfig_Spec_Workspace = new ClusterConfig_Spec_Workspace$Typ
 class ClusterConfig_Spec_Workspace_Storage$Type extends MessageType<ClusterConfig_Spec_Workspace_Storage> {
     constructor() {
         super("octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage", [
-            { no: 1, name: "imageRegistry", kind: "message", T: () => ClusterConfig_Spec_Workspace_Storage_ImageRegistry },
-            { no: 2, name: "storageClass", kind: "message", T: () => ClusterConfig_Spec_Workspace_Storage_StorageClass }
+            { no: 1, name: "storageClass", kind: "message", T: () => ClusterConfig_Spec_Workspace_Storage_StorageClass },
+            { no: 2, name: "volumeSnapshotClass", kind: "message", T: () => ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass }
         ]);
     }
     create(value?: PartialMessage<ClusterConfig_Spec_Workspace_Storage>): ClusterConfig_Spec_Workspace_Storage {
@@ -13396,11 +13279,11 @@ class ClusterConfig_Spec_Workspace_Storage$Type extends MessageType<ClusterConfi
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry imageRegistry */ 1:
-                    message.imageRegistry = ClusterConfig_Spec_Workspace_Storage_ImageRegistry.internalBinaryRead(reader, reader.uint32(), options, message.imageRegistry);
-                    break;
-                case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass storageClass */ 2:
+                case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass storageClass */ 1:
                     message.storageClass = ClusterConfig_Spec_Workspace_Storage_StorageClass.internalBinaryRead(reader, reader.uint32(), options, message.storageClass);
+                    break;
+                case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass volumeSnapshotClass */ 2:
+                    message.volumeSnapshotClass = ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass.internalBinaryRead(reader, reader.uint32(), options, message.volumeSnapshotClass);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -13414,12 +13297,12 @@ class ClusterConfig_Spec_Workspace_Storage$Type extends MessageType<ClusterConfi
         return message;
     }
     internalBinaryWrite(message: ClusterConfig_Spec_Workspace_Storage, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry imageRegistry = 1; */
-        if (message.imageRegistry)
-            ClusterConfig_Spec_Workspace_Storage_ImageRegistry.internalBinaryWrite(message.imageRegistry, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass storageClass = 2; */
+        /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass storageClass = 1; */
         if (message.storageClass)
-            ClusterConfig_Spec_Workspace_Storage_StorageClass.internalBinaryWrite(message.storageClass, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+            ClusterConfig_Spec_Workspace_Storage_StorageClass.internalBinaryWrite(message.storageClass, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass volumeSnapshotClass = 2; */
+        if (message.volumeSnapshotClass)
+            ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass.internalBinaryWrite(message.volumeSnapshotClass, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -13430,256 +13313,6 @@ class ClusterConfig_Spec_Workspace_Storage$Type extends MessageType<ClusterConfi
  * @generated MessageType for protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage
  */
 export const ClusterConfig_Spec_Workspace_Storage = new ClusterConfig_Spec_Workspace_Storage$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class ClusterConfig_Spec_Workspace_Storage_ImageRegistry$Type extends MessageType<ClusterConfig_Spec_Workspace_Storage_ImageRegistry> {
-    constructor() {
-        super("octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry", [
-            { no: 1, name: "local", kind: "message", oneof: "type", T: () => ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local },
-            { no: 2, name: "external", kind: "message", oneof: "type", T: () => ClusterConfig_Spec_Workspace_Storage_ImageRegistry_External }
-        ]);
-    }
-    create(value?: PartialMessage<ClusterConfig_Spec_Workspace_Storage_ImageRegistry>): ClusterConfig_Spec_Workspace_Storage_ImageRegistry {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.type = { oneofKind: undefined };
-        if (value !== undefined)
-            reflectionMergePartial<ClusterConfig_Spec_Workspace_Storage_ImageRegistry>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ClusterConfig_Spec_Workspace_Storage_ImageRegistry): ClusterConfig_Spec_Workspace_Storage_ImageRegistry {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local local */ 1:
-                    message.type = {
-                        oneofKind: "local",
-                        local: ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local.internalBinaryRead(reader, reader.uint32(), options, (message.type as any).local)
-                    };
-                    break;
-                case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.External external */ 2:
-                    message.type = {
-                        oneofKind: "external",
-                        external: ClusterConfig_Spec_Workspace_Storage_ImageRegistry_External.internalBinaryRead(reader, reader.uint32(), options, (message.type as any).external)
-                    };
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: ClusterConfig_Spec_Workspace_Storage_ImageRegistry, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local local = 1; */
-        if (message.type.oneofKind === "local")
-            ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local.internalBinaryWrite(message.type.local, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.External external = 2; */
-        if (message.type.oneofKind === "external")
-            ClusterConfig_Spec_Workspace_Storage_ImageRegistry_External.internalBinaryWrite(message.type.external, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry
- */
-export const ClusterConfig_Spec_Workspace_Storage_ImageRegistry = new ClusterConfig_Spec_Workspace_Storage_ImageRegistry$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local$Type extends MessageType<ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local> {
-    constructor() {
-        super("octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local", [
-            { no: 1, name: "backend", kind: "message", T: () => ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend }
-        ]);
-    }
-    create(value?: PartialMessage<ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local>): ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        if (value !== undefined)
-            reflectionMergePartial<ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local): ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local.Backend backend */ 1:
-                    message.backend = ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend.internalBinaryRead(reader, reader.uint32(), options, message.backend);
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local.Backend backend = 1; */
-        if (message.backend)
-            ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend.internalBinaryWrite(message.backend, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local
- */
-export const ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local = new ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend$Type extends MessageType<ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend> {
-    constructor() {
-        super("octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local.Backend", [
-            { no: 1, name: "s3", kind: "message", oneof: "type", T: () => ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend_S3 }
-        ]);
-    }
-    create(value?: PartialMessage<ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend>): ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.type = { oneofKind: undefined };
-        if (value !== undefined)
-            reflectionMergePartial<ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend): ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local.Backend.S3 s3 */ 1:
-                    message.type = {
-                        oneofKind: "s3",
-                        s3: ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend_S3.internalBinaryRead(reader, reader.uint32(), options, (message.type as any).s3)
-                    };
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local.Backend.S3 s3 = 1; */
-        if (message.type.oneofKind === "s3")
-            ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend_S3.internalBinaryWrite(message.type.s3, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local.Backend
- */
-export const ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend = new ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend_S3$Type extends MessageType<ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend_S3> {
-    constructor() {
-        super("octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local.Backend.S3", [
-            { no: 1, name: "cloudProvider", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
-        ]);
-    }
-    create(value?: PartialMessage<ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend_S3>): ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend_S3 {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.cloudProvider = "";
-        if (value !== undefined)
-            reflectionMergePartial<ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend_S3>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend_S3): ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend_S3 {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* string cloudProvider */ 1:
-                    message.cloudProvider = reader.string();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend_S3, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string cloudProvider = 1; */
-        if (message.cloudProvider !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.cloudProvider);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.Local.Backend.S3
- */
-export const ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend_S3 = new ClusterConfig_Spec_Workspace_Storage_ImageRegistry_Local_Backend_S3$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class ClusterConfig_Spec_Workspace_Storage_ImageRegistry_External$Type extends MessageType<ClusterConfig_Spec_Workspace_Storage_ImageRegistry_External> {
-    constructor() {
-        super("octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.External", [
-            { no: 1, name: "cloudProvider", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
-        ]);
-    }
-    create(value?: PartialMessage<ClusterConfig_Spec_Workspace_Storage_ImageRegistry_External>): ClusterConfig_Spec_Workspace_Storage_ImageRegistry_External {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.cloudProvider = "";
-        if (value !== undefined)
-            reflectionMergePartial<ClusterConfig_Spec_Workspace_Storage_ImageRegistry_External>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ClusterConfig_Spec_Workspace_Storage_ImageRegistry_External): ClusterConfig_Spec_Workspace_Storage_ImageRegistry_External {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* string cloudProvider */ 1:
-                    message.cloudProvider = reader.string();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: ClusterConfig_Spec_Workspace_Storage_ImageRegistry_External, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string cloudProvider = 1; */
-        if (message.cloudProvider !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.cloudProvider);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.ImageRegistry.External
- */
-export const ClusterConfig_Spec_Workspace_Storage_ImageRegistry_External = new ClusterConfig_Spec_Workspace_Storage_ImageRegistry_External$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class ClusterConfig_Spec_Workspace_Storage_StorageClass$Type extends MessageType<ClusterConfig_Spec_Workspace_Storage_StorageClass> {
     constructor() {
@@ -13782,12 +13415,116 @@ class ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule$Type extends Messag
  */
 export const ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule = new ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule$Type();
 // @generated message type with reflection information, may provide speed optimized methods
+class ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass$Type extends MessageType<ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass> {
+    constructor() {
+        super("octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass", [
+            { no: 1, name: "rules", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule }
+        ]);
+    }
+    create(value?: PartialMessage<ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass>): ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.rules = [];
+        if (value !== undefined)
+            reflectionMergePartial<ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass): ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* repeated octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass.Rule rules */ 1:
+                    message.rules.push(ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* repeated octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass.Rule rules = 1; */
+        for (let i = 0; i < message.rules.length; i++)
+            ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule.internalBinaryWrite(message.rules[i], writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass
+ */
+export const ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass = new ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule$Type extends MessageType<ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule> {
+    constructor() {
+        super("octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass.Rule", [
+            { no: 1, name: "condition", kind: "message", T: () => Condition },
+            { no: 2, name: "volumeSnapshotClass", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule>): ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.volumeSnapshotClass = "";
+        if (value !== undefined)
+            reflectionMergePartial<ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule): ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* octelium.api.main.cordium.v1.Condition condition */ 1:
+                    message.condition = Condition.internalBinaryRead(reader, reader.uint32(), options, message.condition);
+                    break;
+                case /* string volumeSnapshotClass */ 2:
+                    message.volumeSnapshotClass = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* octelium.api.main.cordium.v1.Condition condition = 1; */
+        if (message.condition)
+            Condition.internalBinaryWrite(message.condition, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* string volumeSnapshotClass = 2; */
+        if (message.volumeSnapshotClass !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.volumeSnapshotClass);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass.Rule
+ */
+export const ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule = new ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule$Type();
+// @generated message type with reflection information, may provide speed optimized methods
 class ClusterConfig_Spec_Workspace_Limit$Type extends MessageType<ClusterConfig_Spec_Workspace_Limit> {
     constructor() {
         super("octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit", [
-            { no: 1, name: "resource", kind: "message", T: () => ClusterConfig_Spec_Workspace_Limit_Resource },
-            { no: 2, name: "maxPerUser", kind: "scalar", T: 13 /*ScalarType.UINT32*/ },
-            { no: 3, name: "maxActivePerUser", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
+            { no: 1, name: "maxPerUser", kind: "scalar", T: 13 /*ScalarType.UINT32*/ },
+            { no: 2, name: "maxActivePerUser", kind: "scalar", T: 13 /*ScalarType.UINT32*/ },
+            { no: 3, name: "buildLimit", kind: "message", T: () => Workspace_Spec_Limit },
+            { no: 4, name: "defaultOrganizationSpaceLimit", kind: "message", T: () => Workspace_Spec_Limit },
+            { no: 5, name: "defaultUserSpaceLimit", kind: "message", T: () => Workspace_Spec_Limit },
+            { no: 6, name: "maxLimit", kind: "message", T: () => Workspace_Spec_Limit }
         ]);
     }
     create(value?: PartialMessage<ClusterConfig_Spec_Workspace_Limit>): ClusterConfig_Spec_Workspace_Limit {
@@ -13803,14 +13540,23 @@ class ClusterConfig_Spec_Workspace_Limit$Type extends MessageType<ClusterConfig_
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource resource */ 1:
-                    message.resource = ClusterConfig_Spec_Workspace_Limit_Resource.internalBinaryRead(reader, reader.uint32(), options, message.resource);
-                    break;
-                case /* uint32 maxPerUser */ 2:
+                case /* uint32 maxPerUser */ 1:
                     message.maxPerUser = reader.uint32();
                     break;
-                case /* uint32 maxActivePerUser */ 3:
+                case /* uint32 maxActivePerUser */ 2:
                     message.maxActivePerUser = reader.uint32();
+                    break;
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Limit buildLimit */ 3:
+                    message.buildLimit = Workspace_Spec_Limit.internalBinaryRead(reader, reader.uint32(), options, message.buildLimit);
+                    break;
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Limit defaultOrganizationSpaceLimit */ 4:
+                    message.defaultOrganizationSpaceLimit = Workspace_Spec_Limit.internalBinaryRead(reader, reader.uint32(), options, message.defaultOrganizationSpaceLimit);
+                    break;
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Limit defaultUserSpaceLimit */ 5:
+                    message.defaultUserSpaceLimit = Workspace_Spec_Limit.internalBinaryRead(reader, reader.uint32(), options, message.defaultUserSpaceLimit);
+                    break;
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Limit maxLimit */ 6:
+                    message.maxLimit = Workspace_Spec_Limit.internalBinaryRead(reader, reader.uint32(), options, message.maxLimit);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -13824,15 +13570,24 @@ class ClusterConfig_Spec_Workspace_Limit$Type extends MessageType<ClusterConfig_
         return message;
     }
     internalBinaryWrite(message: ClusterConfig_Spec_Workspace_Limit, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource resource = 1; */
-        if (message.resource)
-            ClusterConfig_Spec_Workspace_Limit_Resource.internalBinaryWrite(message.resource, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* uint32 maxPerUser = 2; */
+        /* uint32 maxPerUser = 1; */
         if (message.maxPerUser !== 0)
-            writer.tag(2, WireType.Varint).uint32(message.maxPerUser);
-        /* uint32 maxActivePerUser = 3; */
+            writer.tag(1, WireType.Varint).uint32(message.maxPerUser);
+        /* uint32 maxActivePerUser = 2; */
         if (message.maxActivePerUser !== 0)
-            writer.tag(3, WireType.Varint).uint32(message.maxActivePerUser);
+            writer.tag(2, WireType.Varint).uint32(message.maxActivePerUser);
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Limit buildLimit = 3; */
+        if (message.buildLimit)
+            Workspace_Spec_Limit.internalBinaryWrite(message.buildLimit, writer.tag(3, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Limit defaultOrganizationSpaceLimit = 4; */
+        if (message.defaultOrganizationSpaceLimit)
+            Workspace_Spec_Limit.internalBinaryWrite(message.defaultOrganizationSpaceLimit, writer.tag(4, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Limit defaultUserSpaceLimit = 5; */
+        if (message.defaultUserSpaceLimit)
+            Workspace_Spec_Limit.internalBinaryWrite(message.defaultUserSpaceLimit, writer.tag(5, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Limit maxLimit = 6; */
+        if (message.maxLimit)
+            Workspace_Spec_Limit.internalBinaryWrite(message.maxLimit, writer.tag(6, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -13844,279 +13599,11 @@ class ClusterConfig_Spec_Workspace_Limit$Type extends MessageType<ClusterConfig_
  */
 export const ClusterConfig_Spec_Workspace_Limit = new ClusterConfig_Spec_Workspace_Limit$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class ClusterConfig_Spec_Workspace_Limit_Resource$Type extends MessageType<ClusterConfig_Spec_Workspace_Limit_Resource> {
-    constructor() {
-        super("octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource", [
-            { no: 4, name: "buildLimit", kind: "message", T: () => ClusterConfig_Spec_Workspace_Limit_Resource_Limit },
-            { no: 5, name: "defaultOrganizationSpaceLimit", kind: "message", T: () => ClusterConfig_Spec_Workspace_Limit_Resource_Limit },
-            { no: 6, name: "defaultPersonalSpaceLimit", kind: "message", T: () => ClusterConfig_Spec_Workspace_Limit_Resource_Limit },
-            { no: 7, name: "maxLimit", kind: "message", T: () => ClusterConfig_Spec_Workspace_Limit_Resource_Limit }
-        ]);
-    }
-    create(value?: PartialMessage<ClusterConfig_Spec_Workspace_Limit_Resource>): ClusterConfig_Spec_Workspace_Limit_Resource {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        if (value !== undefined)
-            reflectionMergePartial<ClusterConfig_Spec_Workspace_Limit_Resource>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ClusterConfig_Spec_Workspace_Limit_Resource): ClusterConfig_Spec_Workspace_Limit_Resource {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit buildLimit */ 4:
-                    message.buildLimit = ClusterConfig_Spec_Workspace_Limit_Resource_Limit.internalBinaryRead(reader, reader.uint32(), options, message.buildLimit);
-                    break;
-                case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit defaultOrganizationSpaceLimit */ 5:
-                    message.defaultOrganizationSpaceLimit = ClusterConfig_Spec_Workspace_Limit_Resource_Limit.internalBinaryRead(reader, reader.uint32(), options, message.defaultOrganizationSpaceLimit);
-                    break;
-                case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit defaultPersonalSpaceLimit */ 6:
-                    message.defaultPersonalSpaceLimit = ClusterConfig_Spec_Workspace_Limit_Resource_Limit.internalBinaryRead(reader, reader.uint32(), options, message.defaultPersonalSpaceLimit);
-                    break;
-                case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit maxLimit */ 7:
-                    message.maxLimit = ClusterConfig_Spec_Workspace_Limit_Resource_Limit.internalBinaryRead(reader, reader.uint32(), options, message.maxLimit);
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: ClusterConfig_Spec_Workspace_Limit_Resource, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit buildLimit = 4; */
-        if (message.buildLimit)
-            ClusterConfig_Spec_Workspace_Limit_Resource_Limit.internalBinaryWrite(message.buildLimit, writer.tag(4, WireType.LengthDelimited).fork(), options).join();
-        /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit defaultOrganizationSpaceLimit = 5; */
-        if (message.defaultOrganizationSpaceLimit)
-            ClusterConfig_Spec_Workspace_Limit_Resource_Limit.internalBinaryWrite(message.defaultOrganizationSpaceLimit, writer.tag(5, WireType.LengthDelimited).fork(), options).join();
-        /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit defaultPersonalSpaceLimit = 6; */
-        if (message.defaultPersonalSpaceLimit)
-            ClusterConfig_Spec_Workspace_Limit_Resource_Limit.internalBinaryWrite(message.defaultPersonalSpaceLimit, writer.tag(6, WireType.LengthDelimited).fork(), options).join();
-        /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit maxLimit = 7; */
-        if (message.maxLimit)
-            ClusterConfig_Spec_Workspace_Limit_Resource_Limit.internalBinaryWrite(message.maxLimit, writer.tag(7, WireType.LengthDelimited).fork(), options).join();
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource
- */
-export const ClusterConfig_Spec_Workspace_Limit_Resource = new ClusterConfig_Spec_Workspace_Limit_Resource$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class ClusterConfig_Spec_Workspace_Limit_Resource_Limit$Type extends MessageType<ClusterConfig_Spec_Workspace_Limit_Resource_Limit> {
-    constructor() {
-        super("octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit", [
-            { no: 1, name: "cpu", kind: "message", T: () => ClusterConfig_Spec_Workspace_Limit_Resource_Limit_CPU },
-            { no: 2, name: "memory", kind: "message", T: () => ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Memory },
-            { no: 3, name: "storage", kind: "message", T: () => ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Storage }
-        ]);
-    }
-    create(value?: PartialMessage<ClusterConfig_Spec_Workspace_Limit_Resource_Limit>): ClusterConfig_Spec_Workspace_Limit_Resource_Limit {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        if (value !== undefined)
-            reflectionMergePartial<ClusterConfig_Spec_Workspace_Limit_Resource_Limit>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ClusterConfig_Spec_Workspace_Limit_Resource_Limit): ClusterConfig_Spec_Workspace_Limit_Resource_Limit {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.CPU cpu */ 1:
-                    message.cpu = ClusterConfig_Spec_Workspace_Limit_Resource_Limit_CPU.internalBinaryRead(reader, reader.uint32(), options, message.cpu);
-                    break;
-                case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.Memory memory */ 2:
-                    message.memory = ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Memory.internalBinaryRead(reader, reader.uint32(), options, message.memory);
-                    break;
-                case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.Storage storage */ 3:
-                    message.storage = ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Storage.internalBinaryRead(reader, reader.uint32(), options, message.storage);
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: ClusterConfig_Spec_Workspace_Limit_Resource_Limit, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.CPU cpu = 1; */
-        if (message.cpu)
-            ClusterConfig_Spec_Workspace_Limit_Resource_Limit_CPU.internalBinaryWrite(message.cpu, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.Memory memory = 2; */
-        if (message.memory)
-            ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Memory.internalBinaryWrite(message.memory, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
-        /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.Storage storage = 3; */
-        if (message.storage)
-            ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Storage.internalBinaryWrite(message.storage, writer.tag(3, WireType.LengthDelimited).fork(), options).join();
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit
- */
-export const ClusterConfig_Spec_Workspace_Limit_Resource_Limit = new ClusterConfig_Spec_Workspace_Limit_Resource_Limit$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class ClusterConfig_Spec_Workspace_Limit_Resource_Limit_CPU$Type extends MessageType<ClusterConfig_Spec_Workspace_Limit_Resource_Limit_CPU> {
-    constructor() {
-        super("octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.CPU", [
-            { no: 1, name: "millicores", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
-        ]);
-    }
-    create(value?: PartialMessage<ClusterConfig_Spec_Workspace_Limit_Resource_Limit_CPU>): ClusterConfig_Spec_Workspace_Limit_Resource_Limit_CPU {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.millicores = 0;
-        if (value !== undefined)
-            reflectionMergePartial<ClusterConfig_Spec_Workspace_Limit_Resource_Limit_CPU>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ClusterConfig_Spec_Workspace_Limit_Resource_Limit_CPU): ClusterConfig_Spec_Workspace_Limit_Resource_Limit_CPU {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* uint32 millicores */ 1:
-                    message.millicores = reader.uint32();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: ClusterConfig_Spec_Workspace_Limit_Resource_Limit_CPU, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* uint32 millicores = 1; */
-        if (message.millicores !== 0)
-            writer.tag(1, WireType.Varint).uint32(message.millicores);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.CPU
- */
-export const ClusterConfig_Spec_Workspace_Limit_Resource_Limit_CPU = new ClusterConfig_Spec_Workspace_Limit_Resource_Limit_CPU$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Memory$Type extends MessageType<ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Memory> {
-    constructor() {
-        super("octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.Memory", [
-            { no: 1, name: "megabytes", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
-        ]);
-    }
-    create(value?: PartialMessage<ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Memory>): ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Memory {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.megabytes = 0;
-        if (value !== undefined)
-            reflectionMergePartial<ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Memory>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Memory): ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Memory {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* uint32 megabytes */ 1:
-                    message.megabytes = reader.uint32();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Memory, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* uint32 megabytes = 1; */
-        if (message.megabytes !== 0)
-            writer.tag(1, WireType.Varint).uint32(message.megabytes);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.Memory
- */
-export const ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Memory = new ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Memory$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Storage$Type extends MessageType<ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Storage> {
-    constructor() {
-        super("octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.Storage", [
-            { no: 1, name: "megabytes", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
-        ]);
-    }
-    create(value?: PartialMessage<ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Storage>): ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Storage {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.megabytes = 0;
-        if (value !== undefined)
-            reflectionMergePartial<ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Storage>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Storage): ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Storage {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* uint32 megabytes */ 1:
-                    message.megabytes = reader.uint32();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Storage, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* uint32 megabytes = 1; */
-        if (message.megabytes !== 0)
-            writer.tag(1, WireType.Varint).uint32(message.megabytes);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.Resource.Limit.Storage
- */
-export const ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Storage = new ClusterConfig_Spec_Workspace_Limit_Resource_Limit_Storage$Type();
-// @generated message type with reflection information, may provide speed optimized methods
 class ClusterConfig_Spec_Workspace_Timeout$Type extends MessageType<ClusterConfig_Spec_Workspace_Timeout> {
     constructor() {
         super("octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout", [
             { no: 1, name: "defaultDuration", kind: "message", T: () => Duration },
-            { no: 2, name: "personalSpaceDuration", kind: "message", T: () => Duration },
+            { no: 2, name: "userSpaceDuration", kind: "message", T: () => Duration },
             { no: 3, name: "organizationSpaceDuration", kind: "message", T: () => Duration },
             { no: 4, name: "maxActiveDuration", kind: "message", T: () => Duration }
         ]);
@@ -14135,8 +13622,8 @@ class ClusterConfig_Spec_Workspace_Timeout$Type extends MessageType<ClusterConfi
                 case /* octelium.api.main.meta.v1.Duration defaultDuration */ 1:
                     message.defaultDuration = Duration.internalBinaryRead(reader, reader.uint32(), options, message.defaultDuration);
                     break;
-                case /* octelium.api.main.meta.v1.Duration personalSpaceDuration */ 2:
-                    message.personalSpaceDuration = Duration.internalBinaryRead(reader, reader.uint32(), options, message.personalSpaceDuration);
+                case /* octelium.api.main.meta.v1.Duration userSpaceDuration */ 2:
+                    message.userSpaceDuration = Duration.internalBinaryRead(reader, reader.uint32(), options, message.userSpaceDuration);
                     break;
                 case /* octelium.api.main.meta.v1.Duration organizationSpaceDuration */ 3:
                     message.organizationSpaceDuration = Duration.internalBinaryRead(reader, reader.uint32(), options, message.organizationSpaceDuration);
@@ -14159,9 +13646,9 @@ class ClusterConfig_Spec_Workspace_Timeout$Type extends MessageType<ClusterConfi
         /* octelium.api.main.meta.v1.Duration defaultDuration = 1; */
         if (message.defaultDuration)
             Duration.internalBinaryWrite(message.defaultDuration, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* octelium.api.main.meta.v1.Duration personalSpaceDuration = 2; */
-        if (message.personalSpaceDuration)
-            Duration.internalBinaryWrite(message.personalSpaceDuration, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.meta.v1.Duration userSpaceDuration = 2; */
+        if (message.userSpaceDuration)
+            Duration.internalBinaryWrite(message.userSpaceDuration, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
         /* octelium.api.main.meta.v1.Duration organizationSpaceDuration = 3; */
         if (message.organizationSpaceDuration)
             Duration.internalBinaryWrite(message.organizationSpaceDuration, writer.tag(3, WireType.LengthDelimited).fork(), options).join();

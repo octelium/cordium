@@ -415,7 +415,7 @@ export const SpaceEdit = (props: { item: WsPB.Space }) => {
                   obj={req.spec!.limit.defaultLimit ? {} : undefined}
                   onSet={() => {
                     req.spec!.limit!.defaultLimit =
-                      WsPB.Workspace_Status_Limit.create({
+                      WsPB.Workspace_Spec_Limit.create({
                         cpu: {
                           millicores: 0,
                         },
@@ -491,7 +491,7 @@ export const SpaceEdit = (props: { item: WsPB.Space }) => {
                   obj={req.spec!.limit.maxLimit ? {} : undefined}
                   onSet={() => {
                     req.spec!.limit!.maxLimit =
-                      WsPB.Workspace_Status_Limit.create({
+                      WsPB.Workspace_Spec_Limit.create({
                         cpu: {
                           millicores: 0,
                         },

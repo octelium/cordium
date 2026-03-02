@@ -1368,7 +1368,7 @@ const EditSpec = (props: {
           obj={(req as WsPB.Template).spec!.limit ? {} : undefined}
           onSet={() => {
             (req as WsPB.Template).spec!.limit =
-              WsPB.Workspace_Status_Limit.create();
+              WsPB.Workspace_Spec_Limit.create();
             updateReq();
           }}
         >
@@ -1380,7 +1380,7 @@ const EditSpec = (props: {
                 obj={(req as WsPB.Template).spec!.limit!.cpu ? {} : undefined}
                 onSet={() => {
                   (req as WsPB.Template).spec!.limit!.cpu =
-                    WsPB.Workspace_Status_Limit_CPU.create();
+                    WsPB.Workspace_Spec_Limit_CPU.create();
                   updateReq();
                 }}
                 onUnset={() => {
@@ -1410,7 +1410,7 @@ const EditSpec = (props: {
                 }
                 onSet={() => {
                   (req as WsPB.Template).spec!.limit!.memory =
-                    WsPB.Workspace_Status_Limit_Memory.create();
+                    WsPB.Workspace_Spec_Limit_Memory.create();
                   updateReq();
                 }}
                 onUnset={() => {
@@ -1440,7 +1440,7 @@ const EditSpec = (props: {
                 }
                 onSet={() => {
                   (req as WsPB.Template).spec!.limit!.storage =
-                    WsPB.Workspace_Status_Limit_Storage.create();
+                    WsPB.Workspace_Spec_Limit_Storage.create();
                   updateReq();
                 }}
                 onUnset={() => {
