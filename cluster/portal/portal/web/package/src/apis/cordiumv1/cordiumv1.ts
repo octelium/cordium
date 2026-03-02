@@ -2821,6 +2821,10 @@ export enum ListenLogResponse_Type {
  * @generated from protobuf message octelium.api.main.cordium.v1.WatchWorkspaceRequest
  */
 export interface WatchWorkspaceRequest {
+    /**
+     * @generated from protobuf field: octelium.api.main.meta.v1.ObjectReference workspaceRef = 1
+     */
+    workspaceRef?: ObjectReference;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.WatchWorkspaceResponse
@@ -12006,7 +12010,9 @@ export const ListenLogResponse = new ListenLogResponse$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class WatchWorkspaceRequest$Type extends MessageType<WatchWorkspaceRequest> {
     constructor() {
-        super("octelium.api.main.cordium.v1.WatchWorkspaceRequest", []);
+        super("octelium.api.main.cordium.v1.WatchWorkspaceRequest", [
+            { no: 1, name: "workspaceRef", kind: "message", T: () => ObjectReference }
+        ]);
     }
     create(value?: PartialMessage<WatchWorkspaceRequest>): WatchWorkspaceRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
@@ -12019,6 +12025,9 @@ class WatchWorkspaceRequest$Type extends MessageType<WatchWorkspaceRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
+                case /* octelium.api.main.meta.v1.ObjectReference workspaceRef */ 1:
+                    message.workspaceRef = ObjectReference.internalBinaryRead(reader, reader.uint32(), options, message.workspaceRef);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -12031,6 +12040,9 @@ class WatchWorkspaceRequest$Type extends MessageType<WatchWorkspaceRequest> {
         return message;
     }
     internalBinaryWrite(message: WatchWorkspaceRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* octelium.api.main.meta.v1.ObjectReference workspaceRef = 1; */
+        if (message.workspaceRef)
+            ObjectReference.internalBinaryWrite(message.workspaceRef, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
