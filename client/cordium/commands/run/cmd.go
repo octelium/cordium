@@ -128,13 +128,11 @@ func doRun(ctx context.Context, conn *grpc.ClientConn, ws *pb.Workspace) error {
 	if doWaitStarting {
 
 		zap.L().Debug("Starting watchWorkspace")
-		strm, err := c.WatchWorkspace(ctx, &pb.WatchWorkspaceRequest{})
+		strm, err := c.WatchWorkspace(ctx, &pb.WatchWorkspaceRequest{
+			WorkspaceRef: umetav1.GetObjectReference(ws),
+		})
 		if err != nil {
 			return err
-		}
-
-		isSameWorkspace := func(itm *pb.Workspace) bool {
-			return itm.Metadata.Uid == ws.Metadata.Uid
 		}
 
 		if err := func() error {
@@ -147,9 +145,6 @@ func doRun(ctx context.Context, conn *grpc.ClientConn, ws *pb.Workspace) error {
 				switch msg.Type.(type) {
 				case *pb.WatchWorkspaceResponse_Update_:
 					cur := msg.GetUpdate().NewItem
-					if !isSameWorkspace(cur) {
-						continue
-					}
 
 					zap.L().Debug("Got Workspace update", zap.String("state", cur.Status.State.String()))
 
