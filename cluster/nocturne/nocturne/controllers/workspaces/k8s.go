@@ -728,6 +728,42 @@ func (c *Controller) createTemplateSnapshot(ctx context.Context,
 		return nil
 	}
 
+	var volumeSnapshotClassName *string
+	if cc, err := c.octeliumC.CordiumV1Utils().GetClusterConfig(ctx); err == nil {
+		if cc.Spec.Workspace != nil && cc.Spec.Workspace.Storage != nil &&
+			cc.Spec.Workspace.Storage.VolumeSnapshotClass != nil &&
+			len(cc.Spec.Workspace.Storage.VolumeSnapshotClass.Rules) > 0 {
+
+			reqCtxMap := map[string]any{
+				"ctx": map[string]any{
+					"workspace": pbutils.MustConvertToMap(ws),
+					"template":  pbutils.MustConvertToMap(tmpl),
+				},
+			}
+
+			func() {
+				for _, rule := range cc.Spec.Workspace.Storage.VolumeSnapshotClass.Rules {
+
+					cond, err := ovutils.ToCoreCondition(rule.Condition)
+					if err != nil {
+						continue
+					}
+
+					isMatched, err := c.celEngine.EvalCondition(ctx, cond, reqCtxMap)
+					if err != nil {
+						continue
+					}
+
+					if isMatched {
+						volumeSnapshotClassName = utils_types.StrToPtr(rule.VolumeSnapshotClass)
+						return
+					}
+				}
+			}()
+
+		}
+	}
+
 	snapshot := &v1.VolumeSnapshot{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      c.getTemplateBuildName(tmpl),
@@ -737,7 +773,7 @@ func (c *Controller) createTemplateSnapshot(ctx context.Context,
 			},
 		},
 		Spec: v1.VolumeSnapshotSpec{
-			VolumeSnapshotClassName: nil,
+			VolumeSnapshotClassName: volumeSnapshotClassName,
 			Source: v1.VolumeSnapshotSource{
 				PersistentVolumeClaimName: utils_types.StrToPtr(c.getPVCName(ws)),
 			},

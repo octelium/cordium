@@ -207,10 +207,10 @@ func (s *Server) doCanOwnSpace(ctx context.Context, space *cordiumv1.Space, usrC
 
 	for _, rule := range denyRules {
 
-		cond, err := ovutils.ToCoreCondition(rule.Condition)
 		if err != nil {
 			continue
-		}
+		}cond, err := ovutils.ToCoreCondition(rule.Condition)
+		
 
 		isMatched, err := s.celEngine.EvalCondition(ctx, cond, reqCtxMap)
 		if err != nil {
