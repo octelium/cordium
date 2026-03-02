@@ -2578,13 +2578,13 @@ export interface CreateTerminalRequest {
      */
     workspaceRef?: ObjectReference;
     /**
-     * @generated from protobuf field: uint32 width = 2
+     * @generated from protobuf field: uint32 cols = 2
      */
-    width: number;
+    cols: number;
     /**
-     * @generated from protobuf field: uint32 height = 3
+     * @generated from protobuf field: uint32 rows = 3
      */
-    height: number;
+    rows: number;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Terminal
@@ -2650,13 +2650,13 @@ export interface SetTerminalWindowSizeRequest {
      */
     id: string;
     /**
-     * @generated from protobuf field: uint32 width = 2
+     * @generated from protobuf field: uint32 cols = 2
      */
-    width: number;
+    cols: number;
     /**
-     * @generated from protobuf field: uint32 height = 3
+     * @generated from protobuf field: uint32 rows = 3
      */
-    height: number;
+    rows: number;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.SetTerminalWindowSizeResponse
@@ -2728,13 +2728,13 @@ export interface ListenTerminalResponse_Stdout {
  */
 export interface ListenTerminalResponse_WindowSize {
     /**
-     * @generated from protobuf field: uint32 width = 1
+     * @generated from protobuf field: uint32 cols = 1
      */
-    width: number;
+    cols: number;
     /**
-     * @generated from protobuf field: uint32 height = 2
+     * @generated from protobuf field: uint32 rows = 2
      */
-    height: number;
+    rows: number;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.ListenTerminalResponse.Close
@@ -11098,14 +11098,14 @@ class CreateTerminalRequest$Type extends MessageType<CreateTerminalRequest> {
     constructor() {
         super("octelium.api.main.cordium.v1.CreateTerminalRequest", [
             { no: 1, name: "workspaceRef", kind: "message", T: () => ObjectReference },
-            { no: 2, name: "width", kind: "scalar", T: 13 /*ScalarType.UINT32*/ },
-            { no: 3, name: "height", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
+            { no: 2, name: "cols", kind: "scalar", T: 13 /*ScalarType.UINT32*/ },
+            { no: 3, name: "rows", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
         ]);
     }
     create(value?: PartialMessage<CreateTerminalRequest>): CreateTerminalRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.width = 0;
-        message.height = 0;
+        message.cols = 0;
+        message.rows = 0;
         if (value !== undefined)
             reflectionMergePartial<CreateTerminalRequest>(this, message, value);
         return message;
@@ -11118,11 +11118,11 @@ class CreateTerminalRequest$Type extends MessageType<CreateTerminalRequest> {
                 case /* octelium.api.main.meta.v1.ObjectReference workspaceRef */ 1:
                     message.workspaceRef = ObjectReference.internalBinaryRead(reader, reader.uint32(), options, message.workspaceRef);
                     break;
-                case /* uint32 width */ 2:
-                    message.width = reader.uint32();
+                case /* uint32 cols */ 2:
+                    message.cols = reader.uint32();
                     break;
-                case /* uint32 height */ 3:
-                    message.height = reader.uint32();
+                case /* uint32 rows */ 3:
+                    message.rows = reader.uint32();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -11139,12 +11139,12 @@ class CreateTerminalRequest$Type extends MessageType<CreateTerminalRequest> {
         /* octelium.api.main.meta.v1.ObjectReference workspaceRef = 1; */
         if (message.workspaceRef)
             ObjectReference.internalBinaryWrite(message.workspaceRef, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* uint32 width = 2; */
-        if (message.width !== 0)
-            writer.tag(2, WireType.Varint).uint32(message.width);
-        /* uint32 height = 3; */
-        if (message.height !== 0)
-            writer.tag(3, WireType.Varint).uint32(message.height);
+        /* uint32 cols = 2; */
+        if (message.cols !== 0)
+            writer.tag(2, WireType.Varint).uint32(message.cols);
+        /* uint32 rows = 3; */
+        if (message.rows !== 0)
+            writer.tag(3, WireType.Varint).uint32(message.rows);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -11470,15 +11470,15 @@ class SetTerminalWindowSizeRequest$Type extends MessageType<SetTerminalWindowSiz
     constructor() {
         super("octelium.api.main.cordium.v1.SetTerminalWindowSizeRequest", [
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "width", kind: "scalar", T: 13 /*ScalarType.UINT32*/ },
-            { no: 3, name: "height", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
+            { no: 2, name: "cols", kind: "scalar", T: 13 /*ScalarType.UINT32*/ },
+            { no: 3, name: "rows", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
         ]);
     }
     create(value?: PartialMessage<SetTerminalWindowSizeRequest>): SetTerminalWindowSizeRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.id = "";
-        message.width = 0;
-        message.height = 0;
+        message.cols = 0;
+        message.rows = 0;
         if (value !== undefined)
             reflectionMergePartial<SetTerminalWindowSizeRequest>(this, message, value);
         return message;
@@ -11491,11 +11491,11 @@ class SetTerminalWindowSizeRequest$Type extends MessageType<SetTerminalWindowSiz
                 case /* string id */ 1:
                     message.id = reader.string();
                     break;
-                case /* uint32 width */ 2:
-                    message.width = reader.uint32();
+                case /* uint32 cols */ 2:
+                    message.cols = reader.uint32();
                     break;
-                case /* uint32 height */ 3:
-                    message.height = reader.uint32();
+                case /* uint32 rows */ 3:
+                    message.rows = reader.uint32();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -11512,12 +11512,12 @@ class SetTerminalWindowSizeRequest$Type extends MessageType<SetTerminalWindowSiz
         /* string id = 1; */
         if (message.id !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.id);
-        /* uint32 width = 2; */
-        if (message.width !== 0)
-            writer.tag(2, WireType.Varint).uint32(message.width);
-        /* uint32 height = 3; */
-        if (message.height !== 0)
-            writer.tag(3, WireType.Varint).uint32(message.height);
+        /* uint32 cols = 2; */
+        if (message.cols !== 0)
+            writer.tag(2, WireType.Varint).uint32(message.cols);
+        /* uint32 rows = 3; */
+        if (message.rows !== 0)
+            writer.tag(3, WireType.Varint).uint32(message.rows);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -11789,14 +11789,14 @@ export const ListenTerminalResponse_Stdout = new ListenTerminalResponse_Stdout$T
 class ListenTerminalResponse_WindowSize$Type extends MessageType<ListenTerminalResponse_WindowSize> {
     constructor() {
         super("octelium.api.main.cordium.v1.ListenTerminalResponse.WindowSize", [
-            { no: 1, name: "width", kind: "scalar", T: 13 /*ScalarType.UINT32*/ },
-            { no: 2, name: "height", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
+            { no: 1, name: "cols", kind: "scalar", T: 13 /*ScalarType.UINT32*/ },
+            { no: 2, name: "rows", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
         ]);
     }
     create(value?: PartialMessage<ListenTerminalResponse_WindowSize>): ListenTerminalResponse_WindowSize {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.width = 0;
-        message.height = 0;
+        message.cols = 0;
+        message.rows = 0;
         if (value !== undefined)
             reflectionMergePartial<ListenTerminalResponse_WindowSize>(this, message, value);
         return message;
@@ -11806,11 +11806,11 @@ class ListenTerminalResponse_WindowSize$Type extends MessageType<ListenTerminalR
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* uint32 width */ 1:
-                    message.width = reader.uint32();
+                case /* uint32 cols */ 1:
+                    message.cols = reader.uint32();
                     break;
-                case /* uint32 height */ 2:
-                    message.height = reader.uint32();
+                case /* uint32 rows */ 2:
+                    message.rows = reader.uint32();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -11824,12 +11824,12 @@ class ListenTerminalResponse_WindowSize$Type extends MessageType<ListenTerminalR
         return message;
     }
     internalBinaryWrite(message: ListenTerminalResponse_WindowSize, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* uint32 width = 1; */
-        if (message.width !== 0)
-            writer.tag(1, WireType.Varint).uint32(message.width);
-        /* uint32 height = 2; */
-        if (message.height !== 0)
-            writer.tag(2, WireType.Varint).uint32(message.height);
+        /* uint32 cols = 1; */
+        if (message.cols !== 0)
+            writer.tag(1, WireType.Varint).uint32(message.cols);
+        /* uint32 rows = 2; */
+        if (message.rows !== 0)
+            writer.tag(2, WireType.Varint).uint32(message.rows);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

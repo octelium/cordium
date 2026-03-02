@@ -100,8 +100,8 @@ func DoCmdTerminal(ctx context.Context, conn *grpc.ClientConn, wsName string) er
 		WorkspaceRef: &metav1.ObjectReference{
 			Name: wsName,
 		},
-		Width:  uint32(cols),
-		Height: uint32(rows),
+		Cols: uint32(cols),
+		Rows: uint32(rows),
 	})
 	if err != nil {
 		return err
@@ -128,9 +128,9 @@ func DoCmdTerminal(ctx context.Context, conn *grpc.ClientConn, wsName string) er
 			zap.L().Debug("New window size", zap.Int("cols", cols), zap.Int("rows", rows))
 
 			if _, err := c.SetTerminalWindowSize(ctx, &pb.SetTerminalWindowSizeRequest{
-				Id:     t.Id,
-				Width:  uint32(cols),
-				Height: uint32(rows),
+				Id:   t.Id,
+				Cols: uint32(cols),
+				Rows: uint32(rows),
 			}); err != nil {
 				zap.L().Debug("Could not SetTerminalWindowSize", zap.Error(err))
 			}

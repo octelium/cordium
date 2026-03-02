@@ -152,8 +152,8 @@ func (t *terminal) handleSend(msg *ccordiumv1.ListenTerminalResponse) error {
 		t.sendMsg(&cordiumv1.ListenTerminalResponse{
 			Type: &cordiumv1.ListenTerminalResponse_WindowSize_{
 				WindowSize: &cordiumv1.ListenTerminalResponse_WindowSize{
-					Width:  msg.GetWindowSize().Width,
-					Height: msg.GetWindowSize().Height,
+					Cols: msg.GetWindowSize().Cols,
+					Rows: msg.GetWindowSize().Rows,
 				},
 			},
 		})

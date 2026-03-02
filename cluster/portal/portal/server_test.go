@@ -294,9 +294,9 @@ func TestServer(t *testing.T) {
 
 	time.Sleep(1 * time.Second)
 	_, err = wsSupSrv.SetWindowSize(usr.Ctx(), &ccordiumv1.SetWindowSizeRequest{
-		Id:     termResp.Id,
-		Width:  uint32(width),
-		Height: uint32(height),
+		Id:   termResp.Id,
+		Cols: uint32(width),
+		Rows: uint32(height),
 	})
 	assert.Nil(t, err)
 	time.Sleep(1 * time.Second)

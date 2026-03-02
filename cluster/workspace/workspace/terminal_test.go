@@ -95,8 +95,8 @@ func TestTerminal(t *testing.T) {
 
 	{
 		_, err = termC.SetWindowSize(ctx, &ccordiumv1.SetWindowSizeRequest{
-			Width:  100,
-			Height: 100,
+			Cols: 100,
+			Rows: 100,
 		})
 		assert.NotNil(t, err)
 	}
@@ -110,9 +110,9 @@ func TestTerminal(t *testing.T) {
 
 	{
 		_, err = termC.SetWindowSize(ctx, &ccordiumv1.SetWindowSizeRequest{
-			Id:     term.Id,
-			Width:  100,
-			Height: 100,
+			Id:   term.Id,
+			Cols: 100,
+			Rows: 100,
 		})
 		assert.Nil(t, err)
 	}

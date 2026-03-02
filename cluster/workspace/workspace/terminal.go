@@ -128,7 +128,7 @@ func (s *Server) newTerminal(req *ccordiumv1.CreateTerminalRequest) (*terminal, 
 		return nil, err
 	}
 
-	if err := ret.setWinSize(uint16(req.Width), uint16(req.Height)); err != nil {
+	if err := ret.setWinSize(uint16(req.Cols), uint16(req.Rows)); err != nil {
 		return nil, err
 	}
 
@@ -639,8 +639,8 @@ func (term *terminal) sendInitListenMsg(srv ccordiumv1.TerminalService_ListenTer
 	if err := srv.Send(&ccordiumv1.ListenTerminalResponse{
 		Type: &ccordiumv1.ListenTerminalResponse_WindowSize_{
 			WindowSize: &ccordiumv1.ListenTerminalResponse_WindowSize{
-				Width:  uint32(term.winSize.width),
-				Height: uint32(term.winSize.height),
+				Cols: uint32(term.winSize.width),
+				Rows: uint32(term.winSize.height),
 			},
 		},
 	}); err != nil {
@@ -690,7 +690,7 @@ func (s *Server) SetWindowSize(ctx context.Context, req *ccordiumv1.SetWindowSiz
 		return nil, grpcutils.InvalidArg("Terminal does not exist: %s", req.Id)
 	}
 
-	if err := term.setWinSize(uint16(req.Width), uint16(req.Height)); err != nil {
+	if err := term.setWinSize(uint16(req.Cols), uint16(req.Rows)); err != nil {
 		return nil, err
 	}
 
@@ -698,8 +698,8 @@ func (s *Server) SetWindowSize(ctx context.Context, req *ccordiumv1.SetWindowSiz
 	msg := &ccordiumv1.ListenTerminalResponse{
 		Type: &ccordiumv1.ListenTerminalResponse_WindowSize_{
 			WindowSize: &ccordiumv1.ListenTerminalResponse_WindowSize{
-				Width:  uint32(winSize.width),
-				Height: uint32(winSize.height),
+				Cols: uint32(winSize.width),
+				Rows: uint32(winSize.height),
 			},
 		},
 	}

@@ -192,9 +192,9 @@ func TestTerminal(t *testing.T) {
 		width := uint32(utilrand.GetRandomRangeMath(100, 200))
 		height := uint32(utilrand.GetRandomRangeMath(100, 200))
 		_, err = srv.SetTerminalWindowSize(usr.Ctx(), &cordiumv1.SetTerminalWindowSizeRequest{
-			Id:     resp.Id,
-			Width:  width,
-			Height: height,
+			Id:   resp.Id,
+			Cols: width,
+			Rows: height,
 		})
 		assert.Nil(t, err)
 	}
@@ -203,9 +203,9 @@ func TestTerminal(t *testing.T) {
 		width := uint32(utilrand.GetRandomRangeMath(100, 200))
 		height := uint32(utilrand.GetRandomRangeMath(100, 200))
 		_, err = srv.SetTerminalWindowSize(usr.Ctx(), &cordiumv1.SetTerminalWindowSizeRequest{
-			Id:     fmt.Sprintf("%s-%s", ws.Metadata.Name, utilrand.GetRandomStringLowercase(4)),
-			Width:  width,
-			Height: height,
+			Id:   fmt.Sprintf("%s-%s", ws.Metadata.Name, utilrand.GetRandomStringLowercase(4)),
+			Cols: width,
+			Rows: height,
 		})
 		assert.NotNil(t, err)
 		assert.True(t, grpcerr.IsInvalidArg(err), "%+v", err)

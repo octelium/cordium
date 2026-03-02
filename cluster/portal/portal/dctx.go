@@ -283,9 +283,9 @@ func (c *dctx) handleClientMsg(ctx context.Context, msg *cordiumv1.ClientMessage
 		}
 
 		_, err = supC.TermC().SetWindowSize(ctx, &ccordiumv1.SetWindowSizeRequest{
-			Id:     req.Id,
-			Width:  req.Width,
-			Height: req.Height,
+			Id:   req.Id,
+			Cols: req.Cols,
+			Rows: req.Rows,
 		})
 		if err != nil {
 			return err

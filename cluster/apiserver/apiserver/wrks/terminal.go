@@ -47,8 +47,8 @@ func (s *Server) CreateTerminal(ctx context.Context, req *cordiumv1.CreateTermin
 	}
 
 	resp, err := wssupClient.TermC().CreateTerminal(ctx, &ccordiumv1.CreateTerminalRequest{
-		Width:  req.Width,
-		Height: req.Height,
+		Cols: req.Cols,
+		Rows: req.Rows,
 	})
 	if err != nil {
 		return nil, grpcutils.InternalWithErr(err)
@@ -157,9 +157,9 @@ func (s *Server) SetTerminalWindowSize(ctx context.Context, req *cordiumv1.SetTe
 	}
 
 	_, err = wssupClient.TermC().SetWindowSize(ctx, &ccordiumv1.SetWindowSizeRequest{
-		Id:     req.Id,
-		Width:  req.Width,
-		Height: req.Height,
+		Id:   req.Id,
+		Cols: req.Cols,
+		Rows: req.Rows,
 	})
 	if err != nil {
 		return nil, err
@@ -220,8 +220,8 @@ func (s *Server) ListenTerminal(req *cordiumv1.ListenTerminalRequest, srv cordiu
 				srv.Send(&cordiumv1.ListenTerminalResponse{
 					Type: &cordiumv1.ListenTerminalResponse_WindowSize_{
 						WindowSize: &cordiumv1.ListenTerminalResponse_WindowSize{
-							Width:  msg.GetWindowSize().Width,
-							Height: msg.GetWindowSize().Height,
+							Cols: msg.GetWindowSize().Cols,
+							Rows: msg.GetWindowSize().Rows,
 						},
 					},
 				})

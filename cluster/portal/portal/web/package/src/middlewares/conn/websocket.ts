@@ -125,8 +125,8 @@ export class WebSocketCtl {
         oneofKind: "setTerminalWindowSizeRequest",
         setTerminalWindowSizeRequest: {
           id,
-          width: cols,
-          height: rows,
+          cols,
+          rows,
         },
       },
     });
