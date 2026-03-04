@@ -367,20 +367,6 @@ func (c *Controller) newPodSpec(ws *cordiumv1.Workspace) corev1.PodSpec {
 					}
 					return ret
 				}(),
-
-				/*
-					ReadinessProbe: &corev1.Probe{
-						TimeoutSeconds:   1,
-						PeriodSeconds:    2,
-						SuccessThreshold: 1,
-						FailureThreshold: 3600,
-						ProbeHandler: corev1.ProbeHandler{
-							Exec: &corev1.ExecAction{
-								Command: []string{"/bin/grpc_health_probe", "-addr=127.0.0.1:8080"},
-							},
-						},
-					},
-				*/
 			},
 		},
 	}
