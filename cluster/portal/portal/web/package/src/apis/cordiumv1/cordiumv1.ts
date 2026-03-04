@@ -2746,13 +2746,9 @@ export interface ListenTerminalResponse_Close {
  */
 export interface ListenLogRequest {
     /**
-     * @generated from protobuf field: string uid = 1
+     * @generated from protobuf field: octelium.api.main.meta.v1.ObjectReference workspaceRef = 1
      */
-    uid: string;
-    /**
-     * @generated from protobuf field: string name = 2
-     */
-    name: string;
+    workspaceRef?: ObjectReference;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.ListenLogResponse
@@ -11886,14 +11882,11 @@ export const ListenTerminalResponse_Close = new ListenTerminalResponse_Close$Typ
 class ListenLogRequest$Type extends MessageType<ListenLogRequest> {
     constructor() {
         super("octelium.api.main.cordium.v1.ListenLogRequest", [
-            { no: 1, name: "uid", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 1, name: "workspaceRef", kind: "message", T: () => ObjectReference }
         ]);
     }
     create(value?: PartialMessage<ListenLogRequest>): ListenLogRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.uid = "";
-        message.name = "";
         if (value !== undefined)
             reflectionMergePartial<ListenLogRequest>(this, message, value);
         return message;
@@ -11903,11 +11896,8 @@ class ListenLogRequest$Type extends MessageType<ListenLogRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string uid */ 1:
-                    message.uid = reader.string();
-                    break;
-                case /* string name */ 2:
-                    message.name = reader.string();
+                case /* octelium.api.main.meta.v1.ObjectReference workspaceRef */ 1:
+                    message.workspaceRef = ObjectReference.internalBinaryRead(reader, reader.uint32(), options, message.workspaceRef);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -11921,12 +11911,9 @@ class ListenLogRequest$Type extends MessageType<ListenLogRequest> {
         return message;
     }
     internalBinaryWrite(message: ListenLogRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string uid = 1; */
-        if (message.uid !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.uid);
-        /* string name = 2; */
-        if (message.name !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.name);
+        /* octelium.api.main.meta.v1.ObjectReference workspaceRef = 1; */
+        if (message.workspaceRef)
+            ObjectReference.internalBinaryWrite(message.workspaceRef, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

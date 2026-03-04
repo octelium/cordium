@@ -10,6 +10,7 @@ import { connect, ConnectedProps } from "react-redux";
 import { AppDispatch, RootState } from "../../store";
 
 import { getClientWorkspaceSvc } from "@/utils/client";
+import { getResourceRef } from "@/utils/pb";
 import { twMerge } from "tailwind-merge";
 import * as WsPB from "../../apis/cordiumv1/cordiumv1";
 import * as WsGRPC from "../../apis/cordiumv1/cordiumv1.client";
@@ -61,16 +62,6 @@ export class TerminalEvent extends React.Component<Props, State> {
     this.serializeAddon = new SerializeAddon();
     this.state = {};
 
-    /*
-    console.log("registering === evt", `evt-${this.props.item.metadata?.uid}`);
-    const unsub = emitter.on(
-      `evt-${this.props.item.metadata?.uid}`,
-      (msg: WsPB.ListenEventResponse) => {
-        this.handleMessage(msg);
-      }
-    );
-    */
-
     const doResize = debounce(() => {
       this.fitAddon.fit();
     }, 300);
@@ -83,13 +74,6 @@ export class TerminalEvent extends React.Component<Props, State> {
       },
     });
 
-    /*
-    this.disposables.push({
-      dispose: () => {
-        unsub();
-      },
-    });
-    */
     this.disposables.push(this.fitAddon);
     this.disposables.push(this.t);
   }
@@ -103,7 +87,7 @@ export class TerminalEvent extends React.Component<Props, State> {
 
     const strm = this.c.listenLog(
       WsPB.ListenLogRequest.create({
-        uid: this.props.item.metadata!.uid,
+        workspaceRef: getResourceRef(this.props.item),
       }),
     );
 
