@@ -64,7 +64,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{env.V_CONTAINER_REGISTRY}}/${{env.V_ORG}}/octelium-${{matrix.component}}
+          images: ${{env.V_CONTAINER_REGISTRY}}/${{env.V_ORG}}/cordium-${{matrix.component}}
           flavor: |
             latest=false
             prefix=
@@ -139,7 +139,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{env.V_CONTAINER_REGISTRY}}/${{env.V_ORG}}/octelium-${{matrix.component}}
+          images: ${{env.V_CONTAINER_REGISTRY}}/${{env.V_ORG}}/cordium-${{matrix.component}}
           flavor: |
             latest=${{env.V_IS_LATEST}}
             prefix=
@@ -163,7 +163,7 @@ jobs:
       - name: Create and push manifest with annotations
         env:
           LABELS: ${{ steps.meta.outputs.labels }}
-          BASE_IMAGE: ${{env.V_CONTAINER_REGISTRY}}/${{env.V_ORG}}/octelium-${{matrix.component}}
+          BASE_IMAGE: ${{env.V_CONTAINER_REGISTRY}}/${{env.V_ORG}}/cordium-${{matrix.component}}
           VERSION: ${{ steps.meta.outputs.version }}
         run: |
           TAGS="${{ steps.meta.outputs.tags }}"

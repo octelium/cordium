@@ -6,10 +6,10 @@ on:
   push:
     tags:
       - "v*.*.*"
-    branches:
-      - b-*
-      # - main
-      # - dev
+    # branches:
+    #   - b-*
+    # - main
+    # - dev
 jobs:
   build:
     name: build-${{ matrix.component }}-${{ matrix.arch }}
@@ -19,14 +19,14 @@ jobs:
         component: [cordium]
         arch:
           - amd64
-          - arm64
+          # - arm64
         include:
           - arch: amd64
             platform: linux/amd64
             runner: ubuntu-24.04
-          - arch: arm64
-            platform: linux/arm64
-            runner: ubuntu-24.04-arm
+          # - arch: arm64
+          #   platform: linux/arm64
+          #   runner: ubuntu-24.04-arm
     steps:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v4
