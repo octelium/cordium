@@ -91,14 +91,16 @@ func (*endpoint) LinkAddress() tcpip.LinkAddress {
 
 func (*endpoint) Wait() {}
 
-func (e *endpoint) WritePacket(pkt stack.PacketBufferPtr) tcpip.Error {
+func (e *endpoint) WritePacket(pkt *stack.PacketBuffer) tcpip.Error {
 	e.incomingPacket <- pkt.ToView()
 	return nil
 }
 
-func (e *endpoint) WriteRawPacket(stack.PacketBufferPtr) tcpip.Error {
+func (e *endpoint) WriteRawPacket(*stack.PacketBuffer) tcpip.Error {
 	panic("not implemented")
 }
+
+func (*endpoint) ParseHeader(*stack.PacketBuffer) bool { return true }
 
 func (e *endpoint) WritePackets(pbs stack.PacketBufferList) (int, tcpip.Error) {
 	lst := pbs.AsSlice()
@@ -112,9 +114,24 @@ func (*endpoint) ARPHardwareType() header.ARPHardwareType {
 	return header.ARPHardwareNone
 }
 
-func (e *endpoint) AddHeader(stack.PacketBufferPtr) {
+func (e *endpoint) AddHeader(*stack.PacketBuffer) {
 }
-func (*endpoint) ParseHeader(stack.PacketBufferPtr) bool { return true }
+
+func (e *endpoint) Close() {
+
+}
+
+func (e *endpoint) SetLinkAddress(addr tcpip.LinkAddress) {
+
+}
+
+func (e *endpoint) SetMTU(mtu uint32) {
+
+}
+
+func (e *endpoint) SetOnCloseAction(func()) {
+
+}
 
 func (c *netTun) GetNetstackNet() *Net {
 	return (*Net)(c)
