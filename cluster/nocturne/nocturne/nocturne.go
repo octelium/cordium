@@ -24,6 +24,7 @@ import (
 
 	"github.com/octelium/cordium/cluster/common/octeliumc"
 	wswatchers "github.com/octelium/cordium/cluster/common/watchers"
+	tmplcontroller "github.com/octelium/cordium/cluster/nocturne/nocturne/controllers/templates"
 	usrcontroller "github.com/octelium/cordium/cluster/nocturne/nocturne/controllers/users"
 	wscontroller "github.com/octelium/cordium/cluster/nocturne/nocturne/controllers/workspaces"
 	"github.com/octelium/octelium/apis/rsc/rmetav1"
@@ -83,7 +84,17 @@ func Run(ctx context.Context) error {
 		return err
 	}
 
+	tmplCtl, err := tmplcontroller.NewController(ctx, octeliumC)
+	if err != nil {
+		return err
+	}
+
 	if err := wswatchers.NewCordiumV1(octeliumC).Workspace(ctx, nil, ctl.OnAdd, ctl.OnUpdate, ctl.OnDelete); err != nil {
+		return err
+	}
+
+	if err := wswatchers.NewCordiumV1(octeliumC).Template(ctx,
+		nil, tmplCtl.OnAdd, tmplCtl.OnUpdate, tmplCtl.OnDelete); err != nil {
 		return err
 	}
 
