@@ -21,7 +21,6 @@ import (
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
 	"github.com/octelium/octelium/apis/cluster/ccordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
-	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/cluster/common/apivalidation"
 	"github.com/octelium/octelium/cluster/common/grpcutils"
 	"github.com/octelium/octelium/pkg/grpcerr"
@@ -36,17 +35,13 @@ func (s *Server) ListenLog(req *cordiumv1.ListenLogRequest, srv cordiumv1.Worksp
 		return err
 	}
 
-	if err := apivalidation.CheckGetOptions(&metav1.GetOptions{
-		Name: req.Name,
-		Uid:  req.Uid,
-	}, &apivalidation.CheckGetOptionsOpts{}); err != nil {
+	if err := apivalidation.CheckObjectRef(req.WorkspaceRef, &apivalidation.CheckGetOptionsOpts{}); err != nil {
 		return err
 	}
 
-	ws, supC, err := s.supClientMap.Get(&metav1.GetOptions{
-		Name: req.Name,
-		Uid:  req.Uid,
-	}, i.Session.Status.UserRef)
+	ws, supC, err := s.supClientMap.Get(
+		apivalidation.ObjectReferenceToGetOptions(req.WorkspaceRef),
+		i.Session.Status.UserRef)
 	if err != nil {
 		return err
 	}
