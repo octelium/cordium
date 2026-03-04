@@ -4,7 +4,6 @@ go 1.25.7
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
-	github.com/codeclysm/extract/v3 v3.1.1
 	github.com/google/go-containerregistry v0.21.2
 	github.com/google/uuid v1.6.0
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
@@ -20,6 +19,7 @@ require (
 )
 
 require (
+	github.com/codeclysm/extract/v4 v4.0.0
 	github.com/go-git/go-git/v5 v5.17.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
@@ -119,7 +119,7 @@ require (
 	github.com/skeema/knownhosts v1.3.1 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.6.0 // indirect
 	github.com/tchap/go-patricia/v2 v2.3.3 // indirect
-	github.com/ulikunitz/xz v0.5.11 // indirect
+	github.com/ulikunitz/xz v0.5.12 // indirect
 	github.com/valyala/fastjson v1.6.7 // indirect
 	github.com/vbatts/tar-split v0.12.2 // indirect
 	github.com/vektah/gqlparser/v2 v2.5.31 // indirect
