@@ -839,17 +839,19 @@ func (c *statusWatcher) onStopped(ctx context.Context) error {
 		}
 	}
 
-	if ws.Status.IsBuild {
-		zap.L().Debug("Deleting build Workspace", zap.String("ws", ws.Metadata.Name))
-		_, err := c.octeliumC.CordiumC().DeleteWorkspace(ctx, &rmetav1.DeleteOptions{
-			Uid: c.ws.Metadata.Uid,
-		})
-		if err != nil {
-			if !grpcerr.IsNotFound(err) {
-				return err
+	/*
+		if ws.Status.IsBuild {
+			zap.L().Debug("Deleting build Workspace", zap.String("ws", ws.Metadata.Name))
+			_, err := c.octeliumC.CordiumC().DeleteWorkspace(ctx, &rmetav1.DeleteOptions{
+				Uid: c.ws.Metadata.Uid,
+			})
+			if err != nil {
+				if !grpcerr.IsNotFound(err) {
+					return err
+				}
 			}
 		}
-	}
+	*/
 
 	return nil
 }

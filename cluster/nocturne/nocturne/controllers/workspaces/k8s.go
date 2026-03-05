@@ -458,61 +458,8 @@ func (c *Controller) createK8sService(ctx context.Context,
 		return err
 	}
 
-	/*
-		if c.doSetWorkspaceInternalAddr(ctx, svcK8s, ws); err != nil {
-			zap.L().Warn("Could not doSetWorkspaceInternalAddr", zap.String("wsName", ws.Metadata.Name), zap.Error(err))
-		}
-	*/
-
 	return nil
 }
-
-/*
-func (c *Controller) doSetWorkspaceInternalAddr(ctx context.Context, svcK8s *corev1.Service, ws *cordiumv1.Workspace) error {
-
-	if ldflags.IsTest() {
-		return nil
-	}
-
-	if svcK8s.Spec.ClusterIP != "" {
-		if addr, err := netip.ParseAddr(svcK8s.Spec.ClusterIP); err == nil {
-			zap.L().Debug("Found Workspace k8s svc clusterIP", zap.String("ipAddr", addr.String()))
-			ws.Status.InternalIPAddress = addr.String()
-			ws, err = c.octeliumC.CordiumC().UpdateWorkspace(ctx, ws)
-			if err != nil {
-				return err
-			}
-			zap.L().Debug("Done updating internalIPAddr of ws", zap.String("wsName", ws.Metadata.Name))
-			return nil
-		}
-	}
-
-	zap.L().Debug("Trying to get the Workspace k8sSvc clusterIP", zap.String("wsName", ws.Metadata.Name))
-	for i := 0; i < 100; i++ {
-		svcK8s, err := c.k8sC.CoreV1().Services(svcK8s.Namespace).Get(ctx, svcK8s.Name, metav1.GetOptions{})
-		if err != nil {
-			return err
-		}
-		if svcK8s.Spec.ClusterIP != "" {
-			if addr, err := netip.ParseAddr(svcK8s.Spec.ClusterIP); err == nil {
-				zap.L().Debug("Found Workspace k8s svc clusterIP", zap.String("ipAddr", addr.String()))
-				ws.Status.InternalIPAddress = addr.String()
-				ws, err = c.octeliumC.CordiumC().UpdateWorkspace(ctx, ws)
-				if err != nil {
-					return err
-				}
-				zap.L().Debug("Done updating internalIPAddr of ws", zap.String("wsName", ws.Metadata.Name))
-				return nil
-			}
-		}
-		time.Sleep(1 * time.Second)
-		zap.L().Debug("Trying again to get the Workspace k8sSvc clusterIP...", zap.String("wsName", ws.Metadata.Name))
-	}
-
-	zap.L().Debug("Could not find the Workspace k8sSvc clusterIP", zap.String("wsName", ws.Metadata.Name))
-	return nil
-}
-*/
 
 func (c *Controller) getOwnerConfigMap(ws *cordiumv1.Workspace) *corev1.ConfigMap {
 	return &corev1.ConfigMap{
@@ -755,7 +702,8 @@ func (c *Controller) createTemplateSnapshot(ctx context.Context,
 			Name:      c.getTemplateBuildName(tmpl),
 			Namespace: ns,
 			Labels: map[string]string{
-				"octelium.com/template-uid": tmpl.Metadata.Uid,
+				"octelium.com/template-uid":  tmpl.Metadata.Uid,
+				"octelium.com/parent-ws-uid": ws.Metadata.Uid,
 			},
 		},
 		Spec: v1.VolumeSnapshotSpec{
@@ -767,7 +715,7 @@ func (c *Controller) createTemplateSnapshot(ctx context.Context,
 	}
 
 	zap.L().Debug("Creating template volume snapshot", zap.Any("tmpl", tmpl))
-	if _, err := c.snapshotC.SnapshotV1().
+	if snapshot, err := c.snapshotC.SnapshotV1().
 		VolumeSnapshots(ns).Create(ctx, snapshot, metav1.CreateOptions{}); err != nil {
 		switch {
 		case k8serr.IsNotFound(err):
@@ -779,6 +727,8 @@ func (c *Controller) createTemplateSnapshot(ctx context.Context,
 		default:
 			return err
 		}
+	} else {
+		zap.L().Debug("Snapshot successfully created", zap.Any("snapshot", snapshot))
 	}
 
 	return nil
