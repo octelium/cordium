@@ -375,7 +375,13 @@ func (s *Server) waitForTermOuter(ctx context.Context) error {
 		defer cancelFn()
 
 		zap.L().Debug("Outer supervisor waiting for exit...")
-		<-ctx.Done()
+
+		select {
+		case <-ctx.Done():
+			zap.L().Debug("Received term signal")
+		case <-time.After(20 * time.Second):
+			zap.L().Debug("Timeout exceeded. Exiting...")
+		}
 	}
 
 	zap.L().Debug("Exiting outer supervisor...")
