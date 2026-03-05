@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/octelium/cordium/client/cordium/commands/ccommon"
 	pb "github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/client/common/client"
@@ -122,10 +123,12 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	p := printer.NewPrinter("Name", "Created", "State", "Last Started")
+	p := printer.NewPrinter("Name", "Created", "Template", "Space", "State", "Last Started")
 	for _, itm := range itmList.Items {
 		p.AppendRow(itm.Metadata.Name,
 			cliutils.GetResourceAge(itm),
+			ccommon.GetResourceRefShortName(itm.Status.TemplateRef),
+			ccommon.GetResourceRefShortName(itm.Status.SpaceRef),
 			itm.Status.State.String(),
 			cliutils.GetAgeFromTimestampMust(itm.Status.LastInitializedAt.AsTime().Format(time.RFC3339Nano)))
 	}

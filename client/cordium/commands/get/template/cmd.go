@@ -19,6 +19,7 @@ package template
 import (
 	"fmt"
 
+	"github.com/octelium/cordium/client/cordium/commands/ccommon"
 	pb "github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/client/common/client"
@@ -110,9 +111,11 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	p := printer.NewPrinter("Name", "Description")
-	for _, net := range itmList.Items {
-		p.AppendRow(net.Metadata.Name, net.Metadata.Description)
+	p := printer.NewPrinter("Name", "Created", "Space")
+	for _, itm := range itmList.Items {
+		p.AppendRow(ccommon.GetResourceShortName(itm),
+			cliutils.GetResourceAge(itm),
+			ccommon.GetResourceRefShortName(itm.Status.SpaceRef))
 	}
 
 	p.Render()
