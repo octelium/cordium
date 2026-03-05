@@ -91,7 +91,7 @@ func (s *Server) checkResourceDefault(rsc umetav1.ResourceObjectI) error {
 		return grpcutils.InvalidArg("Resource name is not set")
 	}
 
-	if !strings.HasPrefix(rsc.GetMetadata().Name, "default.") {
+	if strings.HasPrefix(rsc.GetMetadata().Name, "default.") {
 		return grpcutils.InvalidArg("This resource is not a default resource")
 	}
 
@@ -105,6 +105,9 @@ func getFullGetOptionsSpaceChild(ctx context.Context, req *metav1.GetOptions) *m
 
 	if isNameFQDN(req.Name, 2) {
 		return req
+	}
+	if isNameFQDN(req.Name, 0) {
+		req.Name = fmt.Sprintf("%s.default", req.Name)
 	}
 
 	i, err := commonw.GetUserCtx(ctx)
@@ -124,6 +127,9 @@ func getFullDeleteOptionsSpaceChild(ctx context.Context, req *metav1.DeleteOptio
 	if isNameFQDN(req.Name, 2) {
 		return req
 	}
+	if isNameFQDN(req.Name, 0) {
+		req.Name = fmt.Sprintf("%s.default", req.Name)
+	}
 
 	i, err := commonw.GetUserCtx(ctx)
 	if err != nil {
@@ -141,6 +147,9 @@ func getFullNamResourceSpaceChild(ctx context.Context, req umetav1.ResourceObjec
 
 	if isNameFQDN(req.GetMetadata().Name, 2) {
 		return req
+	}
+	if isNameFQDN(req.GetMetadata().Name, 0) {
+		req.GetMetadata().Name = fmt.Sprintf("%s.default", req.GetMetadata().Name)
 	}
 
 	i, err := commonw.GetUserCtx(ctx)

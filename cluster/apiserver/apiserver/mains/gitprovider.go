@@ -113,7 +113,6 @@ func (s *Server) CreateGitProvider(ctx context.Context, req *cordiumv1.GitProvid
 func (s *Server) UpdateGitProvider(ctx context.Context, req *cordiumv1.GitProvider) (*cordiumv1.GitProvider, error) {
 	if err := apivalidation.ValidateCommon(getFullNamResourceSpaceChild(ctx, req), &apivalidation.ValidateCommonOpts{
 		ValidateMetadataOpts: apivalidation.ValidateMetadataOpts{
-			RequireName: true,
 			ParentsMust: 2,
 		},
 		RequireStatus: true,

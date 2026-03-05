@@ -118,7 +118,6 @@ func (s *Server) UpdateTemplate(ctx context.Context, req *cordiumv1.Template) (*
 
 	if err := apivalidation.ValidateCommon(getFullNamResourceSpaceChild(ctx, req), &apivalidation.ValidateCommonOpts{
 		ValidateMetadataOpts: apivalidation.ValidateMetadataOpts{
-			RequireName: true,
 			ParentsMust: 2,
 		},
 		RequireStatus: true,
@@ -156,9 +155,10 @@ func (s *Server) UpdateTemplate(ctx context.Context, req *cordiumv1.Template) (*
 
 func (s *Server) DeleteTemplate(ctx context.Context, req *metav1.DeleteOptions) (*metav1.OperationResult, error) {
 
-	if err := apivalidation.CheckDeleteOptions(getFullDeleteOptionsSpaceChild(ctx, req), &apivalidation.CheckGetOptionsOpts{
-		ParentsMust: 2,
-	}); err != nil {
+	if err := apivalidation.CheckDeleteOptions(getFullDeleteOptionsSpaceChild(ctx, req),
+		&apivalidation.CheckGetOptionsOpts{
+			ParentsMust: 2,
+		}); err != nil {
 		return nil, err
 	}
 	tmpl, err := s.octeliumC.CordiumC().GetTemplate(ctx, &rmetav1.GetOptions{
@@ -170,7 +170,7 @@ func (s *Server) DeleteTemplate(ctx context.Context, req *metav1.DeleteOptions) 
 	}
 
 	if err := s.checkResourceDefault(tmpl); err != nil {
-		return nil, grpcutils.InvalidArg("You cannot delete the default Template")
+		return nil, grpcutils.InvalidArg("You cannot delete the default Template: %s", tmpl.Metadata.Name)
 	}
 
 	if err := s.checkIsResourceOwnerOrSpaceOwner(ctx, tmpl.Status.UserRef, tmpl.Status.SpaceRef); err != nil {

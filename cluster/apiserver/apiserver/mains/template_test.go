@@ -64,6 +64,13 @@ func TestTemplate(t *testing.T) {
 		})
 		assert.Nil(t, err)
 
+		{
+			_, err = srv.GetTemplate(usr.Ctx(), &metav1.GetOptions{
+				Name: fmt.Sprintf("default.%s", org.Metadata.Name),
+			})
+			assert.Nil(t, err)
+		}
+
 		tmplReq := &cordiumv1.Template{
 			Metadata: &metav1.Metadata{
 				Name: fmt.Sprintf("%s.%s",
@@ -100,7 +107,7 @@ func TestTemplate(t *testing.T) {
 		}
 
 		_, err = srv.DeleteTemplate(usr.Ctx(), &metav1.DeleteOptions{Uid: tmpl.Metadata.Uid})
-		assert.Nil(t, err)
+		assert.Nil(t, err, "%+v", err)
 	}
 
 	{
@@ -117,11 +124,34 @@ func TestTemplate(t *testing.T) {
 			})
 			assert.NotNil(t, err, "%+v", err)
 		}
+		{
+			_, err := srv.CreateSpace(usr.Ctx(), &cordiumv1.Space{
+				Metadata: &metav1.Metadata{
+					Name: "default",
+				},
+				Spec: &cordiumv1.Space_Spec{},
+			})
+			assert.Nil(t, err)
+
+			name := utilrand.GetRandomStringCanonical(8)
+			tmpl, err := srv.CreateTemplate(usr.Ctx(), &cordiumv1.Template{
+				Metadata: &metav1.Metadata{
+					Name: name,
+				},
+				Spec:   &cordiumv1.Template_Spec{},
+				Status: &cordiumv1.Template_Status{},
+			})
+			assert.Nil(t, err, "%+v", err)
+
+			assert.Equal(t, fmt.Sprintf("%s.default.%s", name, usr.Usr.Metadata.Name), tmpl.Metadata.Name)
+		}
 
 		{
-			org, err := srv.CreateSpace(usr.Ctx(), &cordiumv1.Space{
+
+			space := utilrand.GetRandomStringCanonical(8)
+			_, err := srv.CreateSpace(usr.Ctx(), &cordiumv1.Space{
 				Metadata: &metav1.Metadata{
-					Name: fmt.Sprintf("%s.cordium", utilrand.GetRandomStringCanonical(8)),
+					Name: space,
 				},
 				Spec: &cordiumv1.Space_Spec{},
 				Status: &cordiumv1.Space_Status{
@@ -132,12 +162,12 @@ func TestTemplate(t *testing.T) {
 
 			_, err = srv.CreateTemplate(usr.Ctx(), &cordiumv1.Template{
 				Metadata: &metav1.Metadata{
-					Name: fmt.Sprintf("%s.%s", utilrand.GetRandomStringCanonical(8), org.Metadata.Name),
+					Name: fmt.Sprintf("%s.%s", utilrand.GetRandomStringCanonical(8), space),
 				},
 				Spec:   &cordiumv1.Template_Spec{},
 				Status: &cordiumv1.Template_Status{},
 			})
-			assert.NotNil(t, err, "%+v", err)
+			assert.Nil(t, err, "%+v", err)
 
 		}
 	}

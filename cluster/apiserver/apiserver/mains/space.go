@@ -497,7 +497,9 @@ func (s *Server) LeaveSpace(ctx context.Context, req *cordiumv1.LeaveSpaceReques
 	}
 
 	if err := apivalidation.CheckObjectRef(getFullResourceRefSpace(ctx, req.SpaceRef),
-		&apivalidation.CheckGetOptionsOpts{}); err != nil {
+		&apivalidation.CheckGetOptionsOpts{
+			ParentsMust: 1,
+		}); err != nil {
 		return nil, err
 	}
 

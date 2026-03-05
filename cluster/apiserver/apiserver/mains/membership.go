@@ -192,7 +192,6 @@ func (s *Server) UpdateMembership(ctx context.Context, req *cordiumv1.Membership
 
 	if err := apivalidation.ValidateCommon(getFullNamResourceSpaceChild(ctx, req), &apivalidation.ValidateCommonOpts{
 		ValidateMetadataOpts: apivalidation.ValidateMetadataOpts{
-			RequireName: true,
 			ParentsMust: 2,
 		},
 		RequireData: true,
