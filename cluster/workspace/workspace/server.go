@@ -24,6 +24,7 @@ import (
 	"os/exec"
 	"os/user"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -449,14 +450,8 @@ func (s *Server) setUser(ctx context.Context) error {
 	}
 
 	if s.isFreshRun {
-		zap.L().Debug("Adding NOPASSWD to user sudoers")
-		if err := os.MkdirAll("/etc/sudoers.d", 0750); err != nil {
-			return err
-		}
-
-		if err := os.WriteFile(fmt.Sprintf("/etc/sudoers.d/%s", s.userInfo.name),
-			[]byte(fmt.Sprintf(`%%%s ALL=(ALL:ALL) NOPASSWD: ALL`, s.userInfo.name)), 0644); err != nil {
-			return errors.Errorf("Could not write to sudoers file: %+v", err)
+		if err := s.setSudoersFile(); err != nil {
+			zap.L().Warn("Could not set sudoers file", zap.Error(err))
 		}
 	} else {
 		zap.L().Debug("No need to add NOPASSWD to user sudoers")
@@ -485,6 +480,30 @@ func (s *Server) setUser(ctx context.Context) error {
 	}
 
 	zap.L().Debug("User successfully set")
+
+	return nil
+}
+
+func (s *Server) setSudoersFile() error {
+	sudoersDir := "/etc/sudoers.d"
+	username := s.userInfo.name
+	filePath := filepath.Join(sudoersDir, username)
+
+	if _, err := os.Stat(sudoersDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(sudoersDir, 0755); err != nil {
+			return err
+		}
+	}
+
+	if _, err := os.Stat(filePath); err == nil {
+		return nil
+	}
+
+	content := fmt.Sprintf("%s ALL=(ALL) NOPASSWD: ALL\n", username)
+
+	if err := os.WriteFile(filePath, []byte(content), 0440); err != nil {
+		return err
+	}
 
 	return nil
 }
