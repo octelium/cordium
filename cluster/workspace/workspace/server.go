@@ -592,8 +592,8 @@ func (s *Server) doPrepare(ctx context.Context, req *ccordiumv1.PrepareRequest) 
 				return true
 			}
 			return (ws.Status.IsEphemeral || ws.Status.SuccessfulRuns == 0) &&
-				!ucordiumv1.ToTemplate(s.initReq.Template).HasReadyBuild()
-
+				!(ucordiumv1.ToTemplate(s.initReq.Template).HasReadyBuild() &&
+					s.initReq.TemplateHasSnapshot)
 		}()
 	}
 

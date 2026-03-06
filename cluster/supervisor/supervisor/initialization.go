@@ -60,16 +60,6 @@ func (s *Server) doInitialize() error {
 	req := s.initReq
 	s.mu.Unlock()
 
-	/*
-		if req.LoadContainerRegistry == nil {
-			return errors.Errorf("Cannot doInitialize. No LoadContainerRegistry in req")
-		}
-
-		if req.SaveContainerRegistry == nil {
-			return errors.Errorf("Cannot doInitialize. No SaveContainerRegistry in req")
-		}
-	*/
-
 	s.spec, err = wsutils.MergeSpec(&wsutils.MergeSpecReq{
 		Workspace: req.Workspace,
 		Template:  req.Template,
@@ -85,8 +75,8 @@ func (s *Server) doInitialize() error {
 			return true
 		}
 		return (ws.Status.IsEphemeral || ws.Status.SuccessfulRuns == 0) &&
-			!ucordiumv1.ToTemplate(s.initReq.Template).HasReadyBuild()
-
+			!(ucordiumv1.ToTemplate(s.initReq.Template).HasReadyBuild() &&
+				s.initReq.TemplateHasSnapshot)
 	}()
 
 	s.wsUID = ws.Metadata.Uid
@@ -146,6 +136,7 @@ func (s *Server) doInitialize() error {
 
 		cmds := []string{
 			"env",
+			"uname -a",
 			"cat /proc/mounts",
 			"ls -la /octelium",
 			"cat /etc/os-release",
@@ -236,15 +227,15 @@ func (s *Server) doInitialize() error {
 		TunnelPeerPublicKey: req.TunnelPeerPublicKey,
 		TunnelPrivateKey:    s.wgPrivateKey.String(),
 
-		Workspace:       s.initReq.Workspace,
-		Space:           s.initReq.Space,
-		Template:        s.initReq.Template,
-		SecretList:      s.initReq.SecretList,
-		UserSecretList:  s.initReq.UserSecretList,
-		UserConfig:      s.initReq.UserConfig,
-		GitProviderInfo: s.initReq.GitProviderInfo,
-
-		Ssh: s.initReq.Ssh,
+		Workspace:           s.initReq.Workspace,
+		Space:               s.initReq.Space,
+		Template:            s.initReq.Template,
+		SecretList:          s.initReq.SecretList,
+		UserSecretList:      s.initReq.UserSecretList,
+		UserConfig:          s.initReq.UserConfig,
+		GitProviderInfo:     s.initReq.GitProviderInfo,
+		Ssh:                 s.initReq.Ssh,
+		TemplateHasSnapshot: s.initReq.TemplateHasSnapshot,
 	}
 
 	if ldflags.IsDev() {

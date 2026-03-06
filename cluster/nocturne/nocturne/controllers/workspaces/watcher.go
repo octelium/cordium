@@ -551,12 +551,19 @@ func (c *statusWatcher) onReadyInit(ctx context.Context) error {
 		return err
 	}
 
+	var templateHasSnapshot bool
 	if !ws.Status.IsBuild && ws.Status.TemplateRef != nil {
 		project, err := c.octeliumC.CordiumC().GetTemplate(ctx, &rmetav1.GetOptions{
 			Uid: ws.Status.TemplateRef.Uid,
 		})
 		if err != nil {
 			return err
+		}
+
+		if _, err := c.ctl.snapshotC.SnapshotV1().
+			VolumeSnapshots(ns).
+			Get(ctx, c.ctl.getTemplateBuildName(project), k8smetav1.GetOptions{}); err == nil {
+			templateHasSnapshot = true
 		}
 
 		if project.Spec.GitProvider != "" && ws.Status.UserRef != nil {
@@ -657,9 +664,10 @@ func (c *statusWatcher) onReadyInit(ctx context.Context) error {
 		TunnelPeerPublicKey: tunnelPeerPublicKey,
 		SecretList:          orgSecretList,
 
-		GitProviderInfo: gitProviderInfo,
-		UserSecretList:  userSecretList,
-		UserConfig:      userConfig,
+		GitProviderInfo:     gitProviderInfo,
+		UserSecretList:      userSecretList,
+		UserConfig:          userConfig,
+		TemplateHasSnapshot: templateHasSnapshot,
 	}
 
 	zap.L().Debug("Sending an Initialize call", zap.String("name", c.name), zap.Any("req", initializeReq))
