@@ -588,6 +588,14 @@ func (c *Controller) setPersistentVolumeClaim(ctx context.Context, ws *cordiumv1
 					return nil
 				}
 
+				if _, err := c.snapshotC.SnapshotV1().
+					VolumeSnapshots(ns).
+					Get(ctx, c.getTemplateBuildName(tmpl), metav1.GetOptions{}); err != nil {
+					zap.L().Debug("Could not get the template snapshot",
+						zap.Any("ws", ws), zap.Any("tmpl", tmpl), zap.Error(err))
+					return nil
+				}
+
 				return &corev1.TypedLocalObjectReference{
 					APIGroup: utils_types.StrToPtr("snapshot.storage.k8s.io"),
 					Kind:     "VolumeSnapshot",
