@@ -26,6 +26,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/octelium/cordium/cluster/common/ovutils"
 	"github.com/octelium/octelium/cluster/common/vutils"
 	"github.com/octelium/octelium/pkg/utils/ldflags"
 	"github.com/opencontainers/runtime-spec/specs-go"
@@ -439,7 +440,7 @@ func (s *Server) runOuterPodman(ctx context.Context) error {
 		fmt.Sprintf("--cgroup-manager=cgroupfs --cgroup-parent=%s", s.getRelativePathOuterCgroup()),
 	}
 
-	if ldflags.IsDev() && vutils.FSPathExists("/etc/regcred.json") {
+	if ldflags.IsDev() && ovutils.IsPrivateRegistry() && vutils.FSPathExists("/etc/regcred.json") {
 		argList = append(argList, "-v /etc/regcred.json:/etc/regcred.json")
 	}
 

@@ -26,10 +26,13 @@ import (
 	"time"
 
 	workspacecommon "github.com/octelium/cordium/cluster/common"
+	"github.com/octelium/cordium/cluster/common/components"
+	"github.com/octelium/cordium/cluster/common/ovutils"
 	"github.com/octelium/cordium/cluster/supervisor/supervisor/oproxy"
 	"github.com/octelium/cordium/cluster/supervisor/supervisor/sshagent"
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
+	"github.com/octelium/octelium/cluster/common/vutils"
 	"github.com/octelium/octelium/pkg/utils/ldflags"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -227,10 +230,9 @@ func (s *Server) pullImageFromExternal(ctx context.Context, image string, auth *
 	image = strings.TrimSpace(image)
 
 	if image == "" {
-		// image = components.GetImage(components.Workspace, "")
+		image = components.GetImage(components.Workspace, "")
 		zap.L().Debug("No image provided. Switching to loading the base image")
-		// return s.pullImageFromLocal(ctx, "")
-		image = "mcr.microsoft.com/vscode/devcontainers/base:ubuntu"
+		// image = "mcr.microsoft.com/vscode/devcontainers/base:ubuntu"
 	}
 
 	podmanRunArgs := []string{}
@@ -245,11 +247,11 @@ func (s *Server) pullImageFromExternal(ctx context.Context, image string, auth *
 
 	s.setStatus(cordiumv1.Workspace_Status_PULLING_IMAGE)
 
-	/*
-		if ldflags.IsDev() && ovutils.IsPrivateRegistry() && image == components.GetImage(components.Workspace, "") {
-			podmanRunArgs = append(podmanRunArgs, "--authfile /etc/regcred.json")
-		}
-	*/
+	if ldflags.IsDev() && ovutils.IsPrivateRegistry() &&
+		vutils.FSPathExists("/etc/regcred.json") &&
+		image == components.GetImage(components.Workspace, "") {
+		podmanRunArgs = append(podmanRunArgs, "--authfile /etc/regcred.json")
+	}
 
 	if ldflags.IsDev() {
 		podmanRunArgs = append(podmanRunArgs, "--log-level=debug")
