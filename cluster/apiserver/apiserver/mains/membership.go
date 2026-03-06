@@ -304,7 +304,7 @@ func (s *Server) DeleteMembership(ctx context.Context, req *metav1.DeleteOptions
 }
 
 func (s *Server) ListMembership(ctx context.Context, req *cordiumv1.ListMembershipOptions) (*cordiumv1.MembershipList, error) {
-	org, err := s.getMemberSpaceFromSpaceRef(ctx, req.SpaceRef)
+	org, err := s.getMemberSpaceFromSpaceRef(ctx, getFullResourceRefSpace(ctx, req.SpaceRef))
 	if err != nil {
 		return nil, err
 	}

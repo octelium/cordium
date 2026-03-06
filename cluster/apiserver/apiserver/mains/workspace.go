@@ -410,19 +410,15 @@ func (s *Server) ListWorkspace(ctx context.Context, req *cordiumv1.ListWorkspace
 
 	switch req.Filter.(type) {
 	case *cordiumv1.ListWorkspaceOptions_TemplateRef:
-		if err := apivalidation.CheckGetOptions(&metav1.GetOptions{
-			Uid:  req.GetTemplateRef().Uid,
-			Name: req.GetTemplateRef().Name,
-		}, &apivalidation.CheckGetOptionsOpts{
-			ParentsMust: 2,
-		}); err != nil {
+		if err := apivalidation.CheckGetOptions(
+			apivalidation.ObjectReferenceToGetOptions(req.GetTemplateRef()), &apivalidation.CheckGetOptionsOpts{
+				ParentsMust: 2,
+			}); err != nil {
 			return nil, err
 		}
 
-		tmpl, err := s.octeliumC.CordiumC().GetTemplate(ctx, &rmetav1.GetOptions{
-			Uid:  req.GetTemplateRef().Uid,
-			Name: req.GetTemplateRef().Name,
-		})
+		tmpl, err := s.octeliumC.CordiumC().GetTemplate(ctx,
+			apivalidation.ObjectReferenceToRGetOptions(req.GetTemplateRef()))
 		if err != nil {
 			return nil, grpcutils.K8sNotFoundOrInternalWithErr(err)
 		}
@@ -430,19 +426,15 @@ func (s *Server) ListWorkspace(ctx context.Context, req *cordiumv1.ListWorkspace
 		filters = append(filters, ourscsrv.FilterStatusTemplateUID(tmpl.Metadata.Uid))
 
 	case *cordiumv1.ListWorkspaceOptions_SpaceRef:
-		if err := apivalidation.CheckGetOptions(&metav1.GetOptions{
-			Uid:  req.GetSpaceRef().Uid,
-			Name: req.GetSpaceRef().Name,
-		}, &apivalidation.CheckGetOptionsOpts{
-			ParentsMust: 1,
-		}); err != nil {
+		if err := apivalidation.CheckGetOptions(
+			apivalidation.ObjectReferenceToGetOptions(req.GetSpaceRef()),
+			&apivalidation.CheckGetOptionsOpts{
+				ParentsMust: 1,
+			}); err != nil {
 			return nil, err
 		}
 
-		if _, err := s.octeliumC.CordiumC().GetSpace(ctx, &rmetav1.GetOptions{
-			Uid:  req.GetSpaceRef().Uid,
-			Name: req.GetSpaceRef().Name,
-		}); err != nil {
+		if _, err := s.octeliumC.CordiumC().GetSpace(ctx, apivalidation.ObjectReferenceToRGetOptions(req.GetSpaceRef())); err != nil {
 			return nil, grpcutils.K8sNotFoundOrInternalWithErr(err)
 		}
 
@@ -637,7 +629,6 @@ func (s *Server) createWorkspaceSession(ctx context.Context, i *userctx.UserCtx,
 		return nil, serr.InternalWithErr(err)
 	}
 	sess.Status.Ext[ovutils.ExtInfoLabel] = extInfoStruct
-	// sess.Status.Authentication = &corev1.Session_Status_Authentication{}
 
 	sess, err = s.octeliumC.CoreC().CreateSession(ctx, sess)
 	if err != nil {

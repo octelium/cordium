@@ -245,6 +245,7 @@ func (s *Server) validateAndSetTemplate(ctx context.Context, req *cordiumv1.Temp
 			Runtime:                spec.Runtime,
 			Repository:             spec.Repository,
 			AdditionalRepositories: spec.AdditionalRepositories,
+			Limit:                  spec.Limit,
 		},
 		Status: &cordiumv1.Workspace_Status{
 			SpaceRef: req.Status.SpaceRef,
@@ -279,7 +280,7 @@ func (s *Server) validateAndSetTemplate(ctx context.Context, req *cordiumv1.Temp
 
 func (s *Server) ListTemplate(ctx context.Context, req *cordiumv1.ListTemplateOptions) (*cordiumv1.TemplateList, error) {
 
-	org, err := s.getMemberSpaceFromSpaceRef(ctx, req.SpaceRef)
+	org, err := s.getMemberSpaceFromSpaceRef(ctx, getFullResourceRefSpace(ctx, req.SpaceRef))
 	if err != nil {
 		return nil, err
 	}

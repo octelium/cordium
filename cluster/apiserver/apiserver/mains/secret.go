@@ -150,7 +150,7 @@ func (s *Server) checkSecretData(ctx context.Context, req *cordiumv1.Secret) err
 
 func (s *Server) ListSecret(ctx context.Context, req *cordiumv1.ListSecretOptions) (*cordiumv1.SecretList, error) {
 
-	org, err := s.getMemberSpaceFromSpaceRef(ctx, req.SpaceRef)
+	org, err := s.getMemberSpaceFromSpaceRef(ctx, getFullResourceRefSpace(ctx, req.SpaceRef))
 	if err != nil {
 		return nil, err
 	}

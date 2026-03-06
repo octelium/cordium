@@ -39,12 +39,11 @@ func (s *Server) getMemberSpaceFromSpaceRef(ctx context.Context, spaceRef *metav
 		return nil, grpcutils.InvalidArg("SpaceRef is not provided")
 	}
 
-	if err := apivalidation.CheckGetOptions(&metav1.GetOptions{
-		Uid:  spaceRef.Uid,
-		Name: spaceRef.Name,
-	}, &apivalidation.CheckGetOptionsOpts{
-		ParentsMust: 1,
-	}); err != nil {
+	if err := apivalidation.CheckGetOptions(
+		apivalidation.ObjectReferenceToGetOptions(getFullResourceRefSpace(ctx, spaceRef)),
+		&apivalidation.CheckGetOptionsOpts{
+			ParentsMust: 1,
+		}); err != nil {
 		return nil, err
 	}
 

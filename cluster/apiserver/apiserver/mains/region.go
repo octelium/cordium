@@ -20,6 +20,7 @@ import (
 	"context"
 
 	"github.com/octelium/cordium/cluster/common/ovutils"
+	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/corev1"
 	"github.com/octelium/octelium/apis/main/metav1"
@@ -38,7 +39,7 @@ func (s *Server) ListRegion(ctx context.Context, req *cordiumv1.ListRegionOption
 	}
 
 	ret := &cordiumv1.RegionList{
-		ApiVersion:       "cordium/v1",
+		ApiVersion:       ucordiumv1.APIVersion,
 		Kind:             "RegionList",
 		ListResponseMeta: itmList.ListResponseMeta,
 	}
