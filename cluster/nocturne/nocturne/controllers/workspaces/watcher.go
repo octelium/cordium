@@ -670,7 +670,7 @@ func (c *statusWatcher) onReadyInit(ctx context.Context) error {
 		TemplateHasSnapshot: templateHasSnapshot,
 	}
 
-	zap.L().Debug("Sending an Initialize call", zap.String("name", c.name), zap.Any("req", initializeReq))
+	zap.L().Debug("Sending an Initialize call", zap.String("name", c.name))
 	if err := func() error {
 		for i := 0; i < 3000; i++ {
 			err := c.doInitialize(ctx, initializeReq)
@@ -686,7 +686,7 @@ func (c *statusWatcher) onReadyInit(ctx context.Context) error {
 		return err
 	}
 
-	zap.L().Debug("Workspace successfully initialized", zap.String("uid", ws.Metadata.Uid))
+	zap.L().Debug("Workspace successfully initialized", zap.String("name", c.name))
 	return nil
 }
 
