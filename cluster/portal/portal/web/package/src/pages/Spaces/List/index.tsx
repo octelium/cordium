@@ -1,55 +1,43 @@
-import * as React from "react";
-
 import { ListSpaceOptions, SpaceList } from "@/apis/cordiumv1/cordiumv1";
-import { getClientWorkspace } from "@/utils/client";
-
-import { ResourceListCreateItem } from "@/components/ResourceList";
-import { useQuery } from "@tanstack/react-query";
-
 import EmptyList from "@/components/EmptyList";
 import PageWrap from "@/components/PageWrap";
 import Paginator from "@/components/Paginator";
-import { ResourceListWrapper } from "@/components/ResourceList";
+import {
+  ResourceListCreateItem,
+  ResourceListWrapper,
+} from "@/components/ResourceList";
 import ItemSpace from "@/components/ResourceList/ItemSpace";
+import { getClientWorkspace } from "@/utils/client";
 import { useAppSelector } from "@/utils/hooks";
+import { useQuery } from "@tanstack/react-query";
+import * as React from "react";
 import { Navigate } from "react-router-dom";
 
 const SpaceListC = (props: { itemsList: SpaceList }) => {
-  if (!props.itemsList) {
-    return <Navigate to="/" />;
-  }
-  return (
-    <div>
-      <div>
-        <ResourceListWrapper>
-          {props.itemsList.items.length === 0 && (
-            <EmptyList title="No Spaces found"></EmptyList>
-          )}
+  if (!props.itemsList) return <Navigate to="/" />;
 
-          {props.itemsList.items.map((x) => (
-            <ItemSpace key={x.metadata?.uid} item={x} />
-          ))}
-        </ResourceListWrapper>
-      </div>
-    </div>
+  return (
+    <ResourceListWrapper>
+      {props.itemsList.items.length === 0 && (
+        <EmptyList title="No Spaces found" />
+      )}
+      {props.itemsList.items.map((x) => (
+        <ItemSpace key={x.metadata?.uid} item={x} />
+      ))}
+    </ResourceListWrapper>
   );
 };
 
 const Page = () => {
   const settings = useAppSelector((state) => state.settings);
-  const itemsPerPage = settings.itemsPerPage;
-
-  let [page, setPage] = React.useState(0);
+  const [page, setPage] = React.useState(0);
 
   const qry = useQuery({
     queryKey: ["workspace/listSpace", page],
     queryFn: () => {
       const { response } = getClientWorkspace().listSpace(
         ListSpaceOptions.create({
-          common: {
-            page,
-            itemsPerPage,
-          },
+          common: { page, itemsPerPage: settings.itemsPerPage },
         }),
       );
       return response;
@@ -59,20 +47,10 @@ const Page = () => {
   return (
     <PageWrap qry={qry} title="Spaces">
       {qry.data && (
-        <div className="w-full">
+        <div className="w-full flex flex-col gap-4">
           <ResourceListCreateItem title="Create a Space" />
-
           <SpaceListC itemsList={qry.data} />
-
-          <div className="mt-4">
-            <Paginator
-              meta={qry.data.listResponseMeta!}
-              path="/spaces"
-              onPageChange={(i) => {
-                setPage(i);
-              }}
-            />
-          </div>
+          <Paginator meta={qry.data.listResponseMeta!} onPageChange={setPage} />
         </div>
       )}
     </PageWrap>

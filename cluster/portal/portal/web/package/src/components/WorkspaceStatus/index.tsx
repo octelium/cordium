@@ -1,100 +1,100 @@
+import { Loader2 } from "lucide-react";
+import { twMerge } from "tailwind-merge";
+import { match } from "ts-pattern";
 import * as WsPB from "../../apis/cordiumv1/cordiumv1";
 
-import ClipLoader from "react-spinners/ClipLoader";
-import { twMerge } from "tailwind-merge";
+type State = WsPB.Workspace_Status_State;
+const S = WsPB.Workspace_Status_State;
 
-const getStateText = (arg: WsPB.Workspace_Status_State): string => {
-  switch (arg) {
-    case WsPB.Workspace_Status_State.RUNNING:
-      return "Running";
-    case WsPB.Workspace_Status_State.STARTING_RUNTIME:
-      return "Starting Runtime";
-    case WsPB.Workspace_Status_State.PULLING_IMAGE:
-      return "Pulling Image";
-    case WsPB.Workspace_Status_State.BUILDING_IMAGE:
-      return "Building Image";
-    case WsPB.Workspace_Status_State.PREPARING:
-      return "Preparing";
-    case WsPB.Workspace_Status_State.STOPPING_REQUEST:
-      return "Stopping Request";
-    case WsPB.Workspace_Status_State.STOPPING:
-      return "Stopping";
-    case WsPB.Workspace_Status_State.STOPPED:
-      return "Stopped";
-    case WsPB.Workspace_Status_State.INITIALIZING:
-      return "Initializing";
-    case WsPB.Workspace_Status_State.INIT_REQUEST:
-      return "Initialization Request";
-    case WsPB.Workspace_Status_State.UNKNOWN:
-      return "Unknown";
-    default:
-      return "Unknown";
-  }
-};
+interface StateMeta {
+  label: string;
+  dot: string;
+  text: string;
+  loading: boolean;
+}
 
-const getStateColor = (arg: WsPB.Workspace_Status_State): string => {
-  switch (arg) {
-    case WsPB.Workspace_Status_State.RUNNING:
-      return "#1cc02a";
-    case WsPB.Workspace_Status_State.STARTING_RUNTIME:
-      return "#f031b0";
-    case WsPB.Workspace_Status_State.PULLING_IMAGE:
-      return "#5138e0";
-    case WsPB.Workspace_Status_State.BUILDING_IMAGE:
-      return "#2075d6";
-    case WsPB.Workspace_Status_State.PREPARING:
-      return "#aff07a";
-    case WsPB.Workspace_Status_State.STOPPING_REQUEST:
-    case WsPB.Workspace_Status_State.STOPPING:
-      return "#444";
-    case WsPB.Workspace_Status_State.STOPPED:
-      return "#ccc";
-    case WsPB.Workspace_Status_State.INIT_REQUEST:
-    case WsPB.Workspace_Status_State.INITIALIZING:
-      return "#999";
-    case WsPB.Workspace_Status_State.UNKNOWN:
-      return "#000";
-    default:
-      return "#aaa";
-  }
-};
+const getStateMeta = (state: State): StateMeta =>
+  match(state)
+    .with(S.RUNNING, () => ({
+      label: "Running",
+      dot: "bg-emerald-500",
+      text: "text-emerald-700",
+      loading: false,
+    }))
+    .with(S.STOPPED, () => ({
+      label: "Stopped",
+      dot: "bg-slate-300",
+      text: "text-slate-500",
+      loading: false,
+    }))
+    .with(S.STOPPING, S.STOPPING_REQUEST, () => ({
+      label: state === S.STOPPING ? "Stopping" : "Stopping Request",
+      dot: "bg-slate-500",
+      text: "text-slate-600",
+      loading: true,
+    }))
+    .with(S.STARTING_RUNTIME, () => ({
+      label: "Starting Runtime",
+      dot: "bg-pink-500",
+      text: "text-pink-700",
+      loading: true,
+    }))
+    .with(S.PULLING_IMAGE, () => ({
+      label: "Pulling Image",
+      dot: "bg-violet-500",
+      text: "text-violet-700",
+      loading: true,
+    }))
+    .with(S.BUILDING_IMAGE, () => ({
+      label: "Building Image",
+      dot: "bg-blue-500",
+      text: "text-blue-700",
+      loading: true,
+    }))
+    .with(S.PREPARING, () => ({
+      label: "Preparing",
+      dot: "bg-lime-400",
+      text: "text-lime-700",
+      loading: true,
+    }))
+    .with(S.INITIALIZING, S.INIT_REQUEST, () => ({
+      label:
+        state === S.INITIALIZING ? "Initializing" : "Initialization Request",
+      dot: "bg-slate-400",
+      text: "text-slate-600",
+      loading: true,
+    }))
+    .otherwise(() => ({
+      label: "Unknown",
+      dot: "bg-slate-300",
+      text: "text-slate-400",
+      loading: false,
+    }));
 
-const needsLoadingFn = (arg: WsPB.Workspace_Status_State): boolean => {
-  switch (arg) {
-    case WsPB.Workspace_Status_State.RUNNING:
-      return false;
-    case WsPB.Workspace_Status_State.STOPPED:
-      return false;
-    case WsPB.Workspace_Status_State.UNKNOWN:
-      return false;
-    default:
-      return true;
-  }
-};
+const WorkspaceStatus = (props: { status: State }) => {
+  const meta = getStateMeta(props.status);
 
-const WorkspaceStatus = (props: { status: WsPB.Workspace_Status_State }) => {
-  const needsLoading = needsLoadingFn(props.status);
   return (
-    <div>
-      <div className="w-full flex items-center">
-        {!needsLoading && (
-          <div
-            style={{
-              backgroundColor: getStateColor(props.status),
-            }}
-            className={twMerge(`rounded-full w-[20px] h-[20px]`)}
-          ></div>
-        )}
-        {needsLoading && (
-          <ClipLoader
-            color={getStateColor(props.status)}
-            loading={true}
-            size={20}
-          />
-        )}
-
-        <div className="ml-1 text-sm">{getStateText(props.status)}</div>
-      </div>
+    <div className="inline-flex items-center gap-1.5">
+      {meta.loading ? (
+        <Loader2
+          size={13}
+          strokeWidth={2.5}
+          className={twMerge("animate-spin shrink-0", meta.text)}
+        />
+      ) : (
+        <span
+          className={twMerge(
+            "w-2 h-2 rounded-full shrink-0",
+            meta.dot,
+            props.status === S.RUNNING &&
+              "shadow-[0_0_0_3px_rgba(16,185,129,0.15)]",
+          )}
+        />
+      )}
+      <span className={twMerge("text-[0.78rem] font-semibold", meta.text)}>
+        {meta.label}
+      </span>
     </div>
   );
 };

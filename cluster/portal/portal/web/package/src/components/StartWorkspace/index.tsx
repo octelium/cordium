@@ -5,10 +5,23 @@ import * as React from "react";
 import { onError } from "@/utils";
 import { getClientWorkspace } from "@/utils/client";
 import { getResourceRef } from "@/utils/pb";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
-import { Group, Tabs } from "@mantine/core";
+import {
+  Badge,
+  Button,
+  Divider,
+  Group,
+  Select,
+  Stack,
+  Switch,
+  Tabs,
+  Text,
+  TextInput,
+  ThemeIcon,
+  Tooltip,
+} from "@mantine/core";
 
 import {
   getPathWorkspace,
@@ -16,140 +29,86 @@ import {
   invalidateWorkspace,
 } from "@/utils/octelium";
 
-import { Select } from "@mantine/core";
-
-import { Button } from "@mantine/core";
-import Field from "../Field";
-import Label from "../Label";
-import Switch from "../Switch";
 import TimeAgo from "../TimeAgo";
 import WorkspaceEdit from "../WorkspaceEdit";
+
+import {
+  IconBox,
+  IconBrandGit,
+  IconDatabase,
+  IconInfoCircle,
+  IconLayoutGrid,
+  IconPlayerPlay,
+  IconRefresh,
+  IconSettings,
+} from "@tabler/icons-react";
 
 const StartWorkspaceTemplate = (props: {
   item: WsPB.Template;
   workspace: WsPB.Workspace;
   onUpdateWorkspace: (item: WsPB.Workspace) => void;
 }) => {
-  const client = getClientWorkspace();
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-  const { item } = props;
-
-  let [doStart, setDoStart] = React.useState(true);
-
-  let [req, setReq] = React.useState(WsPB.Workspace.clone(props.workspace));
+  const { item, workspace } = props;
 
   const updateReq = (arg: WsPB.Workspace) => {
     const c = WsPB.Workspace.clone(arg);
-    setReq(c);
     props.onUpdateWorkspace(c);
   };
 
-  React.useEffect(() => {
-    setReq(WsPB.Workspace.clone(props.workspace));
-  }, [props.workspace]);
-
-  const mutationStartWorkspaceDefault = useMutation({
-    mutationFn: async () => {
-      const { response } = await client.createWorkspace(req);
-
-      const uid = response.metadata!.uid;
-      if (doStart) {
-        await client.startWorkspace(
-          WsPB.StartWorkspaceRequest.create({
-            workspaceRef: getResourceRef(response),
-          }),
-        );
-      }
-
-      invalidateResource(response);
-
-      return { response };
-    },
-    onSuccess: ({ response }) => {
-      invalidateWorkspace(response);
-      navigate(getPathWorkspace(response));
-    },
-    onError,
-  });
+  const req = workspace;
 
   return (
-    <div>
-      <div>
-        {/**
-         <Group grow>
-          <Switch
-            label="Ephemeral Storage"
-            val={(req as WsPB.Workspace).status?.isEphemeral}
-            onChange={(v) => {
-              (req as WsPB.Workspace).status!.isEphemeral = v;
-              updateReq(req);
-            }}
-          />
-
-          <Switch
-            label="Start after Creation"
-            val={doStart}
-            onChange={(v) => {
-              setDoStart(v);
-            }}
-          />
-        </Group>
-         **/}
-
-        <Group grow>
-          <Field
-            val={req.spec!.repository?.url ?? ""}
-            label="Repo URL"
-            placeholder="https://github.com/torvalds/linux"
-            onChange={(v) => {
-              if (!req.spec!.repository) {
-                req.spec!.repository = WsPB.Workspace_Spec_Repository.create();
-              }
-
-              req.spec!.repository!.url = v as string;
-
-              updateReq(req);
-            }}
-          />
-
-          <Field
-            val={
-              req.spec!.image?.type.oneofKind === `registry` &&
-              req.spec!.image?.type.registry.url
-                ? req.spec!.image?.type.registry.url
-                : ""
+    <Stack gap="md">
+      <Group grow align="flex-start">
+        <TextInput
+          label="Repository URL"
+          description="Git repository to clone on start"
+          placeholder="https://github.com/org/repo"
+          leftSection={<IconBrandGit size={15} />}
+          value={req.spec?.repository?.url ?? ""}
+          onChange={(e) => {
+            if (!req.spec!.repository) {
+              req.spec!.repository = WsPB.Workspace_Spec_Repository.create();
             }
-            label="Workspace Docker Image"
-            placeholder="ubuntu:jammy"
-            onChange={(v) => {
-              if (!req.spec!.image) {
-                req.spec!.image = WsPB.Workspace_Spec_Image.create();
-              }
-
-              if (req.spec!.image.type.oneofKind !== `registry`) {
-                req.spec!.image.type = {
-                  oneofKind: "registry",
-                  registry: WsPB.Workspace_Spec_Image_Registry.create(),
-                };
-              }
-
-              req.spec!.image.type.registry.url = v as string;
-
-              updateReq(req);
-            }}
-          />
-        </Group>
-      </div>
-      <div>
-        <ChooseBuild
-          template={item}
-          onSet={(i) => {
+            req.spec!.repository!.url = e.currentTarget.value;
             updateReq(req);
           }}
         />
-      </div>
-    </div>
+
+        <TextInput
+          label="Docker Image"
+          description="Base container image for this workspace"
+          placeholder="ubuntu:jammy"
+          leftSection={<IconBox size={15} />}
+          value={
+            req.spec?.image?.type.oneofKind === "registry" &&
+            req.spec?.image?.type.registry.url
+              ? req.spec.image.type.registry.url
+              : ""
+          }
+          onChange={(e) => {
+            if (!req.spec!.image) {
+              req.spec!.image = WsPB.Workspace_Spec_Image.create();
+            }
+            if (req.spec!.image.type.oneofKind !== "registry") {
+              req.spec!.image.type = {
+                oneofKind: "registry",
+                registry: WsPB.Workspace_Spec_Image_Registry.create(),
+              };
+            }
+            req.spec!.image.type.registry.url = e.currentTarget.value;
+            updateReq(req);
+          }}
+        />
+      </Group>
+
+      <ChooseBuild
+        template={item}
+        onSet={() => {
+          updateReq(req);
+        }}
+      />
+    </Stack>
   );
 };
 
@@ -158,11 +117,14 @@ const WrapC = (props: {
   disableChooseTemplate?: boolean;
   disableChooseEnvironment?: boolean;
 }) => {
-  let [template, setTemplate] = React.useState(WsPB.Template.clone(props.item));
+  const [template, setTemplate] = React.useState(
+    WsPB.Template.clone(props.item),
+  );
   const client = getClientWorkspace();
   const navigate = useNavigate();
-  let [doStart, setDoStart] = React.useState(true);
-  let [req, setReq] = React.useState(
+  const [doStart, setDoStart] = React.useState(true);
+  const [isEphemeral, setIsEphemeral] = React.useState(false);
+  const [req, setReq] = React.useState(
     WsPB.Workspace.create({
       apiVersion: "workspace/v1",
       kind: "Workspace",
@@ -174,11 +136,15 @@ const WrapC = (props: {
     }),
   );
 
-  const mutationStartWorkspaceDefault = useMutation({
-    mutationFn: async () => {
-      const { response } = await client.createWorkspace(req);
+  const updateReq = (next: WsPB.Workspace) =>
+    setReq(WsPB.Workspace.clone(next));
 
-      const uid = response.metadata!.uid;
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const cloned = WsPB.Workspace.clone(req);
+      cloned.status!.isEphemeral = isEphemeral;
+      const { response } = await client.createWorkspace(cloned);
+
       if (doStart) {
         await client.startWorkspace(
           WsPB.StartWorkspaceRequest.create({
@@ -188,7 +154,6 @@ const WrapC = (props: {
       }
 
       invalidateResource(response);
-
       return { response };
     },
     onSuccess: ({ response }) => {
@@ -199,14 +164,37 @@ const WrapC = (props: {
   });
 
   return (
-    <div className="w-full p-4 mt-4 mb-4 rounded-xl shadow-md border-[1px] border-gray-300">
-      <div className="w-full font-bold text-xl flex items-center justify-center mb-4 text-shadow-2xs">
-        Create and Start a Workspace
-      </div>
+    <div
+      style={{
+        background: "white",
+        border: "1px solid #e2e8f0",
+        borderRadius: 12,
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          padding: "20px 24px 16px",
+          borderBottom: "1px solid #e2e8f0",
+          background: "#f8fafc",
+        }}
+      >
+        <Group justify="space-between" align="center">
+          <Group gap="xs">
+            <ThemeIcon variant="light" color="blue" size="md" radius="md">
+              <IconPlayerPlay size={15} />
+            </ThemeIcon>
+            <div>
+              <Text fw={600} size="sm">
+                New Workspace
+              </Text>
+              <Text size="xs" c="dimmed">
+                Configure and launch a remote development environment
+              </Text>
+            </div>
+          </Group>
 
-      <Group className="mb-4" grow>
-        {!props.disableChooseTemplate && (
-          <div>
+          {!props.disableChooseTemplate && (
             <ChooseTemplate
               cur={template}
               spaceRef={template.status!.spaceRef!}
@@ -216,74 +204,132 @@ const WrapC = (props: {
                 setReq(WsPB.Workspace.clone(req));
               }}
             />
-          </div>
-        )}
+          )}
+        </Group>
+      </div>
 
-        <Switch
-          label="Ephemeral Storage"
-          description="Ephemeral Workspaces Storage is reset on every run"
-          val={(req as WsPB.Workspace).status?.isEphemeral}
-          onChange={(v) => {
-            (req as WsPB.Workspace).status!.isEphemeral = v;
-            setReq(WsPB.Workspace.clone(req));
-          }}
-        />
+      <div
+        style={{
+          padding: "12px 24px",
+          borderBottom: "1px solid #e2e8f0",
+          background: "#fafafa",
+        }}
+      >
+        <Group gap="xl">
+          <Group gap="xs">
+            <Switch
+              size="sm"
+              checked={isEphemeral}
+              onChange={(e) => setIsEphemeral(e.currentTarget.checked)}
+              label={
+                <Group gap={4}>
+                  <Text size="sm">Ephemeral storage</Text>
+                  <Tooltip
+                    label="Storage is wiped on every run — nothing persists between sessions"
+                    withArrow
+                    multiline
+                    w={220}
+                  >
+                    <IconInfoCircle
+                      size={13}
+                      style={{ color: "var(--mantine-color-dimmed)" }}
+                    />
+                  </Tooltip>
+                </Group>
+              }
+            />
+          </Group>
 
-        <Switch
-          label="Start after Creation"
-          description="Immediately start Workspace after creation"
-          val={doStart}
-          onChange={(v) => {
-            setDoStart(v);
-          }}
-        />
-      </Group>
+          <Switch
+            size="sm"
+            checked={doStart}
+            onChange={(e) => setDoStart(e.currentTarget.checked)}
+            label={
+              <Group gap={4}>
+                <Text size="sm">Start immediately</Text>
+                <Tooltip
+                  label="Workspace will start automatically after creation"
+                  withArrow
+                  multiline
+                  w={200}
+                >
+                  <IconInfoCircle
+                    size={13}
+                    style={{ color: "var(--mantine-color-dimmed)" }}
+                  />
+                </Tooltip>
+              </Group>
+            }
+          />
+        </Group>
+      </div>
 
-      <div>
-        <Tabs defaultValue="main" className="font-bold text-xl">
-          <Tabs.List className="mb-2">
-            <Tabs.Tab value="main" onClick={() => {}}>
-              Quick Mode
+      <div style={{ padding: "0 24px 24px" }}>
+        <Tabs defaultValue="main" mt="md">
+          <Tabs.List mb="md">
+            <Tabs.Tab value="main" leftSection={<IconLayoutGrid size={14} />}>
+              Quick mode
             </Tabs.Tab>
-            <Tabs.Tab value="custom" onClick={() => {}}>
+            <Tabs.Tab value="custom" leftSection={<IconSettings size={14} />}>
               Customize
             </Tabs.Tab>
           </Tabs.List>
 
-          <Tabs.Panel value="main" className="mt-2">
+          <Tabs.Panel value="main">
             <StartWorkspaceTemplate
               item={template}
               workspace={req}
-              onUpdateWorkspace={(i) => {
-                setReq(WsPB.Workspace.clone(i));
-              }}
+              onUpdateWorkspace={updateReq}
             />
           </Tabs.Panel>
-          <Tabs.Panel value="custom" className="mt-2">
+
+          <Tabs.Panel value="custom">
             <WorkspaceEdit
               spaceRef={template!.status!.spaceRef!}
               item={req}
               onUpdate={(item) => {
-                let v = item as WsPB.Workspace;
-                let reqClone = WsPB.Workspace.clone(req);
-                reqClone.spec = v.spec;
-                setReq(reqClone);
+                const v = item as WsPB.Workspace;
+                const clone = WsPB.Workspace.clone(req);
+                clone.spec = v.spec;
+                setReq(clone);
               }}
             />
           </Tabs.Panel>
         </Tabs>
 
-        <div className="w-full flex items-center justify-end mt-8">
+        <Divider my="lg" />
+
+        <Group justify="flex-end" gap="sm">
           <Button
-            size="lg"
-            loading={mutationStartWorkspaceDefault.isPending}
+            variant="default"
+            size="sm"
+            leftSection={<IconRefresh size={14} />}
             onClick={() => {
-              mutationStartWorkspaceDefault.mutate(undefined);
+              setReq(
+                WsPB.Workspace.create({
+                  apiVersion: "workspace/v1",
+                  kind: "Workspace",
+                  metadata: {},
+                  spec: {},
+                  status: { templateRef: getResourceRef(template) },
+                }),
+              );
+              setIsEphemeral(false);
+              setDoStart(true);
             }}
           >
-            Submit
+            Reset
           </Button>
-        </div>
+
+          <Button
+            size="sm"
+            leftSection={<IconPlayerPlay size={14} />}
+            loading={mutation.isPending}
+            onClick={() => mutation.mutate(undefined)}
+          >
+            {doStart ? "Create & start" : "Create workspace"}
+          </Button>
+        </Group>
       </div>
     </div>
   );
@@ -296,43 +342,38 @@ const ChooseTemplate = (props: {
 }) => {
   const { spaceRef } = props;
   const client = getClientWorkspace();
-  let [page, setPage] = React.useState(0);
 
   const qry = useQuery({
-    queryKey: ["workspace/listTemplate", spaceRef.uid, page],
+    queryKey: ["workspace/listTemplate", spaceRef.uid],
     queryFn: () => {
       const { response } = client.listTemplate(
-        WsPB.ListTemplateOptions.create({
-          spaceRef,
-        }),
+        WsPB.ListTemplateOptions.create({ spaceRef }),
       );
       return response;
     },
   });
 
-  if (!qry.isSuccess) {
-    return <></>;
-  }
+  if (!qry.isSuccess || qry.data.items.length === 0) return null;
 
   return (
-    <div>
-      <Select
-        label="Choose Template"
-        value={
-          props.cur ? props.cur.metadata!.uid : qry.data.items[0].metadata!.uid
-        }
-        onChange={(val) => {
-          const tmpl = qry.data.items.find((x) => x.metadata!.uid === val)!;
-          props.onSet(tmpl);
-        }}
-        data={qry.data.items.map((x) => ({
-          label: `${x.metadata!.name.split(".").at(0)}${
-            x.metadata?.displayName ? "(" + x.metadata?.displayName + ")" : ""
-          }`,
-          value: x.metadata!.uid,
-        }))}
-      />
-    </div>
+    <Select
+      label="Template"
+      size="xs"
+      w={200}
+      value={
+        props.cur ? props.cur.metadata!.uid : qry.data.items[0].metadata!.uid
+      }
+      onChange={(val) => {
+        const tmpl = qry.data.items.find((x) => x.metadata!.uid === val);
+        if (tmpl) props.onSet(tmpl);
+      }}
+      data={qry.data.items.map((x) => ({
+        label: `${x.metadata!.name.split(".").at(0)}${
+          x.metadata?.displayName ? " – " + x.metadata.displayName : ""
+        }`,
+        value: x.metadata!.uid,
+      }))}
+    />
   );
 };
 
@@ -341,42 +382,54 @@ const ChooseBuild = (props: {
   onSet: (id: string) => void;
 }) => {
   const { template } = props;
+  const builds = template.status?.buildInfo?.builds ?? [];
+  const readyBuilds = builds.filter(
+    (x) => x.state === WsPB.Template_Status_BuildInfo_Build_State.READY,
+  );
 
   if (
-    !template.status ||
-    !template.status.buildInfo ||
-    !template.status.buildInfo.builds ||
-    template.status.buildInfo.builds.length < 1 ||
-    template.status.buildInfo.currentReadyBuildID.length < 1
+    !template.status?.buildInfo?.currentReadyBuildID ||
+    readyBuilds.length === 0
   ) {
-    return <></>;
+    return null;
   }
 
   return (
     <div>
+      <Text size="sm" fw={500} mb={6}>
+        Build
+      </Text>
       <Select
+        placeholder="Select build"
         value={template.status.buildInfo.currentReadyBuildID}
-        onChange={(val) => {
-          if (!val) {
-            return;
-          }
-          props.onSet(val);
+        onChange={(val) => val && props.onSet(val)}
+        leftSection={<IconDatabase size={14} />}
+        data={readyBuilds.map((x) => ({
+          label: x.id,
+          value: x.id,
+        }))}
+        renderOption={({ option }) => {
+          const build = readyBuilds.find((b) => b.id === option.value);
+          if (!build) return <Text size="sm">{option.label}</Text>;
+          return (
+            <Group gap="xs" wrap="nowrap">
+              <Text size="sm" style={{ fontFamily: "monospace" }}>
+                {build.id}
+              </Text>
+              <Group gap={4}>
+                {build.tags.map((tag) => (
+                  <Badge key={tag} size="xs" variant="light">
+                    {tag}
+                  </Badge>
+                ))}
+              </Group>
+              <Text size="xs" c="dimmed" ml="auto">
+                <TimeAgo rfc3339={build.doneAt} />
+              </Text>
+            </Group>
+          );
         }}
-      >
-        {template.status.buildInfo.builds
-          .filter(
-            (x) => x.state === WsPB.Template_Status_BuildInfo_Build_State.READY,
-          )
-          .map((x) => (
-            <div key={x.id}>
-              {`${x.id}`}{" "}
-              {x.tags.map((tag) => (
-                <Label>{tag}</Label>
-              ))}{" "}
-              <TimeAgo rfc3339={x.doneAt} />
-            </div>
-          ))}
-      </Select>
+      />
     </div>
   );
 };
@@ -393,9 +446,7 @@ const StartWorkspace = (props: {
     queryKey: ["workspace/getTemplate", templateRef?.uid],
     queryFn: () => {
       const { response } = getClientWorkspace().getTemplate(
-        MetaPB.GetOptions.create({
-          uid: templateRef?.uid,
-        }),
+        MetaPB.GetOptions.create({ uid: templateRef?.uid }),
       );
       return response;
     },
@@ -403,39 +454,29 @@ const StartWorkspace = (props: {
   });
 
   const queryTemplateDefault = useQuery({
-    queryKey: ["workspace/getTemplate", `default.default.${spaceRef?.name}`],
+    queryKey: ["workspace/getTemplate", `default.${spaceRef?.name}`],
     queryFn: () => {
       const { response } = getClientWorkspace().getTemplate(
-        MetaPB.GetOptions.create({
-          name: `default.${spaceRef?.name}`,
-        }),
+        MetaPB.GetOptions.create({ name: `default.${spaceRef?.name}` }),
       );
       return response;
     },
-    enabled: !templateRef?.uid || !!spaceRef?.name,
+    enabled: !templateRef?.uid && !!spaceRef?.name,
   });
 
-  if (queryTemplateRef.isSuccess) {
-    return (
-      <WrapC
-        item={queryTemplateRef.data}
-        disableChooseTemplate={props.disableChooseTemplate}
-        disableChooseEnvironment={props.disableChooseEnvironment}
-      />
-    );
-  }
+  const template =
+    (queryTemplateRef.isSuccess && queryTemplateRef.data) ||
+    (queryTemplateDefault.isSuccess && queryTemplateDefault.data);
 
-  if (queryTemplateDefault.isSuccess) {
-    return (
-      <WrapC
-        item={queryTemplateDefault.data}
-        disableChooseTemplate={props.disableChooseTemplate}
-        disableChooseEnvironment={props.disableChooseEnvironment}
-      />
-    );
-  }
+  if (!template) return null;
 
-  return <div></div>;
+  return (
+    <WrapC
+      item={template}
+      disableChooseTemplate={props.disableChooseTemplate}
+      disableChooseEnvironment={props.disableChooseEnvironment}
+    />
+  );
 };
 
 export default StartWorkspace;

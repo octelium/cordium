@@ -1,19 +1,17 @@
+import { Stack, Text, ThemeIcon } from "@mantine/core";
+import { IconInbox } from "@tabler/icons-react";
 import * as React from "react";
-import { twJoin } from "tailwind-merge";
 
 export default (props: { title: string; children?: React.ReactNode }) => {
   return (
-    <div className="flex flex-col items-center justify-center">
-      <div
-        className={twJoin(
-          "flex text-center items-center justify-center",
-          "font-bold text-4xl text-gray-600",
-          "my-16",
-        )}
-      >
+    <Stack align="center" justify="center" gap="md" py={64}>
+      <ThemeIcon size={48} variant="light" color="gray" radius="xl">
+        <IconInbox size={24} />
+      </ThemeIcon>
+      <Text fw={600} size="lg" c="dimmed" ta="center">
         {props.title}
-      </div>
-      <div>{props.children}</div>
-    </div>
+      </Text>
+      {props.children && <div>{props.children}</div>}
+    </Stack>
   );
 };

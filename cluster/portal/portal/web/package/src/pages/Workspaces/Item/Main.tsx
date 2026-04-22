@@ -1,46 +1,46 @@
-import * as React from "react";
-
-import { useAppDispatch } from "@/utils/hooks";
-
-import { getClientWorkspace } from "@/utils/client";
-
-import { onError } from "@/utils";
-
 import * as WsPB from "@/apis/cordiumv1/cordiumv1";
-
-import WorkspaceStatus from "@/components/WorkspaceStatus";
-import { BsFillStopFill } from "react-icons/bs";
-import { FaPlay } from "react-icons/fa";
-
-import { useNavigate } from "react-router-dom";
-
 import { GetOptions } from "@/apis/metav1/metav1";
 import CopyText from "@/components/CopyText";
 import InfoItem from "@/components/InfoItem";
-import Label from "@/components/Label";
-import Repository from "@/components/Repository";
-import TimeAgo from "@/components/TimeAgo";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { twMerge } from "tailwind-merge";
-
-import { BiLinkExternal } from "react-icons/bi";
-
-import BoxItem from "@/components/BoxItem";
 import LinkWrap from "@/components/LinkWrap";
 import PageWrap from "@/components/PageWrap";
+import Repository from "@/components/Repository";
 import ResourceYAML from "@/components/ResourceYAML";
 import SpaceName from "@/components/SpaceName";
+import TimeAgo from "@/components/TimeAgo";
+import WorkspaceStatus from "@/components/WorkspaceStatus";
 import { clearTerminalGroup } from "@/features/terminalgroup/slice";
+import { onError } from "@/utils";
+import { getClientWorkspace } from "@/utils/client";
+import { useAppDispatch } from "@/utils/hooks";
 import {
   getPathSpace,
   getPathTemplate,
   invalidateResource,
 } from "@/utils/octelium";
 import { canStopWorkspace, getResourceRef, getShortName } from "@/utils/pb";
-
-import { Button, Modal } from "@mantine/core";
+import {
+  Anchor,
+  Badge,
+  Button,
+  Group,
+  Modal,
+  Stack,
+  Text,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import {
+  IconBrandGit,
+  IconCpu,
+  IconDatabase,
+  IconExternalLink,
+  IconPlayerPlay,
+  IconPlayerStop,
+  IconServer,
+} from "@tabler/icons-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import * as React from "react";
 import { useContextWorkspace } from "../utils";
 
 interface AuthBegin {
@@ -49,21 +49,16 @@ interface AuthBegin {
 
 const LoginGitProvider = (props: { item: WsPB.Workspace }) => {
   const { item } = props;
-  const client = getClientWorkspace();
+
   if (
     !item.status?.templateRef ||
-    item.status.spaceType !== WsPB.Space_Status_Type.ORGANIZATION
-  ) {
-    return <></>;
-  }
-
-  if (item.status!.state !== WsPB.Workspace_Status_State.STOPPED) {
-    return <></>;
-  }
+    item.status.spaceType !== WsPB.Space_Status_Type.ORGANIZATION ||
+    item.status.state !== WsPB.Workspace_Status_State.STOPPED
+  )
+    return null;
 
   const qryTemplate = useQuery({
-    queryKey: ["workspace/getTemplate", item.status!.templateRef!.uid],
-
+    queryKey: ["workspace/getTemplate", item.status.templateRef.uid],
     queryFn: () => {
       const { response } = getClientWorkspace().getTemplate(
         GetOptions.create({ uid: item.status!.templateRef!.uid }),
@@ -82,258 +77,213 @@ const LoginGitProvider = (props: { item: WsPB.Workspace }) => {
     onSuccess: (data) => {
       window.location.href = data.loginURL;
     },
-    onError: onError,
+    onError,
   });
 
-  if (!qryTemplate.isSuccess) {
-    return <></>;
-  }
-
-  if (!qryTemplate.data.status?.gitProviderRef) {
-    return <></>;
-  }
+  if (!qryTemplate.isSuccess || !qryTemplate.data.status?.gitProviderRef)
+    return null;
 
   return (
-    <button
-      className={twMerge(
-        "flex items-center justify-center cursor-pointer",
-        `transition-all duration-300`,
-        "w-full bg-gray-800 text-white font-bold rounded-lg py-4 px-4 text-xl",
-        "hover:bg-black",
-        "shadow-2xl",
-      )}
-      onClick={() => {
-        mutation.mutate();
-      }}
+    <Button
+      fullWidth
+      variant="default"
+      leftSection={<IconBrandGit size={15} />}
+      loading={mutation.isPending}
+      onClick={() => mutation.mutate()}
     >
-      Login to Git Provider
-    </button>
+      Login to Git provider
+    </Button>
   );
 };
 
 const StartStopButton = (props: { item: WsPB.Workspace }) => {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-
   const client = getClientWorkspace();
-  const queryClient = useQueryClient();
-
   const { item } = props;
   const canStop = canStopWorkspace(item);
-
-  let [openStop, setOpenStop] = React.useState(false);
-  let [openStart, setOpenStart] = React.useState(false);
-
+  const isStopped = item.status?.state === WsPB.Workspace_Status_State.STOPPED;
   const [opened, { open, close }] = useDisclosure(false);
-
-  let [startWorkspaceRequest, setStartWorkspaceRequest] =
-    React.useState<WsPB.StartWorkspaceRequest>(
-      WsPB.StartWorkspaceRequest.create({
-        workspaceRef: getResourceRef(item),
-      }),
-    );
-
-  let [stopWorkspaceRequest, setStopWorkspaceRequest] =
-    React.useState<WsPB.StopWorkspaceRequest>(
-      WsPB.StopWorkspaceRequest.create({
-        workspaceRef: getResourceRef(item),
-      }),
-    );
 
   const mutationStop = useMutation({
     mutationFn: async () => {
-      const { response } = await client.stopWorkspace(stopWorkspaceRequest);
+      const { response } = await client.stopWorkspace(
+        WsPB.StopWorkspaceRequest.create({
+          workspaceRef: getResourceRef(item),
+        }),
+      );
       return response;
     },
-    onSuccess: (response) => {
+    onSuccess: () => {
       close();
       dispatch(clearTerminalGroup({}));
       invalidateResource(item);
     },
-    onError: () => {
-      close();
-    },
+    onError: () => close(),
   });
 
   const mutationStart = useMutation({
     mutationFn: async () => {
-      const { response } = await client.startWorkspace(startWorkspaceRequest);
+      const { response } = await client.startWorkspace(
+        WsPB.StartWorkspaceRequest.create({
+          workspaceRef: getResourceRef(item),
+        }),
+      );
       return response;
     },
-    onSuccess: (response) => {
-      invalidateResource(item);
-    },
+    onSuccess: () => invalidateResource(item),
   });
 
   return (
     <>
       {canStop && (
-        <button
-          className={twMerge(
-            "flex items-center justify-center cursor-pointer",
-            `transition-all duration-300`,
-            "w-full text-black font-bold rounded-lg py-4 px-4 text-xl",
-            "border-2 border-black",
-            "hover:bg-white",
-            "shadow-xl",
-          )}
-          onClick={() => {
-            // mutationStop.mutate();
-            open();
-          }}
+        <Button
+          fullWidth
+          variant="outline"
+          color="red"
+          leftSection={<IconPlayerStop size={15} />}
+          onClick={open}
         >
-          <span className="mr-1">Stop</span>
-          <BsFillStopFill />
-        </button>
+          Stop workspace
+        </Button>
       )}
 
-      {item.status!.state === WsPB.Workspace_Status_State.STOPPED && (
-        <div className="w-full flex flex-col items-center justify-center">
-          <button
-            className={twMerge(
-              "flex items-center justify-center cursor-pointer",
-              `transition-all duration-500`,
-              "w-full bg-gray-800 text-white font-bold rounded-lg py-4 px-4 text-xl",
-              "hover:bg-black",
-              "shadow-2xl",
-            )}
-            onClick={() => {
-              mutationStart.mutate();
-            }}
-          >
-            <span className="mr-1">Start</span>
-            <FaPlay />
-          </button>
-
-          {/*
-          <button
-            className={twMerge(
-              "mt-4",
-              "flex items-center justify-center",
-              `transition-all duration-300`,
-              " text-gray-800 font-bold rounded-lg p-2 text-xs",
-              "hover:text-black"
-            )}
-            onClick={() => {
-              setOpenStart(true);
-            }}
-          >
-            <span className="mr-1">Start with Options</span>
-          </button>
-          */}
-        </div>
+      {isStopped && (
+        <Button
+          fullWidth
+          leftSection={<IconPlayerPlay size={15} />}
+          loading={mutationStart.isPending}
+          onClick={() => mutationStart.mutate()}
+        >
+          Start workspace
+        </Button>
       )}
-
-      {/*
-      <Dialog
-        open={openStart}
-        onClose={() => {
-          setOpenStart(false);
-        }}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          <div className="ml-4">
-            <div className="font-bold mb-2 text-lg">Run Options</div>
-
-            {item.status && item.status.runs.length > 0 && (
-              <div className="w-full p4">
-                <Autocomplete
-                  value={startWorkspaceRequest.fromRunID}
-                  options={item.status.runs
-                    .filter((x) => !x.isEphemeral && !x.failure && x.stoppedAt)
-                    .map((x) => x.id)}
-                  sx={{ width: 300 }}
-                  onChange={(v, b) => {
-                    startWorkspaceRequest.fromRunID = b ?? "";
-                    setStartWorkspaceRequest(
-                      WsPB.StartWorkspaceRequest.clone(startWorkspaceRequest)
-                    );
-                  }}
-                  renderInput={(params) => <TextField {...params} />}
-                />
-              </div>
-            )}
-          </div>
-        </DialogTitle>
-
-        <DialogActions>
-          <Button
-            size="small"
-            mode="outline"
-            onClick={() => {
-              setOpenStart(false);
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            size="small"
-            onClick={() => {
-              mutationStart.mutate();
-              setOpenStart(false);
-            }}
-            autoFocus
-          >
-            Start Workspace
-          </Button>
-        </DialogActions>
-      </Dialog>
-      */}
 
       <Modal
         opened={opened}
-        onClose={() => {
-          close();
-        }}
+        onClose={close}
         centered
+        title={
+          <Text fw={600} size="sm">
+            Stop workspace?
+          </Text>
+        }
       >
-        <div className="font-bold text-xl mb-4">
-          {`Are you sure that you want to Stop this Workspace?`}
-        </div>
+        <Stack gap="md">
+          <Text size="sm" c="dimmed">
+            This will stop the running workspace and terminate all active
+            sessions.
+          </Text>
 
-        <div className="w-full my-4">
-          <InfoItem title="Name">{props.item.metadata!.name}</InfoItem>
-          <InfoItem title="UID">{props.item.metadata!.uid}</InfoItem>
-          <InfoItem title="Detailed Info">
-            <ResourceYAML item={item} size="xs" />
-          </InfoItem>
-        </div>
-
-        <div className="mt-4 flex justify-end items-center">
-          <Button
-            variant="outline"
-            onClick={() => {
-              close();
+          <div
+            style={{
+              background: "#f8fafc",
+              borderRadius: 8,
+              border: "1px solid #e2e8f0",
+              padding: "8px 14px",
             }}
           >
-            Cancel
-          </Button>
-          <Button
-            className={twMerge("ml-4  transition-all duration-500")}
-            loading={mutationStop.isPending}
-            // color="red"
-            onClick={() => {
-              mutationStop.mutate();
-            }}
-            autoFocus
-          >
-            Yes, Stop Workspace
-          </Button>
-        </div>
+            <InfoItem title="Name">{item.metadata!.name}</InfoItem>
+            <InfoItem title="UID">{item.metadata!.uid}</InfoItem>
+          </div>
+
+          <Group justify="flex-end" gap="sm">
+            <Button variant="default" size="sm" onClick={close}>
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              color="red"
+              loading={mutationStop.isPending}
+              onClick={() => mutationStop.mutate()}
+            >
+              Stop workspace
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
     </>
   );
 };
 
+const ResourceLimits = (props: { item: WsPB.Workspace }) => {
+  const { item } = props;
+  const limit = item.status?.limit;
+  if (!limit || (!limit.cpu && !limit.memory && !limit.storage)) return null;
+
+  const chips: { icon: React.ReactNode; label: string }[] = [];
+
+  if (limit.cpu?.millicores) {
+    chips.push({
+      icon: <IconCpu size={12} />,
+      label: `${limit.cpu.millicores / 1000} CPU`,
+    });
+  }
+  if (limit.memory?.megabytes) {
+    const mem =
+      limit.memory.megabytes >= 1000
+        ? `${limit.memory.megabytes / 1000}GB RAM`
+        : `${limit.memory.megabytes}MB RAM`;
+    chips.push({ icon: <IconServer size={12} />, label: mem });
+  }
+  if (limit.storage?.megabytes) {
+    const stor =
+      limit.storage.megabytes >= 1000
+        ? `${limit.storage.megabytes / 1000}GB Storage`
+        : `${limit.storage.megabytes}MB Storage`;
+    chips.push({ icon: <IconDatabase size={12} />, label: stor });
+  }
+
+  return (
+    <InfoItem title="Resource limits">
+      <Group gap={6}>
+        {chips.map((c) => (
+          <Badge key={c.label} size="sm" variant="light" leftSection={c.icon}>
+            {c.label}
+          </Badge>
+        ))}
+      </Group>
+    </InfoItem>
+  );
+};
+
+const AppItem = (props: {
+  app: WsPB.Workspace_Spec_Application;
+  item: WsPB.Workspace;
+}) => {
+  const { item, app } = props;
+  const href = item.status?.hostname
+    ? app.isDefault
+      ? `https://${item.status.hostname}`
+      : `https://${app.name}_${item.status.hostname}`
+    : undefined;
+
+  return (
+    <Anchor
+      href={href}
+      target="_blank"
+      underline="never"
+      style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+    >
+      <Badge
+        size="sm"
+        variant="outline"
+        rightSection={<IconExternalLink size={10} />}
+        style={{ cursor: "pointer" }}
+      >
+        {app.displayName || app.name}
+        {app.port > 0 && ` :${app.port}`}
+        {app.isDefault && " · default"}
+      </Badge>
+    </Anchor>
+  );
+};
+
 const InfoBar = (props: { item: WsPB.Workspace }) => {
-  const item = props.item;
+  const { item } = props;
   const isActive = item.status?.state !== WsPB.Workspace_Status_State.STOPPED;
 
   const qryTemplate = useQuery({
     queryKey: ["workspace/getTemplate", item.status!.templateRef!.uid],
-
     queryFn: () => {
       const { response } = getClientWorkspace().getTemplate(
         GetOptions.create({ uid: item.status!.templateRef!.uid }),
@@ -344,7 +294,6 @@ const InfoBar = (props: { item: WsPB.Workspace }) => {
 
   const qrySpace = useQuery({
     queryKey: ["workspace/getSpace", item.status!.spaceRef!.uid],
-
     queryFn: () => {
       const { response } = getClientWorkspace().getSpace(
         GetOptions.create({ uid: item.status!.spaceRef!.uid }),
@@ -353,201 +302,177 @@ const InfoBar = (props: { item: WsPB.Workspace }) => {
     },
   });
 
+  const apps = item.spec?.applications ?? [];
+
   return (
-    <div className="w-full mb-4">
-      <div>
-        <div className="flex flex-col md:flex-row">
-          <div className="flex md:basis-2/3 md:mr-1">
-            <div>
-              <InfoItem title="Name">
-                <div className="flex items-center">
-                  <CopyText value={item.metadata!.name} />
-                </div>
-              </InfoItem>
-              {item.metadata?.displayName && (
-                <InfoItem title="Display Name">
-                  {item.metadata?.displayName}
-                </InfoItem>
-              )}
-
-              {qrySpace.isSuccess && (
-                <InfoItem title="Space">
-                  <div className="flex items-center">
-                    <LinkWrap to={getPathSpace(qrySpace.data!)}>
-                      <SpaceName spaceRef={getResourceRef(qrySpace.data!)} />
-                    </LinkWrap>
-                  </div>
-                </InfoItem>
-              )}
-
-              {qryTemplate.isSuccess && (
-                <InfoItem title="Template">
-                  <div className="flex items-center">
-                    <LinkWrap to={getPathTemplate(qryTemplate.data)}>
-                      {getShortName(qryTemplate.data)}
-                    </LinkWrap>
-                  </div>
-                </InfoItem>
-              )}
-
-              <InfoItem title="Detailed Info">
-                <ResourceYAML item={item} size="xs" />
-              </InfoItem>
-
-              {isActive && (
-                <InfoItem title="URL">
-                  <a
-                    className={twMerge(
-                      "flex items-center justify-center text-sm font-bold cursor-pointer",
-                      "text-cyan-800 hover:text-gray-800 rounded-full transition-all duration-300 shadow-2xl",
-                    )}
-                    href={
-                      isActive ? `https://${item.status!.hostname}` : undefined
-                    }
-                    target="_blank"
-                  >
-                    {`https://${item.status!.hostname}`}
-                    <span className="ml-1">
-                      <BiLinkExternal />
-                    </span>
-                  </a>
-                </InfoItem>
-              )}
-
-              <InfoItem title="Created">
-                <TimeAgo rfc3339={item.metadata?.createdAt} />
-              </InfoItem>
-
-              <InfoItem title="State">
-                <WorkspaceStatus status={item.status!.state} />
-              </InfoItem>
-              {item.status?.isEphemeral && (
-                <InfoItem title="Ephemeral">
-                  <span className={"text-rose-700"}>YES</span>
-                </InfoItem>
-              )}
-
-              {item.status?.lastInitializedAt && (
-                <InfoItem title="Last Initialized">
-                  <TimeAgo rfc3339={item.status?.lastInitializedAt} />
-                </InfoItem>
-              )}
-
-              {item.status?.lastStoppedAt && (
-                <InfoItem title="Last Stopped">
-                  <TimeAgo rfc3339={item.status?.lastStoppedAt} />
-                </InfoItem>
-              )}
-
-              {item.status?.state === WsPB.Workspace_Status_State.RUNNING &&
-                item.status?.lastActivityAt && (
-                  <InfoItem title="Last Activity">
-                    <TimeAgo rfc3339={item.status?.lastActivityAt} />
-                  </InfoItem>
-                )}
-
-              {item.status?.limit &&
-                (item.status.limit.cpu || item.status.limit.memory) && (
-                  <InfoItem title="Resource Limit">
-                    {item.status.limit.cpu && (
-                      <Label>
-                        {item.status.limit.cpu.millicores / 1000} CPU
-                      </Label>
-                    )}
-                    {item.status.limit.memory &&
-                      (item.status.limit.memory.megabytes >= 1000 ? (
-                        <Label>
-                          {item.status.limit.memory.megabytes / 1000}GB RAM
-                        </Label>
-                      ) : (
-                        <Label>
-                          {item.status.limit.memory.megabytes}MB RAM
-                        </Label>
-                      ))}
-
-                    {item.status.limit.storage &&
-                      (item.status.limit.storage.megabytes >= 1000 ? (
-                        <Label>
-                          {item.status.limit.storage.megabytes / 1000}GB Storage
-                        </Label>
-                      ) : (
-                        <Label>
-                          {item.status.limit.storage.megabytes}MB Storage
-                        </Label>
-                      ))}
-                  </InfoItem>
-                )}
-
-              <div>
-                <Repository item={item} />
-              </div>
-            </div>
+    <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div
+          style={{
+            background: "white",
+            border: "1px solid #e2e8f0",
+            borderRadius: 12,
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              padding: "14px 20px",
+              borderBottom: "1px solid #e2e8f0",
+              background: "#f8fafc",
+            }}
+          >
+            <Text
+              size="xs"
+              fw={500}
+              tt="uppercase"
+              style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
+            >
+              Workspace details
+            </Text>
           </div>
-          <div className="flex flex-col items-center justify-center md:basis-1/3">
-            <StartStopButton item={item} />
-            <div className="my-2"></div>
-            <LoginGitProvider item={item} />
+
+          <div style={{ padding: "4px 20px 8px" }}>
+            <InfoItem title="Name">
+              <CopyText value={item.metadata!.name} />
+            </InfoItem>
+
+            {item.metadata?.displayName && (
+              <InfoItem title="Display name">
+                {item.metadata.displayName}
+              </InfoItem>
+            )}
+
+            <InfoItem title="State">
+              <WorkspaceStatus status={item.status!.state} />
+            </InfoItem>
+
+            {qrySpace.isSuccess && (
+              <InfoItem title="Space">
+                <LinkWrap to={getPathSpace(qrySpace.data!)}>
+                  <SpaceName spaceRef={getResourceRef(qrySpace.data!)} />
+                </LinkWrap>
+              </InfoItem>
+            )}
+
+            {qryTemplate.isSuccess && (
+              <InfoItem title="Template">
+                <LinkWrap to={getPathTemplate(qryTemplate.data)}>
+                  {getShortName(qryTemplate.data)}
+                </LinkWrap>
+              </InfoItem>
+            )}
+
+            {isActive && item.status?.hostname && (
+              <InfoItem title="URL">
+                <Anchor
+                  href={`https://${item.status.hostname}`}
+                  target="_blank"
+                  size="sm"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 4,
+                  }}
+                >
+                  {`https://${item.status.hostname}`}
+                  <IconExternalLink size={12} />
+                </Anchor>
+              </InfoItem>
+            )}
+
+            <InfoItem title="Created">
+              <TimeAgo rfc3339={item.metadata?.createdAt} />
+            </InfoItem>
+
+            {item.status?.isEphemeral && (
+              <InfoItem title="Storage">
+                <Badge size="sm" color="orange" variant="light">
+                  Ephemeral
+                </Badge>
+              </InfoItem>
+            )}
+
+            {item.status?.lastInitializedAt && (
+              <InfoItem title="Last initialized">
+                <TimeAgo rfc3339={item.status.lastInitializedAt} />
+              </InfoItem>
+            )}
+
+            {item.status?.lastStoppedAt && (
+              <InfoItem title="Last stopped">
+                <TimeAgo rfc3339={item.status.lastStoppedAt} />
+              </InfoItem>
+            )}
+
+            {item.status?.state === WsPB.Workspace_Status_State.RUNNING &&
+              item.status?.lastActivityAt && (
+                <InfoItem title="Last activity">
+                  <TimeAgo rfc3339={item.status.lastActivityAt} />
+                </InfoItem>
+              )}
+
+            <ResourceLimits item={item} />
+
+            <InfoItem title="Config">
+              <ResourceYAML item={item} size="xs" />
+            </InfoItem>
           </div>
         </div>
+
+        {apps.length > 0 && (
+          <div
+            style={{
+              marginTop: 12,
+              background: "white",
+              border: "1px solid #e2e8f0",
+              borderRadius: 12,
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                padding: "14px 20px",
+                borderBottom: "1px solid #e2e8f0",
+                background: "#f8fafc",
+              }}
+            >
+              <Text
+                size="xs"
+                fw={500}
+                tt="uppercase"
+                style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
+              >
+                Applications
+              </Text>
+            </div>
+            <div
+              style={{
+                padding: "12px 20px",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 6,
+              }}
+            >
+              {apps.map((app) => (
+                <AppItem key={app.name} app={app} item={item} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div style={{ marginTop: 12 }}>
+          <Repository item={item} />
+        </div>
+      </div>
+
+      <div style={{ width: 220, flexShrink: 0 }}>
+        <Stack gap="sm">
+          <StartStopButton item={item} />
+          <LoginGitProvider item={item} />
+        </Stack>
       </div>
     </div>
-  );
-};
-
-const AppItem = (props: {
-  app: WsPB.Workspace_Spec_Application;
-  item: WsPB.Workspace;
-}) => {
-  const { item, app } = props;
-
-  return (
-    <a
-      className="flex items-center justify-center text-sm font-bold mx-1 my-1 py-1 px-2 cursor-pointer border-[1px] border-gray-400 hover:bg-gray-200 rounded-full transition-all duration-300 shadow-2xl"
-      href={
-        item.status?.hostname
-          ? app.isDefault
-            ? `https://${item.status!.hostname}`
-            : `https://${app.name}_${item.status!.hostname}`
-          : undefined
-      }
-      target="_blank"
-    >
-      <div className="mr-1">
-        {app.displayName ? app.displayName : app.name}{" "}
-      </div>
-
-      {app.port > 0 && <Label>{app.port}</Label>}
-      {app.isDefault && <Label>Default</Label>}
-    </a>
-  );
-};
-
-const AppsBar = (props: { item: WsPB.Workspace }) => {
-  const { item } = props;
-
-  const appsWorkspace = item.spec?.applications;
-
-  if (!appsWorkspace?.length) {
-    return <></>;
-  }
-
-  return (
-    <BoxItem title="Applications">
-      <div>
-        <div className="my-1">
-          {appsWorkspace && appsWorkspace.length > 0 && (
-            <div className="w-full">
-              <div className="mb-2">Workspace Apps</div>
-              <div className="flex">
-                {appsWorkspace?.map((app) => (
-                  <AppItem app={app} item={item} />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </BoxItem>
   );
 };
 

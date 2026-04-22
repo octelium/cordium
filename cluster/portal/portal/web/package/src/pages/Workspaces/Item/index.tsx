@@ -1,123 +1,136 @@
-import * as React from "react";
-
-import { useAppDispatch } from "@/utils/hooks";
-
-import { Outlet, useLocation } from "react-router-dom";
-
-import { useNavigate } from "react-router-dom";
-
-// import { sendListenEvent } from "@/features/conn/slice";
-
-import { clearTerminalGroup } from "@/features/terminalgroup/slice";
-
+import * as WsPB from "@/apis/cordiumv1/cordiumv1";
 import PageWrap from "@/components/PageWrap";
-import { Tabs } from "@mantine/core";
+import WorkspaceStatus from "@/components/WorkspaceStatus";
+import { clearTerminalGroup } from "@/features/terminalgroup/slice";
+import { useAppDispatch } from "@/utils/hooks";
+import { getShortName } from "@/utils/pb";
+import { Tabs, Text } from "@mantine/core";
+import {
+  IconActivity,
+  IconBolt,
+  IconLayoutGrid,
+  IconPencil,
+  IconTerminal2,
+} from "@tabler/icons-react";
+import * as React from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { match } from "ts-pattern";
 import { useContextWorkspace } from "../utils";
 
 const Workspace = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-
   const ctx = useContextWorkspace();
   const loc = useLocation();
 
   React.useEffect(() => {
     dispatch(clearTerminalGroup({}));
-
     return () => {
       dispatch(clearTerminalGroup({}));
     };
   }, [dispatch]);
 
+  const data = ctx.workspace.data;
+
+  const activeTab = match(loc.pathname.split("/").reverse().at(0))
+    .with("edit", (v) => v)
+    .with("actions", (v) => v)
+    .with("terminals", (v) => v)
+    .with("logs", (v) => v)
+    .otherwise(() => "main");
+
+  const tabs = [
+    {
+      value: "main",
+      label: "Overview",
+      icon: <IconLayoutGrid size={14} />,
+      path: "./",
+    },
+    {
+      value: "terminals",
+      label: "Terminals",
+      icon: <IconTerminal2 size={14} />,
+      path: "./terminals",
+    },
+    {
+      value: "edit",
+      label: "Edit",
+      icon: <IconPencil size={14} />,
+      path: "./edit",
+    },
+    {
+      value: "logs",
+      label: "Activity logs",
+      icon: <IconActivity size={14} />,
+      path: "./logs",
+    },
+    {
+      value: "actions",
+      label: "Actions",
+      icon: <IconBolt size={14} />,
+      path: "./actions",
+    },
+  ];
+
+  const isRunning = data?.status?.state === WsPB.Workspace_Status_State.RUNNING;
+
   return (
     <PageWrap qry={ctx.workspace}>
-      {ctx.workspace.data && (
-        <div className="w-full font-bold">
-          <div>
-            <Tabs
-              defaultValue="main"
-              value={match(loc.pathname.split("/").reverse().at(0))
-                .with("edit", (v) => v)
-                .with("actions", (v) => v)
-                .with("terminals", (v) => v)
-                .with("logs", (v) => v)
-                .otherwise(() => "main")}
+      {data && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+          <Tabs value={activeTab}>
+            <Tabs.List
+              style={{
+                background: "white",
+                borderRadius: "10px 10px 0 0",
+                border: "1px solid #e2e8f0",
+                borderBottom: "none",
+                padding: "0 8px",
+              }}
             >
-              <Tabs.List className="mb-2">
+              {tabs.map((t) => (
                 <Tabs.Tab
-                  value="main"
-                  onClick={() => {
-                    navigate("./");
-                  }}
+                  key={t.value}
+                  value={t.value}
+                  leftSection={t.icon}
+                  onClick={() => navigate(t.path)}
+                  style={{ fontSize: 13 }}
                 >
-                  Main
+                  {t.label}
                 </Tabs.Tab>
-                <Tabs.Tab
-                  value="terminals"
-                  onClick={() => {
-                    navigate("./terminals");
-                  }}
-                >
-                  Terminals
-                </Tabs.Tab>
-                <Tabs.Tab
-                  value="edit"
-                  onClick={() => {
-                    navigate("./edit");
-                  }}
-                >
-                  Edit
-                </Tabs.Tab>
-                <Tabs.Tab
-                  value="logs"
-                  onClick={() => {
-                    navigate("./logs");
-                  }}
-                >
-                  Activity Logs
-                </Tabs.Tab>
-                <Tabs.Tab
-                  value="actions"
-                  onClick={() => {
-                    navigate("./actions");
-                  }}
-                >
-                  Actions
-                </Tabs.Tab>
-              </Tabs.List>
-            </Tabs>
-          </div>
+              ))}
 
-          <div>
-            <Outlet />
-          </div>
+              <div
+                style={{
+                  marginLeft: "auto",
+                  display: "flex",
+                  alignItems: "center",
+                  paddingRight: 12,
+                  gap: 8,
+                }}
+              >
+                <Text size="xs" c="dimmed" style={{ fontFamily: "monospace" }}>
+                  {getShortName(data)}
+                </Text>
+                {data.status?.state !== undefined && (
+                  <WorkspaceStatus status={data.status.state} />
+                )}
+              </div>
+            </Tabs.List>
 
-          {/*
-      <div>
-        <div>
-          <InfoBar item={data} />
-        </div>
-
-        <div className="mt-6">
-          <TerminalGroup workspace={data} />
-        </div>
-
-        <div>
-          <LogsBar item={data} />
-        </div>
-
-        <div>
-          <ActionsBar item={data} />
-        </div>
-
-        <div>
-          <AppsBar item={data} />
-        </div>
-
-        <div className="mt-2 mb-12"></div>
-      </div>
-      */}
+            <div
+              style={{
+                background: "white",
+                border: "1px solid #e2e8f0",
+                borderTop: "none",
+                borderRadius: "0 0 10px 10px",
+                padding: "20px",
+                minHeight: 200,
+              }}
+            >
+              <Outlet />
+            </div>
+          </Tabs>
         </div>
       )}
     </PageWrap>

@@ -9,10 +9,7 @@ import { debounce } from "lodash";
 import { connect, ConnectedProps } from "react-redux";
 import { AppDispatch, RootState } from "../../store";
 
-import { getClientWorkspaceSvc } from "@/utils/client";
-import { twMerge } from "tailwind-merge";
 import * as WsPB from "../../apis/cordiumv1/cordiumv1";
-import * as WsGRPC from "../../apis/cordiumv1/cordiumv1.client";
 import {
   sendListenTerminal,
   sendListenTerminalEnd,
@@ -38,34 +35,50 @@ interface State {
 
 export class Terminal extends React.Component<Props, State> {
   t: XTerm;
-  ref: React.RefObject<HTMLInputElement | null>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
 
   fitAddon: FitAddon;
-  // serializeAddon: SerializeAddon;
   disposables: IDisposable[];
-  c: WsGRPC.WorkspaceServiceClient;
+  resizeObserver: ResizeObserver | null = null;
 
   constructor(props: Props) {
     super(props);
-    console.log("Starting term constructor");
+
     this.t = new XTerm({
       convertEol: true,
       fontFamily: "Ubuntu Mono",
       fontWeight: 600,
       fontWeightBold: 700,
       cursorBlink: true,
-      scrollback: 1000,
+      scrollback: 5000,
       fontSize: props.state.settings.terminalFontSize ?? 18,
+      theme: {
+        background: "#0f172a",
+        foreground: "#e2e8f0",
+        cursor: "#94a3b8",
+        selectionBackground: "#334155",
+        black: "#1e293b",
+        brightBlack: "#475569",
+        blue: "#60a5fa",
+        brightBlue: "#93c5fd",
+        cyan: "#22d3ee",
+        brightCyan: "#67e8f9",
+        green: "#4ade80",
+        brightGreen: "#86efac",
+        red: "#f87171",
+        brightRed: "#fca5a5",
+        yellow: "#facc15",
+        brightYellow: "#fde047",
+        magenta: "#c084fc",
+        brightMagenta: "#d8b4fe",
+        white: "#cbd5e1",
+        brightWhite: "#f1f5f9",
+      },
     });
 
-    this.ref = React.createRef<HTMLInputElement>();
-
-    this.c = getClientWorkspaceSvc(undefined);
-
+    this.containerRef = React.createRef<HTMLDivElement>();
     this.disposables = [];
-
     this.fitAddon = new FitAddon();
-    // this.serializeAddon = new SerializeAddon();
     this.state = {};
 
     const unsub = emitter.on(
@@ -75,167 +88,93 @@ export class Terminal extends React.Component<Props, State> {
       },
     );
 
-    const doResize = debounce(() => {
-      console.log("Resizing terminal: ", this.props.item.id);
-      this.doResize();
-    }, 300);
-
-    window.addEventListener("resize", doResize);
-
-    this.disposables.push({
-      dispose: () => {
-        window.removeEventListener("resize", doResize);
-      },
-    });
-
-    this.disposables.push({
-      dispose: () => {
-        unsub();
-      },
-    });
-
+    this.disposables.push({ dispose: () => unsub() });
     this.disposables.push(this.fitAddon);
     this.disposables.push(this.t);
-    console.log("Successfully done term constructor");
   }
 
   handleMessage(evt: WsPB.ServerMessage_ListenTerminalEvent) {
     const msg = evt.listenTerminalResponse!;
     switch (msg.type.oneofKind) {
-      case "close": {
-        this.props.removeTerminal({
-          id: this.props.item.id,
-        });
+      case "close":
+        this.props.removeTerminal({ id: this.props.item.id });
         break;
-      }
-      case "stdout": {
+      case "stdout":
         this.t.write(msg.type.stdout.data);
         break;
-      }
-      case "windowSize": {
-        break;
-      }
     }
   }
 
-  doResize() {
+  doResize = debounce(() => {
     this.fitAddon.fit();
     const termSize = this.fitAddon.proposeDimensions();
-    if (termSize === undefined) {
-      console.log("Undefined term size. Skipping");
-      return;
-    }
-    if (isNaN(termSize.rows) || isNaN(termSize.cols)) {
-      console.log("NaN rows or cols. Skipping...");
-      return;
-    }
+    if (!termSize || isNaN(termSize.rows) || isNaN(termSize.cols)) return;
 
-    console.log(
-      "Fitting and sending terminal size",
-      this.props.item.id,
-      termSize,
-    );
     this.props.sendSetTerminalSize({
       uid: this.props.item.id,
       rows: termSize.rows,
       cols: termSize.cols,
     });
-  }
+  }, 100);
 
   componentDidMount() {
-    console.log("mounted terminal: ", this.props.item.id);
     this.init();
-    this.doResize();
-    setTimeout(() => {
+
+    this.resizeObserver = new ResizeObserver(() => {
       this.doResize();
-    }, 500);
+    });
 
-    this.props.sendListenTerminal({
-      id: this.props.item.id,
-    });
-    /*
-    const strm = this.c.listenTerminal(
-      WsPB.ListenTerminalRequest.create({
-        id: this.props.item.id,
-      })
-    );
-    strm.responses.onMessage((msg) => {
-      console.log("Got listenTerminal msg", this.props.item.id, msg);
-      switch (msg.type.oneofKind) {
-        case "close": {
-          this.props.removeTerminal({
-            id: this.props.item.id,
-          });
-          break;
-        }
-        case "stdout": {
-          this.t.write(msg.type.stdout.data);
-          break;
-        }
-        case "windowSize": {
-          break;
-        }
-      }
-    });
-    */
+    if (this.containerRef.current) {
+      this.resizeObserver.observe(this.containerRef.current);
+    }
+
+    this.props.sendListenTerminal({ id: this.props.item.id });
   }
 
-  onActive() {
-    console.log("TERM ACTIVE: ", this.props.item.id);
-    this.doResize();
-  }
+  componentDidUpdate(prevProps: Props) {
+    const prevFontSize = prevProps.state.settings.terminalFontSize;
+    const nextFontSize = this.props.state.settings.terminalFontSize;
 
-  componentDidUpdate() {
-    console.log("DID UPDATE: ", this.props.item.id);
+    if (prevFontSize !== nextFontSize && nextFontSize) {
+      this.t.options.fontSize = nextFontSize;
+      this.doResize();
+    }
 
-    this.doResize();
+    const prevWide = prevProps.state.settings.wideTerminal;
+    const nextWide = this.props.state.settings.wideTerminal;
+    if (prevWide !== nextWide) {
+      this.doResize();
+    }
   }
 
   componentWillUnmount() {
-    console.log("Unmounting terminal: ", this.props.item.id);
-    this.props.sendListenTerminalEnd({
-      id: this.props.item.id,
-    });
+    this.props.sendListenTerminalEnd({ id: this.props.item.id });
+    this.resizeObserver?.disconnect();
+    this.doResize.cancel();
     this.close();
   }
 
   init() {
-    console.log("Initializing terminal: ", this.props.item.id);
-
     this.t.loadAddon(this.fitAddon);
-    // this.t.loadAddon(this.serializeAddon);
-
-    /*
-    if (this.props.item.buffer) {
-      this.t.write(this.props.item.buffer);
-    }
-    */
-    this.t.open(this.ref.current!);
+    this.t.open(this.containerRef.current!);
 
     if (isWebgl2Supported) {
-      console.log("WebGL2 is supported");
-      this.t.loadAddon(new WebglAddon());
+      try {
+        this.t.loadAddon(new WebglAddon());
+      } catch {}
     }
 
     this.fitAddon.fit();
-
     this.t.focus();
 
-    this.t.onData((arg) => {
-      console.log("onData", arg);
-      this.handleOnData(arg);
-    });
+    this.t.onData((data) => this.handleOnData(data));
 
     this.t.onTitleChange((title) => {
-      console.log("New title = ", title);
-      this.setState({
-        title,
-      });
+      this.setState({ title });
       this.props.setTerminalTitle({ id: this.props.item.id, title });
     });
 
     this.t.onResize(({ rows, cols }) => {
-      console.log("Sending setTerminal size: ", rows, cols);
       this.props.sendSetTerminalSize({
         uid: this.props.item.id,
         rows,
@@ -243,44 +182,25 @@ export class Terminal extends React.Component<Props, State> {
       });
     });
 
-    const onActive = () => {
-      this.onActive();
-    };
-
-    this.t.textarea?.addEventListener("focus", onActive);
+    const onFocus = () => this.doResize();
+    this.t.textarea?.addEventListener("focus", onFocus);
     this.disposables.push({
-      dispose: () => {
-        this.t.textarea?.removeEventListener("focus", onActive);
-      },
+      dispose: () => this.t.textarea?.removeEventListener("focus", onFocus),
     });
   }
 
   close() {
-    console.log("closing terminal: ", this.props.item.id);
-    /*
-    this.props.serializeTerminalBuffer({
-      uid: this.props.item.id,
-      buffer: this.serializeAddon.serialize(),
-    });
-    */
-    this.disposables.map((x) => x.dispose());
+    this.disposables.forEach((x) => x.dispose());
     this.disposables = [];
   }
 
-  handleClose() {
-    this.close();
-  }
-
-  handleOnData(arg: string) {
-    console.log("WRITING", arg);
+  handleOnData(data: string) {
     if (isDev()) {
-      this.t.write(arg);
-      return;
+      this.t.write(data);
     }
-
     this.props.sendTerminalData({
       uid: this.props.item.id,
-      data: arg,
+      data,
     });
   }
 
@@ -289,22 +209,22 @@ export class Terminal extends React.Component<Props, State> {
 
     return (
       <div
-        className={twMerge(
-          "rounded-md overflow-hidden shadow-2xl",
-          "flex items-center justify-center transition-all duration-100",
-          wideTerminal ? `md:w-[96vw] md:ml-[calc(-48vw+50%)]` : undefined,
-        )}
-        ref={this.ref}
-      ></div>
+        style={{
+          width: wideTerminal ? "96vw" : "100%",
+          marginLeft: wideTerminal ? "calc(-48vw + 50%)" : undefined,
+          padding: "8px 4px 4px",
+          boxSizing: "border-box",
+          transition: "width 150ms ease, margin-left 150ms ease",
+        }}
+        ref={this.containerRef}
+      />
     );
   }
 }
 
-const mapState = (state: RootState) => ({
-  state,
-});
-const mapDispatch = (dispatch: AppDispatch) => {
-  return bindActionCreators(
+const mapState = (state: RootState) => ({ state });
+const mapDispatch = (dispatch: AppDispatch) =>
+  bindActionCreators(
     {
       sendTerminalData,
       sendSetTerminalSize,
@@ -316,7 +236,7 @@ const mapDispatch = (dispatch: AppDispatch) => {
     },
     dispatch,
   );
-};
+
 const connector = connect(mapState, mapDispatch);
 type PropsFromRedux = ConnectedProps<typeof connector>;
 export default connector(Terminal);
