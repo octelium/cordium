@@ -328,7 +328,7 @@ const InfoBar = (props: { item: WsPB.Workspace }) => {
               tt="uppercase"
               style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
             >
-              Workspace details
+              Info
             </Text>
           </div>
 

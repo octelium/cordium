@@ -56,7 +56,7 @@ const CreateSpace = () => {
           </ThemeIcon>
           <Text
             size="xs"
-            fw={600}
+            fw={700}
             tt="uppercase"
             style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
           >

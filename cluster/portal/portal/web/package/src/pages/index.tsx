@@ -30,7 +30,6 @@ export default () => {
   if (urlSearchParams.get("redirect")) {
     const val = urlSearchParams.get("redirect")!;
     urlSearchParams.delete("redirect");
-    console.log("Redirecting to", val);
     return <Navigate to={val} />;
   }
 
@@ -38,13 +37,10 @@ export default () => {
     queryKey: ["user/getStatus"],
     queryFn: async () => {
       const { response } = await getClientUser().getStatus({});
-      console.log("getStatus", response);
       dispatch(setStatus({ status: response }));
 
-      let wsResp = await getClientWorkspace().listSpace(
-        ListSpaceOptions.create({
-          type: Space_Status_Type.USER,
-        }),
+      const wsResp = await getClientWorkspace().listSpace(
+        ListSpaceOptions.create({ type: Space_Status_Type.USER }),
       );
       if (wsResp.response && wsResp.response.items.length === 0) {
         await getClientWorkspace().createSpace(
@@ -54,12 +50,9 @@ export default () => {
               displayName: "Default Space",
             },
             spec: {},
-            status: {
-              type: Space_Status_Type.USER,
-            },
+            status: { type: Space_Status_Type.USER },
           }),
         );
-
         invalidateSpaces();
       }
 
@@ -69,77 +62,65 @@ export default () => {
 
   return (
     <>
-      <div>
-        <title>Cordium - Octelium Homepage</title>
+      <title>Cordium - Octelium Homepage</title>
 
-        <div className="bg-slate-100! min-h-screen antialiased">
-          <AppShell
-            header={{ height: 60, collapsed: !pinned, offset: false }}
-            navbar={{
-              width: 150,
-              breakpoint: "sm",
-              collapsed: { mobile: !opened },
-            }}
-            aside={{
-              width: 150,
-              breakpoint: "md",
-              collapsed: { desktop: false, mobile: true },
-            }}
-            padding="md"
-          >
-            <AppShell.Header className="bg-slate-100!">
-              <div className="flex flex-row items-center justify-center">
-                <Burger
-                  opened={opened}
-                  onClick={toggle}
-                  hiddenFrom="sm"
-                  size="sm"
-                />
-                <TopBar />
-              </div>
-            </AppShell.Header>
-
-            <AppShell.Navbar p="md" className="bg-slate-100! mt-[60px]">
-              <SideBar />
-            </AppShell.Navbar>
-
-            <AppShell.Main className="h-full w-full mt-[60px]">
-              <div className="flex-1 flex flex-col min-h-full min-w-full items-center justify-center">
-                <div className="flex-1 w-full h-full mt-[60px]">
-                  <Outlet />
-                </div>
-              </div>
-            </AppShell.Main>
-            <AppShell.Aside
-              p="md"
-              className="bg-slate-100! mt-[60px]"
-            ></AppShell.Aside>
-          </AppShell>
-          {/*
-          <TopBar />
-          <div className="mb-8"></div>
-         */}
-
-          {/*
-          
-          <div className="flex-1 w-full flex flex-col items-center">
-            <div className="md:container mx-auto mt-2 p-2 md:p-8 w-full !max-w-4xl">
-              <div className="w-full mb-8">
-                <MainBar />
-              </div>
-              <div className="w-full mb-8">
-                <TitleItem />
-              </div>
-              <div>
-                <Outlet />
-              </div>
+      <div className="bg-slate-100 min-h-screen antialiased">
+        <AppShell
+          header={{ height: 60, collapsed: !pinned, offset: false }}
+          navbar={{
+            width: 150,
+            breakpoint: "sm",
+            collapsed: { mobile: !opened },
+          }}
+          aside={{
+            width: 150,
+            breakpoint: "md",
+            collapsed: { desktop: false, mobile: true },
+          }}
+          padding="md"
+        >
+          <AppShell.Header style={{ background: "#f8fafc" }}>
+            <div className="flex flex-row items-center">
+              <Burger
+                opened={opened}
+                onClick={toggle}
+                hiddenFrom="sm"
+                size="sm"
+                ml="sm"
+              />
+              <TopBar />
             </div>
-          </div>
-          */}
+          </AppShell.Header>
 
-          <Toaster position="bottom-center" />
-          <Footer />
-        </div>
+          <AppShell.Navbar
+            p="md"
+            style={{ background: "#f1f5f9", marginTop: 60 }}
+          >
+            <SideBar />
+          </AppShell.Navbar>
+
+          <AppShell.Main
+            style={{
+              marginTop: 60,
+              background: "#f1f5f9",
+              display: "flex",
+              flexDirection: "column",
+              minHeight: "calc(100vh - 60px)",
+            }}
+          >
+            <div style={{ flex: 1 }}>
+              <Outlet />
+            </div>
+            <Footer />
+          </AppShell.Main>
+
+          <AppShell.Aside
+            p="md"
+            style={{ background: "#f1f5f9", marginTop: 60 }}
+          />
+        </AppShell>
+
+        <Toaster position="bottom-center" />
       </div>
     </>
   );

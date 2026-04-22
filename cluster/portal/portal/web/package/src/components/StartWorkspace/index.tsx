@@ -170,6 +170,7 @@ const WrapC = (props: {
         borderRadius: 12,
         overflow: "hidden",
       }}
+      className="my-8"
     >
       <div
         style={{

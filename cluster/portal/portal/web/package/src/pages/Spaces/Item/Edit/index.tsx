@@ -562,7 +562,6 @@ export const SpaceEdit = (props: { item: WsPB.Space }) => {
         <div>
           <div className="flex flex-row justify-end items-center">
             <Button
-              size="lg"
               variant="outline"
               className="mr-2"
               onClick={() => {
@@ -573,7 +572,6 @@ export const SpaceEdit = (props: { item: WsPB.Space }) => {
             </Button>
 
             <Button
-              size="lg"
               onClick={() => {
                 mutationUpdate.mutate(req);
               }}

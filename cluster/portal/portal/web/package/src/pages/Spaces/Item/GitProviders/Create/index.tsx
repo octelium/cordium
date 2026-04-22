@@ -224,7 +224,7 @@ const CreateGitProvider = () => {
             tt="uppercase"
             style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
           >
-            Provider configuration
+            Spec
           </Text>
         </Group>
 

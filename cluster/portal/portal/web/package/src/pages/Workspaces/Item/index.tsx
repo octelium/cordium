@@ -54,7 +54,7 @@ const Workspace = () => {
     },
     {
       value: "edit",
-      label: "Edit",
+      label: "Config",
       icon: <IconPencil size={14} />,
       path: "./edit",
     },

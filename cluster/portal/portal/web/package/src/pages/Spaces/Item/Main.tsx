@@ -36,7 +36,7 @@ const Page = () => {
                 tt="uppercase"
                 style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
               >
-                Space details
+                Info
               </Text>
             </div>
 

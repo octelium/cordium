@@ -72,7 +72,6 @@ export const WorkspaceEdit = (props: { item: WsPB.Workspace }) => {
         <div className="mt-8">
           <div className="flex flex-row justify-end items-center">
             <Button
-              size="lg"
               variant="outline"
               className="mr-2"
               onClick={() => {
@@ -83,7 +82,6 @@ export const WorkspaceEdit = (props: { item: WsPB.Workspace }) => {
             </Button>
 
             <Button
-              size="lg"
               loading={mutationUpdate.isPending}
               onClick={() => {
                 if (req) {
