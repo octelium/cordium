@@ -39,7 +39,6 @@ import {
   IconInfoCircle,
   IconLayoutGrid,
   IconPlayerPlay,
-  IconRefresh,
   IconSettings,
 } from "@tabler/icons-react";
 
@@ -300,27 +299,6 @@ const WrapC = (props: {
         <Divider my="lg" />
 
         <Group justify="flex-end" gap="sm">
-          <Button
-            variant="default"
-            size="sm"
-            leftSection={<IconRefresh size={14} />}
-            onClick={() => {
-              setReq(
-                WsPB.Workspace.create({
-                  apiVersion: "workspace/v1",
-                  kind: "Workspace",
-                  metadata: {},
-                  spec: {},
-                  status: { templateRef: getResourceRef(template) },
-                }),
-              );
-              setIsEphemeral(false);
-              setDoStart(true);
-            }}
-          >
-            Reset
-          </Button>
-
           <Button
             size="sm"
             leftSection={<IconPlayerPlay size={14} />}

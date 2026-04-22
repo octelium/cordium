@@ -1,115 +1,93 @@
-import * as React from "react";
-
-import * as WsPB from "../../../apis/cordiumv1/cordiumv1";
-
-import { getClientWorkspace } from "../../../utils/client";
-
-import { onError } from "@/utils";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-
 import MetadataEdit from "@/components/MetadataEdit";
+import { onError } from "@/utils";
 import { useAppSelector } from "@/utils/hooks";
 import { getPathSpace, invalidateSpace } from "@/utils/octelium";
-import { Button } from "@mantine/core";
+import { Button, Divider, Group, Stack, Text, ThemeIcon } from "@mantine/core";
+import { useMutation } from "@tanstack/react-query";
+import { Layers } from "lucide-react";
+import * as React from "react";
+import { useNavigate } from "react-router-dom";
+import * as WsPB from "../../../apis/cordiumv1/cordiumv1";
+import { getClientWorkspace } from "../../../utils/client";
 
 const CreateSpace = () => {
-  let [req, setReq] = React.useState(
+  const [req, setReq] = React.useState(
     WsPB.Space.create({
       metadata: {},
       spec: {},
-      status: {
-        type: WsPB.Space_Status_Type.USER,
-      },
+      status: { type: WsPB.Space_Status_Type.USER },
     }),
   );
 
   const client = getClientWorkspace();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
   const user = useAppSelector((a) => a.settings.status?.user);
 
   const mutation = useMutation({
     mutationFn: async () => {
       const { response } = await client.createSpace(req);
-
       return response;
     },
     onSuccess: (data) => {
       invalidateSpace(data);
       navigate(getPathSpace(data));
     },
-    onError: onError,
+    onError,
   });
 
+  const parentName =
+    req.status?.type === WsPB.Space_Status_Type.USER
+      ? user?.metadata?.name
+      : "cordium";
+
   return (
-    <div>
-      <div>
+    <Stack gap="xl">
+      <div
+        style={{
+          background: "#f8fafc",
+          border: "1px solid #e2e8f0",
+          borderRadius: 10,
+          padding: "16px 20px",
+        }}
+      >
+        <Group gap="xs" mb="md">
+          <ThemeIcon size="sm" variant="light" color="blue" radius="md">
+            <Layers size={13} />
+          </ThemeIcon>
+          <Text
+            size="xs"
+            fw={600}
+            tt="uppercase"
+            style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
+          >
+            Space details
+          </Text>
+        </Group>
         <MetadataEdit
           metadata={req.metadata!}
           onUpdate={(itm) => {
             req.metadata = itm;
-            setReq(req);
-          }}
-          parentName={
-            req.status?.type === WsPB.Space_Status_Type.USER
-              ? user?.metadata?.name
-              : "cordium"
-          }
-        />
-      </div>
-
-      {/**
-       <div>
-        <Select
-          label="Type"
-          data={[
-            {
-              label: "User",
-              value: WsPB.Space_Status_Type[WsPB.Space_Status_Type.USER],
-            },
-            {
-              label: "Organization",
-              value:
-                WsPB.Space_Status_Type[WsPB.Space_Status_Type.ORGANIZATION],
-            },
-          ]}
-          value={WsPB.Space_Status_Type[req.status!.type]}
-          onChange={(val) => {
-            if (!val) {
-              return;
-            }
-            req.status!.type =
-              WsPB.Space_Status_Type[val as "ORGANIZATION" | "PERSONAL"];
             setReq(WsPB.Space.clone(req));
           }}
+          parentName={parentName}
         />
       </div>
-       **/}
 
-      <div className="flex items-center justify-end mt-4">
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={() => {
-            navigate(-1);
-          }}
-        >
+      <Divider />
+
+      <Group justify="flex-end" gap="sm">
+        <Button variant="default" size="sm" onClick={() => navigate(-1)}>
           Cancel
         </Button>
         <Button
+          size="sm"
           loading={mutation.isPending}
-          size="lg"
-          className="ml-2"
-          onClick={() => {
-            mutation.mutate();
-          }}
+          onClick={() => mutation.mutate()}
         >
-          Create Space
+          Create space
         </Button>
-      </div>
-    </div>
+      </Group>
+    </Stack>
   );
 };
 

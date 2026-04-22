@@ -3,61 +3,92 @@ import * as React from "react";
 
 import { getClientWorkspace } from "@/utils/client";
 
-import Field from "@/components/Field";
 import MetadataEdit from "@/components/MetadataEdit";
 import { useContextSpace } from "@/pages/Spaces/utils";
 import { onError } from "@/utils";
 import { getPathSpace } from "@/utils/octelium";
 import { cloneResource, getResourceRef } from "@/utils/pb";
-import { Button, Group, Select, Tabs } from "@mantine/core";
+import {
+  Button,
+  Divider,
+  Group,
+  Select,
+  Stack,
+  Tabs,
+  Text,
+  TextInput,
+  ThemeIcon,
+} from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { GitBranch, Settings2 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
+type ProviderKind = "github" | "gitlab" | "oauth2";
+
+const PROVIDER_TABS: { value: ProviderKind; label: string }[] = [
+  { value: "github", label: "GitHub" },
+  { value: "gitlab", label: "GitLab" },
+  { value: "oauth2", label: "Generic OAuth2" },
+];
+
+const makeProviderSpec = (kind: ProviderKind): WsPB.GitProvider["spec"] => {
+  const secret = { type: { oneofKind: "fromSecret" as const, fromSecret: "" } };
+  switch (kind) {
+    case "github":
+      return {
+        type: {
+          oneofKind: "github",
+          github: { clientID: "", clientSecret: secret, scopes: [] },
+        },
+      };
+    case "gitlab":
+      return {
+        type: {
+          oneofKind: "gitlab",
+          gitlab: { clientID: "", clientSecret: secret, scopes: [] },
+        },
+      };
+    case "oauth2":
+      return {
+        type: {
+          oneofKind: "oauth2",
+          oauth2: {
+            clientID: "",
+            authURL: "",
+            tokenURL: "",
+            scopes: [],
+            clientSecret: secret,
+          },
+        },
+      };
+  }
+};
+
 const CreateGitProvider = () => {
   const ctx = useContextSpace();
+  const client = getClientWorkspace();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  if (!ctx.space.isSuccess) {
-    return <></>;
-  }
-
-  let [req, setReq] = React.useState(
+  const [req, setReq] = React.useState(
     WsPB.GitProvider.create({
       apiVersion: "workspace/v1",
       kind: "GitProvider",
       metadata: {},
-      spec: {
-        type: {
-          oneofKind: `github`,
-          github: {
-            clientID: "",
-
-            clientSecret: {
-              type: {
-                oneofKind: "fromSecret",
-                fromSecret: "",
-              },
-            },
-          } as WsPB.GitProvider_Spec_Github,
-        },
-      },
+      spec: makeProviderSpec("github"),
       status: {},
     }),
   );
 
-  const updateReq = () => {
-    const clone = cloneResource(req) as WsPB.GitProvider;
-    setReq(clone);
-  };
+  const [activeTab, setActiveTab] = React.useState<ProviderKind>("github");
 
-  const client = getClientWorkspace();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const updateReq = () => setReq(cloneResource(req) as WsPB.GitProvider);
+
   const mutation = useMutation({
     mutationFn: async () => {
       req.status!.spaceRef = getResourceRef(ctx.space.data!);
       const { response } = await client.createGitProvider(req);
-
       return response;
     },
     onSuccess: (data) => {
@@ -68,634 +99,229 @@ const CreateGitProvider = () => {
           0,
         ],
       });
-
-      toast.success("GitProvider created");
+      toast.success("Git provider created");
       navigate(`${getPathSpace(ctx.space.data!)}/gitproviders`);
     },
-    onError: onError,
+    onError,
   });
 
-  let qrySecret = useQuery({
-    queryKey: ["workspace/listSecret/"],
+  const qrySecret = useQuery({
+    queryKey: ["workspace/listSecret/", ctx.space.data?.metadata?.uid],
     queryFn: () => {
       const { response } = client.listSecret(
         WsPB.ListSecretOptions.create({
           spaceRef: getResourceRef(ctx.space.data!),
-          common: {
-            itemsPerPage: 500,
-          },
+          common: { itemsPerPage: 500 },
         }),
       );
       return response;
     },
+    enabled: ctx.space.isSuccess,
   });
 
-  if (!qrySecret.isSuccess) {
-    return <></>;
-  }
+  if (!ctx.space.isSuccess || !qrySecret.isSuccess) return null;
+
+  const data = ctx.space.data;
+
+  const secretOptions = qrySecret.data.items.map((x) => ({
+    value: x.metadata!.name,
+    label: x.metadata!.name.split(".").at(0) ?? x.metadata!.name,
+  }));
+
+  const getClientSecretValue = (): string => {
+    const t = req.spec!.type;
+    if (t.oneofKind === "github")
+      return t.github.clientSecret?.type.oneofKind === "fromSecret"
+        ? t.github.clientSecret.type.fromSecret
+        : "";
+    if (t.oneofKind === "gitlab")
+      return t.gitlab.clientSecret?.type.oneofKind === "fromSecret"
+        ? t.gitlab.clientSecret.type.fromSecret
+        : "";
+    if (t.oneofKind === "oauth2")
+      return t.oauth2.clientSecret?.type.oneofKind === "fromSecret"
+        ? t.oauth2.clientSecret.type.fromSecret
+        : "";
+    return "";
+  };
+
+  const setClientID = (v: string) => {
+    const t = req.spec!.type;
+    if (t.oneofKind === "github") t.github.clientID = v;
+    else if (t.oneofKind === "gitlab") t.gitlab.clientID = v;
+    else if (t.oneofKind === "oauth2") t.oauth2.clientID = v;
+    updateReq();
+  };
+
+  const setClientSecret = (val: string) => {
+    const t = req.spec!.type;
+    const patch = { oneofKind: "fromSecret" as const, fromSecret: val };
+    if (t.oneofKind === "github" && t.github.clientSecret)
+      t.github.clientSecret.type = patch;
+    else if (t.oneofKind === "gitlab" && t.gitlab.clientSecret)
+      t.gitlab.clientSecret.type = patch;
+    else if (t.oneofKind === "oauth2" && t.oauth2.clientSecret)
+      t.oauth2.clientSecret.type = patch;
+    updateReq();
+  };
+
+  const getClientID = (): string => {
+    const t = req.spec!.type;
+    if (t.oneofKind === "github") return t.github.clientID;
+    if (t.oneofKind === "gitlab") return t.gitlab.clientID;
+    if (t.oneofKind === "oauth2") return t.oauth2.clientID;
+    return "";
+  };
 
   return (
-    <div>
-      <div className="w-full">
+    <Stack gap="xl">
+      <div
+        style={{
+          background: "#f8fafc",
+          border: "1px solid #e2e8f0",
+          borderRadius: 10,
+          padding: "16px 20px",
+        }}
+      >
+        <Group gap="xs" mb="md">
+          <ThemeIcon size="sm" variant="light" color="blue" radius="md">
+            <GitBranch size={13} />
+          </ThemeIcon>
+          <Text
+            size="xs"
+            fw={600}
+            tt="uppercase"
+            style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
+          >
+            Metadata
+          </Text>
+        </Group>
         <MetadataEdit
           metadata={req.metadata!}
           onUpdate={(itm) => {
             req.metadata = itm;
             updateReq();
           }}
-          parentName={ctx.space.data.metadata?.name}
+          parentName={data.metadata?.name}
         />
-
-        <Tabs className="mt-12" defaultValue="github">
-          <Tabs.List className="mb-2">
-            <Tabs.Tab
-              value="github"
-              onClick={() => {
-                req.spec!.type = {
-                  oneofKind: "github",
-                  github: {
-                    clientID: "",
-                    clientSecret: {
-                      type: {
-                        oneofKind: "fromSecret",
-                        fromSecret: "",
-                      },
-                    },
-                    scopes: [],
-                  },
-                };
-                updateReq();
-              }}
-            >
-              Github
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="gitlab"
-              onClick={() => {
-                req.spec!.type = {
-                  oneofKind: "gitlab",
-                  gitlab: {
-                    clientID: "",
-                    clientSecret: {
-                      type: {
-                        oneofKind: "fromSecret",
-                        fromSecret: "",
-                      },
-                    },
-                    scopes: [],
-                  },
-                };
-                updateReq();
-              }}
-            >
-              Gitlab
-            </Tabs.Tab>
-            <Tabs.Tab
-              value="oauth2"
-              onClick={() => {
-                req.spec!.type = {
-                  oneofKind: "oauth2",
-                  oauth2: {
-                    clientID: "",
-                    authURL: "",
-                    tokenURL: "",
-                    scopes: [],
-                    clientSecret: {
-                      type: {
-                        oneofKind: "fromSecret",
-                        fromSecret: "",
-                      },
-                    },
-                  },
-                };
-                updateReq();
-              }}
-            >
-              Generic OAuth2 Provider
-            </Tabs.Tab>
-          </Tabs.List>
-
-          <Tabs.Panel value="github">
-            {req.spec!.type.oneofKind === `github` && (
-              <Group grow>
-                <Field
-                  val={req.spec!.type.github.clientID}
-                  label={`Client ID`}
-                  placeholder="abcdefg123456"
-                  isRequired
-                  onChange={(v) => {
-                    let f = req.spec!.type as {
-                      oneofKind: "github";
-                      github: WsPB.GitProvider_Spec_Github;
-                    };
-
-                    f.github.clientID = v as string;
-                    updateReq();
-                  }}
-                />
-
-                {req.spec!.type.github.clientSecret?.type.oneofKind ===
-                  "fromSecret" && (
-                  <>
-                    {req.spec!.type.github.clientSecret.type.oneofKind ===
-                      "fromSecret" && (
-                      <Select
-                        label="Client Secret"
-                        required
-                        data={qrySecret.data!.items.map((x) => ({
-                          value: x.metadata!.name,
-                          label: x.metadata!.name.split(".").at(0) ?? "",
-                        }))}
-                        defaultValue={
-                          req.spec!.type.github.clientSecret.type.fromSecret ??
-                          ""
-                        }
-                        onChange={(val) => {
-                          if (!val) {
-                            return;
-                          }
-                          let f = req.spec!.type as {
-                            oneofKind: "github";
-                            github: WsPB.GitProvider_Spec_Github;
-                          };
-
-                          let g = f.github.clientSecret?.type as {
-                            oneofKind: "fromSecret";
-                            fromSecret: string;
-                          };
-                          g.fromSecret = val;
-                          updateReq();
-                        }}
-                      />
-                    )}
-                  </>
-                )}
-              </Group>
-            )}
-          </Tabs.Panel>
-          <Tabs.Panel value="gitlab">
-            {req.spec!.type.oneofKind === `gitlab` && (
-              <Group grow>
-                <Field
-                  val={req.spec!.type.gitlab.clientID}
-                  label={`Client ID`}
-                  placeholder="abcdefg123456"
-                  isRequired
-                  onChange={(v) => {
-                    let f = req.spec!.type as {
-                      oneofKind: "gitlab";
-                      gitlab: WsPB.GitProvider_Spec_Gitlab;
-                    };
-
-                    f.gitlab.clientID = v as string;
-                    updateReq();
-                  }}
-                />
-
-                {req.spec!.type.gitlab.clientSecret?.type.oneofKind ===
-                  "fromSecret" && (
-                  <>
-                    {req.spec!.type.gitlab.clientSecret.type.oneofKind ===
-                      "fromSecret" && (
-                      <Select
-                        label="Client Secret"
-                        required
-                        data={qrySecret.data!.items.map((x) => ({
-                          value: x.metadata!.name,
-                          label: x.metadata!.name.split(".").at(0) ?? "",
-                        }))}
-                        defaultValue={
-                          req.spec!.type.gitlab.clientSecret.type.fromSecret ??
-                          ""
-                        }
-                        onChange={(val) => {
-                          if (!val) {
-                            return;
-                          }
-                          let f = req.spec!.type as {
-                            oneofKind: "gitlab";
-                            gitlab: WsPB.GitProvider_Spec_Gitlab;
-                          };
-
-                          let g = f.gitlab.clientSecret?.type as {
-                            oneofKind: "fromSecret";
-                            fromSecret: string;
-                          };
-                          g.fromSecret = val;
-                          updateReq();
-                        }}
-                      />
-                    )}
-                  </>
-                )}
-              </Group>
-            )}
-          </Tabs.Panel>
-          <Tabs.Panel value="oauth2">
-            {req.spec!.type.oneofKind === `oauth2` && (
-              <Group grow>
-                <Field
-                  val={req.spec!.type.oauth2.clientID}
-                  label={`Client ID`}
-                  placeholder="abcdefg123456"
-                  isRequired
-                  onChange={(v) => {
-                    let f = req.spec!.type as {
-                      oneofKind: "oauth2";
-                      oauth2: WsPB.GitProvider_Spec_OAuth2;
-                    };
-
-                    f.oauth2.clientID = v as string;
-                    updateReq();
-                  }}
-                />
-
-                {req.spec!.type.oauth2.clientSecret?.type.oneofKind ===
-                  "fromSecret" && (
-                  <>
-                    {req.spec!.type.oauth2.clientSecret.type.oneofKind ===
-                      "fromSecret" && (
-                      <Select
-                        label="Client Secret"
-                        required
-                        data={qrySecret.data!.items.map((x) => ({
-                          value: x.metadata!.name,
-                          label: x.metadata!.name.split(".").at(0) ?? "",
-                        }))}
-                        defaultValue={
-                          req.spec!.type.oauth2.clientSecret.type.fromSecret ??
-                          ""
-                        }
-                        onChange={(val) => {
-                          if (!val) {
-                            return;
-                          }
-                          let f = req.spec!.type as {
-                            oneofKind: "oauth2";
-                            oauth2: WsPB.GitProvider_Spec_OAuth2;
-                          };
-
-                          let g = f.oauth2.clientSecret?.type as {
-                            oneofKind: "fromSecret";
-                            fromSecret: string;
-                          };
-                          g.fromSecret = val;
-                          updateReq();
-                        }}
-                      />
-                    )}
-                  </>
-                )}
-
-                <Field
-                  val={req.spec!.type.oauth2.authURL}
-                  label={`Auth URL`}
-                  isRequired
-                  placeholder="https://example.com/auth"
-                  onChange={(v) => {
-                    let f = req.spec!.type as {
-                      oneofKind: "oauth2";
-                      oauth2: WsPB.GitProvider_Spec_OAuth2;
-                    };
-
-                    f.oauth2.authURL = v as string;
-                    updateReq();
-                  }}
-                />
-
-                <Field
-                  val={req.spec!.type.oauth2.tokenURL}
-                  label={`Token URL`}
-                  isRequired
-                  placeholder="https://example.com/oauth/oauth20/token"
-                  onChange={(v) => {
-                    let f = req.spec!.type as {
-                      oneofKind: "oauth2";
-                      oauth2: WsPB.GitProvider_Spec_OAuth2;
-                    };
-
-                    f.oauth2.tokenURL = v as string;
-                    updateReq();
-                  }}
-                />
-              </Group>
-            )}
-          </Tabs.Panel>
-        </Tabs>
-
-        {/*
-        <div className="mt-16">
-          <ItemContainer title="">
-            <EditItem
-              title="GitHub"
-              obj={req.spec!.type.oneofKind === `github` ? {} : undefined}
-              onSet={() => {
-                req.spec!.type = {
-                  oneofKind: "github",
-                  github: {
-                    clientID: "",
-                    clientSecret: {
-                      type: {
-                        oneofKind: "fromSecret",
-                        fromSecret: "",
-                      },
-                    },
-                    scopes: [],
-                  },
-                };
-                updateReq();
-              }}
-              onUnset={() => {
-                req.spec!.type = {
-                  oneofKind: undefined,
-                };
-                updateReq();
-              }}
-            >
-              {req.spec!.type.oneofKind === `github` && (
-                <Group grow>
-                  <Field
-                    val={req.spec!.type.github.clientID}
-                    label={`Client ID`}
-                    placeholder="abcdefg123456"
-                    isRequired
-                    onChange={(v) => {
-                      let f = req.spec!.type as {
-                        oneofKind: "github";
-                        github: WsPB.GitProvider_Spec_Github;
-                      };
-
-                      f.github.clientID = v as string;
-                      updateReq();
-                    }}
-                  />
-
-                  {req.spec!.type.github.clientSecret?.type.oneofKind ===
-                    "fromSecret" && (
-                    <>
-                      {req.spec!.type.github.clientSecret.type.oneofKind ===
-                        "fromSecret" && (
-                        <Select
-                          label="Client Secret"
-                          required
-                          data={qrySecret.data!.items.map((x) => ({
-                            value: x.metadata!.name,
-                            label: x.metadata!.name.split(".").at(0) ?? "",
-                          }))}
-                          defaultValue={
-                            req.spec!.type.github.clientSecret.type
-                              .fromSecret ?? ""
-                          }
-                          onChange={(val) => {
-                            if (!val) {
-                              return;
-                            }
-                            let f = req.spec!.type as {
-                              oneofKind: "github";
-                              github: WsPB.GitProvider_Spec_Github;
-                            };
-
-                            let g = f.github.clientSecret?.type as {
-                              oneofKind: "fromSecret";
-                              fromSecret: string;
-                            };
-                            g.fromSecret = val;
-                            updateReq();
-                          }}
-                        />
-                      )}
-                    </>
-                  )}
-                </Group>
-              )}
-            </EditItem>
-            <Divider>OR</Divider>
-            <EditItem
-              title="Gitlab"
-              obj={req.spec!.type.oneofKind === `gitlab` ? {} : undefined}
-              onSet={() => {
-                req.spec!.type = {
-                  oneofKind: "gitlab",
-                  gitlab: {
-                    clientID: "",
-                    clientSecret: {
-                      type: {
-                        oneofKind: "fromSecret",
-                        fromSecret: "",
-                      },
-                    },
-                    scopes: [],
-                  },
-                };
-                updateReq();
-              }}
-              onUnset={() => {
-                req.spec!.type = {
-                  oneofKind: undefined,
-                };
-                updateReq();
-              }}
-            >
-              {req.spec!.type.oneofKind === `gitlab` && (
-                <Group grow>
-                  <Field
-                    val={req.spec!.type.gitlab.clientID}
-                    label={`Client ID`}
-                    placeholder="abcdefg123456"
-                    isRequired
-                    onChange={(v) => {
-                      let f = req.spec!.type as {
-                        oneofKind: "gitlab";
-                        gitlab: WsPB.GitProvider_Spec_Gitlab;
-                      };
-
-                      f.gitlab.clientID = v as string;
-                      updateReq();
-                    }}
-                  />
-
-                  {req.spec!.type.gitlab.clientSecret?.type.oneofKind ===
-                    "fromSecret" && (
-                    <>
-                      {req.spec!.type.gitlab.clientSecret.type.oneofKind ===
-                        "fromSecret" && (
-                        <Select
-                          label="Client Secret"
-                          required
-                          data={qrySecret.data!.items.map((x) => ({
-                            value: x.metadata!.name,
-                            label: x.metadata!.name.split(".").at(0) ?? "",
-                          }))}
-                          defaultValue={
-                            req.spec!.type.gitlab.clientSecret.type
-                              .fromSecret ?? ""
-                          }
-                          onChange={(val) => {
-                            if (!val) {
-                              return;
-                            }
-                            let f = req.spec!.type as {
-                              oneofKind: "gitlab";
-                              gitlab: WsPB.GitProvider_Spec_Gitlab;
-                            };
-
-                            let g = f.gitlab.clientSecret?.type as {
-                              oneofKind: "fromSecret";
-                              fromSecret: string;
-                            };
-                            g.fromSecret = val;
-                            updateReq();
-                          }}
-                        />
-                      )}
-                    </>
-                  )}
-                </Group>
-              )}
-            </EditItem>
-
-            <Divider>OR</Divider>
-
-            <EditItem
-              title="Generic OAuth2 Provider"
-              obj={req.spec!.type.oneofKind === `oauth2` ? {} : undefined}
-              onSet={() => {
-                req.spec!.type = {
-                  oneofKind: "oauth2",
-                  oauth2: {
-                    clientID: "",
-                    authURL: "",
-                    tokenURL: "",
-                    scopes: [],
-                    clientSecret: {
-                      type: {
-                        oneofKind: "fromSecret",
-                        fromSecret: "",
-                      },
-                    },
-                  },
-                };
-                updateReq();
-              }}
-              onUnset={() => {
-                req.spec!.type = {
-                  oneofKind: undefined,
-                };
-                updateReq();
-              }}
-            >
-              {req.spec!.type.oneofKind === `oauth2` && (
-                <Group grow>
-                  <Field
-                    val={req.spec!.type.oauth2.clientID}
-                    label={`Client ID`}
-                    placeholder="abcdefg123456"
-                    isRequired
-                    onChange={(v) => {
-                      let f = req.spec!.type as {
-                        oneofKind: "oauth2";
-                        oauth2: WsPB.GitProvider_Spec_OAuth2;
-                      };
-
-                      f.oauth2.clientID = v as string;
-                      updateReq();
-                    }}
-                  />
-
-                  {req.spec!.type.oauth2.clientSecret?.type.oneofKind ===
-                    "fromSecret" && (
-                    <>
-                      {req.spec!.type.oauth2.clientSecret.type.oneofKind ===
-                        "fromSecret" && (
-                        <Select
-                          label="Client Secret"
-                          required
-                          data={qrySecret.data!.items.map((x) => ({
-                            value: x.metadata!.name,
-                            label: x.metadata!.name.split(".").at(0) ?? "",
-                          }))}
-                          defaultValue={
-                            req.spec!.type.oauth2.clientSecret.type
-                              .fromSecret ?? ""
-                          }
-                          onChange={(val) => {
-                            if (!val) {
-                              return;
-                            }
-                            let f = req.spec!.type as {
-                              oneofKind: "oauth2";
-                              oauth2: WsPB.GitProvider_Spec_OAuth2;
-                            };
-
-                            let g = f.oauth2.clientSecret?.type as {
-                              oneofKind: "fromSecret";
-                              fromSecret: string;
-                            };
-                            g.fromSecret = val;
-                            updateReq();
-                          }}
-                        />
-                      )}
-                    </>
-                  )}
-
-                  <Field
-                    val={req.spec!.type.oauth2.authURL}
-                    label={`Auth URL`}
-                    placeholder="https://example.com/auth"
-                    onChange={(v) => {
-                      let f = req.spec!.type as {
-                        oneofKind: "oauth2";
-                        oauth2: WsPB.GitProvider_Spec_OAuth2;
-                      };
-
-                      f.oauth2.authURL = v as string;
-                      updateReq();
-                    }}
-                  />
-
-                  <Field
-                    val={req.spec!.type.oauth2.tokenURL}
-                    label={`Token URL`}
-                    placeholder="https://example.com/oauth/oauth20/token"
-                    onChange={(v) => {
-                      let f = req.spec!.type as {
-                        oneofKind: "oauth2";
-                        oauth2: WsPB.GitProvider_Spec_OAuth2;
-                      };
-
-                      f.oauth2.tokenURL = v as string;
-                      updateReq();
-                    }}
-                  />
-                </Group>
-              )}
-            </EditItem>
-          </ItemContainer>
-        </div> 
-        */}
       </div>
-      <div className="flex items-center justify-end mt-12">
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={() => {
-            navigate(-1);
+
+      <div
+        style={{
+          background: "#f8fafc",
+          border: "1px solid #e2e8f0",
+          borderRadius: 10,
+          padding: "16px 20px",
+        }}
+      >
+        <Group gap="xs" mb="md">
+          <ThemeIcon size="sm" variant="light" color="violet" radius="md">
+            <Settings2 size={13} />
+          </ThemeIcon>
+          <Text
+            size="xs"
+            fw={600}
+            tt="uppercase"
+            style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
+          >
+            Provider configuration
+          </Text>
+        </Group>
+
+        <Tabs
+          value={activeTab}
+          onChange={(v) => {
+            const kind = v as ProviderKind;
+            setActiveTab(kind);
+            req.spec = makeProviderSpec(kind);
+            updateReq();
           }}
         >
+          <Tabs.List mb="md">
+            {PROVIDER_TABS.map((t) => (
+              <Tabs.Tab key={t.value} value={t.value} style={{ fontSize: 13 }}>
+                {t.label}
+              </Tabs.Tab>
+            ))}
+          </Tabs.List>
+
+          {PROVIDER_TABS.map((t) => (
+            <Tabs.Panel key={t.value} value={t.value}>
+              <Stack gap="md">
+                <Group grow align="flex-start">
+                  <TextInput
+                    label="Client ID"
+                    placeholder="abcdefg123456"
+                    required
+                    value={getClientID()}
+                    onChange={(e) => setClientID(e.currentTarget.value)}
+                  />
+                  <Select
+                    label="Client secret"
+                    placeholder="Select a secret…"
+                    required
+                    data={secretOptions}
+                    value={getClientSecretValue() || null}
+                    onChange={(val) => val && setClientSecret(val)}
+                  />
+                </Group>
+
+                {t.value === "oauth2" &&
+                  req.spec!.type.oneofKind === "oauth2" && (
+                    <Group grow align="flex-start">
+                      <TextInput
+                        label="Auth URL"
+                        placeholder="https://example.com/oauth/authorize"
+                        required
+                        value={req.spec!.type.oauth2.authURL}
+                        onChange={(e) => {
+                          (
+                            req.spec!.type as {
+                              oneofKind: "oauth2";
+                              oauth2: WsPB.GitProvider_Spec_OAuth2;
+                            }
+                          ).oauth2.authURL = e.currentTarget.value;
+                          updateReq();
+                        }}
+                      />
+                      <TextInput
+                        label="Token URL"
+                        placeholder="https://example.com/oauth/token"
+                        required
+                        value={req.spec!.type.oauth2.tokenURL}
+                        onChange={(e) => {
+                          (
+                            req.spec!.type as {
+                              oneofKind: "oauth2";
+                              oauth2: WsPB.GitProvider_Spec_OAuth2;
+                            }
+                          ).oauth2.tokenURL = e.currentTarget.value;
+                          updateReq();
+                        }}
+                      />
+                    </Group>
+                  )}
+              </Stack>
+            </Tabs.Panel>
+          ))}
+        </Tabs>
+      </div>
+
+      <Divider />
+
+      <Group justify="flex-end" gap="sm">
+        <Button variant="default" size="sm" onClick={() => navigate(-1)}>
           Cancel
         </Button>
         <Button
-          size="lg"
-          className="ml-2"
-          onClick={() => {
-            mutation.mutate();
-          }}
+          size="sm"
+          loading={mutation.isPending}
+          onClick={() => mutation.mutate()}
         >
-          Create
+          Create provider
         </Button>
-      </div>
-    </div>
+      </Group>
+    </Stack>
   );
 };
 

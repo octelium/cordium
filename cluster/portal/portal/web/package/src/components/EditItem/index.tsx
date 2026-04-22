@@ -1,16 +1,13 @@
-import * as React from "react";
-
 import { Button, Collapse } from "@mantine/core";
-
+import { Plus, Trash2 } from "lucide-react";
+import * as React from "react";
 import { twJoin, twMerge } from "tailwind-merge";
-
-import { MdAdd, MdDelete } from "react-icons/md";
 
 interface Props {
   children?: React.ReactNode;
   title?: string;
   description?: string;
-  obj?: object | Array<any> | undefined;
+  obj?: object | Array<any>;
   onSet?: () => void;
   onUnset: () => void;
   isList?: boolean;
@@ -19,51 +16,50 @@ interface Props {
 }
 
 const EditItem = (props: Props) => {
-  // let [isExpanded, setIsExpanded] = React.useState(false);
-
-  let arrLen = 0;
-  if (props.isList) {
-    let arr = props.obj as Array<any>;
-    arrLen = arr.length;
-  }
-
+  const arr = props.isList ? (props.obj as Array<any> | undefined) : undefined;
+  const arrLen = arr?.length ?? 0;
   const isExpanded = props.isList ? arrLen > 0 : props.obj !== undefined;
+
+  const handleAddItem = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    props.onAddListItem?.();
+  };
 
   return (
     <div
       className={twJoin(
-        "mt-4 pl-2 border-l-4",
-        "transition-all duration-200",
-        isExpanded ? "border-l-gray-800" : "border-l-gray-400",
-        isExpanded ? undefined : "hover:bg-white hover:bg-opacity-50",
+        "mt-4 pl-3 border-l-4",
+        "transition-colors duration-200",
+        isExpanded ? "border-l-gray-800" : "border-l-gray-300",
+        !isExpanded && "hover:border-l-gray-500",
       )}
     >
-      <div className="w-full flex items-center">
+      <div className="w-full flex items-center gap-2 min-h-[28px]">
         <div
           className={twJoin(
-            "font-bold text-sm  flex items-center",
-            "transition-all duration-200",
-            "flex-1 flex-grow w-full",
-            isExpanded ? "text-black" : "text-gray-600",
-            isExpanded ? undefined : "cursor-pointer",
+            "flex items-center gap-2 flex-1 min-w-0",
+            !isExpanded && "cursor-pointer",
           )}
           onClick={() => {
-            if (!isExpanded) {
-              if (props.onSet) {
-                props.onSet();
-              }
-            }
+            if (!isExpanded) props.onSet?.();
           }}
         >
           {props.title && (
-            <span className={twMerge("text-sm", "mr-2")}>{props.title}</span>
+            <span
+              className={twMerge(
+                "font-bold text-sm transition-colors duration-200 shrink-0",
+                isExpanded ? "text-gray-900" : "text-gray-500",
+              )}
+            >
+              {props.title}
+            </span>
           )}
+
           {props.description && (
             <span
               className={twMerge(
-                isExpanded ? "text-gray-600" : "text-gray-500",
-                "mr-2",
-                "transition-all duration-200",
+                "text-xs transition-colors duration-200 truncate",
+                isExpanded ? "text-gray-500" : "text-gray-400",
               )}
             >
               {props.description}
@@ -73,58 +69,48 @@ const EditItem = (props: Props) => {
           {props.isList && props.onAddListItem && (
             <Button
               size="xs"
-              // variant="light"
-              className="!shadow transition-all duration-500"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (props.onAddListItem) {
-                  props.onAddListItem();
-                }
-              }}
+              variant="light"
+              leftSection={<Plus size={12} />}
+              onClick={handleAddItem}
             >
-              Add Item {`(${arrLen})`} <MdAdd />
+              Add item {arrLen > 0 && `(${arrLen})`}
             </Button>
           )}
         </div>
-        {!props.noDelete && (
-          <div>
-            <button
-              className={twJoin(
-                "text-gray-600 font-bold text-xl p-1 cursor-pointer",
-                "hover:text-gray-800 transition-all duration-200",
-                isExpanded ? "visible" : "invisible",
-              )}
-              onClick={() => {
-                props.onUnset();
-              }}
-            >
-              <MdDelete />
-            </button>
-          </div>
+
+        {!props.noDelete && isExpanded && (
+          <button
+            type="button"
+            aria-label={`Remove ${props.title ?? "item"}`}
+            className="text-gray-400 hover:text-red-500 transition-colors duration-150 p-1 cursor-pointer flex-shrink-0"
+            onClick={() => props.onUnset()}
+          >
+            <Trash2 size={14} />
+          </button>
         )}
       </div>
 
-      <div>
-        <Collapse in={isExpanded}>
-          <div>
-            <div className="ml-2">{props.children}</div>
-            {props.isList && props.onAddListItem && (
-              <div className="flex justify-center items-center my-4">
-                <Button
-                  size="xs"
-                  // variant="light"
-                  className="!shadow transition-all duration-500"
-                  onClick={() => {
-                    props.onAddListItem!();
-                  }}
-                >
-                  Add Item {`(${arrLen})`} <MdAdd />
-                </Button>
-              </div>
-            )}
-          </div>
-        </Collapse>
-      </div>
+      <Collapse in={isExpanded}>
+        <div className="ml-2 mt-1">
+          {props.children}
+
+          {props.isList && props.onAddListItem && arrLen > 0 && (
+            <div className="flex justify-start items-center mt-3 mb-1">
+              <Button
+                size="xs"
+                variant="light"
+                leftSection={<Plus size={12} />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  props.onAddListItem!();
+                }}
+              >
+                Add another item ({arrLen})
+              </Button>
+            </div>
+          )}
+        </div>
+      </Collapse>
     </div>
   );
 };

@@ -1,9 +1,7 @@
-import * as React from "react";
-
 import { Metadata } from "@/apis/metav1/metav1";
-import Field from "@/components/Field";
 import { getShortNameFromStr } from "@/utils/pb";
-import { Group } from "@mantine/core";
+import { Group, TextInput } from "@mantine/core";
+import * as React from "react";
 
 const MetadataEdit = (props: {
   metadata: Metadata;
@@ -11,38 +9,44 @@ const MetadataEdit = (props: {
   parentName?: string;
   skipDisplayName?: boolean;
 }) => {
-  let [req, setReq] = React.useState(Metadata.clone(props.metadata));
+  const [req, setReq] = React.useState(Metadata.clone(props.metadata));
+
+  const update = (next: Metadata) => {
+    const cloned = Metadata.clone(next);
+    setReq(cloned);
+    props.onUpdate(cloned);
+  };
+
+  const shortName = getShortNameFromStr(req.name);
 
   return (
-    <div className="w-full">
-      <Group grow>
-        <Field
-          val={getShortNameFromStr(req.name)}
-          label="Name"
-          placeholder="my-resource"
-          isRequired
-          onChange={(v) => {
-            const arg = v as string;
-            req!.name = props.parentName ? `${arg}.${props.parentName}` : arg;
-            setReq(Metadata.clone(req));
-            props.onUpdate(req);
+    <Group grow align="flex-start">
+      <TextInput
+        label="Name"
+        description={"Set a unique name for th resource"}
+        placeholder="my-resource"
+        required
+        value={shortName}
+        onChange={(e) => {
+          const arg = e.currentTarget.value;
+          req.name = props.parentName ? `${arg}.${props.parentName}` : arg;
+          update(req);
+        }}
+      />
+
+      {!props.skipDisplayName && (
+        <TextInput
+          label="Display name"
+          description="Optional human-friendly label"
+          placeholder="My Resource"
+          value={req.displayName}
+          onChange={(e) => {
+            req.displayName = e.currentTarget.value;
+            update(req);
           }}
         />
-
-        {!props.skipDisplayName && (
-          <Field
-            val={req.displayName}
-            label="Display Name"
-            placeholder="My Resource"
-            onChange={(v) => {
-              req.displayName = v as string;
-              setReq(Metadata.clone(req));
-              props.onUpdate(req);
-            }}
-          />
-        )}
-      </Group>
-    </div>
+      )}
+    </Group>
   );
 };
 

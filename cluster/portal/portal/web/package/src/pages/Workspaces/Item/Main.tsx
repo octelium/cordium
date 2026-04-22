@@ -324,7 +324,7 @@ const InfoBar = (props: { item: WsPB.Workspace }) => {
           >
             <Text
               size="xs"
-              fw={500}
+              fw={700}
               tt="uppercase"
               style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
             >

@@ -10,26 +10,25 @@ import { useContextSpace } from "@/pages/Spaces/utils";
 import { onError, queryClient } from "@/utils";
 import { getPathTemplate } from "@/utils/octelium";
 import { getResourceRef } from "@/utils/pb";
-import { Button } from "@mantine/core";
+import { Button, Divider, Group, Stack, Text, ThemeIcon } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
+import { LayoutTemplate, Settings2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const CreateTemplate = () => {
   const ctx = useContextSpace();
 
-  if (!ctx.space.isSuccess) {
-    return <></>;
-  }
-
-  let [req, setReq] = React.useState(
+  const [req, setReq] = React.useState(
     WsPB.Template.create({
       apiVersion: "workspace/v1",
       kind: "Template",
       metadata: {},
       spec: {},
       status: {
-        spaceRef: getResourceRef(ctx.space.data),
+        spaceRef: ctx.space.isSuccess
+          ? getResourceRef(ctx.space.data)
+          : undefined,
       },
     }),
   );
@@ -40,10 +39,8 @@ const CreateTemplate = () => {
   const mutation = useMutation({
     mutationFn: async () => {
       const { response } = await client.createTemplate(req);
-
       return response;
     },
-
     onSuccess: (data) => {
       navigate(getPathTemplate(data));
       queryClient.invalidateQueries({
@@ -51,25 +48,70 @@ const CreateTemplate = () => {
       });
       toast.success(`Template ${data.metadata?.name} created`);
     },
-    onError: onError,
+    onError,
   });
+
+  if (!ctx.space.isSuccess) return null;
+
+  const data = ctx.space.data;
 
   return (
     <PageWrap qry={ctx.space} title="Create a Template">
-      {ctx.space.data && (
-        <div>
-          <div>
-            <MetadataEdit
-              metadata={req.metadata!}
-              onUpdate={(itm) => {
-                req.metadata = itm;
-                setReq(WsPB.Template.clone(req));
-              }}
-              parentName={ctx.space.data.metadata?.name}
-            />
-          </div>
+      <Stack gap="xl">
+        <div
+          style={{
+            background: "#f8fafc",
+            border: "1px solid #e2e8f0",
+            borderRadius: 10,
+            padding: "16px 20px",
+          }}
+        >
+          <Group gap="xs" mb="md">
+            <ThemeIcon size="sm" variant="light" color="blue" radius="md">
+              <LayoutTemplate size={13} />
+            </ThemeIcon>
+            <Text
+              size="xs"
+              fw={600}
+              tt="uppercase"
+              style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
+            >
+              Metadata
+            </Text>
+          </Group>
+          <MetadataEdit
+            metadata={req.metadata!}
+            onUpdate={(itm) => {
+              req.metadata = itm;
+              setReq(WsPB.Template.clone(req));
+            }}
+            parentName={data.metadata?.name}
+          />
+        </div>
+
+        <div
+          style={{
+            background: "#f8fafc",
+            border: "1px solid #e2e8f0",
+            borderRadius: 10,
+            padding: "16px 20px",
+          }}
+        >
+          <Group gap="xs" mb="md">
+            <ThemeIcon size="sm" variant="light" color="violet" radius="md">
+              <Settings2 size={13} />
+            </ThemeIcon>
+            <Text
+              size="xs"
+              fw={600}
+              tt="uppercase"
+              style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
+            >
+              Configuration
+            </Text>
+          </Group>
           <WorkspaceEdit
-            spaceRef={getResourceRef(ctx.space.data)}
+            spaceRef={getResourceRef(data)}
             item={req}
             onUpdate={(itm) => {
               const item = itm as WsPB.Template;
@@ -77,29 +119,23 @@ const CreateTemplate = () => {
               setReq(WsPB.Template.clone(req));
             }}
           />
-
-          <div className="flex items-center justify-end mt-8">
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => {
-                navigate(-1);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              className="ml-4"
-              size="lg"
-              onClick={() => {
-                mutation.mutate();
-              }}
-            >
-              Create Template
-            </Button>
-          </div>
         </div>
-      )}
+
+        <Divider />
+
+        <Group justify="flex-end" gap="sm">
+          <Button variant="default" size="sm" onClick={() => navigate(-1)}>
+            Cancel
+          </Button>
+          <Button
+            size="sm"
+            loading={mutation.isPending}
+            onClick={() => mutation.mutate()}
+          >
+            Create template
+          </Button>
+        </Group>
+      </Stack>
     </PageWrap>
   );
 };
