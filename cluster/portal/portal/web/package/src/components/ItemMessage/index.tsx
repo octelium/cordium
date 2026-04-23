@@ -86,7 +86,7 @@ const ItemMessage = (props: Props) => {
       </button>
 
       {props.obj && (
-        <Collapse in={isExpanded}>
+        <Collapse expanded={isExpanded}>
           <div className="ml-4 mt-3 mb-4">{props.children}</div>
         </Collapse>
       )}

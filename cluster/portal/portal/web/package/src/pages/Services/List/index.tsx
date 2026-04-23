@@ -140,7 +140,7 @@ const Item = (props: { item: Service; domain: string }) => {
             {item.spec?.isTLS && <SvcLabel>TLS</SvcLabel>}
           </div>
 
-          <Collapse in={showDetails}>
+          <Collapse expanded={showDetails}>
             <ItemDetails item={item} domain={props.domain} />
           </Collapse>
         </div>

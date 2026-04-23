@@ -90,7 +90,7 @@ const EditItem = (props: Props) => {
         )}
       </div>
 
-      <Collapse in={isExpanded}>
+      <Collapse expanded={isExpanded}>
         <div className="ml-2 mt-1">
           {props.children}
 
