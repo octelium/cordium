@@ -20,6 +20,10 @@ import { invalidateSpaces } from "@/utils/octelium";
 import { AppShell, Burger } from "@mantine/core";
 import { useDisclosure, useHeadroom } from "@mantine/hooks";
 
+import "@fontsource/ubuntu/400.css";
+import "@fontsource/ubuntu/500.css";
+import "@fontsource/ubuntu/700.css";
+
 export default () => {
   const dispatch = useAppDispatch();
 
