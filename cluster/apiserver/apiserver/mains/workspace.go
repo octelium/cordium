@@ -607,8 +607,10 @@ func (s *Server) createWorkspaceSession(ctx context.Context, i *userctx.UserCtx,
 			Usr:       usr,
 			OcteliumC: s.octeliumC,
 			SessType:  corev1.Session_Status_CLIENT,
-			// ParentSession: umetav1.GetObjectReference(i.Session),
 			ExpiresAt: time.Now().Add(90 * 24 * time.Hour),
+			AuthenticationInfo: &corev1.Session_Status_Authentication_Info{
+				Type: corev1.Session_Status_Authentication_Info_INTERNAL,
+			},
 		})
 	if err != nil {
 		return nil, err
