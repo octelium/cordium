@@ -232,7 +232,7 @@ func (s *Server) doRunOuter(ctx context.Context) error {
 		return errors.Errorf("Could not prepare outer cgroup: %+v", err)
 	}
 	if err := s.runOuterPodman(ctx); err != nil {
-		return errors.Errorf("Could not run outer podman")
+		return errors.Errorf("Could not run outer podman: %+v", err)
 	}
 
 	zap.L().Debug("Successfully done running outer")
