@@ -688,8 +688,8 @@ func (t *task) startStderrLoop() error {
 func (t *task) publishStderr(buf []byte) {
 
 	t.listenBroker.Publish(&cordiumv1.ExecResponse{
-		Type: &cordiumv1.ExecResponse_Stdout_{
-			Stdout: &cordiumv1.ExecResponse_Stdout{
+		Type: &cordiumv1.ExecResponse_Stderr_{
+			Stderr: &cordiumv1.ExecResponse_Stderr{
 				Data: buf,
 			},
 		},
