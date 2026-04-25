@@ -498,13 +498,13 @@ func (t *terminal) close() error {
 
 func (t *terminal) setBuf(arg []byte) {
 	t.mu.Lock()
-	bufLen := len(t.buf)
-	argLen := len(arg)
-	if bufLen+argLen > maxSizeTermBuf {
-		t.buf = t.buf[argLen:]
+	defer t.mu.Unlock()
+
+	t.buf = append(t.buf, arg...)
+
+	if len(t.buf) > maxSizeTermBuf {
+		t.buf = t.buf[len(t.buf)-maxSizeTermBuf:]
 	}
-	t.buf = append(t.buf, arg[:]...)
-	t.mu.Unlock()
 }
 
 func (s *Server) CreateTerminal(ctx context.Context, req *ccordiumv1.CreateTerminalRequest) (*ccordiumv1.CreateTerminalResponse, error) {
