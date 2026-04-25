@@ -266,7 +266,7 @@ func (c *Controller) stopWorkspace(ctx context.Context, ws *cordiumv1.Workspace)
 
 		c.watcherMap.mu.RLock()
 		watcher, ok := c.watcherMap.mp[ws.Metadata.Uid]
-		c.watcherMap.mu.Unlock()
+		c.watcherMap.mu.RUnlock()
 		if ok {
 			go func() {
 				if err := watcher.forceOnStop(context.Background()); err != nil {
