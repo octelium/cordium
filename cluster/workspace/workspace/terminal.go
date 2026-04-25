@@ -489,7 +489,7 @@ func (t *terminal) close() error {
 	}
 
 	if t.pty != nil {
-		t.tty.Close()
+		t.pty.Close()
 		t.pty = nil
 	}
 
