@@ -7,6 +7,7 @@ import { getClientWorkspace } from "@/utils/client";
 import * as React from "react";
 
 import EmptyList from "@/components/EmptyList";
+import Meta from "@/components/Meta";
 import PageWrap from "@/components/PageWrap";
 import Paginator from "@/components/Paginator";
 import {
@@ -80,6 +81,7 @@ const Page = () => {
 
   return (
     <PageWrap qry={qry} title="Templates">
+      <Meta title="Space Templates" />
       {qry.data && (
         <div>
           <ResourceListCreateItem title="Create a Template" path={`./create`} />

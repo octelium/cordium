@@ -123,7 +123,7 @@ export const ListSecret = (props: { item: WsPB.Space }) => {
 
   return (
     <>
-      <Meta title="Secrets" />
+      <Meta title="Secrets - Space" />
       <ResourceListCreateItem
         title="Create a Secret"
         path={`${getPathSpace(item)}/secrets/create`}

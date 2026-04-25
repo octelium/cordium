@@ -124,7 +124,7 @@ export const SpaceEdit = (props: { item: WsPB.Space }) => {
 
   return (
     <>
-      <Meta title={`Edit Space`} />
+      <Meta title={`Space Config`} />
       <div>
         <div>
           <EditItem

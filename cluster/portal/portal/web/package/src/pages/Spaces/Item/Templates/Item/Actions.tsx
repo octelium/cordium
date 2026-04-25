@@ -1,5 +1,6 @@
 import { DeleteOptions } from "@/apis/metav1/metav1";
 import DeleteResource from "@/components/DeleteResource";
+import Meta from "@/components/Meta";
 import PageWrap from "@/components/PageWrap";
 import { useContextSpace } from "@/pages/Spaces/utils";
 import { getClientWorkspace } from "@/utils/client";
@@ -32,6 +33,7 @@ const Page = () => {
     <PageWrap qry={ctx.space}>
       {data && (
         <div>
+          <Meta title="Template Actions" />
           <div className="flex items-center justify-end">
             <div className="flex flex-1 items-center justify-end">
               <div className="flex flex-none">

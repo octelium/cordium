@@ -2,6 +2,7 @@ import { LeaveSpaceRequest } from "@/apis/cordiumv1/cordiumv1";
 import { DeleteOptions } from "@/apis/metav1/metav1";
 
 import DeleteResource from "@/components/DeleteResource";
+import Meta from "@/components/Meta";
 import PageWrap from "@/components/PageWrap";
 import { onError } from "@/utils";
 import { getClientWorkspace } from "@/utils/client";
@@ -59,6 +60,7 @@ const Page = () => {
     <PageWrap qry={ctx.space}>
       {data && (
         <div>
+          <Meta title="Space Actions" />
           <div className="flex items-center justify-end">
             <div className="flex flex-1 items-center justify-end">
               {data.status?.userRef?.uid !==

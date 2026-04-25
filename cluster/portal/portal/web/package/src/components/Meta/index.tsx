@@ -1,5 +1,11 @@
+import { useEffect } from "react";
+
 const Meta = (props: { title: string }) => {
-  return <title>{props.title} - Cordium - Octelium</title>;
+  useEffect(() => {
+    document.title = `${props.title} - Cordium - Octelium`;
+  }, [props.title]);
+
+  return null;
 };
 
 export default Meta;

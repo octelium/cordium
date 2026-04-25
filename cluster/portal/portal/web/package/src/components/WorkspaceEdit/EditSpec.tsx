@@ -668,6 +668,7 @@ const EditSpec = (props: {
                           val={envVar.key}
                           label="Key"
                           placeholder="KEY-1"
+                          description="Set the environment variable key"
                           onChange={(v) => {
                             envVarsArray[idxEnvVar].key = v as string;
                             updateReq();
@@ -681,6 +682,7 @@ const EditSpec = (props: {
                             val={envVar.type.value}
                             label="Value"
                             placeholder="MY VALUE"
+                            description="Set the environment variable value"
                             onChange={(v) => {
                               envVarsArray[idxEnvVar].type = {
                                 oneofKind: "value",

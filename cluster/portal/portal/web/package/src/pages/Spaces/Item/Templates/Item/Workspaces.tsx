@@ -7,6 +7,7 @@ import { useAppSelector } from "@/utils/hooks";
 import { useQuery } from "@tanstack/react-query";
 
 import * as WsPB from "@/apis/cordiumv1/cordiumv1";
+import Meta from "@/components/Meta";
 import PageWrap from "@/components/PageWrap";
 import Paginator from "@/components/Paginator";
 import WorkspaceListC from "@/components/ScopeResourceList/WorkspaceList";
@@ -41,6 +42,7 @@ const ListWorkspace = (props: { item: WsPB.Template }) => {
 
   return (
     <PageWrap qry={qry}>
+      <Meta title="Template Workspaces" />
       {qry.data && (
         <div>
           <WorkspaceListC itemList={qry.data} />

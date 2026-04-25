@@ -8,6 +8,7 @@ import * as WsPB from "@/apis/cordiumv1/cordiumv1";
 
 import { useNavigate } from "react-router-dom";
 
+import Meta from "@/components/Meta";
 import WorkspaceEdit from "@/components/WorkspaceEdit";
 import { useContextSpace } from "@/pages/Spaces/utils";
 import { getPathTemplate } from "@/utils/octelium";
@@ -52,6 +53,7 @@ const Edit = () => {
   return (
     <>
       <div>
+        <Meta title="Template Config" />
         <div>
           <WorkspaceEdit
             spaceRef={data.status!.spaceRef!}

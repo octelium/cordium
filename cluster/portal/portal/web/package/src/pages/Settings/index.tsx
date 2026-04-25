@@ -7,6 +7,7 @@ import {
 import EditItem from "@/components/EditItem";
 import Editor from "@/components/Editor";
 import ItemContainer from "@/components/ItemContainer";
+import Meta from "@/components/Meta";
 import Switch from "@/components/Switch";
 import { onError } from "@/utils";
 import { getClientWorkspace } from "@/utils/client";
@@ -142,6 +143,7 @@ const Edit = (props: { userConfig: UserConfig }) => {
                   <TextInput
                     label="Key"
                     placeholder="MY_VAR"
+                    description="Set the environment variable key"
                     required
                     value={envVar.key}
                     onChange={(e) => {
@@ -153,6 +155,7 @@ const Edit = (props: { userConfig: UserConfig }) => {
                     <TextInput
                       label="Value"
                       placeholder="value"
+                      description="Set the environment variable value"
                       required
                       value={envVar.type.value}
                       onChange={(e) => {
@@ -321,5 +324,10 @@ export default () => {
 
   if (!isSuccess) return null;
 
-  return <Edit userConfig={data} />;
+  return (
+    <div>
+      <Meta title="Settings" />
+      <Edit userConfig={data} />
+    </div>
+  );
 };

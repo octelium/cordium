@@ -1,4 +1,5 @@
 import InfoItem from "@/components/InfoItem";
+import Meta from "@/components/Meta";
 import PageWrap from "@/components/PageWrap";
 import ResourceYAML from "@/components/ResourceYAML";
 import StartWorkspace from "@/components/StartWorkspace";
@@ -13,6 +14,7 @@ const Page = () => {
 
   return (
     <PageWrap qry={ctx.space}>
+      <Meta title="Space Overview" />
       {data && (
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           <div

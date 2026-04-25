@@ -237,7 +237,7 @@ const ResourceLimits = (props: { item: WsPB.Workspace }) => {
     <InfoItem title="Resource limits">
       <Group gap={6}>
         {chips.map((c) => (
-          <Badge key={c.label} size="sm" variant="light" leftSection={c.icon}>
+          <Badge key={c.label} size="sm" leftSection={c.icon}>
             {c.label}
           </Badge>
         ))}

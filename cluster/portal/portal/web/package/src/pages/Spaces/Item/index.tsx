@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import DeleteResource from "@/components/DeleteResource";
+import Meta from "@/components/Meta";
 import PageWrap from "@/components/PageWrap";
 import { onError } from "@/utils";
 import { Button, Tabs } from "@mantine/core";
@@ -134,6 +135,7 @@ const Page = () => {
 
   return (
     <PageWrap qry={ctx.space}>
+      <Meta title="Spaces" />
       <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
         <Tabs value={activeTab}>
           <Tabs.List

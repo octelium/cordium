@@ -8,6 +8,7 @@ import * as React from "react";
 
 import EmptyList from "@/components/EmptyList";
 import Label from "@/components/Label";
+import Meta from "@/components/Meta";
 import PageWrap from "@/components/PageWrap";
 import Paginator from "@/components/Paginator";
 import {
@@ -76,7 +77,7 @@ const Item = (props: { item: GitProvider }) => {
   );
 };
 
-const SecretListC = (props: { itemsList: GitProviderList }) => {
+const ItemListC = (props: { itemsList: GitProviderList }) => {
   return (
     <div>
       <ResourceListWrapper>
@@ -131,7 +132,8 @@ const Page = () => {
         title="Create a Git Provider"
         path={`${getPathSpace(ctx.space.data)}/gitproviders/create`}
       />
-      <SecretListC itemsList={data} />
+      <ItemListC itemsList={data} />
+      <Meta title="Git Providers - Space" />
 
       <div className="mt-4">
         <Paginator
