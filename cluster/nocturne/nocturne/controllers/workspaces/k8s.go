@@ -605,9 +605,10 @@ func (c *Controller) setPersistentVolumeClaim(ctx context.Context, ws *cordiumv1
 		},
 	}, metav1.CreateOptions{}); err != nil {
 		if !k8serr.IsAlreadyExists(err) {
+			return err
+		} else {
 			zap.L().Debug("No need to recreate Workspace PVC. Already exists...",
 				zap.String("wsName", ws.Metadata.Name))
-			return err
 		}
 	}
 
