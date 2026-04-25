@@ -424,13 +424,13 @@ func ValidateWorkspace(ctx context.Context, req *ValidateWorkspaceReq) error {
 
 		for _, project := range spec.AdditionalRepositories {
 			if project.Name == "" {
-				return serr.InvalidArg("Empty project name")
+				return serr.InvalidArg("Empty additional repository name")
 			}
 			if !common.IsNameValid(project.Name) {
-				return serr.InvalidArg("Invalid project name: %s", project.Name)
+				return serr.InvalidArg("Invalid additional repository name: %s", project.Name)
 			}
 			if isInList(names, project.Name) {
-				return serr.InvalidArg("The Environment name: %s already exists", project.Name)
+				return serr.InvalidArg("The additional repository name: %s already exists", project.Name)
 			}
 			names = append(names, project.Name)
 

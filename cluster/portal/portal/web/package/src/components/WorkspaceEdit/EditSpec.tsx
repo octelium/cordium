@@ -262,6 +262,7 @@ const EditSpec = (props: {
                               .username
                           }
                           label="Auth username"
+                          description="Set the HTTP basic authentication username"
                           isRequired
                           placeholder={`user-1234`}
                           onChange={(v) => {
@@ -283,6 +284,7 @@ const EditSpec = (props: {
                             .password!.type.oneofKind === `fromSecret` && (
                             <Select
                               label="Password Secret"
+                              description="Set the Secret of the HTTP authentication password"
                               required
                               data={qrySecret.data!.items.map((x) => ({
                                 label: x.metadata!.name.split(".").at(0) ?? "",
@@ -417,6 +419,7 @@ const EditSpec = (props: {
                                   .username
                               }
                               label={`Auth Username`}
+                              description="Set the HTTP basic authentication username"
                               placeholder="user-1234"
                               onChange={(v) => {
                                 let f = req.spec!.image!.type as {
@@ -437,6 +440,7 @@ const EditSpec = (props: {
                                 .password!.type.oneofKind === `fromSecret` && (
                                 <Select
                                   label="Password Secret"
+                                  description="Set the Secret of the HTTP authentication password"
                                   data={qrySecret.data!.items.map((x) => ({
                                     label:
                                       x.metadata!.name.split(".").at(0) ?? "",

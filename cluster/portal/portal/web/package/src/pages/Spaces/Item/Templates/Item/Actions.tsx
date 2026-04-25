@@ -3,7 +3,7 @@ import DeleteResource from "@/components/DeleteResource";
 import PageWrap from "@/components/PageWrap";
 import { useContextSpace } from "@/pages/Spaces/utils";
 import { getClientWorkspace } from "@/utils/client";
-import { invalidateTemplate } from "@/utils/octelium";
+import { getPathSpaceRef, invalidateTemplate } from "@/utils/octelium";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
@@ -24,6 +24,7 @@ const Page = () => {
     },
     onSuccess: () => {
       invalidateTemplate(data);
+      navigate(getPathSpaceRef(data.status!.spaceRef!));
     },
   });
 

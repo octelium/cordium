@@ -66,8 +66,6 @@ export default () => {
 
   return (
     <>
-      <title>Cordium - Octelium Homepage</title>
-
       <div className="bg-slate-100 min-h-screen antialiased">
         <AppShell
           header={{ height: 60, collapsed: !pinned, offset: false }}

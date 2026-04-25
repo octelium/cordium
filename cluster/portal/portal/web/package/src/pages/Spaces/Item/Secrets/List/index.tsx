@@ -24,7 +24,6 @@ import { onError } from "@/utils";
 import { getPathSpace } from "@/utils/octelium";
 import { getResourceRef, isMemberAdmin } from "@/utils/pb";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 
 const Item = (props: { item: Secret }) => {
   return (
@@ -44,7 +43,7 @@ const SecretListC = (props: {
   isAdmin?: boolean;
 }) => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
+
   const client = getClientWorkspace();
 
   const mutationDelete = useMutation({

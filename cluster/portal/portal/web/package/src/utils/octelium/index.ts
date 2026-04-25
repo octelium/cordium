@@ -32,7 +32,7 @@ export const getServicePublicURL = (
   return `https://${getServicePublicFQDN(arg, domain)}`;
 };
 
-const getPathSpaceRef = (arg: MetaPB.ObjectReference): string => {
+export const getPathSpaceRef = (arg: MetaPB.ObjectReference): string => {
   return `/spaces/${getShortNameFromRef(arg)}`;
 };
 
@@ -94,5 +94,8 @@ export const invalidateTemplate = (arg: WsPB.Template) => {
 
   queryClient.invalidateQueries({
     queryKey: ["workspace/listTemplate", arg.status?.spaceRef?.uid, 0],
+  });
+  queryClient.invalidateQueries({
+    queryKey: ["workspace/listTemplate", arg.status?.spaceRef?.uid],
   });
 };

@@ -7,8 +7,8 @@ import MetadataEdit from "@/components/MetadataEdit";
 import PageWrap from "@/components/PageWrap";
 import WorkspaceEdit from "@/components/WorkspaceEdit";
 import { useContextSpace } from "@/pages/Spaces/utils";
-import { onError, queryClient } from "@/utils";
-import { getPathTemplate } from "@/utils/octelium";
+import { onError } from "@/utils";
+import { getPathTemplate, invalidateTemplate } from "@/utils/octelium";
 import { getResourceRef } from "@/utils/pb";
 import { Button, Divider, Group, Stack, Text, ThemeIcon } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
@@ -43,9 +43,7 @@ const CreateTemplate = () => {
     },
     onSuccess: (data) => {
       navigate(getPathTemplate(data));
-      queryClient.invalidateQueries({
-        queryKey: ["workspace/listTemplate", data.status?.spaceRef?.uid, 0],
-      });
+      invalidateTemplate(data);
       toast.success(`Template ${data.metadata?.name} created`);
     },
     onError,

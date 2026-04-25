@@ -186,10 +186,10 @@ const WrapC = (props: {
             </ThemeIcon>
             <div>
               <Text fw={600} size="sm">
-                New Workspace
+                New Workspace/Sandbox
               </Text>
-              <Text size="xs" c="dimmed">
-                Configure and launch a remote development environment
+              <Text fw={700} size="xs" c="dimmed">
+                Configure and launch a new Workspace/Sandbox
               </Text>
             </div>
           </Group>

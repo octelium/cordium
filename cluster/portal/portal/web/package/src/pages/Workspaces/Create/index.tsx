@@ -154,8 +154,6 @@ const CreateWorkspace = () => {
 const Page = () => {
   return (
     <>
-      <title>Create a new Workspace</title>
-
       <div>
         <CreateWorkspace />
       </div>

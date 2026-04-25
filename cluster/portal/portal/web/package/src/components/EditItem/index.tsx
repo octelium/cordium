@@ -69,7 +69,7 @@ const EditItem = (props: Props) => {
           {props.isList && props.onAddListItem && (
             <Button
               size="xs"
-              variant="light"
+              // variant="light"
               leftSection={<Plus size={12} />}
               onClick={handleAddItem}
             >
@@ -98,7 +98,7 @@ const EditItem = (props: Props) => {
             <div className="flex justify-start items-center mt-3 mb-1">
               <Button
                 size="xs"
-                variant="light"
+                // variant="light"
                 leftSection={<Plus size={12} />}
                 onClick={(e) => {
                   e.stopPropagation();

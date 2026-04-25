@@ -12,7 +12,7 @@ const DeleteResource = (props: {
   return (
     <>
       <Button
-        size={props.btnSize ?? "sm"}
+        size={`compact-sm`}
         variant="outline"
         color="red"
         leftSection={<Trash2 size={13} />}
