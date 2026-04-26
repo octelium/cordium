@@ -23,6 +23,7 @@ import (
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
 	pb "github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
+	"github.com/octelium/octelium/apis/main/userv1"
 	"github.com/octelium/octelium/client/common/client"
 	"github.com/octelium/octelium/client/common/cliutils"
 	"github.com/pkg/errors"
@@ -68,6 +69,19 @@ func doCmd(cmd *cobra.Command, args []string) error {
 	defer conn.Close()
 
 	c := pb.NewMainServiceClient(conn)
+
+	{
+		userC := userv1.NewMainServiceClient(conn)
+		r, err := userC.GetStatus(ctx, &userv1.GetStatusRequest{})
+		if err != nil {
+			return err
+		}
+
+		if !r.Session.Status.IsConnected {
+			return errors.Errorf(
+				`Currently not connected to the Octelium Cluster. Please run "octelium connect" command first`)
+		}
+	}
 
 	arg := i.FirstArg()
 	ws, err := c.GetWorkspace(ctx, &metav1.GetOptions{
