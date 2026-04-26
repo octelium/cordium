@@ -68,5 +68,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	cliutils.LineNotify("Successfully stopped the Workspace: %s\n", i.FirstArg())
+
 	return nil
 }

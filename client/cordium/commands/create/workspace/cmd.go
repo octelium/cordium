@@ -92,7 +92,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 
 	c := pb.NewMainServiceClient(conn)
 
-	if _, err := DoCreateWorkspace(ctx, c, &DoCreateWorkspaceOpts{
+	ws, err := DoCreateWorkspace(ctx, c, &DoCreateWorkspaceOpts{
 		Space:      cmdArgs.Space,
 		Template:   cmdArgs.Template,
 		File:       cmdArgs.File,
@@ -101,8 +101,15 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		Image:      cmdArgs.Image,
 		Dockerfile: cmdArgs.Dockerfile,
 		Ephemeral:  cmdArgs.Ephemeral,
-	}); err != nil {
+	})
+	if err != nil {
 		return err
+	}
+
+	if cmdArgs.Start {
+		cliutils.LineNotify("Successfully created and started Workspace: %s\n", ws.Metadata.Name)
+	} else {
+		cliutils.LineNotify("Successfully created Workspace: %s\n", ws.Metadata.Name)
 	}
 
 	return nil
