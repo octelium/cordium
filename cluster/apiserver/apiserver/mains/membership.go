@@ -194,7 +194,6 @@ func (s *Server) UpdateMembership(ctx context.Context, req *cordiumv1.Membership
 		ValidateMetadataOpts: apivalidation.ValidateMetadataOpts{
 			ParentsMust: 2,
 		},
-		RequireData: true,
 	}); err != nil {
 		return nil, err
 	}
