@@ -208,7 +208,7 @@ func ValidateWorkspace(ctx context.Context, req *ValidateWorkspaceReq) error {
 					}
 
 					if len(envVar.GetValue()) > 1024 {
-						return serr.InvalidArg("Empty value for env var: %s", envVar.Key)
+						return serr.InvalidArg("Empty value for env var: %s", envVar.GetValue())
 					}
 				default:
 					return serr.InvalidArg("No env variable value for the key: %s", envVar.Key)

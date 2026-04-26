@@ -547,7 +547,7 @@ func (s *Server) validateSpace(ctx context.Context, req *cordiumv1.Space, isUpda
 					}
 
 					if len(envVar.GetValue()) > 1024 {
-						return serr.InvalidArg("Empty value for env var: %s", envVar.Key)
+						return serr.InvalidArg("Empty value for env var: %s", envVar.GetValue())
 					}
 				default:
 					return serr.InvalidArg("No env variable value for the key: %s", envVar.Key)
