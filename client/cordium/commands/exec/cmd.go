@@ -28,10 +28,11 @@ import (
 	"time"
 
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
-	"github.com/octelium/octelium/apis/main/metav1"
 	pb "github.com/octelium/octelium/apis/main/cordiumv1"
+	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/client/common/client"
 	"github.com/octelium/octelium/client/common/cliutils"
+	"github.com/octelium/octelium/pkg/grpcerr"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -108,6 +109,10 @@ func doCmd(cmd *cobra.Command, args []string) error {
 			default:
 				msg, err := strm.Recv()
 				if err != nil {
+					if errors.Is(err, io.EOF) || grpcerr.IsCanceled(err) {
+						cancel()
+						return
+					}
 					time.Sleep(200 * time.Millisecond)
 					continue
 				}
@@ -159,7 +164,10 @@ func doCmd(cmd *cobra.Command, args []string) error {
 						}
 						return
 					}
+
+					return
 				}
+
 				if err := strm.Send(&pb.ExecRequest{
 					Type: &pb.ExecRequest_WriteData_{
 						WriteData: &pb.ExecRequest_WriteData{
