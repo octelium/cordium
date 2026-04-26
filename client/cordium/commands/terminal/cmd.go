@@ -18,6 +18,8 @@ package terminal
 
 import (
 	"context"
+	"errors"
+	"io"
 	"os"
 	"os/signal"
 	"syscall"
@@ -27,6 +29,7 @@ import (
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/client/common/client"
 	"github.com/octelium/octelium/client/common/cliutils"
+	"github.com/octelium/octelium/pkg/grpcerr"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"golang.org/x/term"
@@ -118,23 +121,30 @@ func DoCmdTerminal(ctx context.Context, conn *grpc.ClientConn, wsName string) er
 	signal.Notify(sigCh, syscall.SIGWINCH)
 
 	go func(ctx context.Context) {
-		for range sigCh {
-			cols, rows, err := term.GetSize(int(os.Stdout.Fd()))
-			if err != nil {
-				zap.L().Debug("Could not getSize", zap.Error(err))
-				continue
-			}
 
-			zap.L().Debug("New window size", zap.Int("cols", cols), zap.Int("rows", rows))
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-sigCh:
+				cols, rows, err := term.GetSize(int(os.Stdout.Fd()))
+				if err != nil {
+					zap.L().Debug("Could not getSize", zap.Error(err))
+					continue
+				}
 
-			if _, err := c.SetTerminalWindowSize(ctx, &pb.SetTerminalWindowSizeRequest{
-				Id:   t.Id,
-				Cols: uint32(cols),
-				Rows: uint32(rows),
-			}); err != nil {
-				zap.L().Debug("Could not SetTerminalWindowSize", zap.Error(err))
+				zap.L().Debug("New window size", zap.Int("cols", cols), zap.Int("rows", rows))
+
+				if _, err := c.SetTerminalWindowSize(ctx, &pb.SetTerminalWindowSizeRequest{
+					Id:   t.Id,
+					Cols: uint32(cols),
+					Rows: uint32(rows),
+				}); err != nil {
+					zap.L().Debug("Could not SetTerminalWindowSize", zap.Error(err))
+				}
 			}
 		}
+
 	}(ctx)
 
 	go func(ctx context.Context) {
@@ -146,6 +156,10 @@ func DoCmdTerminal(ctx context.Context, conn *grpc.ClientConn, wsName string) er
 			default:
 				msg, err := strm.Recv()
 				if err != nil {
+					if errors.Is(err, io.EOF) || grpcerr.IsCanceled(err) {
+						cancel()
+						return
+					}
 					time.Sleep(200 * time.Millisecond)
 					continue
 				}
@@ -174,7 +188,7 @@ func DoCmdTerminal(ctx context.Context, conn *grpc.ClientConn, wsName string) er
 			default:
 				n, err := os.Stdin.Read(buf)
 				if err != nil || ctx.Err() != nil {
-					break
+					return
 				}
 				if _, err := c.WriteTerminalData(ctx, &pb.WriteTerminalDataRequest{
 					Id:   t.Id,
