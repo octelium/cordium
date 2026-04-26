@@ -122,19 +122,19 @@ func GetWorkspaceSupClient(ws *cordiumv1.Workspace, o *GetWorkspaceSupClientOpts
 	unaryMiddlewares := []grpc.UnaryClientInterceptor{
 		grpc_retry.UnaryClientInterceptor(
 			grpc_retry.WithMax(64),
-			grpc_retry.WithPerRetryTimeout(3*time.Second),
-			grpc_retry.WithBackoff(grpc_retry.BackoffLinear(1000*time.Millisecond)),
+			grpc_retry.WithPerRetryTimeout(1500*time.Millisecond),
+			grpc_retry.WithBackoff(grpc_retry.BackoffLinear(500*time.Millisecond)),
 			grpc_retry.WithCodes(retryCodes...)),
 	}
 
 	streamMiddlewares := []grpc.StreamClientInterceptor{
 		grpc_retry.StreamClientInterceptor(
 			grpc_retry.WithMax(math.MaxUint32),
-			grpc_retry.WithBackoff(grpc_retry.BackoffLinear(1000*time.Millisecond)),
+			grpc_retry.WithBackoff(grpc_retry.BackoffLinear(500*time.Millisecond)),
 			grpc_retry.WithCodes(retryCodes...)),
 	}
 
-	grpcConn, err := grpc.Dial(
+	grpcConn, err := grpc.NewClient(
 		func() string {
 			if o != nil && o.Host != "" {
 				addr := net.JoinHostPort(o.Host, fmt.Sprintf("%d", GetWorkspaceSupPort()))
