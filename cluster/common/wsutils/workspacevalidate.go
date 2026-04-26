@@ -234,7 +234,7 @@ func ValidateWorkspace(ctx context.Context, req *ValidateWorkspaceReq) error {
 
 		for _, cmd := range specContainer.Tasks {
 			if len(cmd.EnvVars) > 256 {
-				serr.InvalidArg("Too large container env var list")
+				return serr.InvalidArg("Too large container env var list")
 			}
 
 			if cmd.Run == "" {

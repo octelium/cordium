@@ -596,7 +596,7 @@ func (s *Server) validateSpace(ctx context.Context, req *cordiumv1.Space, isUpda
 
 		for _, cmd := range specContainer.Tasks {
 			if len(cmd.EnvVars) > 256 {
-				serr.InvalidArg("Too large container env var list")
+				return serr.InvalidArg("Too large container env var list")
 			}
 
 			if cmd.Run == "" {
