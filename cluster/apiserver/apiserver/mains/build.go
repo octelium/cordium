@@ -196,6 +196,20 @@ func (s *Server) createBuildRun(ctx context.Context, req *cordiumv1.BuildTemplat
 
 	tmpl.Status.BuildInfo.CurrentRunningBuildID = runID
 
+	cco, err := s.octeliumC.CordiumV1Utils().GetClusterConfig(ctx)
+	if err != nil {
+		return err
+	}
+
+	i, err := commonw.GetUserCtx(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := s.checkIfCanStartWorkspace(ctx, i, cco); err != nil {
+		return err
+	}
+
 	now := pbutils.Now()
 
 	wsReq := &cordiumv1.Workspace{
@@ -226,11 +240,6 @@ func (s *Server) createBuildRun(ctx context.Context, req *cordiumv1.BuildTemplat
 	org, err := s.octeliumC.CordiumC().GetSpace(ctx, &rmetav1.GetOptions{
 		Uid: tmpl.Status.SpaceRef.Uid,
 	})
-	if err != nil {
-		return err
-	}
-
-	cco, err := s.octeliumC.CordiumV1Utils().GetClusterConfig(ctx)
 	if err != nil {
 		return err
 	}
