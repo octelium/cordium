@@ -558,24 +558,6 @@ func (s *Server) StartWorkspace(ctx context.Context, req *cordiumv1.StartWorkspa
 		InitializedAt: ws.Status.LastInitializedAt,
 	}}, ws.Status.Runs...)
 
-	// run := ucordiumv1.ToWorkspace(ws).GetCurrentRun()
-
-	/*
-		if req.FromRunID != "" {
-			if fromRun := ucordiumv1.ToWorkspace(ws).GeRunByID(req.FromRunID); fromRun != nil {
-				run.FromID = fromRun.Id
-			} else {
-				return nil, grpcutils.InvalidArg("This run ID does not exit: %s", req.FromRunID)
-			}
-		} else if req.FromRunTag != "" {
-			if fromRun := ucordiumv1.ToWorkspace(ws).GetRunByTag(req.FromRunTag); fromRun != nil {
-				run.FromID = fromRun.Id
-			} else {
-				return nil, grpcutils.InvalidArg("This run ID does not exit: %s", req.FromRunID)
-			}
-		}
-	*/
-
 	if err := s.setWorkspaceLimit(ctx, ws, spc, cco); err != nil {
 		return nil, err
 	}
@@ -589,6 +571,7 @@ func (s *Server) StartWorkspace(ctx context.Context, req *cordiumv1.StartWorkspa
 
 	_, err = s.octeliumC.CordiumC().UpdateWorkspace(ctx, ws)
 	if err != nil {
+		s.octeliumC.CoreC().DeleteSession(ctx, &rmetav1.DeleteOptions{Uid: wsSession.Metadata.Uid})
 		return nil, serr.InternalWithErr(err)
 	}
 
