@@ -39,7 +39,6 @@ import (
 	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"github.com/octelium/octelium/pkg/common/pbutils"
 	"github.com/octelium/octelium/pkg/grpcerr"
-	"google.golang.org/protobuf/types/known/structpb"
 )
 
 const maxSpacesPerUser = 150
@@ -408,26 +407,9 @@ func (s *Server) ListSpace(ctx context.Context, req *cordiumv1.ListSpaceOptions)
 		}
 		switch req.Type {
 		case cordiumv1.Space_Status_USER:
-			filters = append(filters, &rmetav1.ListOptions_Filter{
-				Field: "status.type",
-				Op:    rmetav1.ListOptions_Filter_OP_EQ,
-				Value: &structpb.Value{
-					Kind: &structpb.Value_StringValue{
-						StringValue: "PERSONAL",
-					},
-				},
-			})
-
+			filters = append(filters, urscsrv.FilterFieldEQValStr("status.type", "USER"))
 		case cordiumv1.Space_Status_ORGANIZATION:
-			filters = append(filters, &rmetav1.ListOptions_Filter{
-				Field: "status.type",
-				Op:    rmetav1.ListOptions_Filter_OP_EQ,
-				Value: &structpb.Value{
-					Kind: &structpb.Value_StringValue{
-						StringValue: "ORGANIZATION",
-					},
-				},
-			})
+			filters = append(filters, urscsrv.FilterFieldEQValStr("status.type", "ORGANIZATION"))
 		}
 		ret, err := s.octeliumC.CordiumC().ListSpace(ctx, urscsrv.GetUserPublicListOptions(req, filters...))
 		if err != nil {
@@ -441,26 +423,9 @@ func (s *Server) ListSpace(ctx context.Context, req *cordiumv1.ListSpaceOptions)
 
 		switch req.Type {
 		case cordiumv1.Space_Status_USER:
-			filters = append(filters, &rmetav1.ListOptions_Filter{
-				Field: "status.type",
-				Op:    rmetav1.ListOptions_Filter_OP_EQ,
-				Value: &structpb.Value{
-					Kind: &structpb.Value_StringValue{
-						StringValue: "PERSONAL",
-					},
-				},
-			})
-
+			filters = append(filters, urscsrv.FilterFieldEQValStr("status.type", "USER"))
 		case cordiumv1.Space_Status_ORGANIZATION:
-			filters = append(filters, &rmetav1.ListOptions_Filter{
-				Field: "status.type",
-				Op:    rmetav1.ListOptions_Filter_OP_EQ,
-				Value: &structpb.Value{
-					Kind: &structpb.Value_StringValue{
-						StringValue: "ORGANIZATION",
-					},
-				},
-			})
+			filters = append(filters, urscsrv.FilterFieldEQValStr("status.type", "ORGANIZATION"))
 		}
 		memList, err := s.octeliumC.CordiumC().ListMembership(ctx,
 			urscsrv.GetUserPublicListOptions(req, filters...))
@@ -531,7 +496,7 @@ func (s *Server) validateSpace(ctx context.Context, req *cordiumv1.Space, isUpda
 
 	if spec.Limit != nil {
 		if req.Status.Type == cordiumv1.Space_Status_USER {
-			return grpcutils.Unauthorized("Cannot set Limits for PERSONAL Spaces")
+			return grpcutils.Unauthorized("Cannot set Limits for USER Spaces")
 		}
 	}
 
