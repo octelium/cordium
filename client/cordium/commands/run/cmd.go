@@ -18,6 +18,8 @@ package run
 
 import (
 	"context"
+	"fmt"
+	"os"
 
 	"github.com/octelium/cordium/client/cordium/commands/create/workspace"
 	"github.com/octelium/cordium/client/cordium/commands/terminal"
@@ -136,6 +138,11 @@ func doRun(ctx context.Context, conn *grpc.ClientConn, ws *pb.Workspace) error {
 		}
 
 		if err := func() error {
+			s := cliutils.NewSpinner(os.Stdout)
+			s.SetSuffix("Waiting for the Workspace to run")
+			s.Start()
+			defer s.Stop()
+
 			for {
 				msg, err := strm.Recv()
 				if err != nil {
@@ -145,11 +152,15 @@ func doRun(ctx context.Context, conn *grpc.ClientConn, ws *pb.Workspace) error {
 				switch msg.Type.(type) {
 				case *pb.WatchWorkspaceResponse_Update_:
 					cur := msg.GetUpdate().NewItem
-
+					old := msg.GetUpdate().OldItem
 					zap.L().Debug("Got Workspace update", zap.String("state", cur.Status.State.String()))
 
+					if cur.Status.State != old.Status.State {
+						s.SetSuffix(fmt.Sprintf("Workspace status: %s", cur.Status.State.String()))
+					}
+
 					switch {
-					case ucordiumv1.ToWorkspace(msg.GetUpdate().NewItem).IsPreparingOrRunning():
+					case ucordiumv1.ToWorkspace(cur).IsPreparingOrRunning():
 						return nil
 					}
 				}
