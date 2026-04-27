@@ -19,6 +19,7 @@ package usersecret
 import (
 	"os"
 
+	"github.com/octelium/cordium/client/cordium/commands/ccommon"
 	pb "github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/client/common/client"
@@ -94,6 +95,8 @@ func doCmd(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+
+	cliutils.LineNotify("Successfully created UserSecret: %s\n", ccommon.GetResourceShortName(sec))
 
 	return nil
 }

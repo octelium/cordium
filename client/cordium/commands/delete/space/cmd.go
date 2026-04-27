@@ -69,5 +69,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	cliutils.LineNotify("Successfully deleted Space: %s\n", i.FirstArg())
+
 	return nil
 }

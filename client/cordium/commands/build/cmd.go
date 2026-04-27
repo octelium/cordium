@@ -17,6 +17,7 @@
 package build
 
 import (
+	"github.com/octelium/cordium/client/cordium/commands/ccommon"
 	pb "github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/client/common/client"
@@ -64,6 +65,13 @@ func doCmd(cmd *cobra.Command, args []string) error {
 
 	c := pb.NewMainServiceClient(conn)
 
+	tmpl, err := c.GetTemplate(ctx, &metav1.GetOptions{
+		Name: i.FirstArg(),
+	})
+	if err != nil {
+		return err
+	}
+
 	if cmdArgs.DoCancel {
 		if _, err := c.CancelBuildTemplate(ctx, &pb.CancelBuildTemplateRequest{
 			TemplateRef: &metav1.ObjectReference{
@@ -72,6 +80,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		}); err != nil {
 			return err
 		}
+		cliutils.LineNotify("Canceled a build for Template: %s\n", ccommon.GetResourceShortName(tmpl))
 	} else {
 		if _, err := c.BuildTemplate(ctx, &pb.BuildTemplateRequest{
 			TemplateRef: &metav1.ObjectReference{
@@ -80,6 +89,8 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		}); err != nil {
 			return err
 		}
+
+		cliutils.LineNotify("Started a build for Template: %s\n", ccommon.GetResourceShortName(tmpl))
 	}
 
 	return nil
