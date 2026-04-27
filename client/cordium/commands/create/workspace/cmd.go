@@ -64,8 +64,9 @@ var Cmd = &cobra.Command{
 	Short: "Create a Workspace",
 	Example: `
 cordium create workspace
-cordium create ws -o json
-cordium create workspaces
+cordium create ws
+cordium create ws --space my-space
+cordium create ws --template my-template.my-space
 	`,
 	Aliases: []string{"workspaces", "ws"},
 	RunE: func(cmd *cobra.Command, args []string) error {

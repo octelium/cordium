@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/octelium/cordium/client/cordium/commands/create/workspace"
 	"github.com/octelium/cordium/client/cordium/commands/terminal"
@@ -37,6 +38,7 @@ import (
 
 type args struct {
 	workspace.CreateWorkspaceArgs
+	DoRemove bool
 }
 
 var cmdArgs args
@@ -51,12 +53,14 @@ func init() {
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Dockerfile, "dockerfile", "", "",
 		`Provide a Dockerfile file path to build the Container image from it`)
 	Cmd.PersistentFlags().BoolVarP(&cmdArgs.Ephemeral, "ephemeral", "", false, "Set the Workspace storage to be ephemeral")
+	Cmd.PersistentFlags().BoolVarP(&cmdArgs.DoRemove, "rm", "", false, "Automatically remove the Workspace after the run")
 }
 
 var Cmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run a Workspace",
 	Example: `
+cordium run
 cordium run abc
 	`,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -105,7 +109,22 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	return doRun(ctx, conn, ws)
+	if err := doRun(ctx, conn, ws); err != nil {
+		zap.L().Debug("doRun exited with err", zap.Error(err))
+	}
+
+	if cmdArgs.DoRemove {
+		ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
+		defer cancel()
+
+		if _, err := c.DeleteWorkspace(ctx, &metav1.DeleteOptions{
+			Uid: ws.Metadata.Uid,
+		}); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func doRun(ctx context.Context, conn *grpc.ClientConn, ws *pb.Workspace) error {
