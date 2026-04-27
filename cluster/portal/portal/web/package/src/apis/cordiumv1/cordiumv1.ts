@@ -2901,19 +2901,19 @@ export interface ExecRequest {
     type: {
         oneofKind: "request";
         /**
-         * @generated from protobuf field: octelium.api.main.cordium.v1.ExecRequest.Request request = 2
+         * @generated from protobuf field: octelium.api.main.cordium.v1.ExecRequest.Request request = 1
          */
         request: ExecRequest_Request;
     } | {
         oneofKind: "writeData";
         /**
-         * @generated from protobuf field: octelium.api.main.cordium.v1.ExecRequest.WriteData writeData = 3
+         * @generated from protobuf field: octelium.api.main.cordium.v1.ExecRequest.WriteData writeData = 2
          */
         writeData: ExecRequest_WriteData;
     } | {
         oneofKind: "kill";
         /**
-         * @generated from protobuf field: octelium.api.main.cordium.v1.ExecRequest.Kill kill = 4
+         * @generated from protobuf field: octelium.api.main.cordium.v1.ExecRequest.Kill kill = 3
          */
         kill: ExecRequest_Kill;
     } | {
@@ -12305,9 +12305,9 @@ export const CancelBuildTemplateRequest = new CancelBuildTemplateRequest$Type();
 class ExecRequest$Type extends MessageType<ExecRequest> {
     constructor() {
         super("octelium.api.main.cordium.v1.ExecRequest", [
-            { no: 2, name: "request", kind: "message", oneof: "type", T: () => ExecRequest_Request },
-            { no: 3, name: "writeData", kind: "message", oneof: "type", T: () => ExecRequest_WriteData },
-            { no: 4, name: "kill", kind: "message", oneof: "type", T: () => ExecRequest_Kill }
+            { no: 1, name: "request", kind: "message", oneof: "type", T: () => ExecRequest_Request },
+            { no: 2, name: "writeData", kind: "message", oneof: "type", T: () => ExecRequest_WriteData },
+            { no: 3, name: "kill", kind: "message", oneof: "type", T: () => ExecRequest_Kill }
         ]);
     }
     create(value?: PartialMessage<ExecRequest>): ExecRequest {
@@ -12322,19 +12322,19 @@ class ExecRequest$Type extends MessageType<ExecRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* octelium.api.main.cordium.v1.ExecRequest.Request request */ 2:
+                case /* octelium.api.main.cordium.v1.ExecRequest.Request request */ 1:
                     message.type = {
                         oneofKind: "request",
                         request: ExecRequest_Request.internalBinaryRead(reader, reader.uint32(), options, (message.type as any).request)
                     };
                     break;
-                case /* octelium.api.main.cordium.v1.ExecRequest.WriteData writeData */ 3:
+                case /* octelium.api.main.cordium.v1.ExecRequest.WriteData writeData */ 2:
                     message.type = {
                         oneofKind: "writeData",
                         writeData: ExecRequest_WriteData.internalBinaryRead(reader, reader.uint32(), options, (message.type as any).writeData)
                     };
                     break;
-                case /* octelium.api.main.cordium.v1.ExecRequest.Kill kill */ 4:
+                case /* octelium.api.main.cordium.v1.ExecRequest.Kill kill */ 3:
                     message.type = {
                         oneofKind: "kill",
                         kill: ExecRequest_Kill.internalBinaryRead(reader, reader.uint32(), options, (message.type as any).kill)
@@ -12352,15 +12352,15 @@ class ExecRequest$Type extends MessageType<ExecRequest> {
         return message;
     }
     internalBinaryWrite(message: ExecRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* octelium.api.main.cordium.v1.ExecRequest.Request request = 2; */
+        /* octelium.api.main.cordium.v1.ExecRequest.Request request = 1; */
         if (message.type.oneofKind === "request")
-            ExecRequest_Request.internalBinaryWrite(message.type.request, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
-        /* octelium.api.main.cordium.v1.ExecRequest.WriteData writeData = 3; */
+            ExecRequest_Request.internalBinaryWrite(message.type.request, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.ExecRequest.WriteData writeData = 2; */
         if (message.type.oneofKind === "writeData")
-            ExecRequest_WriteData.internalBinaryWrite(message.type.writeData, writer.tag(3, WireType.LengthDelimited).fork(), options).join();
-        /* octelium.api.main.cordium.v1.ExecRequest.Kill kill = 4; */
+            ExecRequest_WriteData.internalBinaryWrite(message.type.writeData, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.ExecRequest.Kill kill = 3; */
         if (message.type.oneofKind === "kill")
-            ExecRequest_Kill.internalBinaryWrite(message.type.kill, writer.tag(4, WireType.LengthDelimited).fork(), options).join();
+            ExecRequest_Kill.internalBinaryWrite(message.type.kill, writer.tag(3, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

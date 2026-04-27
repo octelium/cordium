@@ -124,7 +124,14 @@ gen-go-client:
 	protoc -I . -I $(PROTO_IN_CLIENT)/configv1 configv1.proto \
 		--go_out=apis/client/cliconfigv1 --go-grpc_out=apis/client/cliconfigv1 $(PROTO_GO_OPT)
 
-gen-api: gen-go-main gen-go-cluster gen-go-client gen-go-rsc
+
+cp-pb:
+	cp -r ../pb/apis/protobuf ./apis
+
+gen-api-portal:
+	cd ./cluster/portal/portal/web/package; npm run protoc
+
+gen-api: cp-pb gen-go-main gen-go-cluster gen-go-client gen-go-rsc gen-api-portal
 	rm -rf ./apis/protobuf
 	go run unsorted/licenser/main.go
 
