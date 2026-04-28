@@ -162,10 +162,6 @@ const TerminalGroupC = (props: { workspace: WsPB.Workspace }) => {
   const dispatch = useAppDispatch();
   const canUseTerminal = canUseTerminals(item);
 
-  if (!canUseTerminal) {
-    return <EmptyList title="Workspace needs to be ready to use terminals" />;
-  }
-
   const qryListTerm = useQuery({
     queryKey: ["workspace/ws/listTerminal", item.metadata!.uid],
     gcTime: 0,
@@ -184,6 +180,10 @@ const TerminalGroupC = (props: { workspace: WsPB.Workspace }) => {
     },
     enabled: canUseTerminal,
   });
+
+  if (!canUseTerminal) {
+    return <EmptyList title="Workspace needs to be ready to use terminals" />;
+  }
 
   if (!qryListTerm.isSuccess) return null;
 
