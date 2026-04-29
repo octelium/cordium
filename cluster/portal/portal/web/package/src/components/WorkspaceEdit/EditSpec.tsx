@@ -733,6 +733,7 @@ const EditSpec = (props: {
                       <Field
                         val={commandsArray[idxCommand].name}
                         label="Name"
+                        description="Set a unique name for the task"
                         isRequired
                         placeholder="task-1"
                         onChange={(v) => {
@@ -744,6 +745,7 @@ const EditSpec = (props: {
                       <Field
                         val={commandsArray[idxCommand].workingDir}
                         label="Working Directory"
+                        description="Set the working directory for the task"
                         placeholder="/usr/bin"
                         onChange={(v) => {
                           commandsArray[idxCommand].workingDir = v as string;
@@ -753,7 +755,8 @@ const EditSpec = (props: {
 
                       <Select
                         required
-                        label="Command Type"
+                        label="Type"
+                        description={`Set the type to ON_CREATE, POST_START or PRE_STOP`}
                         data={[
                           {
                             label: "On Creation (i.e. First Run)",
@@ -797,6 +800,7 @@ const EditSpec = (props: {
 
                       <Switch
                         label="Run in background"
+                        description="Run the task as a service in background"
                         val={commandsArray[idxCommand].isBackground}
                         onChange={(v) => {
                           commandsArray[idxCommand].isBackground = v;
@@ -806,6 +810,7 @@ const EditSpec = (props: {
 
                       <Switch
                         label="Run as root"
+                        description="Run the task as root"
                         val={commandsArray[idxCommand].runAsRoot}
                         onChange={(v) => {
                           commandsArray[idxCommand].runAsRoot = v;
@@ -832,7 +837,8 @@ const EditSpec = (props: {
             <Group grow>
               <Field
                 val={req.spec!.runtime!.cmd}
-                label="Override Container Command"
+                label="Command"
+                description="Override Container Command"
                 placeholder="/bin/script-init"
                 multiLine
                 maxRows={7}
@@ -844,7 +850,8 @@ const EditSpec = (props: {
 
               <Field
                 val={req.spec!.runtime!.entrypoint}
-                label="Override Container Entrypoint"
+                label="Entrypoint"
+                description="Override Container Entrypoint"
                 placeholder="/bin/init"
                 multiLine
                 maxRows={7}
@@ -1034,6 +1041,7 @@ const EditSpec = (props: {
                   <Field
                     val={applicationsArr[idxApplications].name}
                     label="Name"
+                    description="Set a unique name for the application"
                     placeholder="my-app"
                     isRequired
                     onChange={(v) => {
@@ -1045,6 +1053,7 @@ const EditSpec = (props: {
                   <Field
                     val={applicationsArr[idxApplications].displayName}
                     label="Display Name"
+                    description="Set an optional descriptive display name"
                     placeholder="My App"
                     onChange={(v) => {
                       applicationsArr[idxApplications].displayName =
@@ -1056,6 +1065,7 @@ const EditSpec = (props: {
                   <Field
                     val={applicationsArr[idxApplications].port}
                     label="Port"
+                    description="Set the port the application is listening at"
                     isNumber
                     onChange={(v) => {
                       applicationsArr[idxApplications].port = v as number;
@@ -1066,6 +1076,7 @@ const EditSpec = (props: {
 
                   <Switch
                     label="Default Application"
+                    description="This set the application URL to the Workspace application URL"
                     val={applicationsArr[idxApplications].isDefault}
                     onChange={(v) => {
                       applicationsArr[idxApplications].isDefault = v;
@@ -1116,6 +1127,7 @@ const EditSpec = (props: {
               <Field
                 val={repo.name}
                 label="Name"
+                description="Set a unique name for the repo"
                 placeholder="linux-repo"
                 isRequired
                 onChange={(v) => {
@@ -1127,6 +1139,7 @@ const EditSpec = (props: {
               <Field
                 val={repo.clonePath}
                 label="Clone Path"
+                description={`Override the default clone path "/workspace/additional-repos/<name>"`}
                 placeholder="/home/ubuntu/custom/directory"
                 onChange={(v) => {
                   repo.clonePath = v as string;
@@ -1308,6 +1321,7 @@ const EditSpec = (props: {
                               .password!.type.oneofKind === `fromSecret` && (
                               <Select
                                 label="Password Secret"
+                                description="Set the Secret of the git repo authentication password"
                                 data={qrySecret.data!.items.map((x) => ({
                                   label:
                                     x.metadata!.name.split(".").at(0) ?? "",
