@@ -119,8 +119,13 @@ func doCmd(cmd *cobra.Command, args []string) error {
 
 				switch msg.Type.(type) {
 				case *pb.ExecResponse_Exit_:
-					zap.L().Debug("Got close msg. Exiting ListenTerminal loop")
+					zap.L().Debug("Got close msg. Exiting ListenTerminal loop",
+						zap.Int32("code", msg.GetExit().Code))
+
 					cancel()
+					if msg.GetExit().Code != 0 {
+						os.Exit(int(msg.GetExit().Code))
+					}
 					return
 				case *pb.ExecResponse_Stdout_:
 					if _, err := os.Stdout.Write(msg.GetStdout().Data); err != nil {
