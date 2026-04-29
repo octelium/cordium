@@ -87,7 +87,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	strm.Send(&pb.ExecRequest{
+	if err := strm.Send(&pb.ExecRequest{
 		Type: &pb.ExecRequest_Request_{
 
 			Request: &pb.ExecRequest_Request{
@@ -97,7 +97,9 @@ func doCmd(cmd *cobra.Command, args []string) error {
 				Command: strings.Join(args[1:], " "),
 			},
 		},
-	})
+	}); err != nil {
+		return err
+	}
 
 	go func(ctx context.Context) {
 		defer zap.L().Debug("Exiting stdout loop")
