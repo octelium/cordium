@@ -60,14 +60,61 @@ func init() {
 }
 
 var Cmd = &cobra.Command{
-	Use:   "workspace",
-	Short: "Create a Workspace",
+	Use:   "workspace [flags]",
+	Short: "Create a new Workspace",
+	Long: `Create a new Workspace from a Template, YAML file, container image, Dockerfile, or git repository.
+
+If no Template is specified, the default Template of the default Space is used.
+If --start is given, the Workspace is started immediately after creation.
+Use "cordium run" to create and attach a terminal in a single step.`,
 	Example: `
-cordium create workspace
-cordium create ws
-cordium create ws --space my-space
-cordium create ws --template my-template.my-space
-	`,
+  # Create a Workspace from the default Template
+  cordium create workspace
+
+  # Create a Workspace in a specific Space (uses that Space's default Template)
+  cordium create ws --space ml-research
+
+  # Create a Workspace from a specific Template
+  cordium create ws --template backend-service.my-project
+
+  # Create a Workspace from a YAML configuration file
+  cordium create ws --file workspace.yaml
+
+  # Create a Workspace from a public container image
+  cordium create ws --image ubuntu:24.04
+
+  # Create a Workspace from a private registry image
+  cordium create ws --image registry.mycompany.com/dev/base:latest
+
+  # Create a Workspace from a git repository (uses repo's .octelium/workspace.yaml if present)
+  cordium create ws --repository https://github.com/myorg/my-project
+
+  # Create a Workspace from a git repository with a specific Template
+  cordium create ws --repository https://github.com/myorg/my-project --template go-service.my-project
+
+  # Create a Workspace from a local Dockerfile
+  cordium create ws --dockerfile ./Dockerfile
+
+  # Create an ephemeral Workspace (storage is discarded on stop)
+  cordium create ws --ephemeral
+
+  # Create an ephemeral Workspace from an image, useful for short-lived tasks
+  cordium create ws --ephemeral --image python:3.11-slim
+
+  # Create an ephemeral Workspace from a repo for a one-off task or CI run
+  cordium create ws --ephemeral --repository https://github.com/myorg/data-pipeline
+
+  # Create a Workspace and start it immediately
+  cordium create ws --start
+
+  # Create a Workspace from a file and start it immediately
+  cordium create ws --file workspace.yaml --start
+
+  # Create an ephemeral Workspace and start it
+  cordium create ws --ephemeral --image node:20 --start
+
+  # Use the "ws" alias
+  cordium create ws --template ml-env.research --start`,
 	Aliases: []string{"workspaces", "ws"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return doCmd(cmd, args)
