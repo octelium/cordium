@@ -513,11 +513,13 @@ func (s *Server) StartWorkspace(ctx context.Context, req *cordiumv1.StartWorkspa
 		return nil, serr.Unauthorized("Workspace not owned by the User")
 	}
 
-	spc, err := s.octeliumC.CordiumC().GetSpace(ctx, &rmetav1.GetOptions{
-		Uid: ws.Status.SpaceRef.Uid,
-	})
+	spc, err := s.octeliumC.CordiumC().GetSpace(ctx, apivalidation.ObjectReferenceToRGetOptions(ws.Status.SpaceRef))
 	if err != nil {
 		return nil, grpcutils.K8sNotFoundOrInternalWithErr(err)
+	}
+
+	if ucordiumv1.ToWorkspace(ws).IsPreRunning() || ucordiumv1.ToWorkspace(ws).IsRunning() {
+		return nil, grpcutils.AlreadyExists("Workspace is already starting or running")
 	}
 
 	if !ucordiumv1.ToWorkspace(ws).IsStopped() {
