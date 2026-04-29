@@ -18,7 +18,9 @@ package workspace
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"strings"
 
 	pb "github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
@@ -26,6 +28,7 @@ import (
 	"github.com/octelium/octelium/client/common/cliutils"
 	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"github.com/octelium/octelium/pkg/common/pbutils"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -38,25 +41,61 @@ type CreateWorkspaceArgs struct {
 	Image      string
 	Dockerfile string
 	Ephemeral  bool
+
+	Branch   string
+	Depth    uint32
+	Checkout string
+
+	EnvVars           []string
+	EnvVarFromSecrets []string
+
+	AdditionalRepos []string
+
+	CPUMillicores uint32
+	MemoryMB      uint32
+	StorageMB     uint32
+
+	AppPorts []string
 }
+
 type args struct {
-	Out string
 	CreateWorkspaceArgs
 }
 
 var cmdArgs args
 
 func init() {
-	Cmd.PersistentFlags().StringVarP(&cmdArgs.Out, "out", "o", "", "Output format")
-	Cmd.PersistentFlags().StringVarP(&cmdArgs.Space, "space", "", "", "Parent Space")
-	Cmd.PersistentFlags().StringVarP(&cmdArgs.Template, "template", "", "", "Parent Template")
-	Cmd.PersistentFlags().StringVarP(&cmdArgs.File, "file", "", "", "Spec file path")
-	Cmd.PersistentFlags().BoolVarP(&cmdArgs.Start, "start", "", false, "Start the Workspace after creation")
-	Cmd.PersistentFlags().StringVarP(&cmdArgs.Repo, "repository", "", "", "Repository URL")
-	Cmd.PersistentFlags().StringVarP(&cmdArgs.Image, "image", "", "", `Container image URL (e.g. "ubuntu:latest")`)
+	Cmd.PersistentFlags().StringVarP(&cmdArgs.Space, "space", "", "", "Parent Space name (e.g. my-project)")
+	Cmd.PersistentFlags().StringVarP(&cmdArgs.Template, "template", "", "", "Parent Template name (e.g. ml-env.my-project)")
+	Cmd.PersistentFlags().StringVarP(&cmdArgs.File, "file", "", "", "Path to a Workspace YAML spec file")
+	Cmd.PersistentFlags().BoolVarP(&cmdArgs.Start, "start", "", false, "Start the Workspace immediately after creation")
+	Cmd.PersistentFlags().StringVarP(&cmdArgs.Repo, "repository", "", "", "Primary repository URL to clone into /workspace/repo")
+	Cmd.PersistentFlags().StringVarP(&cmdArgs.Image, "image", "", "", `Container image URL (e.g. "ubuntu:24.04", "python:3.11-slim")`)
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Dockerfile, "dockerfile", "", "",
-		`Provide a Dockerfile file path to build the Container image from it`)
-	Cmd.PersistentFlags().BoolVarP(&cmdArgs.Ephemeral, "ephemeral", "", false, "Set the Workspace storage to be ephemeral")
+		"Path to a local Dockerfile. The file is read and embedded inline. COPY/ADD with local context paths are not supported; use --file for those cases.")
+	Cmd.PersistentFlags().BoolVarP(&cmdArgs.Ephemeral, "ephemeral", "", false, "Create an ephemeral Workspace whose storage is discarded on stop")
+
+	Cmd.PersistentFlags().StringVarP(&cmdArgs.Branch, "branch", "b", "", "Branch to clone when using --repository (default: repository default branch)")
+	Cmd.PersistentFlags().Uint32Var(&cmdArgs.Depth, "depth", 0, "Shallow clone depth when using --repository (0 = full clone)")
+	Cmd.PersistentFlags().StringVar(&cmdArgs.Checkout, "checkout", "", "Specific commit, tag, or ref to checkout when using --repository")
+
+	Cmd.PersistentFlags().StringArrayVarP(&cmdArgs.EnvVars, "env", "e", nil,
+		`Set an environment variable in the Workspace (KEY=VALUE). Repeatable: -e FOO=bar -e BAZ=qux`)
+	Cmd.PersistentFlags().StringArrayVar(&cmdArgs.EnvVarFromSecrets, "env-from-secret", nil,
+		`Set an environment variable from a Space Secret (KEY=SECRET_NAME). Repeatable: --env-from-secret DB_URL=my-db-secret`)
+
+	Cmd.PersistentFlags().StringArrayVar(&cmdArgs.AdditionalRepos, "additional-repo", nil,
+		`Clone an additional repository into the Workspace (NAME=URL). Repeatable: --additional-repo shared=https://github.com/org/shared`)
+
+	Cmd.PersistentFlags().Uint32Var(&cmdArgs.CPUMillicores, "cpu", 0, "CPU limit in millicores (e.g. 2000 = 2 cores). Uses Space/Cluster default if unset.")
+	Cmd.PersistentFlags().Uint32Var(&cmdArgs.MemoryMB, "memory", 0, "Memory limit in megabytes (e.g. 4096 = 4 GB). Uses Space/Cluster default if unset.")
+	Cmd.PersistentFlags().Uint32Var(&cmdArgs.StorageMB, "storage", 0, "Storage limit in megabytes (e.g. 20000 = 20 GB). Uses Space/Cluster default if unset.")
+
+	Cmd.PersistentFlags().StringArrayVar(&cmdArgs.AppPorts, "port", nil,
+		`Expose a named application port (NAME:PORT or PORT for unnamed). Repeatable: --port web:3000 --port api:8080. Append ":default" to mark as the default app: --port web:3000:default`)
+
+	Cmd.MarkFlagsMutuallyExclusive("space", "template")
+	Cmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
 }
 
 var Cmd = &cobra.Command{
@@ -64,56 +103,85 @@ var Cmd = &cobra.Command{
 	Short: "Create a new Workspace",
 	Long: `Create a new Workspace from a Template, YAML file, container image, Dockerfile, or git repository.
 
-If no Template is specified, the default Template of the default Space is used.
+If no Template or Space is specified, the default Template of the default Space is used.
 If --start is given, the Workspace is started immediately after creation.
-Use "cordium run" to create and attach a terminal in a single step.`,
+Use "cordium run" to create and attach an interactive terminal in a single step.
+
+Flags such as --env, --env-from-secret, --additional-repo, --cpu, --memory,
+--storage, and --port can be combined with --file to override or extend values
+from the YAML spec.`,
 	Example: `
   # Create a Workspace from the default Template
   cordium create workspace
 
-  # Create a Workspace in a specific Space (uses that Space's default Template)
+  # Create a Workspace in a specific Space
   cordium create ws --space ml-research
 
   # Create a Workspace from a specific Template
   cordium create ws --template backend-service.my-project
 
-  # Create a Workspace from a YAML configuration file
+  # Create a Workspace from a YAML spec file
   cordium create ws --file workspace.yaml
 
-  # Create a Workspace from a public container image
-  cordium create ws --image ubuntu:24.04
+  # Create and start immediately; print only the name for scripting
+  cordium create ws --start --out name
 
-  # Create a Workspace from a private registry image
-  cordium create ws --image registry.mycompany.com/dev/base:latest
+  # Create an ephemeral Workspace from a container image
+  cordium create ws --ephemeral --image python:3.11-slim
 
-  # Create a Workspace from a git repository (uses repo's .octelium/workspace.yaml if present)
+  # Create a Workspace from a git repository
   cordium create ws --repository https://github.com/myorg/my-project
 
-  # Create a Workspace from a git repository with a specific Template
-  cordium create ws --repository https://github.com/myorg/my-project --template go-service.my-project
+  # Clone a specific branch at a shallow depth
+  cordium create ws --repository https://github.com/myorg/my-project --branch develop --depth 1
+
+  # Clone a repository and check out a specific tag
+  cordium create ws --repository https://github.com/myorg/my-project --checkout v2.3.0
 
   # Create a Workspace from a local Dockerfile
   cordium create ws --dockerfile ./Dockerfile
 
-  # Create an ephemeral Workspace (storage is discarded on stop)
-  cordium create ws --ephemeral
+  # Set static environment variables
+  cordium create ws --image node:20 -e NODE_ENV=development -e LOG_LEVEL=debug
 
-  # Create an ephemeral Workspace from an image, useful for short-lived tasks
-  cordium create ws --ephemeral --image python:3.11-slim
+  # Set an environment variable from a Space Secret
+  cordium create ws --image python:3.11 --env-from-secret DATABASE_URL=my-db-secret
 
-  # Create an ephemeral Workspace from a repo for a one-off task or CI run
-  cordium create ws --ephemeral --repository https://github.com/myorg/data-pipeline
+  # Mix static and secret-sourced environment variables
+  cordium create ws --template ml-env.research \
+    -e WANDB_PROJECT=my-exp \
+    --env-from-secret WANDB_API_KEY=wandb-secret \
+    --env-from-secret HF_TOKEN=huggingface-secret
 
-  # Create a Workspace and start it immediately
-  cordium create ws --start
+  # Clone the primary repository and an additional shared library repository
+  cordium create ws --repository https://github.com/myorg/api-service \
+    --additional-repo shared-lib=https://github.com/myorg/shared-lib \
+    --additional-repo proto=https://github.com/myorg/proto-defs
 
-  # Create a Workspace from a file and start it immediately
-  cordium create ws --file workspace.yaml --start
+  # Override resource limits
+  cordium create ws --template ml-env.research --cpu 8000 --memory 16384 --storage 50000
 
-  # Create an ephemeral Workspace and start it
-  cordium create ws --ephemeral --image node:20 --start
+  # Expose named application ports
+  cordium create ws --image node:20 \
+    --repository https://github.com/myorg/fullstack \
+    --port web:3000:default \
+    --port api:8080 \
+    --port storybook:6006
 
-  # Use the "ws" alias
+  # Ephemeral AI agent sandbox from an image with secrets and resource limits
+  cordium create ws --ephemeral \
+    --image python:3.11-slim \
+    --env-from-secret ANTHROPIC_API_KEY=anthropic-key \
+    --cpu 2000 --memory 4096 --storage 10000 \
+    --start --out name
+
+  # Combine a YAML file with inline overrides
+  cordium create ws --file base.yaml \
+    -e ENVIRONMENT=staging \
+    --env-from-secret DB_PASSWORD=staging-db-password \
+    --cpu 4000
+
+  # Use the "ws" alias with a template
   cordium create ws --template ml-env.research --start`,
 	Aliases: []string{"workspaces", "ws"},
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -122,7 +190,6 @@ Use "cordium run" to create and attach a terminal in a single step.`,
 }
 
 func doCmd(cmd *cobra.Command, args []string) error {
-
 	ctx := cmd.Context()
 	i, err := cliutils.GetCLIInfo(cmd, args)
 	if err != nil {
@@ -133,22 +200,29 @@ func doCmd(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if err != nil {
-		return err
-	}
 	defer conn.Close()
 
 	c := pb.NewMainServiceClient(conn)
 
 	ws, err := DoCreateWorkspace(ctx, c, &DoCreateWorkspaceOpts{
-		Space:      cmdArgs.Space,
-		Template:   cmdArgs.Template,
-		File:       cmdArgs.File,
-		Start:      cmdArgs.Start,
-		Repo:       cmdArgs.Repo,
-		Image:      cmdArgs.Image,
-		Dockerfile: cmdArgs.Dockerfile,
-		Ephemeral:  cmdArgs.Ephemeral,
+		Space:             cmdArgs.Space,
+		Template:          cmdArgs.Template,
+		File:              cmdArgs.File,
+		Start:             cmdArgs.Start,
+		Repo:              cmdArgs.Repo,
+		Image:             cmdArgs.Image,
+		Dockerfile:        cmdArgs.Dockerfile,
+		Ephemeral:         cmdArgs.Ephemeral,
+		Branch:            cmdArgs.Branch,
+		Depth:             cmdArgs.Depth,
+		Checkout:          cmdArgs.Checkout,
+		EnvVars:           cmdArgs.EnvVars,
+		EnvVarFromSecrets: cmdArgs.EnvVarFromSecrets,
+		AdditionalRepos:   cmdArgs.AdditionalRepos,
+		CPUMillicores:     cmdArgs.CPUMillicores,
+		MemoryMB:          cmdArgs.MemoryMB,
+		StorageMB:         cmdArgs.StorageMB,
+		AppPorts:          cmdArgs.AppPorts,
 	})
 	if err != nil {
 		return err
@@ -172,6 +246,21 @@ type DoCreateWorkspaceOpts struct {
 	Image      string
 	Dockerfile string
 	Ephemeral  bool
+
+	Branch   string
+	Depth    uint32
+	Checkout string
+
+	EnvVars           []string
+	EnvVarFromSecrets []string
+
+	AdditionalRepos []string
+
+	CPUMillicores uint32
+	MemoryMB      uint32
+	StorageMB     uint32
+
+	AppPorts []string
 }
 
 func DoCreateWorkspace(ctx context.Context, c pb.MainServiceClient, o *DoCreateWorkspaceOpts) (*pb.Workspace, error) {
@@ -188,35 +277,119 @@ func DoCreateWorkspace(ctx context.Context, c pb.MainServiceClient, o *DoCreateW
 		if err := pbutils.UnmarshalYAML(yamlBytes, ws); err != nil {
 			return nil, err
 		}
-	} else {
-		if o.Repo != "" {
-			ws.Spec.Repository = &pb.Workspace_Spec_Repository{
-				Url: o.Repo,
-			}
+	}
+
+	if o.Repo != "" {
+		if ws.Spec.Repository == nil {
+			ws.Spec.Repository = &pb.Workspace_Spec_Repository{}
 		}
-		if o.Image != "" {
-			ws.Spec.Image = &pb.Workspace_Spec_Image{
-				Type: &pb.Workspace_Spec_Image_Registry_{
-					Registry: &pb.Workspace_Spec_Image_Registry{
-						Url: o.Image,
+		ws.Spec.Repository.Url = o.Repo
+	}
+
+	if o.Branch != "" || o.Depth > 0 || o.Checkout != "" {
+		if ws.Spec.Repository == nil {
+			ws.Spec.Repository = &pb.Workspace_Spec_Repository{}
+		}
+		if ws.Spec.Repository.CloneOptions == nil {
+			ws.Spec.Repository.CloneOptions = &pb.Workspace_Spec_Repository_CloneOptions{}
+		}
+		if o.Branch != "" {
+			ws.Spec.Repository.CloneOptions.Branch = o.Branch
+		}
+		if o.Depth > 0 {
+			ws.Spec.Repository.CloneOptions.Depth = o.Depth
+		}
+		if o.Checkout != "" {
+			ws.Spec.Repository.CloneOptions.Checkout = o.Checkout
+		}
+	}
+
+	if o.Image != "" {
+		ws.Spec.Image = &pb.Workspace_Spec_Image{
+			Type: &pb.Workspace_Spec_Image_Registry_{
+				Registry: &pb.Workspace_Spec_Image_Registry{
+					Url: o.Image,
+				},
+			},
+		}
+	} else if o.Dockerfile != "" {
+		dockerfileBytes, err := os.ReadFile(o.Dockerfile)
+		if err != nil {
+			return nil, err
+		}
+		ws.Spec.Image = &pb.Workspace_Spec_Image{
+			Type: &pb.Workspace_Spec_Image_Dockerfile_{
+				Dockerfile: &pb.Workspace_Spec_Image_Dockerfile{
+					Type: &pb.Workspace_Spec_Image_Dockerfile_Inline{
+						Inline: string(dockerfileBytes),
 					},
 				},
-			}
-		} else if o.Dockerfile != "" {
-			dockerFile, err := os.ReadFile(o.Dockerfile)
-			if err != nil {
-				return nil, err
-			}
-			ws.Spec.Image = &pb.Workspace_Spec_Image{
-				Type: &pb.Workspace_Spec_Image_Dockerfile_{
-					Dockerfile: &pb.Workspace_Spec_Image_Dockerfile{
-						Type: &pb.Workspace_Spec_Image_Dockerfile_Inline{
-							Inline: string(dockerFile),
-						},
-					},
-				},
-			}
+			},
 		}
+	}
+
+	if len(o.EnvVars) > 0 || len(o.EnvVarFromSecrets) > 0 {
+		if ws.Spec.Runtime == nil {
+			ws.Spec.Runtime = &pb.Workspace_Spec_Runtime{}
+		}
+		for _, raw := range o.EnvVars {
+			key, val, ok := strings.Cut(raw, "=")
+			if !ok || key == "" {
+				return nil, errors.Errorf("invalid --env value %q: expected KEY=VALUE", raw)
+			}
+			ws.Spec.Runtime.EnvVars = append(ws.Spec.Runtime.EnvVars, &pb.Workspace_Spec_Runtime_EnvVar{
+				Key:  key,
+				Type: &pb.Workspace_Spec_Runtime_EnvVar_Value{Value: val},
+			})
+		}
+		for _, raw := range o.EnvVarFromSecrets {
+			key, secretName, ok := strings.Cut(raw, "=")
+			if !ok || key == "" || secretName == "" {
+				return nil, errors.Errorf("invalid --env-from-secret value %q: expected KEY=SECRET_NAME", raw)
+			}
+			ws.Spec.Runtime.EnvVars = append(ws.Spec.Runtime.EnvVars, &pb.Workspace_Spec_Runtime_EnvVar{
+				Key:  key,
+				Type: &pb.Workspace_Spec_Runtime_EnvVar_FromSecret{FromSecret: secretName},
+			})
+		}
+	}
+
+	for _, raw := range o.AdditionalRepos {
+		name, repoURL, ok := strings.Cut(raw, "=")
+		if !ok || name == "" || repoURL == "" {
+			return nil, errors.Errorf("invalid --additional-repo value %q: expected NAME=URL", raw)
+		}
+		ws.Spec.AdditionalRepositories = append(ws.Spec.AdditionalRepositories,
+			&pb.Workspace_Spec_AdditionalRepository{
+				Name: name,
+				Repository: &pb.Workspace_Spec_Repository{
+					Url: repoURL,
+				},
+			},
+		)
+	}
+
+	if o.CPUMillicores > 0 || o.MemoryMB > 0 || o.StorageMB > 0 {
+		if ws.Spec.Limit == nil {
+			ws.Spec.Limit = &pb.Workspace_Spec_Limit{}
+		}
+		if o.CPUMillicores > 0 {
+			ws.Spec.Limit.Cpu = &pb.Workspace_Spec_Limit_CPU{Millicores: o.CPUMillicores}
+		}
+		if o.MemoryMB > 0 {
+			ws.Spec.Limit.Memory = &pb.Workspace_Spec_Limit_Memory{Megabytes: o.MemoryMB}
+		}
+		if o.StorageMB > 0 {
+			ws.Spec.Limit.Storage = &pb.Workspace_Spec_Limit_Storage{Megabytes: o.StorageMB}
+		}
+	}
+
+	for _, raw := range o.AppPorts {
+		app, err := parseAppPort(raw)
+		if err != nil {
+			return nil, err
+		}
+		ws.Spec.Applications = append(ws.Spec.Applications, app)
 	}
 
 	ws.Metadata = &metav1.Metadata{}
@@ -248,4 +421,52 @@ func DoCreateWorkspace(ctx context.Context, c pb.MainServiceClient, o *DoCreateW
 	}
 
 	return ws, nil
+}
+
+func parseAppPort(raw string) (*pb.Workspace_Spec_Application, error) {
+	parts := strings.Split(raw, ":")
+	switch len(parts) {
+	case 1:
+		port, err := parsePort(parts[0])
+		if err != nil {
+			return nil, errors.Errorf("invalid --port value %q: %v", raw, err)
+		}
+		return &pb.Workspace_Spec_Application{
+			Name: fmt.Sprintf("port-%s", parts[0]),
+			Port: port,
+		}, nil
+
+	case 2:
+		port, err := parsePort(parts[1])
+		if err != nil {
+			return nil, errors.Errorf("invalid --port value %q: %v", raw, err)
+		}
+		return &pb.Workspace_Spec_Application{
+			Name: parts[0],
+			Port: port,
+		}, nil
+
+	case 3:
+		port, err := parsePort(parts[1])
+		if err != nil {
+			return nil, errors.Errorf("invalid --port value %q: %v", raw, err)
+		}
+		isDefault := parts[2] == "default"
+		return &pb.Workspace_Spec_Application{
+			Name:      parts[0],
+			Port:      port,
+			IsDefault: isDefault,
+		}, nil
+
+	default:
+		return nil, errors.Errorf("invalid --port value %q: expected PORT, NAME:PORT, or NAME:PORT:default", raw)
+	}
+}
+
+func parsePort(s string) (int32, error) {
+	var port int32
+	if _, err := fmt.Sscanf(s, "%d", &port); err != nil || port < 1 || port > 65535 {
+		return 0, errors.Errorf("port must be a number between 1 and 65535, got %q", s)
+	}
+	return port, nil
 }
