@@ -18,7 +18,6 @@ package exec
 
 import (
 	"context"
-	"errors"
 	"io"
 	"os"
 	"os/signal"
@@ -26,6 +25,8 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/pkg/errors"
 
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	pb "github.com/octelium/octelium/apis/main/cordiumv1"
@@ -38,20 +39,90 @@ import (
 )
 
 type args struct {
+	WorkingDir string
+	EnvVars    []string
+	RunAsRoot  bool
+	NoStdin    bool
 }
 
 var cmdArgs args
 
 func init() {
+	Cmd.Flags().StringVarP(&cmdArgs.WorkingDir, "workdir", "w", "",
+		"Working directory inside the Workspace for the command (e.g. /workspace/repo)")
+	Cmd.Flags().StringArrayVarP(&cmdArgs.EnvVars, "env", "e", nil,
+		"Set an environment variable for this command (KEY=VALUE). Repeatable: -e FOO=bar -e BAZ=qux")
+	Cmd.Flags().BoolVar(&cmdArgs.RunAsRoot, "root", false,
+		"Run the command as root inside the Workspace")
+	Cmd.Flags().BoolVar(&cmdArgs.NoStdin, "no-stdin", false,
+		"Disable stdin. Use when piping output from another command to avoid blocking on stdin reads.")
 }
 
 var Cmd = &cobra.Command{
-	Use:   "exec",
+	Use:   "exec <workspace> -- <command> [args...]",
 	Short: "Run a command in a Workspace",
+	Long: `Run a command in a running Workspace and stream its output.
+
+The command and its arguments must follow a double-dash (--) separator.
+stdin, stdout, and stderr are all connected, making exec suitable for
+interactive commands, pipelines, and scripted automation.
+
+The exit code of the remote command is propagated if the command exits
+with a non-zero code, cordium exec exits with the same code.
+
+Sending Ctrl+C terminates the remote command.`,
 	Example: `
-cordium exec abc -- ls -lah /
-cordium exec def -- sudo apt-get update
-	`,
+  # Run a single command
+  cordium exec abc -- ls -lah /workspace/repo
+
+  # Run in a specific working directory
+  cordium exec abc -w /workspace/repo -- make build
+
+  # Run as root
+  cordium exec abc --root -- apt-get install -y ripgrep
+
+  # Set environment variables for the command
+  cordium exec abc -e GOOS=linux -e GOARCH=amd64 -- go build ./...
+
+  # Combine working directory and environment variables
+  cordium exec abc -w /workspace/repo \
+    -e NODE_ENV=test \
+    -e CI=true \
+    -- npm test
+
+  # Run a shell pipeline (use sh -c for pipelines and redirects)
+  cordium exec abc -- sh -c "cat /etc/os-release | grep VERSION_ID"
+
+  # Pipe local input to a remote command
+  echo "SELECT version();" | cordium exec abc -- psql mydb
+
+  # Capture remote command output to a local file
+  cordium exec abc -- cat /workspace/repo/output.json > local-output.json
+
+  # Stream logs from a running process
+  cordium exec abc -- tail -f /var/log/app.log
+
+  # Run a build and check its exit code in a script
+  cordium exec abc -w /workspace/repo -- make test
+  if [ $? -ne 0 ]; then echo "Tests failed"; exit 1; fi
+
+  # Run without reading stdin
+  cordium exec abc --no-stdin -- go vet ./...
+
+  # Run a root command with environment overrides
+  cordium exec abc --root -e DEBIAN_FRONTEND=noninteractive \
+    -- apt-get install -y --no-install-recommends build-essential
+
+  # Run a database migration as part of a CI/CD pipeline
+  cordium exec abc -w /workspace/repo \
+    -e DATABASE_URL=postgres://staging-db.octelium/myapp \
+    -- npm run db:migrate
+
+  # Run an AI agent task inside an ephemeral Workspace
+  cordium exec abc \
+    -e ANTHROPIC_API_KEY_SECRET=anthropic-key \
+    -w /workspace/repo \
+    -- claude --print "Fix the failing tests in src/auth/ and commit the result."`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return doCmd(cmd, args)
 	},
@@ -87,14 +158,22 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	envVars, err := parseEnvVars(cmdArgs.EnvVars)
+	if err != nil {
+		return err
+	}
+
 	if err := strm.Send(&pb.ExecRequest{
 		Type: &pb.ExecRequest_Request_{
-
 			Request: &pb.ExecRequest_Request{
 				WorkspaceRef: &metav1.ObjectReference{
 					Name: i.FirstArg(),
 				},
-				Command: strings.Join(args[1:], " "),
+				Command:    strings.Join(args[1:], " "),
+				WorkingDir: cmdArgs.WorkingDir,
+				EnvVars:    envVars,
+				RunAsRoot:  cmdArgs.RunAsRoot,
+				HasStdin:   !cmdArgs.NoStdin,
 			},
 		},
 	}); err != nil {
@@ -142,7 +221,6 @@ func doCmd(cmd *cobra.Command, args []string) error {
 						os.Stderr.Write([]byte("\n"))
 					}
 				}
-
 			}
 		}
 	}(ctx)
@@ -150,6 +228,11 @@ func doCmd(cmd *cobra.Command, args []string) error {
 	go func(ctx context.Context) {
 		buf := make([]byte, 3*1024)
 		defer zap.L().Debug("Exiting stdin loop")
+
+		if cmdArgs.NoStdin {
+			return
+		}
+
 		for {
 			select {
 			case <-ctx.Done():
@@ -198,4 +281,22 @@ func doCmd(cmd *cobra.Command, args []string) error {
 	zap.L().Debug("Exiting...")
 
 	return nil
+}
+
+func parseEnvVars(raw []string) ([]*pb.ExecRequest_Request_EnvVar, error) {
+	if len(raw) == 0 {
+		return nil, nil
+	}
+	out := make([]*pb.ExecRequest_Request_EnvVar, 0, len(raw))
+	for _, s := range raw {
+		key, val, ok := strings.Cut(s, "=")
+		if !ok || key == "" {
+			return nil, errors.Errorf("invalid --env value %q: expected KEY=VALUE", s)
+		}
+		out = append(out, &pb.ExecRequest_Request_EnvVar{
+			Key:   key,
+			Value: val,
+		})
+	}
+	return out, nil
 }
