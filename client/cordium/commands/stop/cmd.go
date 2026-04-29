@@ -17,10 +17,13 @@
 package stop
 
 import (
+	"os"
+
 	pb "github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/client/common/client"
 	"github.com/octelium/octelium/client/common/cliutils"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -37,11 +40,15 @@ var Cmd = &cobra.Command{
 	Short: "Stop a Workspace",
 	Example: `
 cordium stop abc
+# Stop the Workspace from within the Workspace
+cordium stop
+# With an environment variable
+CORDIUM_NAME=abc cordium stop
 	`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return doCmd(cmd, args)
 	},
-	Args: cobra.ExactArgs(1),
+	Args: cobra.MaximumNArgs(1),
 }
 
 func doCmd(cmd *cobra.Command, args []string) error {
@@ -60,15 +67,23 @@ func doCmd(cmd *cobra.Command, args []string) error {
 
 	c := pb.NewMainServiceClient(conn)
 
+	name := i.FirstArg()
+	if name == "" {
+		name = os.Getenv("CORDIUM_NAME")
+	}
+	if name == "" {
+		return errors.Errorf("You need to provide the Workspace name")
+	}
+
 	if _, err := c.StopWorkspace(ctx, &pb.StopWorkspaceRequest{
 		WorkspaceRef: &metav1.ObjectReference{
-			Name: i.FirstArg(),
+			Name: name,
 		},
 	}); err != nil {
 		return err
 	}
 
-	cliutils.LineNotify("Successfully stopped the Workspace: %s\n", i.FirstArg())
+	cliutils.LineNotify("Successfully stopped the Workspace: %s\n", name)
 
 	return nil
 }
