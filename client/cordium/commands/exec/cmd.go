@@ -28,6 +28,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"al.essio.dev/pkg/shellescape"
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	pb "github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
@@ -163,13 +164,18 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	quoted := make([]string, len(args[1:]))
+	for idx, arg := range args[1:] {
+		quoted[idx] = shellescape.Quote(arg)
+	}
+
 	if err := strm.Send(&pb.ExecRequest{
 		Type: &pb.ExecRequest_Request_{
 			Request: &pb.ExecRequest_Request{
 				WorkspaceRef: &metav1.ObjectReference{
 					Name: i.FirstArg(),
 				},
-				Command:    strings.Join(args[1:], " "),
+				Command:    strings.Join(quoted, " "),
 				WorkingDir: cmdArgs.WorkingDir,
 				EnvVars:    envVars,
 				RunAsRoot:  cmdArgs.RunAsRoot,
