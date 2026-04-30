@@ -23,6 +23,7 @@ import (
 	"github.com/octelium/cordium/client/cordium/commands/delete"
 	"github.com/octelium/cordium/client/cordium/commands/exec"
 	"github.com/octelium/cordium/client/cordium/commands/get"
+	"github.com/octelium/cordium/client/cordium/commands/logs"
 	"github.com/octelium/cordium/client/cordium/commands/man"
 	"github.com/octelium/cordium/client/cordium/commands/run"
 	"github.com/octelium/cordium/client/cordium/commands/ssh"
@@ -68,6 +69,7 @@ func InitCmds() {
 	Cmd.AddCommand(exec.Cmd)
 	Cmd.AddCommand(run.Cmd)
 	Cmd.AddCommand(man.Cmd)
+	Cmd.AddCommand(logs.Cmd)
 
 	get.AddSubcommands()
 	create.AddSubcommands()
