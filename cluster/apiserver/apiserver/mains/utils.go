@@ -24,7 +24,6 @@ import (
 	"github.com/octelium/cordium/cluster/apiserver/apiserver/commonw"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
-	"github.com/octelium/octelium/apis/rsc/rmetav1"
 	"github.com/octelium/octelium/cluster/apiserver/apiserver/serr"
 	"github.com/octelium/octelium/cluster/common/apivalidation"
 	"github.com/octelium/octelium/cluster/common/grpcutils"
@@ -51,10 +50,7 @@ func (s *Server) getMemberSpaceFromSpaceRef(ctx context.Context, spaceRef *metav
 		return nil, err
 	}
 
-	org, err := s.octeliumC.CordiumC().GetSpace(ctx, &rmetav1.GetOptions{
-		Uid:  spaceRef.Uid,
-		Name: spaceRef.Name,
-	})
+	org, err := s.octeliumC.CordiumC().GetSpace(ctx, apivalidation.ObjectReferenceToRGetOptions(spaceRef))
 	if err != nil {
 		return nil, serr.K8sNotFoundOrInternalWithErr(err)
 	}
