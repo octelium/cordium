@@ -6,9 +6,9 @@ require (
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/cluster/common v0.0.0-20260423051549-ec41041a2056
-	github.com/octelium/octelium/cluster/rscserver v0.0.0-20260423051549-ec41041a2056
-	github.com/octelium/octelium/pkg v0.0.0-20260423051549-ec41041a2056
+	github.com/octelium/octelium/cluster/common v0.0.0-20260502210026-401b624fb197
+	github.com/octelium/octelium/cluster/rscserver v0.0.0-20260502210026-401b624fb197
+	github.com/octelium/octelium/pkg v0.0.0-20260502210026-401b624fb197
 	github.com/pkg/errors v0.9.1
 	go.uber.org/zap v1.27.1
 	google.golang.org/grpc v1.80.0

@@ -5,10 +5,10 @@ go 1.25.8
 require (
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/cluster/apiserver v0.0.0-20260423051549-ec41041a2056 // indirect
-	github.com/octelium/octelium/cluster/common v0.0.0-20260423051549-ec41041a2056
-	github.com/octelium/octelium/cluster/genesis v0.0.0-20260423051549-ec41041a2056
-	github.com/octelium/octelium/pkg v0.0.0-20260423051549-ec41041a2056
+	github.com/octelium/octelium/cluster/apiserver v0.0.0-20260502210026-401b624fb197 // indirect
+	github.com/octelium/octelium/cluster/common v0.0.0-20260502210026-401b624fb197
+	github.com/octelium/octelium/cluster/genesis v0.0.0-20260502210026-401b624fb197
+	github.com/octelium/octelium/pkg v0.0.0-20260502210026-401b624fb197
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.10.2
 	go.uber.org/zap v1.27.1
@@ -37,7 +37,7 @@ require (
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/cilium/cilium v1.18.8 // indirect
+	github.com/cilium/cilium v1.18.9 // indirect
 	github.com/cilium/ebpf v0.20.1-0.20260218191617-ee67e7f43dd9 // indirect
 	github.com/cilium/hive v0.0.0-20250611195437-5a5dacdfb354 // indirect
 	github.com/cilium/proxy v0.0.0-20250623105955-2136f59a4ea1 // indirect

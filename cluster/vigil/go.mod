@@ -7,10 +7,10 @@ require (
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/cluster/apiserver v0.0.0-20260423051549-ec41041a2056
-	github.com/octelium/octelium/cluster/common v0.0.0-20260423051549-ec41041a2056
-	github.com/octelium/octelium/cluster/vigil v0.0.0-20260423051549-ec41041a2056
-	github.com/octelium/octelium/pkg v0.0.0-20260423051549-ec41041a2056
+	github.com/octelium/octelium/cluster/apiserver v0.0.0-20260502210026-401b624fb197
+	github.com/octelium/octelium/cluster/common v0.0.0-20260502210026-401b624fb197
+	github.com/octelium/octelium/cluster/vigil v0.0.0-20260502210026-401b624fb197
+	github.com/octelium/octelium/pkg v0.0.0-20260502210026-401b624fb197
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.11.1
@@ -62,7 +62,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
-	github.com/jackc/pgx/v5 v5.9.1 // indirect
+	github.com/jackc/pgx/v5 v5.9.2 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.7.7 // indirect
@@ -86,8 +86,8 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/octelium/octelium/cluster/octovigil v0.0.0-20260423051549-ec41041a2056 // indirect
-	github.com/octelium/octelium/cluster/rscserver v0.0.0-20260423051549-ec41041a2056 // indirect
+	github.com/octelium/octelium/cluster/octovigil v0.0.0-20260502210026-401b624fb197 // indirect
+	github.com/octelium/octelium/cluster/rscserver v0.0.0-20260502210026-401b624fb197 // indirect
 	github.com/open-policy-agent/opa v1.14.0 // indirect
 	github.com/oschwald/geoip2-golang/v2 v2.1.0 // indirect
 	github.com/oschwald/maxminddb-golang/v2 v2.1.1 // indirect
