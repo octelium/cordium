@@ -23,8 +23,8 @@ export const ResourceListItem = (props: {
         "border border-slate-200 rounded-xl",
         "shadow-[0_1px_4px_rgba(15,23,42,0.06)]",
         "px-5 py-4",
-        "transition-[border-color,box-shadow] duration-150",
-        "hover:border-slate-300 hover:shadow-[0_2px_12px_rgba(15,23,42,0.09)]",
+        "transition-all duration-500",
+        "hover:border-slate-400 hover:bg-transparent",
         hasPath && "cursor-pointer",
       )}
       onClick={() => {

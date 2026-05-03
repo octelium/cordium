@@ -81,7 +81,7 @@ export default () => {
           }}
           padding="md"
         >
-          <AppShell.Header style={{ background: "#f8fafc" }}>
+          <AppShell.Header style={{ background: "#f1f5f9" }}>
             <div className="flex flex-row items-center">
               <Burger
                 opened={opened}
