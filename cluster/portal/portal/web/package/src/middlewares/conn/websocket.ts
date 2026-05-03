@@ -42,8 +42,8 @@ export class WebSocketCtl {
 
       this.handleMessage(payload);
     };
-    this.ws.onerror = () => {
-      console.log("ws conn error");
+    this.ws.onerror = (err) => {
+      console.log("ws conn error", err);
       this.state = State.ERROR;
       store.dispatch(clearTerminalGroup({}));
       if (!isDev()) {
@@ -73,11 +73,8 @@ export class WebSocketCtl {
 
   sendMsg(msg: WsPB.ClientMessage) {
     if (this.state != State.OPEN) {
-      console.log("Cannot send message: ws is not open");
       return;
     }
-
-    console.log("Sending client msg", msg);
 
     this.ws.send(WsPB.ClientMessage.toBinary(msg));
   }
@@ -135,7 +132,7 @@ export class WebSocketCtl {
 
   handleMessage(data: Uint8Array) {
     const msg = WsPB.ServerMessage.fromBinary(data);
-    console.log("Got server msg: ", msg);
+
     switch (msg.type.oneofKind) {
       case "workspaceUpdate": {
         const workspace = msg.type.workspaceUpdate.workspace!;

@@ -20,12 +20,9 @@ const WorkspaceEdit = (props: {
 }) => {
   let [req, setReq] = React.useState(props.item);
 
-  const [value, setValue] = React.useState(0);
-
   const [vYAML, setVYAML] = React.useState<string | undefined>(undefined);
 
   const updateReq = () => {
-    console.log("cloning...", req);
     const clone = cloneResource(req) as WsPB.Workspace | WsPB.Template;
     setReq(clone);
     props.onUpdate(clone);
@@ -35,9 +32,7 @@ const WorkspaceEdit = (props: {
     return () => {
       if (vYAML) {
         const rsc = resourceFromYAML(vYAML)!;
-        console.log("CLONING", rsc);
         req = cloneResource(rsc) as WsPB.Workspace | WsPB.Template;
-        console.log(req);
         updateReq();
       }
     };
@@ -57,11 +52,8 @@ const WorkspaceEdit = (props: {
               spaceRef={props.spaceRef}
               item={req}
               onUpdate={(itm) => {
-                // setReq(WsPB.Workspace.clone(itm as WsPB.Workspace));
-                // console.log("UPDATE", req);
-                // req = WsPB.Workspace.clone(itm as WsPB.Workspace);
                 req = cloneResource(itm) as WsPB.Workspace | WsPB.Template;
-                console.log(req);
+
                 updateReq();
               }}
             />

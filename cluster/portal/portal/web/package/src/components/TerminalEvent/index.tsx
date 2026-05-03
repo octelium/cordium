@@ -92,7 +92,6 @@ export class TerminalEvent extends React.Component<Props, State> {
     );
 
     strm.responses.onMessage((msg) => {
-      console.log("New log", msg);
       this.t.write(msg.data);
       this.t.write("\r\n");
     });
@@ -111,8 +110,6 @@ export class TerminalEvent extends React.Component<Props, State> {
   }
 
   init() {
-    console.log("Initializing LOG terminal: ");
-
     this.t.loadAddon(this.fitAddon);
     this.t.loadAddon(this.serializeAddon);
 
@@ -127,13 +124,9 @@ export class TerminalEvent extends React.Component<Props, State> {
 
     this.t.focus();
 
-    this.t.onData((arg) => {
-      console.log("onData", arg);
-    });
+    this.t.onData((arg) => {});
 
-    this.t.onResize(({ rows, cols }) => {
-      console.log("Sending setTerminal size: ", rows, cols);
-    });
+    this.t.onResize(({ rows, cols }) => {});
 
     const onActive = () => {
       this.onActive();

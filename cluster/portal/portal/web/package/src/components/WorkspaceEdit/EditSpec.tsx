@@ -29,7 +29,6 @@ const EditSpec = (props: {
       | WsPB.Template;
     setReq(clone);
 
-    console.log("CLONED", clone, req);
     props.onUpdate(clone);
   };
 

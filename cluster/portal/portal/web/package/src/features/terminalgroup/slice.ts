@@ -41,23 +41,9 @@ export const slice = createSlice({
       if (state.activeTerminal) {
         state.lastArray.push(state.activeTerminal);
       }
-      console.log("lastArr after push", state.lastArray);
 
       state.activeTerminal = action.payload.id;
     },
-
-    /*
-    setLastActiveTerminal: (state, action: PayloadAction<{ id: string }>) => {
-      state.lastArray = state.lastArray.filter((x) => x !== action.payload.id);
-      console.log("curr array", state.lastArray);
-      state.activeTerminal = state.lastArray.pop();
-      console.log("last now active", state.activeTerminal);
-    },
-
-    deleteLastActive: (state, action: PayloadAction<{ id: string }>) => {
-      state.lastArray = state.lastArray.filter((x) => x !== action.payload.id);
-    },
-    */
 
     addTerminal: (state, action: PayloadAction<{ id: string }>) => {
       state.terminals.push({
@@ -67,7 +53,6 @@ export const slice = createSlice({
     },
 
     removeTerminal: (state, action: PayloadAction<{ id: string }>) => {
-      console.log("Deleting terminal", action.payload.id);
       const idx = state.terminals.findIndex((x) => x.id === action.payload.id);
       if (idx < 0) {
         return;

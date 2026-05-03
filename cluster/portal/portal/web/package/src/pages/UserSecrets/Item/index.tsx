@@ -18,7 +18,6 @@ const Page = () => {
   const client = getClientWorkspace();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  console.log("USER SECRET", uid);
 
   const { isLoading, isSuccess, data } = useQuery({
     queryKey: ["workspace/getUserSecret", uid],
