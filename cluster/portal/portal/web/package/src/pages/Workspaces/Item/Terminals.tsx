@@ -32,14 +32,36 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
+import * as React from "react";
 import { useContextWorkspace } from "../utils";
 import { canUseTerminals } from "./utils";
+
+const TAB_SCROLLBAR_STYLE = `
+  .term-tabbar::-webkit-scrollbar {
+    height: 3px;
+  }
+  .term-tabbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .term-tabbar::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 2px;
+  }
+  .term-tabbar::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+  }
+  .term-tabbar {
+    scrollbar-width: thin;
+    scrollbar-color: #334155 transparent;
+  }
+`;
 
 const TabGroup = (props: { workspace: WsPB.Workspace }) => {
   const { workspace } = props;
   const dispatch = useAppDispatch();
   const tg = useAppSelector((state) => state.terminalGroup);
   const wsC = getClientWorkspaceSvc(workspace.status?.regionRef);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
 
   const handleCreate = async () => {
     const { response } = await wsC.createTerminal(
@@ -56,102 +78,163 @@ const TabGroup = (props: { workspace: WsPB.Workspace }) => {
     dispatch(removeTerminal({ id }));
   };
 
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const terminals = tg.terminals;
+    if (terminals.length < 2) return;
+
+    const currentIdx = terminals.findIndex((t) => t.id === tg.activeTerminal);
+    if (currentIdx === -1) return;
+
+    const delta = e.deltaY > 0 ? 1 : -1;
+    const nextIdx = Math.max(
+      0,
+      Math.min(terminals.length - 1, currentIdx + delta),
+    );
+
+    if (nextIdx !== currentIdx) {
+      dispatch(setActiveTerminal({ id: terminals[nextIdx].id }));
+
+      const tabEl = scrollRef.current?.children[0]?.children[
+        nextIdx
+      ] as HTMLElement;
+      tabEl?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "nearest",
+      });
+    }
+  };
+
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 4,
-        background: "#1e293b",
-        borderRadius: "8px 8px 0 0",
-        padding: "6px 8px",
-        overflowX: "auto",
-      }}
-    >
+    <>
+      <style>{TAB_SCROLLBAR_STYLE}</style>
       <div
         style={{
           display: "flex",
-          flex: 1,
-          gap: 2,
           alignItems: "center",
-          minWidth: 0,
+          gap: 4,
+          background: "#1e293b",
+          borderRadius: "8px 8px 0 0",
+          padding: "6px 8px",
+          borderBottom: "1px solid #0f172a",
         }}
+        onWheel={handleWheel}
       >
-        {tg.terminals.map((t) => {
-          const isActive = tg.activeTerminal === t.id;
-          return (
-            <div
-              key={t.id}
-              onClick={() => dispatch(setActiveTerminal({ id: t.id }))}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "5px 10px",
-                borderRadius: 6,
-                cursor: "pointer",
-                background: isActive ? "#334155" : "transparent",
-                border: isActive
-                  ? "1px solid #475569"
-                  : "1px solid transparent",
-                transition: "all 150ms ease",
-                flexShrink: 0,
-                maxWidth: 180,
-              }}
-            >
-              <IconTerminal2
-                size={13}
-                style={{
-                  color: isActive ? "#94d2bd" : "#64748b",
-                  flexShrink: 0,
-                }}
-              />
-              <Text
-                size="xs"
-                style={{
-                  color: isActive ? "#e2e8f0" : "#94a3b8",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  maxWidth: 110,
-                }}
-              >
-                {truncateUtf8(t.title, 22, { suffix: "…" })}
-              </Text>
-              <ActionIcon
-                size={16}
-                variant="transparent"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemove(t.id);
-                }}
-                style={{ color: "#64748b", flexShrink: 0 }}
-                styles={{ root: { "&:hover": { color: "#f87171" } } }}
-              >
-                <IconX size={11} />
-              </ActionIcon>
-            </div>
-          );
-        })}
-      </div>
-
-      <Tooltip label="New terminal" withArrow position="bottom">
-        <ActionIcon
-          size={28}
-          variant="subtle"
-          onClick={handleCreate}
+        <div
+          ref={scrollRef}
+          className="term-tabbar"
           style={{
-            color: "#94a3b8",
-            background: "transparent",
-            border: "1px solid #334155",
-            borderRadius: 6,
-            flexShrink: 0,
+            display: "flex",
+            flex: 1,
+            gap: 2,
+            alignItems: "center",
+            minWidth: 0,
+            overflowX: "auto",
+            paddingBottom: 2,
           }}
         >
-          <IconPlus size={14} />
-        </ActionIcon>
-      </Tooltip>
-    </div>
+          <div style={{ display: "flex", gap: 2, alignItems: "center" }}>
+            {tg.terminals.map((t) => {
+              const isActive = tg.activeTerminal === t.id;
+              return (
+                <div
+                  key={t.id}
+                  onClick={() => dispatch(setActiveTerminal({ id: t.id }))}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "5px 10px",
+                    borderRadius: 6,
+                    cursor: "pointer",
+                    background: isActive ? "#334155" : "transparent",
+                    border: isActive
+                      ? "1px solid #475569"
+                      : "1px solid transparent",
+                    transition: "all 150ms ease",
+                    flexShrink: 0,
+                    maxWidth: 180,
+                    userSelect: "none",
+                  }}
+                >
+                  <IconTerminal2
+                    size={13}
+                    style={{
+                      color: isActive ? "#94d2bd" : "#64748b",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Text
+                    size="xs"
+                    style={{
+                      color: isActive ? "#e2e8f0" : "#94a3b8",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      maxWidth: 110,
+                      fontFamily: "Ubuntu Mono, monospace",
+                    }}
+                  >
+                    {truncateUtf8(t.title, 22, { suffix: "…" })}
+                  </Text>
+                  <ActionIcon
+                    size={16}
+                    variant="transparent"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemove(t.id);
+                    }}
+                    style={{ color: "#64748b", flexShrink: 0 }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = "#f87171";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = "#64748b";
+                    }}
+                  >
+                    <IconX size={11} />
+                  </ActionIcon>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div
+          style={{
+            width: 1,
+            height: 16,
+            background: "#334155",
+            flexShrink: 0,
+            margin: "0 2px",
+          }}
+        />
+
+        <Tooltip label="New terminal" withArrow position="bottom">
+          <ActionIcon
+            size={28}
+            variant="subtle"
+            onClick={handleCreate}
+            style={{
+              color: "#94a3b8",
+              background: "transparent",
+              border: "1px solid #334155",
+              borderRadius: 6,
+              flexShrink: 0,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#334155";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+            }}
+          >
+            <IconPlus size={14} />
+          </ActionIcon>
+        </Tooltip>
+      </div>
+    </>
   );
 };
 
@@ -246,7 +329,6 @@ const TerminalGroupC = (props: { workspace: WsPB.Workspace }) => {
         }}
       >
         <TabGroup workspace={props.workspace} />
-
         <div style={{ background: "#0f172a", minHeight: 500 }}>
           {tg.terminals.map((x) => (
             <div
