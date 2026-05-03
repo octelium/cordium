@@ -19,6 +19,7 @@ package commands
 import (
 	"github.com/octelium/cordium/client/cordium/commands/build"
 	"github.com/octelium/cordium/client/cordium/commands/code"
+	"github.com/octelium/cordium/client/cordium/commands/cp"
 	"github.com/octelium/cordium/client/cordium/commands/create"
 	"github.com/octelium/cordium/client/cordium/commands/delete"
 	"github.com/octelium/cordium/client/cordium/commands/exec"
@@ -63,6 +64,7 @@ func InitCmds() {
 	Cmd.AddCommand(build.Cmd)
 
 	Cmd.AddCommand(ssh.Cmd)
+	Cmd.AddCommand(cp.Cmd)
 	Cmd.AddCommand(code.Cmd)
 	Cmd.AddCommand(auth.Cmd)
 	Cmd.AddCommand(terminal.Cmd)
