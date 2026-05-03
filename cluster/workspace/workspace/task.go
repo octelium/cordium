@@ -599,6 +599,8 @@ func (t *taskManager) newTaskOcteliumConnect(req *ccordiumv1.PrepareRequest) (*t
 				"OCTELIUM_ESSH_IP_ADDRS":     "0.0.0.0",
 				"OCTELIUM_ESSH_PORT":         "2022",
 				"OCTELIUM_LOCAL_DNS_SERVER":  "true",
+
+				"OCTELIUM_ESSH_SFTP_USER": "true",
 			}
 
 			for k, v := range envMap {
