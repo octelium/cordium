@@ -2,7 +2,7 @@ import BuildTemplate from "@/components/BuildTemplate";
 import InfoItem from "@/components/InfoItem";
 import LinkWrap from "@/components/LinkWrap";
 import PageWrap from "@/components/PageWrap";
-import Repository from "@/components/Repository";
+import Repository, { hasRepository } from "@/components/Repository";
 import ResourceYAML from "@/components/ResourceYAML";
 import SpaceName from "@/components/SpaceName";
 import StartWorkspace from "@/components/StartWorkspace";
@@ -41,7 +41,7 @@ export default () => {
             <ResourceYAML item={data} size="xs" />
           </InfoItem>
 
-          {data.spec?.repository?.url && (
+          {hasRepository(data) && (
             <InfoItem title="Git Repo">
               <Repository item={data} />
             </InfoItem>

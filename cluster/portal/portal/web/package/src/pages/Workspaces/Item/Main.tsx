@@ -4,7 +4,7 @@ import CopyText from "@/components/CopyText";
 import InfoItem from "@/components/InfoItem";
 import LinkWrap from "@/components/LinkWrap";
 import PageWrap from "@/components/PageWrap";
-import Repository from "@/components/Repository";
+import Repository, { hasRepository } from "@/components/Repository";
 import ResourceYAML from "@/components/ResourceYAML";
 import SpaceName from "@/components/SpaceName";
 import TimeAgo from "@/components/TimeAgo";
@@ -417,6 +417,12 @@ const InfoBar = (props: { item: WsPB.Workspace }) => {
             <InfoItem title="Config">
               <ResourceYAML item={item} size="xs" />
             </InfoItem>
+
+            {hasRepository(item) && (
+              <InfoItem title="Git Repo">
+                <Repository item={item} />
+              </InfoItem>
+            )}
           </div>
         </div>
 
@@ -460,10 +466,6 @@ const InfoBar = (props: { item: WsPB.Workspace }) => {
             </div>
           </div>
         )}
-
-        <div style={{ marginTop: 12 }}>
-          <Repository item={item} />
-        </div>
       </div>
 
       <div style={{ width: 220, flexShrink: 0 }}>
