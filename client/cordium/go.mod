@@ -6,6 +6,7 @@ require (
 	al.essio.dev/pkg/shellescape v1.6.0
 	github.com/fatih/color v1.18.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
+	github.com/juju/errors v1.0.0
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/client/common v0.0.0-20260502210026-401b624fb197

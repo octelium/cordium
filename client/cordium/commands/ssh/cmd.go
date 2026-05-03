@@ -18,48 +18,80 @@ package ssh
 
 import (
 	"fmt"
-	"os/exec"
 
+	"github.com/juju/errors"
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
 	pb "github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
-	"github.com/octelium/octelium/apis/main/userv1"
 	"github.com/octelium/octelium/client/common/client"
 	"github.com/octelium/octelium/client/common/cliutils"
-	"github.com/pkg/errors"
+	sshc "github.com/octelium/octelium/client/octelium/commands/ssh"
 	"github.com/spf13/cobra"
 )
 
 type args struct {
+	LocalForwards   []string
+	DynamicForwards []string
+	NoCommand       bool
 }
 
 var cmdArgs args
 
 func init() {
+	Cmd.Flags().StringArrayVarP(&cmdArgs.LocalForwards, "local", "L", nil,
+		"Local port forward: [bind_addr:]port:host:hostport")
+	Cmd.Flags().StringArrayVarP(&cmdArgs.DynamicForwards, "dynamic", "D", nil,
+		"Dynamic (SOCKS5) forward: [bind_addr:]port")
+	Cmd.Flags().BoolVarP(&cmdArgs.NoCommand, "no-command", "N", false,
+		"Do not execute a remote command (useful for port forwarding only)")
 }
 
 var Cmd = &cobra.Command{
-	Use:   "ssh",
-	Short: "SSH into a Workspace.",
+	Use:   "ssh <workspace-name> [-- command [args...]]",
+	Short: "Open an SSH session to a Workspace",
+	Long: `Open an interactive SSH session or execute a remote command on a connected
+a running Workspace using its name.
+
+A remote command and its arguments can be passed after a double-dash (--).
+If no command is given, an interactive shell is opened.`,
 	Example: `
-cordium ssh abc
-`,
+  # Open an interactive shell
+  octelium ssh abc
+
+  # Run a single remote command
+  octelium ssh abc -- uptime
+
+  # Run a shell pipeline
+  octelium ssh abc -- sh -c "ps aux | grep python"
+
+  # Local port forward: forward local :5432 to remote localhost:5432
+  octelium ssh abc -L 5432:localhost:5432
+
+  # Multiple port forwards, no interactive shell
+  octelium ssh abc -N \
+    -L 5432:localhost:5432 \
+    -L 6379:localhost:6379
+
+  # Dynamic SOCKS5 proxy on local port 1080
+  octelium ssh abc -D 1080 -N`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return doCmd(cmd, args)
 	},
-	Args: cobra.ExactArgs(1),
+	Args: cobra.MinimumNArgs(1),
 }
 
 func doCmd(cmd *cobra.Command, args []string) error {
-
 	ctx := cmd.Context()
 	i, err := cliutils.GetCLIInfo(cmd, args)
 	if err != nil {
 		return err
 	}
 
-	if _, err := exec.LookPath("ssh"); err != nil {
-		return errors.Errorf("ssh binary does not exist. Please install it.")
+	wsName := args[0]
+
+	var remoteCommand []string
+	if len(args) > 1 {
+		remoteCommand = args[1:]
 	}
 
 	conn, err := client.GetGRPCClientConn(ctx, i.Domain)
@@ -70,36 +102,21 @@ func doCmd(cmd *cobra.Command, args []string) error {
 
 	c := pb.NewMainServiceClient(conn)
 
-	{
-		userC := userv1.NewMainServiceClient(conn)
-		r, err := userC.GetStatus(ctx, &userv1.GetStatusRequest{})
-		if err != nil {
-			return err
-		}
-
-		if !r.Session.Status.IsConnected {
-			return errors.Errorf(
-				`Currently not connected to the Octelium Cluster. Please run "octelium connect" command first`)
-		}
-	}
-
-	arg := i.FirstArg()
-	ws, err := c.GetWorkspace(ctx, &metav1.GetOptions{
-		Name: arg,
-	})
+	ws, err := c.GetWorkspace(ctx, &metav1.GetOptions{Name: wsName})
 	if err != nil {
-		return err
+		return errors.Errorf("could not get Workspace %q: %+v", wsName, err)
 	}
 	if !ucordiumv1.ToWorkspace(ws).IsPreparingOrRunning() {
-		return errors.Errorf("Workspace is not running")
+		return errors.Errorf("Workspace %q is not running (state: %s)", wsName, ws.Status.State.String())
 	}
 
-	cmdI := exec.CommandContext(ctx, "ssh",
-		fmt.Sprintf("%s@%s-ssh.cordium.local.%s", ws.Metadata.Name, ws.Status.RegionRef.Name, i.Domain))
-
-	cmdI.Stdin = cmd.InOrStdin()
-	cmdI.Stdout = cmd.OutOrStdout()
-	cmdI.Stderr = cmd.ErrOrStderr()
-
-	return cmdI.Run()
+	return sshc.DoCommand(ctx, &sshc.DoCommandOpts{
+		Domain:          i.Domain,
+		Service:         fmt.Sprintf("%s-ssh.cordium", ws.Status.RegionRef.Name),
+		SSHUser:         wsName,
+		Command:         remoteCommand,
+		NoCommand:       cmdArgs.NoCommand,
+		DynamicForwards: cmdArgs.DynamicForwards,
+		LocalForwards:   cmdArgs.LocalForwards,
+	})
 }
