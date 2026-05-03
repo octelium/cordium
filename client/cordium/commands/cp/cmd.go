@@ -18,7 +18,9 @@ package cp
 
 import (
 	"fmt"
+	"net"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
@@ -169,6 +171,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		}()
 
 		e.HostKeyCallback = hostKeyCallback
+		e.Addr = net.JoinHostPort(cfg.Host, strconv.Itoa(int(cfg.Port)))
 
 		return nil
 	}
