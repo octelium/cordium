@@ -82,6 +82,11 @@ const theme = createTheme({
         tab: "!font-bold",
         panel: "!font-bold",
       },
+      styles: {
+        tab: {
+          transition: "background-color 500ms ease",
+        },
+      },
     }),
     Switch: Switch.extend({
       defaultProps: {

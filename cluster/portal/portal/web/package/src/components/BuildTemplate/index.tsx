@@ -1,91 +1,87 @@
 import * as WsPB from "@/apis/cordiumv1/cordiumv1";
 import { onError } from "@/utils";
 import { getClientWorkspace } from "@/utils/client";
-import { getResourceRef } from "@/utils/pb";
-import { useMutation } from "@tanstack/react-query";
-import * as React from "react";
-import { toast } from "react-hot-toast";
-
 import { invalidateResource } from "@/utils/octelium";
-
-import { Button, Modal, TagsInput } from "@mantine/core";
+import { getResourceRef, getShortName } from "@/utils/pb";
+import { Button, Group, Modal, Stack, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { useMutation } from "@tanstack/react-query";
+import { Hammer } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 const BuildTemplate = (props: { item: WsPB.Template }) => {
   const client = getClientWorkspace();
   const { item } = props;
-
-  let [tags, setTags] = React.useState(["latest"]);
-
   const [opened, { open, close }] = useDisclosure(false);
 
-  let [buildTemplateReq, setBuildTemplateReq] = React.useState(
-    WsPB.BuildTemplateRequest.create({
-      templateRef: getResourceRef(item!),
-    }),
-  );
-
-  const mutationBuild = useMutation({
+  const mutation = useMutation({
     mutationFn: async () => {
-      const { response } = await client.buildTemplate(buildTemplateReq);
-
-      return { response };
+      const { response } = await client.buildTemplate(
+        WsPB.BuildTemplateRequest.create({ templateRef: getResourceRef(item) }),
+      );
+      return response;
     },
-    onSuccess: ({ response }) => {
-      setTags(["latest"]);
+    onSuccess: () => {
+      close();
       invalidateResource(item);
-      toast.success(`Initialized a new Build`);
+      toast.success("Build started");
     },
     onError,
   });
 
   return (
     <>
-      <Button size="lg" onClick={open}>
-        Build Template
+      <Button size="sm" leftSection={<Hammer size={14} />} onClick={open}>
+        Build template
       </Button>
 
-      <Modal opened={opened} onClose={close} centered>
-        <div className="font-bold text-xl mb-4">
-          <div className="w-full py-4 px-2">
-            {item.status?.buildInfo?.builds && (
-              <div>
-                <div className="mb-4 text-lg text-zinc-700 font-bold">
-                  Choose one or more tags for your Build
-                </div>
-                <div>
-                  <TagsInput
-                    multiple
-                    value={tags}
-                    onChange={(v) => {
-                      setTags(v);
-                      buildTemplateReq.tags = v;
-                      setBuildTemplateReq(
-                        WsPB.BuildTemplateRequest.clone(buildTemplateReq),
-                      );
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-4 flex justify-end items-center">
-          <Button variant="outline" onClick={close}>
-            Cancel
-          </Button>
-          <Button
-            className="ml-4"
-            loading={mutationBuild.isPending}
-            onClick={() => {
-              mutationBuild.mutate();
+      <Modal
+        opened={opened}
+        onClose={close}
+        centered
+        size="sm"
+        title={
+          <Text fw={600} size="sm">
+            Build template
+          </Text>
+        }
+      >
+        <Stack gap="lg">
+          <div
+            style={{
+              background: "#f8fafc",
+              border: "1px solid #e2e8f0",
+              borderRadius: 8,
+              padding: "10px 14px",
             }}
-            autoFocus
           >
-            Build
-          </Button>
-        </div>
+            <Text size="xs" c="dimmed" mb={2}>
+              Template
+            </Text>
+            <Text size="sm" fw={500} style={{ fontFamily: "monospace" }}>
+              {getShortName(item)}
+            </Text>
+          </div>
+
+          <Text size="sm" c="dimmed">
+            This will start a new build for this Template.
+          </Text>
+
+          <Group justify="flex-end" gap="sm">
+            <Button variant="default" size="sm" onClick={close}>
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              leftSection={<Hammer size={13} />}
+              loading={mutation.isPending}
+              onClick={() => mutation.mutate()}
+              autoFocus
+            >
+              Start build
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
     </>
   );

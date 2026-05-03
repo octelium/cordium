@@ -1,3 +1,4 @@
+import BuildTemplate from "@/components/BuildTemplate";
 import InfoItem from "@/components/InfoItem";
 import LinkWrap from "@/components/LinkWrap";
 import PageWrap from "@/components/PageWrap";
@@ -45,6 +46,10 @@ export default () => {
               <Repository item={data} />
             </InfoItem>
           )}
+
+          <InfoItem title="Build">
+            <BuildTemplate item={data} />
+          </InfoItem>
 
           <div>
             <StartWorkspace
