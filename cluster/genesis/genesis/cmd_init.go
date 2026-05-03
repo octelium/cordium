@@ -267,10 +267,9 @@ func (g *Genesis) installSystemResources(ctx context.Context, region *corev1.Reg
 	{
 		svc := &corev1.Service{
 			Metadata: &metav1.Metadata{
-				Name:         fmt.Sprintf("%s-ssh.cordium", region.Metadata.Name),
-				DisplayName:  fmt.Sprintf(`Cordium SSH for Region "%s"`, region.Metadata.Name),
-				IsSystem:     true,
-				IsUserHidden: true,
+				Name:        fmt.Sprintf("%s-ssh.cordium", region.Metadata.Name),
+				DisplayName: fmt.Sprintf(`Cordium SSH for Region "%s"`, region.Metadata.Name),
+				IsSystem:    true,
 			},
 			Spec: &corev1.Service_Spec{
 				Port: 22,
@@ -279,6 +278,7 @@ func (g *Genesis) installSystemResources(ctx context.Context, region *corev1.Reg
 					Type: &corev1.Service_Spec_Config_Ssh{
 						Ssh: &corev1.Service_Spec_Config_SSH{
 							EnableLocalPortForwarding: true,
+							EnableSubsystem:           true,
 						},
 					},
 				},
