@@ -90,6 +90,10 @@ export interface Workspace_Spec {
      * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Limit limit = 6
      */
     limit?: Workspace_Spec_Limit;
+    /**
+     * @generated from protobuf field: bool autoStop = 7
+     */
+    autoStop: boolean;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Image
@@ -3496,13 +3500,15 @@ class Workspace_Spec$Type extends MessageType<Workspace_Spec> {
             { no: 3, name: "repository", kind: "message", T: () => Workspace_Spec_Repository },
             { no: 4, name: "additionalRepositories", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_AdditionalRepository },
             { no: 5, name: "applications", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_Application },
-            { no: 6, name: "limit", kind: "message", T: () => Workspace_Spec_Limit }
+            { no: 6, name: "limit", kind: "message", T: () => Workspace_Spec_Limit },
+            { no: 7, name: "autoStop", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
         ]);
     }
     create(value?: PartialMessage<Workspace_Spec>): Workspace_Spec {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.additionalRepositories = [];
         message.applications = [];
+        message.autoStop = false;
         if (value !== undefined)
             reflectionMergePartial<Workspace_Spec>(this, message, value);
         return message;
@@ -3529,6 +3535,9 @@ class Workspace_Spec$Type extends MessageType<Workspace_Spec> {
                     break;
                 case /* octelium.api.main.cordium.v1.Workspace.Spec.Limit limit */ 6:
                     message.limit = Workspace_Spec_Limit.internalBinaryRead(reader, reader.uint32(), options, message.limit);
+                    break;
+                case /* bool autoStop */ 7:
+                    message.autoStop = reader.bool();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -3560,6 +3569,9 @@ class Workspace_Spec$Type extends MessageType<Workspace_Spec> {
         /* octelium.api.main.cordium.v1.Workspace.Spec.Limit limit = 6; */
         if (message.limit)
             Workspace_Spec_Limit.internalBinaryWrite(message.limit, writer.tag(6, WireType.LengthDelimited).fork(), options).join();
+        /* bool autoStop = 7; */
+        if (message.autoStop !== false)
+            writer.tag(7, WireType.Varint).bool(message.autoStop);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
