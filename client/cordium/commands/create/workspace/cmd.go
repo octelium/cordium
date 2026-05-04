@@ -56,6 +56,8 @@ type CreateWorkspaceArgs struct {
 	StorageMB     uint32
 
 	AppPorts []string
+
+	Out string
 }
 
 type args struct {
@@ -94,6 +96,8 @@ func init() {
 	Cmd.PersistentFlags().StringArrayVar(&cmdArgs.AppPorts, "port", nil,
 		`Expose a named application port (NAME:PORT or PORT for unnamed). Repeatable: --port web:3000 --port api:8080. Append ":default" to mark as the default app: --port web:3000:default`)
 
+	Cmd.PersistentFlags().StringVarP(&cmdArgs.Out, "out", "o", "", `Show the created Workspace. Current values are "yaml" or "json"`)
+
 	Cmd.MarkFlagsMutuallyExclusive("space", "template")
 	Cmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
 }
@@ -123,8 +127,11 @@ from the YAML spec.`,
   # Create a Workspace from a YAML spec file
   cordium create ws --file workspace.yaml
 
-  # Create and start immediately; print only the name for scripting
-  cordium create ws --start --out name
+  # Create and show Workspace as YAML
+  cordium create ws --out yaml
+
+  # Create and show Workspace as JSON
+  cordium create ws --out json
 
   # Create an ephemeral Workspace from a container image
   cordium create ws --ephemeral --image python:3.11-slim
@@ -231,7 +238,16 @@ func doCmd(cmd *cobra.Command, args []string) error {
 	if cmdArgs.Start {
 		cliutils.LineNotify("Successfully created and started Workspace: %s\n", ws.Metadata.Name)
 	} else {
-		cliutils.LineNotify("Successfully created Workspace: %s\n", ws.Metadata.Name)
+		if cmdArgs.Out != "" {
+			out, err := cliutils.OutFormatPrint(cmdArgs.Out, ws)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("%s\n", string(out))
+		} else {
+			cliutils.LineNotify("Successfully created Workspace: %s\n", ws.Metadata.Name)
+		}
+
 	}
 
 	return nil
