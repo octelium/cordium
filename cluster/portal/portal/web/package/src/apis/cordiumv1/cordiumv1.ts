@@ -94,6 +94,10 @@ export interface Workspace_Spec {
      * @generated from protobuf field: bool autoStop = 7
      */
     autoStop: boolean;
+    /**
+     * @generated from protobuf field: repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars = 8
+     */
+    vars: Workspace_Spec_Var[];
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Image
@@ -615,6 +619,19 @@ export interface Workspace_Spec_Limit_Storage {
      * @generated from protobuf field: uint32 megabytes = 2
      */
     megabytes: number;
+}
+/**
+ * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Var
+ */
+export interface Workspace_Spec_Var {
+    /**
+     * @generated from protobuf field: string name = 1
+     */
+    name: string;
+    /**
+     * @generated from protobuf field: string value = 2
+     */
+    value: string;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Status
@@ -1378,6 +1395,10 @@ export interface Template_Spec {
      * @generated from protobuf field: string gitProvider = 6
      */
     gitProvider: string;
+    /**
+     * @generated from protobuf field: repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars = 7
+     */
+    vars: Workspace_Spec_Var[];
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Template.Status
@@ -3501,7 +3522,8 @@ class Workspace_Spec$Type extends MessageType<Workspace_Spec> {
             { no: 4, name: "additionalRepositories", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_AdditionalRepository },
             { no: 5, name: "applications", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_Application },
             { no: 6, name: "limit", kind: "message", T: () => Workspace_Spec_Limit },
-            { no: 7, name: "autoStop", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
+            { no: 7, name: "autoStop", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 8, name: "vars", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_Var }
         ]);
     }
     create(value?: PartialMessage<Workspace_Spec>): Workspace_Spec {
@@ -3509,6 +3531,7 @@ class Workspace_Spec$Type extends MessageType<Workspace_Spec> {
         message.additionalRepositories = [];
         message.applications = [];
         message.autoStop = false;
+        message.vars = [];
         if (value !== undefined)
             reflectionMergePartial<Workspace_Spec>(this, message, value);
         return message;
@@ -3538,6 +3561,9 @@ class Workspace_Spec$Type extends MessageType<Workspace_Spec> {
                     break;
                 case /* bool autoStop */ 7:
                     message.autoStop = reader.bool();
+                    break;
+                case /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars */ 8:
+                    message.vars.push(Workspace_Spec_Var.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -3572,6 +3598,9 @@ class Workspace_Spec$Type extends MessageType<Workspace_Spec> {
         /* bool autoStop = 7; */
         if (message.autoStop !== false)
             writer.tag(7, WireType.Varint).bool(message.autoStop);
+        /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars = 8; */
+        for (let i = 0; i < message.vars.length; i++)
+            Workspace_Spec_Var.internalBinaryWrite(message.vars[i], writer.tag(8, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -5218,6 +5247,61 @@ class Workspace_Spec_Limit_Storage$Type extends MessageType<Workspace_Spec_Limit
  * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Limit.Storage
  */
 export const Workspace_Spec_Limit_Storage = new Workspace_Spec_Limit_Storage$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class Workspace_Spec_Var$Type extends MessageType<Workspace_Spec_Var> {
+    constructor() {
+        super("octelium.api.main.cordium.v1.Workspace.Spec.Var", [
+            { no: 1, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "value", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<Workspace_Spec_Var>): Workspace_Spec_Var {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.name = "";
+        message.value = "";
+        if (value !== undefined)
+            reflectionMergePartial<Workspace_Spec_Var>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Workspace_Spec_Var): Workspace_Spec_Var {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string name */ 1:
+                    message.name = reader.string();
+                    break;
+                case /* string value */ 2:
+                    message.value = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: Workspace_Spec_Var, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string name = 1; */
+        if (message.name !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.name);
+        /* string value = 2; */
+        if (message.value !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.value);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Var
+ */
+export const Workspace_Spec_Var = new Workspace_Spec_Var$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class Workspace_Status$Type extends MessageType<Workspace_Status> {
     constructor() {
@@ -7401,13 +7485,15 @@ class Template_Spec$Type extends MessageType<Template_Spec> {
             { no: 3, name: "repository", kind: "message", T: () => Workspace_Spec_Repository },
             { no: 4, name: "additionalRepositories", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_AdditionalRepository },
             { no: 5, name: "limit", kind: "message", T: () => Workspace_Spec_Limit },
-            { no: 6, name: "gitProvider", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 6, name: "gitProvider", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 7, name: "vars", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_Var }
         ]);
     }
     create(value?: PartialMessage<Template_Spec>): Template_Spec {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.additionalRepositories = [];
         message.gitProvider = "";
+        message.vars = [];
         if (value !== undefined)
             reflectionMergePartial<Template_Spec>(this, message, value);
         return message;
@@ -7434,6 +7520,9 @@ class Template_Spec$Type extends MessageType<Template_Spec> {
                     break;
                 case /* string gitProvider */ 6:
                     message.gitProvider = reader.string();
+                    break;
+                case /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars */ 7:
+                    message.vars.push(Workspace_Spec_Var.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -7465,6 +7554,9 @@ class Template_Spec$Type extends MessageType<Template_Spec> {
         /* string gitProvider = 6; */
         if (message.gitProvider !== "")
             writer.tag(6, WireType.LengthDelimited).string(message.gitProvider);
+        /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars = 7; */
+        for (let i = 0; i < message.vars.length; i++)
+            Workspace_Spec_Var.internalBinaryWrite(message.vars[i], writer.tag(7, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

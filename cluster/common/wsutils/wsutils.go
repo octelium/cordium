@@ -22,6 +22,8 @@ import (
 	"path"
 	"regexp"
 
+	"strings"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/cluster/common/grpcutils"
@@ -47,7 +49,7 @@ type LoadWorkspaceFileRequest struct {
 func LoadWorkspaceFile(ctx context.Context, req *LoadWorkspaceFileRequest) (*cordiumv1.Workspace, error) {
 
 	if req == nil || req.Parent == nil || req.Space == nil || req.BaseDir == "" {
-		return nil, errors.Errorf("Cannot load Workspace. Invaldi request")
+		return nil, errors.Errorf("Cannot load Workspace. Invalid request")
 	}
 
 	paths := []string{
@@ -147,31 +149,16 @@ func CheckTerminalID(arg string) error {
 }
 
 type MergeSpecReq struct {
-	Workspace *cordiumv1.Workspace
-	Template  *cordiumv1.Template
-	// Environment *cordiumv1.Environment
-
+	Workspace      *cordiumv1.Workspace
+	Template       *cordiumv1.Template
 	ChildWorkspace *cordiumv1.Workspace
 }
 
-func MergeSpec(req *MergeSpecReq) (*cordiumv1.Workspace_Spec, error) {
-	// var specEnvironment *cordiumv1.Workspace_Spec
+func mergeSpec(req *MergeSpecReq) (*cordiumv1.Workspace_Spec, error) {
 	var specTemplate *cordiumv1.Workspace_Spec
 	if req.Workspace == nil {
 		return nil, errors.Errorf("Cannot Merge a nil Workspace")
 	}
-
-	/*
-		if req.Environment != nil && req.Environment.Spec != nil {
-			spec := req.Environment.Spec
-			specEnvironment = &cordiumv1.Workspace_Spec{
-				Image:                  spec.Image,
-				Runtime:                spec.Runtime,
-				Repository:             spec.Repository,
-				AdditionalRepositories: spec.AdditionalRepositories,
-			}
-		}
-	*/
 
 	if req.Template != nil && req.Template.Spec != nil {
 		spec := req.Template.Spec
@@ -196,6 +183,137 @@ func MergeSpec(req *MergeSpecReq) (*cordiumv1.Workspace_Spec, error) {
 	}
 
 	return specWorkspace, nil
+}
+
+func MergeSpec(req *MergeSpecReq) (*cordiumv1.Workspace_Spec, error) {
+	merged := &cordiumv1.Workspace_Spec{}
+
+	templateSpec := req.Template.GetSpec()
+	workspaceSpec := req.Workspace.GetSpec()
+
+	merged, err := mergeSpec(req)
+	if err != nil {
+		return nil, err
+	}
+
+	vars := resolveVars(templateSpec.GetVars(), workspaceSpec.GetVars())
+	if len(vars) > 0 {
+		renderSpec(merged, vars)
+	}
+
+	return merged, nil
+}
+
+func resolveVars(
+	templateVars []*cordiumv1.Workspace_Spec_Var,
+	workspaceVars []*cordiumv1.Workspace_Spec_Var,
+) map[string]string {
+	if len(templateVars) == 0 && len(workspaceVars) == 0 {
+		return nil
+	}
+
+	ret := make(map[string]string)
+
+	for _, v := range templateVars {
+		if v.Name != "" {
+			ret[v.Name] = v.Value
+		}
+	}
+	for _, v := range workspaceVars {
+		if v.Name != "" {
+			ret[v.Name] = v.Value
+		}
+	}
+
+	return ret
+}
+
+func renderSpec(spec *cordiumv1.Workspace_Spec, vars map[string]string) {
+	if spec == nil || len(vars) == 0 {
+		return
+	}
+
+	if spec.Image != nil {
+		switch img := spec.Image.Type.(type) {
+		case *cordiumv1.Workspace_Spec_Image_Registry_:
+			if img.Registry != nil {
+				img.Registry.Url = renderString(img.Registry.Url, vars)
+			}
+		case *cordiumv1.Workspace_Spec_Image_Dockerfile_:
+			if img.Dockerfile != nil {
+				switch dt := img.Dockerfile.Type.(type) {
+				case *cordiumv1.Workspace_Spec_Image_Dockerfile_Url:
+					dt.Url = renderString(dt.Url, vars)
+				}
+			}
+		case *cordiumv1.Workspace_Spec_Image_Git_:
+			if img.Git != nil {
+				img.Git.Url = renderString(img.Git.Url, vars)
+				img.Git.Checkout = renderString(img.Git.Checkout, vars)
+				img.Git.Dockerfile = renderString(img.Git.Dockerfile, vars)
+				img.Git.Context = renderString(img.Git.Context, vars)
+			}
+		}
+	}
+
+	renderRepository(spec.Repository, vars)
+
+	for _, repo := range spec.AdditionalRepositories {
+		if repo != nil {
+			renderRepository(repo.Repository, vars)
+		}
+	}
+
+	if spec.Runtime != nil {
+		for _, env := range spec.Runtime.EnvVars {
+			if v, ok := env.Type.(*cordiumv1.Workspace_Spec_Runtime_EnvVar_Value); ok {
+				v.Value = renderString(v.Value, vars)
+			}
+		}
+
+		for _, task := range spec.Runtime.Tasks {
+			task.Run = renderString(task.Run, vars)
+			task.WorkingDir = renderString(task.WorkingDir, vars)
+
+			for _, env := range task.EnvVars {
+				if env != nil {
+					env.Value = renderString(env.Value, vars)
+				}
+			}
+		}
+	}
+}
+
+func renderRepository(repo *cordiumv1.Workspace_Spec_Repository, vars map[string]string) {
+	if repo == nil {
+		return
+	}
+	repo.Url = renderString(repo.Url, vars)
+	if repo.CloneOptions != nil {
+		repo.CloneOptions.Branch = renderString(repo.CloneOptions.Branch, vars)
+		repo.CloneOptions.Checkout = renderString(repo.CloneOptions.Checkout, vars)
+	}
+}
+
+func renderString(s string, vars map[string]string) string {
+	if !strings.Contains(s, "${{") {
+		return s
+	}
+	for name, value := range vars {
+		s = strings.ReplaceAll(s, "${{ vars."+name+" }}", value)
+		s = strings.ReplaceAll(s, "${{vars."+name+"}}", value)
+	}
+
+	for strings.Contains(s, "${{ vars.") || strings.Contains(s, "${{vars.") {
+		start := strings.Index(s, "${{")
+		end := strings.Index(s[start:], "}}")
+		if end == -1 {
+			break
+		}
+		s = s[:start] + s[start+end+2:]
+	}
+
+	return s
 }
 
 func Merge(req *MergeSpecReq) (*cordiumv1.Workspace, error) {

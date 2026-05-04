@@ -89,6 +89,59 @@ func TestMergeSpec(t *testing.T) {
 
 	}
 
+	{
+		ws := &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{},
+			Spec:     &cordiumv1.Workspace_Spec{},
+			Status:   &cordiumv1.Workspace_Status{},
+		}
+
+		env := &cordiumv1.Template{
+			Metadata: &metav1.Metadata{},
+			Spec: &cordiumv1.Template_Spec{
+				Repository: &cordiumv1.Workspace_Spec_Repository{
+					Url: "https://github.com/${{vars.ORG}}/env",
+					CloneOptions: &cordiumv1.Workspace_Spec_Repository_CloneOptions{
+						Depth: 10,
+					},
+				},
+				Vars: []*cordiumv1.Workspace_Spec_Var{
+					{
+						Name:  "ORG",
+						Value: "my_org",
+					},
+					{
+						Name:  "KEY",
+						Value: "my_val",
+					},
+				},
+				Runtime: &cordiumv1.Workspace_Spec_Runtime{
+					EnvVars: []*cordiumv1.Workspace_Spec_Runtime_EnvVar{
+						{
+							Key: "K01",
+							Type: &cordiumv1.Workspace_Spec_Runtime_EnvVar_Value{
+								Value: "MY_${{ vars.KEY }}_VAL",
+							},
+						},
+					},
+				},
+			},
+			Status: &cordiumv1.Template_Status{},
+		}
+
+		{
+			spec, err := MergeSpec(&MergeSpecReq{
+				Workspace: ws,
+				Template:  env,
+			})
+			assert.Nil(t, err)
+			assert.Equal(t, spec.Repository.Url, "https://github.com/my_org/env")
+
+			assert.Equal(t, spec.Runtime.EnvVars[0].GetValue(), "MY_my_val_VAL")
+		}
+
+	}
+
 	/*
 		t.Run("project", func(t *testing.T) {
 			usr, err := tstuser.NewUserWithType(fakeC.OcteliumC, adminSrv, nil, nil, corev1.User_Spec_HUMAN, corev1.Session_Status_CLIENTLESS)
