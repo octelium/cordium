@@ -247,14 +247,12 @@ Cordium implements the [Development Container specification](https://containers.
 Templates support a `vars` definition for parameterized instantiation. Variables are referenced with `${{ vars.NAME }}` syntax inside string fields (task scripts, repository URLs, image URLs, environment variable values). Values are resolved at Workspace creation time from per-Workspace overrides, falling back to Template-defined defaults.
 
 ```yaml
-# Template definition
 spec:
   vars:
     - name: BRANCH
-      defaultValue: main
+      value: main
     - name: SERVICE
-      description: "Service directory to build"
-      required: true
+      value: svc
   repository:
     url: https://github.com/myorg/monorepo
     cloneOptions:
@@ -281,8 +279,6 @@ Workspace and Template configurations can be passed to `cordium` CLI commands vi
 Example: a full-stack development Workspace.
 
 ```yaml
-apiVersion: v1
-kind: Workspace
 spec:
   image:
     registry:
@@ -329,8 +325,6 @@ spec:
 Example: an ephemeral AI agent sandbox.
 
 ```yaml
-apiVersion: v1
-kind: Workspace
 spec:
   image:
     registry:
