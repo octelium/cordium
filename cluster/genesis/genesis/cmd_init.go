@@ -125,8 +125,13 @@ func (g *Genesis) RunInit(ctx context.Context, o *InitOpts) error {
 		region.Metadata.SpecLabels = make(map[string]string)
 	}
 	region.Metadata.SpecLabels["has-workspace"] = "true"
-	if _, err := g.octeliumCInit.CoreC().UpdateRegion(ctx, region); err != nil {
+	region, err = g.octeliumCInit.CoreC().UpdateRegion(ctx, region)
+	if err != nil {
 		return err
+	}
+
+	if err := g.setRegionVersionMap(ctx, region); err != nil {
+		zap.L().Warn("Could not setRegionVersionMap", zap.Error(err))
 	}
 
 	zap.L().Info("Successfully initialized the Cluster")

@@ -76,6 +76,10 @@ func (g *Genesis) RunUpgrade(ctx context.Context, o *UpgradeOpts) error {
 		return errors.Errorf("Could not init Cordium specific components: %+v", err)
 	}
 
+	if err := g.setRegionVersionMap(ctx, regionV); err != nil {
+		zap.L().Warn("Could not setRegionVersionMap", zap.Error(err))
+	}
+
 	zap.L().Debug("Upgrade successful")
 
 	return nil

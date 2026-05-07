@@ -22,8 +22,12 @@ import (
 
 	wsc "github.com/octelium/cordium/cluster/common/components"
 	"github.com/octelium/cordium/cluster/genesis/genesis/components"
+	"github.com/octelium/octelium/apis/main/corev1"
 	"github.com/octelium/octelium/apis/rsc/rmetav1"
+	"github.com/octelium/octelium/cluster/common/apivalidation"
 	"github.com/octelium/octelium/cluster/common/k8sutils"
+	"github.com/octelium/octelium/pkg/common/pbutils"
+	"github.com/octelium/octelium/pkg/utils/ldflags"
 	"go.uber.org/zap"
 )
 
@@ -70,6 +74,31 @@ func (g *Genesis) installComponents(ctx context.Context, o *components.CommonOpt
 	}
 
 	if err := components.CreateNocturne(ctx, o); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *Genesis) setRegionVersionMap(ctx context.Context, rgn *corev1.Region) error {
+	region, err := g.octeliumC.CoreC().GetRegion(ctx, apivalidation.ObjectToRGetOptions(rgn))
+	if err != nil {
+		return err
+	}
+
+	if region.Status.VersionInfoMap == nil {
+		region.Status.VersionInfoMap = make(map[string]*corev1.Region_Status_VersionInfo)
+	}
+
+	region.Status.VersionInfoMap["octeliumee"] = &corev1.Region_Status_VersionInfo{
+		Package: "octeliumee",
+		SetAt:   pbutils.Now(),
+		Version: ldflags.GetVersion(),
+		Id:      os.Getenv("OCTELIUM_INSTALL_ID"),
+	}
+
+	_, err = g.octeliumC.CoreC().UpdateRegion(ctx, region)
+	if err != nil {
 		return err
 	}
 
