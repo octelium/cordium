@@ -147,7 +147,7 @@ Host cordium-%s
     HostName %s
     User %s
     Port %d
-	PreferredAuthentications none
+    PreferredAuthentications none
     LogLevel ERROR
     ServerAliveInterval 30
     ServerAliveCountMax 3
