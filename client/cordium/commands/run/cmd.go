@@ -73,6 +73,7 @@ func init() {
 
 	Cmd.PersistentFlags().StringArrayVar(&cmdArgs.AppPorts, "port", nil,
 		"Expose a named application port (NAME:PORT or PORT for unnamed). Repeatable. Append :default to mark as default app: --port web:3000:default")
+	Cmd.PersistentFlags().BoolVarP(&cmdArgs.AutoStop, "auto-stop", "", false, "Automatically stop the Workspace after running all POST_START tasks")
 
 	Cmd.MarkFlagsMutuallyExclusive("space", "template")
 	Cmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
@@ -199,6 +200,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 			MemoryMB:          cmdArgs.MemoryMB,
 			StorageMB:         cmdArgs.StorageMB,
 			AppPorts:          cmdArgs.AppPorts,
+			AutoStop:          cmdArgs.AutoStop,
 		})
 		if err != nil {
 			return err

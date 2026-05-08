@@ -57,6 +57,8 @@ type CreateWorkspaceArgs struct {
 
 	AppPorts []string
 
+	AutoStop bool
+
 	Out string
 }
 
@@ -97,6 +99,8 @@ func init() {
 		`Expose a named application port (NAME:PORT or PORT for unnamed). Repeatable: --port web:3000 --port api:8080. Append ":default" to mark as the default app: --port web:3000:default`)
 
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Out, "out", "o", "", `Show the created Workspace. Current values are "yaml" or "json"`)
+
+	Cmd.PersistentFlags().BoolVarP(&cmdArgs.AutoStop, "auto-stop", "", false, "Automatically stop the Workspace after running all POST_START tasks")
 
 	Cmd.MarkFlagsMutuallyExclusive("space", "template")
 	Cmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
@@ -230,6 +234,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		MemoryMB:          cmdArgs.MemoryMB,
 		StorageMB:         cmdArgs.StorageMB,
 		AppPorts:          cmdArgs.AppPorts,
+		AutoStop:          cmdArgs.AutoStop,
 	})
 	if err != nil {
 		return err
@@ -275,6 +280,8 @@ type DoCreateWorkspaceOpts struct {
 	CPUMillicores uint32
 	MemoryMB      uint32
 	StorageMB     uint32
+
+	AutoStop bool
 
 	AppPorts []string
 }
@@ -407,6 +414,8 @@ func DoCreateWorkspace(ctx context.Context, c pb.MainServiceClient, o *DoCreateW
 		}
 		ws.Spec.Applications = append(ws.Spec.Applications, app)
 	}
+
+	ws.Spec.AutoStop = o.AutoStop
 
 	ws.Metadata = &metav1.Metadata{}
 	ws.Status = &pb.Workspace_Status{
