@@ -90,8 +90,8 @@ func (g *Genesis) setRegionVersionMap(ctx context.Context, rgn *corev1.Region) e
 		region.Status.VersionInfoMap = make(map[string]*corev1.Region_Status_VersionInfo)
 	}
 
-	region.Status.VersionInfoMap["octeliumee"] = &corev1.Region_Status_VersionInfo{
-		Package: "octeliumee",
+	region.Status.VersionInfoMap["cordium"] = &corev1.Region_Status_VersionInfo{
+		Package: "cordium",
 		SetAt:   pbutils.Now(),
 		Version: ldflags.GetVersion(),
 		Id:      os.Getenv("OCTELIUM_INSTALL_ID"),
