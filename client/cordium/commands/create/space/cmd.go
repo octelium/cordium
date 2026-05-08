@@ -25,22 +25,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type args struct {
-}
-
-var cmdArgs args
-
-func init() {
-}
-
 var Cmd = &cobra.Command{
-	Use:   "space",
+	Use:   "space <name> [flags]",
 	Short: "Create a Space",
 	Example: `
-cordium create space my-space
-cordium create spc devops -o json
-cordium create spaces spc01
-	`,
+  # Create a Space
+  cordium create space my-project
+  cordium create spc ml-research`,
 	Aliases: []string{"spaces", "spc"},
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {

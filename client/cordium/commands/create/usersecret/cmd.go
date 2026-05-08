@@ -40,12 +40,17 @@ func init() {
 }
 
 var Cmd = &cobra.Command{
-	Use:   "usersecret",
+	Use:   "usersecret <name> [flags]",
 	Short: "Create a UserSecret",
 	Example: `
-cordium create usersecret topsec01
-cordium create usec topsec02
-	`,
+  # Create a UserSecret and enter the value interactively (no echo)
+  cordium create usersecret my-github-token
+
+  # Create a UserSecret with an inline value
+  cordium create usersecret my-github-token --value "ghp_..."
+
+  # Create a UserSecret from a file
+  cordium create usec my-tls-cert --file ./cert.pem`,
 	Aliases: []string{"usersecrets", "usec"},
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {

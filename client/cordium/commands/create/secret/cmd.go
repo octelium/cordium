@@ -40,12 +40,20 @@ func init() {
 }
 
 var Cmd = &cobra.Command{
-	Use:   "secret",
-	Short: "Create a Secret",
+	Use:   "secret <name> [flags]",
+	Short: "Create a Secret within a Space",
 	Example: `
-cordium create secret my-secret
-cordium create secret topsec01.space01
-	`,
+  # Create a Secret and enter the value interactively
+  cordium create secret db-password.my-project
+
+  # Create a Secret with an inline value
+  cordium create secret stripe-key.my-project --value "sk-live-..."
+
+  # Create a Secret from a file
+  cordium create secret tls-cert.my-project --file ./cert.pem
+
+  # Create a Secret in the default Space
+  cordium create secret db-password`,
 	Aliases: []string{"secrets", "sec"},
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {

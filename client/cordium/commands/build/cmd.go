@@ -36,13 +36,17 @@ func init() {
 }
 
 var Cmd = &cobra.Command{
-	Use:   "build",
-	Short: "Build a Template",
+	Use:   "build <template> [flags]",
+	Short: "Trigger or cancel a Template pre-build",
 	Example: `
-cordium build my-template.my-space
-cordium build template01
-cordium build my-template --cancel
-	`,
+  # Trigger a pre-build for a Template
+  cordium build ml-env.my-project
+
+  # Trigger a pre-build in the default Space
+  cordium build ml-env
+
+  # Cancel a running pre-build
+  cordium build ml-env.my-project --cancel`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return doCmd(cmd, args)
 	},
