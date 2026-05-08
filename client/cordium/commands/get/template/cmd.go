@@ -29,9 +29,8 @@ import (
 )
 
 type args struct {
-	Out      string
-	Space    string
-	Template string
+	Out   string
+	Space string
 }
 
 var cmdArgs args
@@ -42,14 +41,25 @@ func init() {
 }
 
 var Cmd = &cobra.Command{
-	Use:   "template",
-	Short: "List Templates",
+	Use:   "template [name] [flags]",
+	Short: "Get or list Templates",
 	Example: `
-cordium get template
-cordium get tmpl -o json
-cordium get templates -o yaml
-	`,
+  # List all Templates
+  cordium get templates
+
+  # Get a specific Template
+  cordium get tmpl ml-env.my-project
+
+  # List Templates in a Space
+  cordium get tmpl --space my-project
+
+  # Output a specific Template as JSON
+  cordium get tmpl ml-env.my-project -o json
+
+  # Output all Templates as YAML
+  cordium get templates -o yaml`,
 	Aliases: []string{"templates", "tmpl"},
+	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return doCmd(cmd, args)
 	},

@@ -39,14 +39,22 @@ func init() {
 }
 
 var Cmd = &cobra.Command{
-	Use:   "space",
-	Short: "List Spaces",
+	Use:   "space [name] [flags]",
+	Short: "Get or list Spaces",
 	Example: `
-cordium get space
-cordium get spc -o json
-cordium get spaces -o yaml
-	`,
+  # List all Spaces
+  cordium get spaces
+
+  # Get a specific Space
+  cordium get spc my-project.alice
+
+  # Output a specific Space as JSON
+  cordium get spc my-project.alice -o json
+
+  # Output all Spaces as YAML
+  cordium get spaces -o yaml`,
 	Aliases: []string{"spaces", "spc"},
+	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return doCmd(cmd, args)
 	},

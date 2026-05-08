@@ -30,10 +30,9 @@ import (
 )
 
 type args struct {
-	Out         string
-	Space       string
-	Environment string
-	Template    string
+	Out      string
+	Space    string
+	Template string
 }
 
 var cmdArgs args
@@ -41,19 +40,32 @@ var cmdArgs args
 func init() {
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Out, "out", "o", "", "Output format")
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Space, "space", "", "", "Filter by Space")
-	Cmd.PersistentFlags().StringVarP(&cmdArgs.Environment, "project", "", "", "Filter by Environment")
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Template, "template", "", "", "Filter by Template")
 }
 
 var Cmd = &cobra.Command{
-	Use:   "workspace",
-	Short: "List Workspaces",
+	Use:   "workspace [name] [flags]",
+	Short: "Get or list Workspaces",
 	Example: `
-cordium get workspace
-cordium get ws -o json
-cordium get workspaces -o yaml
-	`,
+  # List all Workspaces
+  cordium get workspaces
+
+  # Get a specific Workspace
+  cordium get ws abc
+
+  # List Workspaces in a Space
+  cordium get ws --space my-project
+
+  # List Workspaces from a specific Template
+  cordium get ws --template ml-env.my-project
+
+  # Output a specific Workspace as JSON
+  cordium get ws abc -o json
+
+  # Output all Workspaces as YAML
+  cordium get workspaces -o yaml`,
 	Aliases: []string{"workspaces", "ws"},
+	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return doCmd(cmd, args)
 	},
