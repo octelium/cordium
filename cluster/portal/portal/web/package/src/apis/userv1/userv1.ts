@@ -27,11 +27,11 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
-import { Timestamp } from "../google/protobuf/timestamp";
 import { CommonListOptions } from "../metav1/metav1";
 import { ListResponseMeta } from "../metav1/metav1";
 import { DualStackNetwork } from "../metav1/metav1";
 import { DualStackIP } from "../metav1/metav1";
+import { Timestamp } from "../google/protobuf/timestamp";
 import { Metadata } from "../metav1/metav1";
 /**
  * @generated from protobuf message octelium.api.main.user.v1.LogoutRequest
@@ -213,6 +213,12 @@ export interface ConnectRequest {
          */
         initialize: ConnectRequest_Initialize;
     } | {
+        oneofKind: "keepAlive";
+        /**
+         * @generated from protobuf field: octelium.api.main.user.v1.ConnectRequest.KeepAlive keepAlive = 2
+         */
+        keepAlive: ConnectRequest_KeepAlive;
+    } | {
         oneofKind: undefined;
     };
 }
@@ -367,6 +373,15 @@ export enum ConnectRequest_Initialize_ConnectionType {
      * @generated from protobuf enum value: QUICV0 = 2;
      */
     QUICV0 = 2
+}
+/**
+ * @generated from protobuf message octelium.api.main.user.v1.ConnectRequest.KeepAlive
+ */
+export interface ConnectRequest_KeepAlive {
+    /**
+     * @generated from protobuf field: google.protobuf.Timestamp setAt = 1
+     */
+    setAt?: Timestamp;
 }
 /**
  * @generated from protobuf message octelium.api.main.user.v1.DisconnectRequest
@@ -1783,7 +1798,8 @@ export const GetStatusResponse_Cluster = new GetStatusResponse_Cluster$Type();
 class ConnectRequest$Type extends MessageType<ConnectRequest> {
     constructor() {
         super("octelium.api.main.user.v1.ConnectRequest", [
-            { no: 1, name: "initialize", kind: "message", oneof: "type", T: () => ConnectRequest_Initialize }
+            { no: 1, name: "initialize", kind: "message", oneof: "type", T: () => ConnectRequest_Initialize },
+            { no: 2, name: "keepAlive", kind: "message", oneof: "type", T: () => ConnectRequest_KeepAlive }
         ]);
     }
     create(value?: PartialMessage<ConnectRequest>): ConnectRequest {
@@ -1804,6 +1820,12 @@ class ConnectRequest$Type extends MessageType<ConnectRequest> {
                         initialize: ConnectRequest_Initialize.internalBinaryRead(reader, reader.uint32(), options, (message.type as any).initialize)
                     };
                     break;
+                case /* octelium.api.main.user.v1.ConnectRequest.KeepAlive keepAlive */ 2:
+                    message.type = {
+                        oneofKind: "keepAlive",
+                        keepAlive: ConnectRequest_KeepAlive.internalBinaryRead(reader, reader.uint32(), options, (message.type as any).keepAlive)
+                    };
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -1819,6 +1841,9 @@ class ConnectRequest$Type extends MessageType<ConnectRequest> {
         /* octelium.api.main.user.v1.ConnectRequest.Initialize initialize = 1; */
         if (message.type.oneofKind === "initialize")
             ConnectRequest_Initialize.internalBinaryWrite(message.type.initialize, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.user.v1.ConnectRequest.KeepAlive keepAlive = 2; */
+        if (message.type.oneofKind === "keepAlive")
+            ConnectRequest_KeepAlive.internalBinaryWrite(message.type.keepAlive, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -2104,6 +2129,52 @@ class ConnectRequest_Initialize_PublishedService$Type extends MessageType<Connec
  * @generated MessageType for protobuf message octelium.api.main.user.v1.ConnectRequest.Initialize.PublishedService
  */
 export const ConnectRequest_Initialize_PublishedService = new ConnectRequest_Initialize_PublishedService$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ConnectRequest_KeepAlive$Type extends MessageType<ConnectRequest_KeepAlive> {
+    constructor() {
+        super("octelium.api.main.user.v1.ConnectRequest.KeepAlive", [
+            { no: 1, name: "setAt", kind: "message", T: () => Timestamp }
+        ]);
+    }
+    create(value?: PartialMessage<ConnectRequest_KeepAlive>): ConnectRequest_KeepAlive {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<ConnectRequest_KeepAlive>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ConnectRequest_KeepAlive): ConnectRequest_KeepAlive {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* google.protobuf.Timestamp setAt */ 1:
+                    message.setAt = Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.setAt);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ConnectRequest_KeepAlive, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* google.protobuf.Timestamp setAt = 1; */
+        if (message.setAt)
+            Timestamp.internalBinaryWrite(message.setAt, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message octelium.api.main.user.v1.ConnectRequest.KeepAlive
+ */
+export const ConnectRequest_KeepAlive = new ConnectRequest_KeepAlive$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class DisconnectRequest$Type extends MessageType<DisconnectRequest> {
     constructor() {

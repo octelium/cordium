@@ -2744,7 +2744,7 @@ export interface ListenTerminalResponse {
  */
 export interface ListenTerminalResponse_Stdout {
     /**
-     * @generated from protobuf field: bytes Data = 1
+     * @generated from protobuf field: bytes data = 1
      */
     data: Uint8Array;
 }
@@ -11846,7 +11846,7 @@ export const ListenTerminalResponse = new ListenTerminalResponse$Type();
 class ListenTerminalResponse_Stdout$Type extends MessageType<ListenTerminalResponse_Stdout> {
     constructor() {
         super("octelium.api.main.cordium.v1.ListenTerminalResponse.Stdout", [
-            { no: 1, name: "Data", kind: "scalar", jsonName: "Data", T: 12 /*ScalarType.BYTES*/ }
+            { no: 1, name: "data", kind: "scalar", T: 12 /*ScalarType.BYTES*/ }
         ]);
     }
     create(value?: PartialMessage<ListenTerminalResponse_Stdout>): ListenTerminalResponse_Stdout {
@@ -11861,7 +11861,7 @@ class ListenTerminalResponse_Stdout$Type extends MessageType<ListenTerminalRespo
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* bytes Data */ 1:
+                case /* bytes data */ 1:
                     message.data = reader.bytes();
                     break;
                 default:
@@ -11876,7 +11876,7 @@ class ListenTerminalResponse_Stdout$Type extends MessageType<ListenTerminalRespo
         return message;
     }
     internalBinaryWrite(message: ListenTerminalResponse_Stdout, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* bytes Data = 1; */
+        /* bytes data = 1; */
         if (message.data.length)
             writer.tag(1, WireType.LengthDelimited).bytes(message.data);
         let u = options.writeUnknownFields;
