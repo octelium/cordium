@@ -661,38 +661,44 @@ func doMain(ctx context.Context) error {
 
 ## Comparison with Other Platforms
 
-| Feature | Cordium | E2B | Daytona | Gitpod | GitHub Codespaces | Coder | Devpod |
-|---|---|---|---|---|---|---|---|
-| **License** | AGPLv3 | Apache 2.0 | Apache 2.0 | AGPL (deprecated) | Proprietary | AGPLv3 | MPL 2.0 |
-| **Self-hosted** | Yes | Yes (limited) | Yes | No | No | Yes | Client-only |
-| **Sandbox isolation** | Rootless containers (3-layer) | Firecracker microVMs | Containers | Containers | Hyper-V VMs | Containers | Via providers |
-| **Infrastructure** | Kubernetes | Bare-metal (KVM) | Docker/K8s | Proprietary | Azure | K8s/Docker | Local/cloud VMs |
-| **Root inside sandbox** | Yes | Yes (VM) | Varies | Limited | Yes (VM) | Config-dependent | Provider-dependent |
-| **Nested containers** | Yes (rootless Podman) | Yes (VM) | Docker-in-Docker | Limited | Yes (VM) | Config-dependent | Provider-dependent |
-| **Storage** | K8s PVCs (any CSI) | Ephemeral | Docker volumes | Proprietary | Azure disks | K8s PVCs | Provider-dependent |
-| **Pre-builds / snapshots** | Yes (VolumeSnapshot) | No | No | Yes | Yes | No | No |
-| **Identity system** | Octelium (OIDC, SAML, workload) | API keys | OAuth2 | GitHub/GitLab | GitHub | OIDC/OAuth2 | None |
-| **Secretless resource access** | Yes (SSH, DB, HTTP, mTLS) | No | No | No | No | No | No |
-| **Zero-trust architecture** | Yes (Octelium ZTNA) | No | No | No | No | No | No |
-| **L7-aware access control** | Yes (per-request, ABAC) | No | No | No | No | No | No |
-| **AI agent focus** | Yes | Yes (primary) | Limited | No | No | No | No |
-| **OpenTelemetry native** | Yes | No | No | No | No | Prometheus only | No |
-| **Declarative YAML config** | Yes (Workspace/Template spec) | No | Yes | `.gitpod.yml` | `devcontainer.json` | Terraform | `devcontainer.json` |
-| **Variable substitution** | Yes (`${{ vars.NAME }}`) | No | No | Limited | No | Terraform vars | No |
-| **Web terminal** | Yes (clientless) | No | Yes | Yes (VS Code) | Yes (VS Code) | Yes | No |
-| **gRPC API** | Yes (full lifecycle + exec) | REST/SDK | REST | Limited | REST | REST | No |
+| Capability / Property | Cordium | Daytona | E2B | GitHub Codespaces | Coder | DevPod |
+|---|---|---|---|---|---|---|
+| **Primary workloads** | Developers, AI agents, automation workloads | Developers, AI agents | AI agents | Developers | Developers, AI-assisted development | Developers |
+| **License** | AGPLv3 | AGPLv3 | Mixed / managed-first | Proprietary | AGPLv3 | MPL 2.0 |
+| **Self-hosted** | Yes | Yes | Limited | No | Yes | Local/client-side |
+| **Managed SaaS offering** | No | Yes | Yes | Yes | Yes | No |
+| **Kubernetes-native architecture** | Yes | Partial | No | No | Yes | No |
+| **Horizontal scalability** | Yes, over Kubernetes | Distributed sandbox runtime | Managed proprietary infrastructure | GitHub-managed | Kubernetes/provider-dependent | Local/provider-dependent |
+| **Isolation model** | Rootless nested containers | Containers / gVisor-style isolation | Firecracker microVMs | VMs/containers | Containers/VMs | Provider-dependent |
+| **Root-equivalent access inside sandbox** | Yes | Yes | Limited | Yes | Configurable | Provider-dependent |
+| **Nested container support** | Supported | Docker/container support | Limited | Supported | Supported | Provider-dependent |
+| **Persistent stateful environments** | Yes | Yes | Limited/session-oriented | Yes | Yes | Provider-dependent |
+| **Ephemeral execution support** | Yes | Yes | Yes | Limited | Limited | Limited |
+| **Volume snapshot support** | CSI VolumeSnapshots | Limited | Platform-managed | Managed internally | Provider-dependent | No |
+| **Devcontainer support** | Yes | Yes | Partial | Yes | Yes | Yes |
+| **Template-based provisioning** | Yes | Yes | Limited | Limited | Yes | Yes |
+| **Secretless infrastructure access** | Yes | No | No | No | No | No |
+| **Built-in infrastructure access proxying** | SSH, Kubernetes, databases, HTTP APIs | No | No | No | Limited/external | No |
+| **OpenTelemetry-native auditing** | Yes | Partial | Limited | Platform-managed | External integrations | No |
+| **CLI-first workflows** | Yes | Yes | Yes | Partial | Yes | Yes |
+| **Multi-user platform** | Yes | Yes | Limited | Yes | Yes | No |
+| **SSH access** | Yes | Yes | Limited | Yes | Yes | Provider-dependent |
+| **Public API / SDK access** | Yes | Yes | Yes | Yes | Yes | Limited |
+| **Web terminal support** | Yes | Yes | Limited | Yes | Yes | IDE/provider-dependent |
+| **GitOps declarative management** | Yes | Partial | No | No | Partial | No |
+| **AI-agent-oriented SDK usage** | Yes | Yes | First-class | Limited | Emerging | Limited |
+| **Long-running background workloads** | Yes | Yes | Session-oriented | Limited | Yes | Provider-dependent |
+| **CI/CD-oriented execution** | Yes | Possible | Possible | Limited | Possible | No |
+| **Primary differentiation** | Identity-centric sandbox platform with integrated secure infrastructure access | Fast stateful AI/dev sandboxes | Ephemeral AI code execution | Managed GitHub-native development | Enterprise remote development | Portable devcontainer orchestration |
 
-**Cordium vs. E2B.** E2B uses Firecracker microVMs requiring bare-metal KVM infrastructure. Cordium runs on standard Kubernetes nodes using rootless containers with the same full-root-in-sandbox capability, adds identity-based secretless infrastructure access, and provides an interactive development experience alongside programmatic API access.
+### Notes
 
-**Cordium vs. Daytona.** Daytona focuses on developer workspace management without an identity or access control layer. Cordium adds Octelium zero-trust, secretless access, hierarchical resource limits, and VolumeSnapshot-based pre-builds.
-
-**Cordium vs. GitHub Codespaces.** Codespaces is a proprietary SaaS product tied to GitHub and Azure. Cordium is self-hosted, infrastructure-agnostic, and provides identity-based infrastructure access rather than relying on credential distribution.
-
-**Cordium vs. Coder.** Coder and Cordium share similar Kubernetes infrastructure requirements. Cordium adds the Octelium zero-trust layer (secretless access, dynamic ABAC, L7-aware observability), variable substitution, and is designed for both human and machine users. Coder uses Terraform for workspace provisioning; Cordium uses a declarative YAML-based configuration with a hierarchical Space/Template/Workspace resource model.
-
-**Cordium vs. Gitpod.** Gitpod's open source offering has been deprecated. Cordium is fully open source and maintained for self-hosting with no proprietary cloud dependency.
-
-**Cordium vs. Devpod.** Devpod is a client-side tool with no server-side management, access control, or multi-user capabilities. Cordium is a server-side platform with centralized management and identity-based access control.
+- Cordium focuses on combining sandboxed execution with identity-aware infrastructure access, policy enforcement, and Kubernetes-native orchestration.
+- Daytona has evolved beyond traditional developer workspaces into a broader AI-agent and sandbox platform with strong emphasis on fast startup times and stateful environments.
+- E2B focuses primarily on ephemeral AI code execution environments with strong isolation using Firecracker microVMs.
+- GitHub Codespaces is a managed cloud development environment tightly integrated with GitHub and Visual Studio Code.
+- Coder primarily focuses on self-hosted remote development infrastructure, though recent positioning increasingly includes AI-assisted and agent-driven workflows.
+- DevPod focuses primarily on portable devcontainer orchestration across different infrastructure providers rather than centralized multi-tenant sandbox management.
 
 
 ## License
