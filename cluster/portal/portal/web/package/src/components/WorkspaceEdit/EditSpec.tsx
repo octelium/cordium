@@ -13,6 +13,9 @@ import EditItem from "../EditItem";
 import Editor from "../Editor";
 import Switch from "../Switch";
 
+import * as MetaPB from "@/apis/metav1/metav1";
+import { SegmentedControl, Text, TextInput } from "@mantine/core";
+
 const EditSpec = (props: {
   item: WsPB.Workspace | WsPB.Template;
   onUpdate: (item: WsPB.Workspace | WsPB.Template) => void;
@@ -97,21 +100,6 @@ const EditSpec = (props: {
 
   return (
     <div>
-      {/*
-      {isWorkspace() && (
-        <ItemContainer title="Ephemeral Storage" isHorizontal>
-          <Switch
-            val={(req as WsPB.Workspace).status?.isEphemeral}
-            onChange={(v) => {
-              (req as WsPB.Workspace).status!.isEphemeral = v;
-              updateReq();
-            }}
-          />
-        </ItemContainer>
-      )}
-      
-      */}
-
       <EditItem
         title="Git Repository"
         description="Set the git repo URL of your environment"
@@ -661,38 +649,14 @@ const EditSpec = (props: {
                       updateReq();
                     }}
                   >
-                    <div className="flex flex-row">
-                      <div className="w-full basis-1/3 mr-1">
-                        <Field
-                          val={envVar.key}
-                          label="Key"
-                          placeholder="KEY-1"
-                          description="Set the environment variable key"
-                          onChange={(v) => {
-                            envVarsArray[idxEnvVar].key = v as string;
-                            updateReq();
-                          }}
-                        />
-                      </div>
-
-                      {envVar.type.oneofKind === `value` && (
-                        <div className="w-full basis-2/3 ml-1">
-                          <Field
-                            val={envVar.type.value}
-                            label="Value"
-                            placeholder="MY VALUE"
-                            description="Set the environment variable value"
-                            onChange={(v) => {
-                              envVarsArray[idxEnvVar].type = {
-                                oneofKind: "value",
-                                value: v as string,
-                              };
-                              updateReq();
-                            }}
-                          />
-                        </div>
-                      )}
-                    </div>
+                    <EnvVarItem
+                      envVar={envVar}
+                      spaceRef={req.status!.spaceRef!}
+                      onChange={(updated) => {
+                        envVarsArray[idxEnvVar] = updated;
+                        updateReq();
+                      }}
+                    />
                   </EditItem>
                 ),
               )}
@@ -1485,6 +1449,111 @@ const EditSpec = (props: {
         </EditItem>
       )}
     </div>
+  );
+};
+
+const EnvVarItem = (props: {
+  envVar: WsPB.Workspace_Spec_Runtime_EnvVar;
+  spaceRef: MetaPB.ObjectReference;
+  onChange: (updated: WsPB.Workspace_Spec_Runtime_EnvVar) => void;
+}) => {
+  const { envVar, spaceRef } = props;
+  const client = getClientWorkspace();
+
+  const qrySecrets = useQuery({
+    queryKey: ["workspace/listSecretEnvVar", spaceRef.uid],
+    queryFn: () => {
+      const { response } = client.listSecret(
+        WsPB.ListSecretOptions.create({
+          spaceRef,
+          common: { itemsPerPage: 500 },
+        }),
+      );
+      return response;
+    },
+    enabled: envVar.type.oneofKind === "fromSecret",
+  });
+
+  const currentKind =
+    envVar.type.oneofKind === "fromSecret" ? "fromSecret" : "value";
+
+  const handleKindChange = (kind: string) => {
+    const next = WsPB.Workspace_Spec_Runtime_EnvVar.clone(envVar);
+    if (kind === "value") {
+      next.type = { oneofKind: "value", value: "" };
+    } else {
+      next.type = { oneofKind: "fromSecret", fromSecret: "" };
+    }
+    props.onChange(next);
+  };
+
+  return (
+    <Group align="flex-end" wrap="nowrap" gap="sm">
+      <TextInput
+        label="Key"
+        placeholder="MY_VAR"
+        required
+        style={{ flex: "0 0 30%" }}
+        value={envVar.key}
+        onChange={(e) => {
+          const next = WsPB.Workspace_Spec_Runtime_EnvVar.clone(envVar);
+          next.key = e.currentTarget.value;
+          props.onChange(next);
+        }}
+      />
+
+      <div style={{ flex: "0 0 auto" }}>
+        <Text size="xs" fw={500} mb={6}>
+          Source
+        </Text>
+        <SegmentedControl
+          size="xs"
+          value={currentKind}
+          onChange={handleKindChange}
+          data={[
+            { label: "Value", value: "value" },
+            { label: "Secret", value: "fromSecret" },
+          ]}
+        />
+      </div>
+
+      <div style={{ flex: 1 }}>
+        {currentKind === "value" && envVar.type.oneofKind === "value" && (
+          <TextInput
+            label="Value"
+            placeholder="my-value"
+            value={envVar.type.value}
+            onChange={(e) => {
+              const next = WsPB.Workspace_Spec_Runtime_EnvVar.clone(envVar);
+              next.type = { oneofKind: "value", value: e.currentTarget.value };
+              props.onChange(next);
+            }}
+          />
+        )}
+
+        {currentKind === "fromSecret" &&
+          envVar.type.oneofKind === "fromSecret" && (
+            <Select
+              label="Secret"
+              placeholder="Select a secret…"
+              required
+              data={
+                qrySecrets.data?.items.map((s) => ({
+                  value: s.metadata!.name,
+                  label: s.metadata!.name.split(".").at(0) ?? s.metadata!.name,
+                })) ?? []
+              }
+              value={envVar.type.fromSecret || null}
+              onChange={(val) => {
+                if (!val) return;
+                const next = WsPB.Workspace_Spec_Runtime_EnvVar.clone(envVar);
+                next.type = { oneofKind: "fromSecret", fromSecret: val };
+                props.onChange(next);
+              }}
+            />
+          )}
+      </div>
+    </Group>
   );
 };
 
