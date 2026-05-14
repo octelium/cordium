@@ -69,7 +69,27 @@ func (c *watcher) startWSLoop(ctx context.Context) {
 
 func (c *watcher) handleWorkspaces(ctx context.Context) error {
 
-	wsList, err := c.octeliumC.CordiumC().ListWorkspace(ctx, &rmetav1.ListOptions{})
+	wsList, err := func() ([]*cordiumv1.Workspace, error) {
+		var ret []*cordiumv1.Workspace
+		var page uint32
+		for {
+			itmList, err := c.octeliumC.CordiumC().ListWorkspace(ctx, &rmetav1.ListOptions{
+				Paginate:     true,
+				ItemsPerPage: 500,
+				Page:         page,
+			})
+			if err != nil {
+				return nil, err
+			}
+
+			ret = append(ret, itmList.Items...)
+			if itmList.ListResponseMeta == nil || !itmList.ListResponseMeta.HasMore {
+				return ret, nil
+			}
+
+			page = page + 1
+		}
+	}()
 	if err != nil {
 		return err
 	}
@@ -79,7 +99,7 @@ func (c *watcher) handleWorkspaces(ctx context.Context) error {
 		return err
 	}
 
-	for _, ws := range wsList.Items {
+	for _, ws := range wsList {
 		if !c.isMyRegion(ws) {
 			continue
 		}
