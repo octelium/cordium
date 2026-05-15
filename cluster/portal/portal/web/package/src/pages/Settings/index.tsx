@@ -11,6 +11,7 @@ import Meta from "@/components/Meta";
 import Switch from "@/components/Switch";
 import { onError } from "@/utils";
 import { getClientWorkspace } from "@/utils/client";
+import { getShortName } from "@/utils/pb";
 import {
   Button,
   Divider,
@@ -24,6 +25,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as React from "react";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { match } from "ts-pattern";
 
 const Edit = (props: { userConfig: UserConfig }) => {
   const client = getClientWorkspace();
@@ -33,6 +35,16 @@ const Edit = (props: { userConfig: UserConfig }) => {
   const [req, setReq] = React.useState(UserConfig.clone(props.userConfig));
 
   const updateReq = () => setReq(UserConfig.clone(req));
+
+  let qryUserSecret = useQuery({
+    queryKey: ["workspace/listUserSecret/"],
+    queryFn: () => {
+      const { response } = client.listUserSecret(
+        WsPB.ListUserSecretOptions.create({}),
+      );
+      return response;
+    },
+  });
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -138,6 +150,24 @@ const Edit = (props: { userConfig: UserConfig }) => {
                   arr.splice(idx, 1);
                   updateReq();
                 }}
+                onSet={() => {
+                  req.spec!.envVars.push(
+                    UserConfig_Spec_EnvVar.create({
+                      key: "",
+                      type: { oneofKind: "value", value: "" },
+                    }),
+                  );
+                  updateReq();
+                }}
+                onAddListItem={() => {
+                  req.spec!.envVars.push(
+                    UserConfig_Spec_EnvVar.create({
+                      key: "",
+                      type: { oneofKind: "value", value: "" },
+                    }),
+                  );
+                  updateReq();
+                }}
               >
                 <Group grow align="flex-start">
                   <TextInput
@@ -148,6 +178,28 @@ const Edit = (props: { userConfig: UserConfig }) => {
                     value={envVar.key}
                     onChange={(e) => {
                       arr[idx].key = e.currentTarget.value;
+                      updateReq();
+                    }}
+                  />
+                  <Select
+                    label="Value type"
+                    description="Set the value source"
+                    data={[
+                      { label: "Value", value: "value" },
+                      { label: "From User Secret", value: "fromUserSecret" },
+                    ]}
+                    value={envVar.type.oneofKind}
+                    onChange={(val) => {
+                      if (!val) return;
+                      arr[idx].type = match(val)
+                        .with("fromUserSecret", () => ({
+                          oneofKind: "fromUserSecret" as const,
+                          fromUserSecret: "",
+                        }))
+                        .otherwise(() => ({
+                          oneofKind: "value" as const,
+                          value: "",
+                        }));
                       updateReq();
                     }}
                   />
@@ -162,6 +214,27 @@ const Edit = (props: { userConfig: UserConfig }) => {
                         arr[idx].type = {
                           oneofKind: "value",
                           value: e.currentTarget.value,
+                        };
+                        updateReq();
+                      }}
+                    />
+                  )}
+                  {envVar.type.oneofKind === "fromUserSecret" && (
+                    <Select
+                      label="User Secret"
+                      description="Select the UserSecret whose value will be used"
+                      data={
+                        qryUserSecret.data?.items.map((s) => ({
+                          label: s.metadata?.name ? getShortName(s) : "",
+                          value: s.metadata?.name ?? "",
+                        })) ?? []
+                      }
+                      value={envVar.type.fromUserSecret}
+                      disabled={qryUserSecret.isLoading}
+                      onChange={(val) => {
+                        arr[idx].type = {
+                          oneofKind: "fromUserSecret",
+                          fromUserSecret: val ?? "",
                         };
                         updateReq();
                       }}
