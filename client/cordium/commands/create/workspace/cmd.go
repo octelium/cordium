@@ -59,6 +59,8 @@ type CreateWorkspaceArgs struct {
 
 	AutoStop bool
 
+	Vars []string
+
 	Out string
 }
 
@@ -102,6 +104,9 @@ func init() {
 
 	Cmd.PersistentFlags().BoolVarP(&cmdArgs.AutoStop, "auto-stop", "", false, "Automatically stop the Workspace after running all POST_START tasks")
 
+	Cmd.PersistentFlags().StringArrayVar(&cmdArgs.Vars, "var", nil,
+		`Set a variable (NAME=VALUE). Repeatable: --var BRANCH=main --var SERVICE=payments`)
+
 	Cmd.MarkFlagsMutuallyExclusive("space", "template")
 	Cmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
 }
@@ -116,8 +121,8 @@ If --start is given, the Workspace is started immediately after creation.
 Use "cordium run" to create and attach an interactive terminal in a single step.
 
 Flags such as --env, --env-from-secret, --additional-repo, --cpu, --memory,
---storage, and --port can be combined with --file to override or extend values
-from the YAML spec.`,
+--storage, --port, and --var can be combined with --file to override or extend
+values from the YAML spec.`,
 	Example: `
   # Create a Workspace from the default Template
   cordium create workspace
@@ -134,65 +139,47 @@ from the YAML spec.`,
   # Create and show Workspace as YAML
   cordium create ws --out yaml
 
-  # Create and show Workspace as JSON
-  cordium create ws --out json
-
   # Create an ephemeral Workspace from a container image
   cordium create ws --ephemeral --image python:3.11-slim
 
   # Create a Workspace from a git repository
-  cordium create ws --repository https://github.com/myorg/my-project
-
-  # Clone a specific branch at a shallow depth
   cordium create ws --repository https://github.com/myorg/my-project --branch develop --depth 1
 
-  # Clone a repository and check out a specific tag
-  cordium create ws --repository https://github.com/myorg/my-project --checkout v2.3.0
-
-  # Create a Workspace from a local Dockerfile
-  cordium create ws --dockerfile ./Dockerfile
-
-  # Set static environment variables
+  # Set environment variables
   cordium create ws --image node:20 -e NODE_ENV=development -e LOG_LEVEL=debug
 
   # Set an environment variable from a Space Secret
   cordium create ws --image python:3.11 --env-from-secret DATABASE_URL=my-db-secret
 
-  # Mix static and secret-sourced environment variables
-  cordium create ws --template ml-env.research \
-    -e WANDB_PROJECT=my-exp \
-    --env-from-secret WANDB_API_KEY=wandb-secret \
-    --env-from-secret HF_TOKEN=huggingface-secret
+  # Override Template variables
+  cordium create ws --template go-build.my-project \
+    --var BRANCH=feat/new-auth \
+    --var SERVICE=services/payments
 
-  # Clone the primary repository and an additional shared library repository
-  cordium create ws --repository https://github.com/myorg/api-service \
-    --additional-repo shared-lib=https://github.com/myorg/shared-lib \
-    --additional-repo proto=https://github.com/myorg/proto-defs
+  # Ephemeral CI run from a parameterized Template
+  cordium create ws --template ci-runner.my-project \
+    --ephemeral \
+    --var BRANCH=main \
+    --var RUN_TESTS=true \
+    --auto-stop \
+    --start
+
+  # Combine a YAML file with variable and environment overrides
+  cordium create ws --file base.yaml \
+    --var BRANCH=staging \
+    -e ENVIRONMENT=staging \
+    --env-from-secret DB_PASSWORD=staging-db-password
 
   # Override resource limits
   cordium create ws --template ml-env.research --cpu 8000 --memory 16384 --storage 50000
 
   # Expose named application ports
   cordium create ws --image node:20 \
-    --repository https://github.com/myorg/fullstack \
     --port web:3000:default \
     --port api:8080 \
     --port storybook:6006
 
-  # Ephemeral AI agent sandbox from an image with secrets and resource limits
-  cordium create ws --ephemeral \
-    --image python:3.11-slim \
-    --env-from-secret ANTHROPIC_API_KEY=anthropic-key \
-    --cpu 2000 --memory 4096 --storage 10000 \
-    --start --out name
-
-  # Combine a YAML file with inline overrides
-  cordium create ws --file base.yaml \
-    -e ENVIRONMENT=staging \
-    --env-from-secret DB_PASSWORD=staging-db-password \
-    --cpu 4000
-
-  # Use the "ws" alias with a template
+  # Use the "ws" alias
   cordium create ws --template ml-env.research --start`,
 	Aliases: []string{"workspaces", "ws"},
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -235,6 +222,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		StorageMB:         cmdArgs.StorageMB,
 		AppPorts:          cmdArgs.AppPorts,
 		AutoStop:          cmdArgs.AutoStop,
+		Vars:              cmdArgs.Vars,
 	})
 	if err != nil {
 		return err
@@ -252,7 +240,6 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		} else {
 			cliutils.LineNotify("Successfully created Workspace: %s\n", ws.Metadata.Name)
 		}
-
 	}
 
 	return nil
@@ -284,6 +271,8 @@ type DoCreateWorkspaceOpts struct {
 	AutoStop bool
 
 	AppPorts []string
+
+	Vars []string
 }
 
 func DoCreateWorkspace(ctx context.Context, c pb.MainServiceClient, o *DoCreateWorkspaceOpts) (*pb.Workspace, error) {
@@ -413,6 +402,17 @@ func DoCreateWorkspace(ctx context.Context, c pb.MainServiceClient, o *DoCreateW
 			return nil, err
 		}
 		ws.Spec.Applications = append(ws.Spec.Applications, app)
+	}
+
+	for _, raw := range o.Vars {
+		name, value, ok := strings.Cut(raw, "=")
+		if !ok || name == "" {
+			return nil, errors.Errorf("invalid --var value %q: expected NAME=VALUE", raw)
+		}
+		ws.Spec.Vars = append(ws.Spec.Vars, &pb.Workspace_Spec_Var{
+			Name:  name,
+			Value: value,
+		})
 	}
 
 	ws.Spec.AutoStop = o.AutoStop
