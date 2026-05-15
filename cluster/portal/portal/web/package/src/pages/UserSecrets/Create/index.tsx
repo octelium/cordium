@@ -16,7 +16,7 @@ import { useNavigate } from "react-router-dom";
 const CreateSecret = () => {
   let [req, setReq] = React.useState(
     WsPB.UserSecret.create({
-      apiVersion: "workspace/v1",
+      apiVersion: "cordium/v1",
       kind: "UserSecret",
       metadata: {},
       spec: {},

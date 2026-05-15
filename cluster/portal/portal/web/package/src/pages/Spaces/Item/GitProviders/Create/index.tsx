@@ -73,7 +73,7 @@ const CreateGitProvider = () => {
 
   const [req, setReq] = React.useState(
     WsPB.GitProvider.create({
-      apiVersion: "workspace/v1",
+      apiVersion: "cordium/v1",
       kind: "GitProvider",
       metadata: {},
       spec: makeProviderSpec("github"),

@@ -24,7 +24,7 @@ const CreateWorkspace = () => {
 
   let [req, setReq] = React.useState(
     WsPB.Workspace.create({
-      apiVersion: "workspace/v1",
+      apiVersion: "cordium/v1",
       kind: "Workspace",
       metadata: {},
       spec: {},

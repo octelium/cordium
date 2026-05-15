@@ -33,7 +33,7 @@ const CreateSecret = () => {
 
   const [req, setReq] = React.useState(
     WsPB.Secret.create({
-      apiVersion: "workspace/v1",
+      apiVersion: "cordium/v1",
       kind: "Secret",
       metadata: {},
       spec: {},

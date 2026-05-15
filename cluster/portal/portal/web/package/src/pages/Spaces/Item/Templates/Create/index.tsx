@@ -21,7 +21,7 @@ const CreateTemplate = () => {
 
   const [req, setReq] = React.useState(
     WsPB.Template.create({
-      apiVersion: "workspace/v1",
+      apiVersion: "cordium/v1",
       kind: "Template",
       metadata: {},
       spec: {},
