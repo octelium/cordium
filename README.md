@@ -41,71 +41,12 @@ Cordium is a free and open source, self-hosted, identity-based, horizontally sca
 - **Open source and designed for self-hosting.** Cordium, like Octelium itself, is fully open source and designed for single-tenant self-hosting. There is no proprietary cloud-based control plane, and this is not a limited open source version of a separate fully functional paid SaaS product. Cordium can be deployed on a single-node Kubernetes cluster running on a low-cost cloud VM/VPS, or on production-grade multi-node Kubernetes installations, cloud-based or on-premises, with no vendor lock-in.
 
 
-## Core Concepts
+## Concepts
 
-Cordium organizes resources in a hierarchical structure:
-
-```
-Cluster
-└── Space (namespace for related resources)
-    ├── Template (reusable Workspace configuration)
-    │   └── Workspace (running sandbox instance)
-    ├── Secret (sensitive values, referenced by Workspaces, Templates, and GitProviders)
-    └── GitProvider (OAuth2 git authentication configuration)
-
-User (Octelium-managed, global scope)
-├── UserSecret (per-user sensitive values, including SSH key pairs)
-└── UserConfig (per-user defaults: dotfiles, environment variables, tasks)
-```
-
-### Spaces
-
-A **Space** is the top-level namespace that groups related Workspaces, Templates, Secrets, and GitProviders. All resources belong to exactly one Space. Each User can create one or more Spaces. Each Space has:
-
-- A unique name scoped to the owning User
-- One or more Templates (a `default` Template is created automatically)
-- Space-scoped Secrets accessible to all Templates and Workspaces within the Space
-- Optional GitProviders for OAuth2-based git authentication
-- Optional runtime configuration (environment variables and lifecycle tasks) inherited by all Workspaces in the Space
-- Optional resource limits (default and maximum) applied to Workspaces within the Space
-
-Spaces provide a natural boundary for projects or use cases. A developer might have a Space for each major project; an AI agent platform might create a Space per tenant or per workflow.
-
-### Workspaces
-
-A **Workspace** (synonymous with **sandbox**) is the fundamental execution unit in Cordium. Each Workspace belongs to one Template and one Space, is owned by an Octelium User, and runs as an isolated, rootless container environment. Each running Workspace:
-
-- Has full root access within the container (install packages, run nested containers, manage services)
-- Can have persistent or ephemeral storage
-- Is accessible via web-based terminals, SSH, `cordium` CLI commands, or programmatic API access
-- Has a dedicated Octelium Session for secretless infrastructure access via `octelium connect`
-
-Workspace spec includes: image configuration (public/private registry, Dockerfile, Git repo, devcontainer), primary and additional repository cloning with authentication, runtime tasks (`ON_CREATE`, `POST_START`, `PRE_STOP`), devcontainer features, environment variables with static values or Secret references, resource limits (CPU, memory, storage), and named applications to expose Workspace servers.
-
-### Templates
-
-A **Template** defines a reusable Workspace configuration within a Space. Templates encapsulate the full specification for a Workspace: image source, repository configuration, runtime tasks, environment variables, resource limits, and application definitions.
-
-Every Space has a `default` Template created automatically. Additional Templates can be created for different project configurations, language environments, or use cases within the same Space.
-
-Templates support **pre-building**: a build Workspace is created from the Template spec, runs to completion, and produces a VolumeSnapshot. Subsequent Workspaces instantiated from a pre-built Template restore from this snapshot, reducing startup time from minutes to seconds. Template spec shares most of Workspace spec configuration, and additionally supports a GitProvider association for automatic OAuth2 credential injection and a `vars` definition for parameterized instantiation.
-
-### Secrets
-
-**Secrets** are sensitive values (API keys, access tokens, SSH private keys, etc.) stored within a Space. They can be referenced by name in Template and Space runtime configurations, for example as environment variable values or repository authentication credentials. Secret values are never returned through the API after creation and can only be used by the Cluster or exposed to Workspaces at runtime.
-
-### GitProviders
-
-A **GitProvider** configures OAuth2 authentication against a git hosting service: GitHub, GitLab, or any generic OAuth2 provider. When a Template references a GitProvider, users authenticate once through the Cordium portal's OAuth2 flow, and their access tokens are automatically injected into Workspaces at startup, enabling authenticated `git clone`, `git push`, and other git operations without manual credential configuration.
-
-### User Configuration
-
-Per-user configuration applies across all of a user's Workspaces, regardless of Space or Template:
-
-- **Dotfiles**: A git repository URL containing dotfiles. Cordium clones it into `~/dotfiles` at Workspace creation time and runs standard install scripts (`install.sh`, `bootstrap.sh`, `setup.sh`, or their equivalents).
-- **User environment variables**: Injected into every Workspace. Values can be static or sourced from UserSecrets.
-- **User tasks**: `POST_START` tasks that run in every Workspace after startup.
-- **UserSecrets**: Per-user encrypted values (strings, byte arrays, SSH keys) stored independently of Space-scoped Secrets. SSH key UserSecrets are generated server-side as ECDSA key pairs. The public key is available for external registration; the private key is automatically loaded into the Workspace's SSH agent.
+- **Space** is the top-level namespace in Cordium. It groups Templates, Workspaces, Secrets, and GitProviders under a single organizational unit.
+- **Workspace** (synonymous with sandbox) is the fundamental execution unit in Cordium. It is an isolated, rootless container-based environment that can be used interactively or programmatically via web-based console, cordium CLI, standard SSH, and gRPC-based APIs.
+- **Template** defines a reusable Workspace configuration within a Space. When a Workspace is created, it is initialized from the selected Template's spec. Every Space has a `default` Template created automatically. A Template's spec shares most of Workspace spec (image, runtime, etc.) as well as an optional GitProvider association. Templates support pre-builds via Kubernetes VolumeSnapshot to reduce startup time from minutes to seconds for dependency-heavy Templates.
+- **Secrets** represents a sensitive value (API keys, tokens, passwords, certificates) stored within a Space. Secrets are referenced by name in Template specs.
 
 
 ## Workspace Configuration
