@@ -1,14 +1,9 @@
 # Cordium
 
-Cordium is a free and open source, self-hosted, identity-based sandbox platform built on [Kubernetes](https://kubernetes.io) and [Octelium](https://octelium.com). It provides isolated, rootless container-based reproducible environments, called **Workspaces**, for both humans and machines, including AI agents.
-
-Cordium is designed as a unified platform that serves two primary purposes:
+Cordium is a free and open source, self-hosted, identity-based, horizontally scalable sandbox platform built on [Kubernetes](https://kubernetes.io) and [Octelium](https://github.com/octelium/octelium) for both humans and machines, including AI agents. Cordium is designed as a unified platform that serves two primary purposes:
 
 - A sandbox platform for running both long-lived workloads (such as remote development environments, persistent servers, and interactive coding sessions) and short-lived tasks (such as AI agent execution, CI/CD jobs, and automated scripts) inside reproducible rootless container-based sandboxes accessible via web, SSH, CLI, and gRPC-based SDKs.
 - An identity-based zero-trust remote access platform that leverages [Octelium](https://octelium.com) ZTNA capabilities to provide secretless, policy-driven access to infrastructure resources from within Workspaces, without exposing, distributing, or managing upstream resource credentials.
-
-Cordium is 100% free and open source, self-hosted, and licensed under the [GNU Affero General Public License v3.0](LICENSE).
-
 
 ## Table of Contents
 
@@ -22,21 +17,9 @@ Cordium is 100% free and open source, self-hosted, and licensed under the [GNU A
   - [GitProviders](#gitproviders)
   - [User Configuration](#user-configuration)
 - [Workspace Configuration](#workspace-configuration)
-  - [Image Sources](#image-sources)
-  - [Repository Cloning](#repository-cloning)
-  - [Runtime Configuration](#runtime-configuration)
-  - [Applications and Port Sharing](#applications-and-port-sharing)
-  - [Devcontainer Support](#devcontainer-support)
-  - [Variable Substitution](#variable-substitution)
-  - [YAML Configuration Files](#yaml-configuration-files)
-- [Resource Limits](#resource-limits)
-- [Workspace Lifecycle](#workspace-lifecycle)
 - [Access Methods](#access-methods)
-  - [Web Portal](#web-portal)
   - [CLI](#cli)
-  - [gRPC API](#grpc-api)
 - [Comparison with Other Platforms](#comparison-with-other-platforms)
-- [Self-Hosting](#self-hosting)
 - [License](#license)
 
 
@@ -44,9 +27,9 @@ Cordium is 100% free and open source, self-hosted, and licensed under the [GNU A
 
 - **Unified access for humans and machines.** The same Workspace can be accessed interactively through a browser-based terminal, via SSH, through the CLI, or programmatically via gRPC-based SDKs. This makes Cordium equally suitable as a remote development environment for engineers (comparable to GitHub Codespaces or Coder) and as an execution sandbox for AI agents, CI/CD pipelines, and automated workloads. Workspaces support both long-lived runs (remote development, persistent servers) and short-lived runs (AI agent tasks, build jobs, scripted automation).
 
-- **Highly customizable sandbox environments.** Workspace filesystems can be built from OCI/Docker images, Dockerfiles, git repositories, and devcontainers. Multi-repository cloning, including private repositories with authentication. Workspace and Template configurations are fully declarative via YAML files and can be instantiated through the `cordium` CLI or managed programmatically via the gRPC API. Each running Workspace supports full root access within the sandbox, allowing users to run containers, install system packages, and run privileged services. Templates support pre-building for fast Workspace instantiation. Spaces provide namespacing for Workspaces, Templates, Secrets, and GitProviders. Secrets can be referenced in environment variables and repository authentication configurations. Workspace storage can be persistent or ephemeral. Resource limits (memory, CPU, and storage) can be defined at the Workspace, Space, and Cluster level. Variable substitution (`${{ vars.NAME }}`) allows Templates to be parameterized at instantiation time.
+- **Highly customizable sandbox environments.** Workspace filesystems can be built from OCI/Docker images, Dockerfiles, git repositories, and devcontainers. Multi-repository cloning, including private repositories with authentication. Workspace and Template configurations can be managed declaratively via YAML files and can be instantiated through the `cordium` CLI or managed programmatically via the gRPC API. Each running Workspace supports full root access within the sandbox, allowing users to run containers, install system packages, and run privileged services. Templates support pre-building for fast Workspace instantiation. Spaces provide namespacing for Workspaces, Templates, Secrets, and GitProviders. Secrets can be referenced in environment variables and repository authentication configurations. Workspace storage can be persistent or ephemeral. Resource limits (memory, CPU, and storage) can be defined at the Workspace, Space, and Cluster level.
 
-- **Rootless container-based sandboxing on standard Kubernetes.** No bare-metal nodes or specialized hardware are needed. Workspaces run efficiently on any Kubernetes cluster while providing isolation through Linux namespaces, cgroups, seccomp, and capabilities.
+- **Rootless container-based sandboxing on standard Kubernetes.** No bare-metal nodes or specialized hardware are needed. Workspaces run efficiently on any standard Kubernetes cluster.
 
 - **Zero-trust platform on Octelium.** Cordium is built on [Octelium](https://octelium.com), inheriting its zero-trust infrastructure as a foundational layer and using its resource types (Users, Sessions, Devices, Services, Namespaces, Policies, and others) to provide the following capabilities:
 
