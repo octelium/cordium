@@ -467,7 +467,8 @@ func (s *Server) doRunContainer(ctx context.Context, commonArgs []string, contai
 
 	aCPUs := fmt.Sprintf("--cpus=%.2f",
 		float32(float32(s.initReq.Workspace.Status.Limit.Cpu.Millicores*97)/float32(100*1000)))
-	aCAP := "--cap-add net_admin,sys_admin,net_raw,sys_ptrace,net_bind_service"
+	// aCAP := "--cap-add net_admin,sys_admin,net_raw,sys_ptrace,net_bind_service"
+	aCAP := "--cap-add net_admin,sys_admin,net_raw,net_bind_service"
 
 	aSecFS := "--tmpfs /sys/kernel/security:rw,size=100k,mode=1755"
 	aSecOpts := "--security-opt=unmask=/sys/fs/cgroup --security-opt=unmask=/proc/sys"
