@@ -454,46 +454,63 @@ The Cordium portal provides a browser-based interface for Workspace management a
 
 ### CLI
 
-The `cordium` CLI provides full command-line access to Workspace management.
-
-**Run and attach to a Workspace:**
+The `cordium` CLI provides full command-line access to Workspace management. Here are some examples:
 
 ```sh
-# Create a new Workspace from the default Template and attach a terminal
+# Create from the default Template and attach a terminal
 cordium run
 
-# Create from a YAML configuration file
-cordium run --file workspace.yaml
+# Attach to an existing Workspace (starts it if stopped)
+cordium run abc
 
 # Create from a specific Template
 cordium run --template ml-env.my-project
 
-# Create from a git repository
-cordium run --repository https://github.com/myorg/my-project --branch develop
+# Create from a YAML configuration file
+cordium run --file workspace.yaml
 
-# Create from a container image with environment variables
-cordium run --image python:3.11 -e PYTHONUNBUFFERED=1
+# Create from a container image
+cordium run --image python:3.11-slim
 
 # Create from a Dockerfile
 cordium run --dockerfile ./Dockerfile
 
-# Create an ephemeral Workspace that is deleted after the session ends
+# Create from a git repository, cloning a specific branch
+cordium run --repository https://github.com/myorg/my-project --branch develop
+
+# Create in a specific Space using that Space's default Template
+cordium run --space my-project
+
+# Create an ephemeral Workspace
+cordium run --ephemeral
+
+# Create an ephemeral Workspace that is deleted when the terminal session ends
 cordium run --ephemeral --rm
 
-# Attach to an existing Workspace (starts it if stopped)
-cordium run abc
-```
+# Ephemeral AI agent sandbox with resource limits and a secret
+cordium run --ephemeral --rm \
+  --image python:3.11-slim \
+  --env-from-secret ANTHROPIC_API_KEY=anthropic-key \
+  --cpu 2000 --memory 4096
 
-**Open a terminal:**
+# Set environment variables
+cordium run --image node:20 -e NODE_ENV=development -e PORT=3000
 
-```sh
+# Source a variable from a Space Secret
+cordium run --template backend.my-project \
+  --env-from-secret DATABASE_URL=staging-db-url
+
+# Clone the primary repository and an additional repository with vars
+cordium run --repository https://github.com/myorg/api-service \
+  --additional-repo shared-lib=https://github.com/myorg/shared-lib \
+  --var SERVICE=services/payments \
+  --var BRANCH=main
+
+
+# Open a Workspace terminal
 cordium terminal abc
 cordium term abc          # short alias
-```
 
-**Execute remote commands:**
-
-```sh
 # Run a command and propagate exit code
 cordium exec abc -- make test
 
@@ -506,17 +523,10 @@ cordium exec abc --root -- apt-get install -y ripgrep
 # Set per-command environment variables
 cordium exec abc -e GOOS=linux -e GOARCH=amd64 -- go build ./...
 
-# Pipe local input to a remote command
-echo "SELECT version();" | cordium exec abc -- psql mydb
-
 # Capture remote output locally
 cordium exec abc -- cat /workspace/repo/output.json > local.json
-```
 
-**SSH access:**
-
-```sh
-# Interactive SSH session
+# Interactive SSH session via an embedded SSH client in the cordium CLI
 cordium ssh abc
 
 # Run a remote command via SSH
@@ -533,11 +543,7 @@ cordium ssh abc -D 1080 -N
 
 # Generate an SSH config block for use with VS Code, JetBrains, Zed, rsync
 cordium ssh abc --print-config >> ~/.ssh/config
-```
 
-**File transfer:**
-
-```sh
 # Copy a local file to a Workspace
 cordium cp ./config.json abc:/workspace/repo/config.json
 
@@ -549,34 +555,18 @@ cordium cp -r ./src/ abc:/workspace/repo/src/
 
 # Copy between two Workspaces
 cordium cp abc:/workspace/repo/model.pt def:/workspace/repo/model.pt
-```
 
-**Stream Workspace logs:**
 
-```sh
-# Stream build and task logs
+# Stream Workspace logs
 cordium logs abc
 
-# Stream logs with timestamps
-cordium logs abc --timestamp
-
-# Stream logs without color (useful for CI/CD capture)
-cordium logs abc --no-color
-```
-
-**Workspace lifecycle management:**
-
-```sh
+# Start a Workspace
 cordium start abc
+
+# Stop a Workspace
 cordium stop abc
 cordium delete workspace abc
-cordium list workspaces
-cordium list workspaces --space my-project
-```
 
-**Space and Template management:**
-
-```sh
 # Create a Space
 cordium create space my-project
 
@@ -595,67 +585,6 @@ cordium run --template go-build.my-project \
   --var SERVICE=services/payments \
   --var BRANCH=main \
   --ephemeral
-```
-
-### gRPC API
-
-The complete Cordium API is exposed via gRPC across three services:
-
-**`MainService`**: Resource management and Workspace lifecycle. CRUD operations for Spaces, Templates, Workspaces, Secrets, GitProviders, UserSecrets, and UserConfig; `StartWorkspace` / `StopWorkspace`; `WatchWorkspace` streaming RPC; `BuildTemplate` / `CancelBuildTemplate`; `ShareWorkspacePort` / `UnshareWorkspacePort`.
-
-**`WorkspaceService`**: Terminal and command execution. `CreateTerminal` / `RemoveTerminal` / `ListTerminal`; `ListenTerminal` streaming RPC; `WriteTerminalData` / `SetTerminalWindowSize`; `Exec` bidirectional streaming RPC; `ListenLog` streaming RPC.
-
-**`ManagementService`**: Cluster configuration. `GetClusterConfig` / `UpdateClusterConfig`.
-
-All API operations are authenticated via Octelium session tokens. A minimal Go client:
-
-```go
-package main
-
-import (
-    "context"
-    "fmt"
-    "os"
-
-    "github.com/octelium/octelium/apis/main/cordiumv1"
-    "github.com/octelium/octelium/octelium-go"
-)
-
-func doMain(ctx context.Context) error {
-    octeliumC, err := octelium.NewClient(ctx, &octelium.ClientConfig{
-        Domain:              "example.com",
-        AuthenticationToken: os.Getenv("AUTH_TOKEN"),
-    })
-    if err != nil {
-        return err
-    }
-    defer octeliumC.Close()
-
-    grpcConn, err := octeliumC.GRPC().GetConn(ctx)
-    if err != nil {
-        return err
-    }
-
-    c := cordiumv1.NewMainServiceClient(grpcConn)
-
-    ws, err := c.CreateWorkspace(ctx, &cordiumv1.Workspace{
-        Spec: &cordiumv1.Workspace_Spec{},
-        Status: &cordiumv1.Workspace_Status{
-            IsEphemeral: true,
-            TemplateRef: &metav1.ObjectReference{Name: "agent-sandbox.ai-ops"},
-            VarOverrides: map[string]string{
-                "REPO_URL": "https://github.com/myorg/target-repo",
-                "TASK":     "Fix failing tests in src/auth/ and commit the result.",
-            },
-        },
-    })
-    if err != nil {
-        return err
-    }
-
-    fmt.Printf("Created Workspace: %s\n", ws.Metadata.Name)
-    return nil
-}
 ```
 
 
