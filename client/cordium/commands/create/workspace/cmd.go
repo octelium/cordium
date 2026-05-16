@@ -427,8 +427,8 @@ func DoCreateWorkspace(ctx context.Context, c pb.MainServiceClient, o *DoCreateW
 			Name: o.Template,
 		}
 	} else if o.Space != "" {
-		ws.Status.SpaceRef = &metav1.ObjectReference{
-			Name: o.Space,
+		ws.Status.TemplateRef = &metav1.ObjectReference{
+			Name: fmt.Sprintf("default.%s", o.Space),
 		}
 	}
 
