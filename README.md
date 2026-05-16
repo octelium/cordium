@@ -156,163 +156,126 @@ Per-user configuration applies across all of a user's Workspaces, regardless of 
 
 ## Workspace Configuration
 
-Workspaces can be configured through multiple mechanisms merged at initialization time in a defined precedence order: Workspace spec → Template spec → Space spec → Cluster defaults. Environment variables are merged across all levels; resource limits are resolved by precedence and then capped by Space and Cluster maximums.
+Here are some Workspace/Template configurations that can be used to create and run Workspaces:
 
-### Image Sources
-
-| Source | Description |
-|---|---|
-| **Container registry** | Pull a pre-built image from any OCI-compatible registry, with optional authentication |
-| **Dockerfile** | Provide a Dockerfile inline or from a URL in the Template or Workspace spec |
-| **Git repository** | Clone a repository and build from a Dockerfile or devcontainer spec found within it |
-| **Repository devcontainer** | Detect and build from `.devcontainer/devcontainer.json` in the configured repository |
-
-If no image source is specified, Cordium uses a default base image with common development tools pre-installed.
-
-### Repository Cloning
-
-- **Primary repository**: Cloned into `/workspace/repo` with configurable branch, depth, shallow submodule, and checkout options.
-- **Additional repositories**: Cloned into `/workspace/additional-repos/<name>` with independent configuration.
-- **Authentication**: HTTP basic auth with credentials sourced from Secrets, or automatic credential injection via GitProvider OAuth2 tokens.
-- **Shallow cloning**: Initial clone is shallow for fast startup; full history is fetched asynchronously in the background.
-
-### Runtime Configuration
-
-**Environment variables** can be set at multiple levels with values either static or resolved from Secrets/UserSecrets:
-
-```yaml
-spec:
-  runtime:
-    envVars:
-      - key: DATABASE_URL
-        fromSecret: my-database-url
-      - key: NODE_ENV
-        value: development
-```
-
-**Lifecycle tasks** run at specific points in the Workspace lifecycle:
-
-| Type | When it runs | Use case |
-|---|---|---|
-| `ON_CREATE` | First Workspace start only | Install dependencies, compile, seed databases |
-| `POST_START` | Every Workspace start | Start background services, run dev servers |
-| `PRE_STOP` | Before Workspace stops | Graceful shutdown, cleanup |
-
-Tasks support per-task environment variables, working directories, `runAsRoot`, `isBackground`, and `onFailure` behavior:
-
-```yaml
-spec:
-  runtime:
-    tasks:
-      - name: install-deps
-        run: npm install
-        type: ON_CREATE
-        workingDir: /workspace/repo
-        onFailure: ON_FAILURE_ABORT
-      - name: dev-server
-        run: npm run dev
-        type: POST_START
-        isBackground: true
-        workingDir: /workspace/repo
-      - name: setup-db
-        run: service postgresql start && createdb myapp
-        type: POST_START
-        runAsRoot: true
-```
-
-### Applications and Port Sharing
-
-Workspaces can define named applications mapped to ports, accessible through the portal's reverse proxy:
-
-```yaml
-spec:
-  applications:
-    - name: web
-      port: 3000
-      isDefault: true
-    - name: api
-      port: 8080
-    - name: docs
-      port: 4000
-```
-
-The default application is accessible at `<workspace>.cordium.<domain>`. Named applications are accessible at `<app>_<workspace>.cordium.<domain>`. Applications can be shared with Space members or all authenticated users via the `ShareWorkspacePort` API.
-
-### Devcontainer Support
-
-Cordium implements the [Development Container specification](https://containers.dev/). Workspaces built from repositories containing `.devcontainer/devcontainer.json` or `.devcontainer.json` automatically build or pull the specified image, apply `containerEnv` values, install devcontainer features from OCI registries, run all lifecycle hooks, and install VS Code extensions. Docker Compose-based devcontainer configurations are also supported.
-
-### Variable Substitution
-
-Templates support a `vars` definition for parameterized instantiation. Variables are referenced with `${{ vars.NAME }}` syntax inside string fields (task scripts, repository URLs, image URLs, environment variable values). Values are resolved at Workspace creation time from per-Workspace overrides, falling back to Template-defined defaults.
-
-```yaml
-spec:
-  vars:
-    - name: BRANCH
-      value: main
-    - name: SERVICE
-      value: svc
-  repository:
-    url: https://github.com/myorg/monorepo
-    cloneOptions:
-      branch: ${{ vars.BRANCH }}
-  runtime:
-    tasks:
-      - name: build
-        run: cd ${{ vars.SERVICE }} && go build ./...
-        type: ON_CREATE
-        workingDir: /workspace/repo
-```
-
-```sh
-# Override variables at run time
-cordium run --template go-build.my-project \
-  --var SERVICE=services/payments \
-  --var BRANCH=feat/new-feature
-```
-
-### YAML Configuration Files
-
-Workspace and Template configurations can be passed to `cordium` CLI commands via `--file config.yaml`. A `.octelium/workspace.yaml` file placed in a repository is automatically detected and merged with the Template spec at initialization time.
-
-Example: a full-stack development Workspace.
 
 ```yaml
 spec:
   image:
     registry:
-      url: node:20-bookworm
+      url: python:3.12-bookworm
+
+  runtime:
+    tasks:
+      - name: hello
+        type: ON_CREATE
+        run: |
+          python3 --version
+          echo "Cordium Workspace is ready"
+
+  limit:
+    cpu:
+      millicores: 1000
+    memory:
+      megabytes: 2048
+    storage:
+      megabytes: 10000
+```
+
+```yaml
+spec:
+  image:
+    dockerfile:
+      inline: |
+        FROM ubuntu:24.04
+
+        ENV DEBIAN_FRONTEND=noninteractive
+
+        RUN apt-get update && apt-get install -y \
+            ca-certificates \
+            curl \
+            wget \
+            git \
+            jq \
+            vim \
+            nano \
+            htop
+
   repository:
-    url: https://github.com/myorg/my-fullstack-app
+    url: https://github.com/example/payment-service
     cloneOptions:
       branch: main
+      depth: 1
+      singleBranch: true
+
+  vars:
+    name: CODEX_PROMPT
+    value: |
+      The test suite is failing.
+      Analyze the repository, fix the failing tests,
+      run the tests again, and create a git commit
+      describing the fix.
+
   runtime:
     envVars:
-      - key: NODE_ENV
-        value: development
-      - key: DATABASE_URL
-        fromSecret: staging-db-url
+      - key: OPENAI_API_KEY
+        fromSecret: openai-api-key
+
+      - key: OPENAI_MODEL
+        value: o4-mini
+
+      - key: GIT_AUTHOR_NAME
+        value: cordium-codex
+
+      - key: GIT_AUTHOR_EMAIL
+        value: codex@example.com
+
     tasks:
-      - name: install
-        run: npm ci
+      - name: setup
         type: ON_CREATE
-        workingDir: /workspace/repo
-      - name: migrate
-        run: npx prisma migrate dev
-        type: ON_CREATE
-        workingDir: /workspace/repo
-      - name: dev-server
-        run: npm run dev
+        run: |
+          apt-get update
+          apt-get install -y git curl nodejs npm podman
+
+          npm install -g @openai/codex
+
+          npm ci
+
+      - name: start-postgres
         type: POST_START
-        isBackground: true
+        run: |
+          sudo podman run \
+            --net host \
+            -e POSTGRES_PASSWORD=password \
+            -e POSTGRES_DB=app \
+            -d docker.io/postgres:16
+
+      - name: run-tests
+        type: POST_START
+        run: |
+          npm test
+        onFailure: ON_FAILURE_CONTINUE
+
+      - name: start-service
+        type: POST_START
         workingDir: /workspace/repo
-  applications:
-    - name: web
-      port: 3000
-      isDefault: true
-    - name: storybook
-      port: 6006
+        isBackground: true
+        run: |
+          if [ -f package.json ]; then npm run dev; fi
+
+      - name: codex-remediation
+        type: POST_START
+        run: |
+          codex exec "${{ vars.CODEX_PROMPT}}"
+
+      - name: push-branch
+        type: POST_START
+        run: |
+          BRANCH=codex-fix-$(date +%s)
+
+          git checkout -b $BRANCH
+          git push origin $BRANCH
+
   limit:
     cpu:
       millicores: 4000
@@ -322,135 +285,11 @@ spec:
       megabytes: 30000
 ```
 
-Example: an ephemeral AI agent sandbox.
-
-```yaml
-spec:
-  image:
-    registry:
-      url: python:3.11-slim-bookworm
-  runtime:
-    envVars:
-      - key: ANTHROPIC_API_KEY
-        fromSecret: anthropic-api-key
-      # Database, SSH, and API access provided secretlessly via octelium connect.
-      # No credentials needed here.
-    tasks:
-      - name: install-agent
-        run: pip install --no-cache-dir anthropic aider-chat
-        type: ON_CREATE
-        onFailure: ON_FAILURE_ABORT
-  autoStop: true
-  limit:
-    cpu:
-      millicores: 2000
-    memory:
-      megabytes: 4096
-    storage:
-      megabytes: 10000
-```
-
-
-## Resource Limits
-
-Resource limits are enforced at the cgroup level through a hierarchical precedence system.
-
-### Per-Workspace Limits
-
-```yaml
-spec:
-  limit:
-    cpu:
-      millicores: 2000    # 2 CPU cores
-    memory:
-      megabytes: 4096     # 4 GB RAM
-    storage:
-      megabytes: 20000    # 20 GB disk
-```
-
-### Per-Space Limits
-
-```yaml
-spec:
-  limit:
-    defaultLimit:
-      cpu:
-        millicores: 2000
-      memory:
-        megabytes: 4096
-      storage:
-        megabytes: 20000
-    maxLimit:
-      cpu:
-        millicores: 8000
-      memory:
-        megabytes: 16384
-      storage:
-        megabytes: 50000
-```
-
-### Per-Cluster Limits
-
-```yaml
-spec:
-  workspace:
-    limit:
-      maxPerUser: 50
-      maxActivePerUser: 5
-      defaultUserSpaceLimit:
-        cpu:
-          millicores: 2000
-        memory:
-          megabytes: 4096
-        storage:
-          megabytes: 20000
-      maxLimit:
-        cpu:
-          millicores: 16000
-        memory:
-          megabytes: 32768
-        storage:
-          megabytes: 100000
-      buildLimit:
-        cpu:
-          millicores: 4000
-        memory:
-          megabytes: 8192
-        storage:
-          megabytes: 30000
-```
-
-The resolution order is: Workspace spec → Template spec → Space default → Cluster default, with Space maximum and Cluster maximum applied as hard caps.
-
-
-## Workspace Lifecycle
-
-Workspaces follow a defined state machine:
-
-```
-STOPPED ──► INIT_REQUEST ──► INITIALIZING ──► PULLING_IMAGE ──► BUILDING_IMAGE
-                                                                      │
-                                                                      ▼
-STOPPED ◄── STOPPING ◄── STOPPING_REQUEST ◄── RUNNING ◄── PREPARING ◄── STARTING_RUNTIME
-```
-
-State transitions are observable via the `WatchWorkspace` streaming RPC. Failure at any stage (image pull, image build, repository clone, task execution, health check) is captured with structured failure information including failure type, message, and exit code.
-
-Workspaces can be **ephemeral** (storage discarded on stop) or **persistent** (storage preserved via PVCs across restarts). Persistent Workspaces resume with full filesystem state intact; only `POST_START` tasks re-run on subsequent starts.
-
-Setting `autoStop: true` in the Workspace spec causes the Workspace to stop automatically once all non-background lifecycle tasks complete, without any manual intervention. This is the recommended configuration for CI/CD jobs and AI agent tasks.
-
-
 ## Access Methods
 
 ### Web Portal
 
-The Cordium portal provides a browser-based interface for Workspace management and interaction, including:
-
-- Clientless web-based interactive terminal access to running Workspaces without requiring SSH client installation
-- A reverse proxy for accessing Workspace applications through subdomain routing
-- GitProvider OAuth2 authentication flows
-- Real-time Workspace state updates and log streaming via WebSocket
+The Cordium web portal is a browser-based interface for managing and interacting with Workspaces without installing any software. It is the primary interface for users and teams who want clientless access to their Workspaces. The Octelium web portal authenticates users through Octelium's IdentityProviders, including GitHub OAuth2 or any OpenID Connect or SAML 2.0 IdP (read more here) or directly via Passkeys (read more [here](https://octelium.com/docs/octelium/latest/management/core/identity-providers)).
 
 ### CLI
 
