@@ -8,14 +8,7 @@ Cordium is a free and open source, self-hosted, identity-based, horizontally sca
 ## Table of Contents
 
 - [Main Features](#main-features)
-- [Architecture](#architecture)
 - [Core Concepts](#core-concepts)
-  - [Spaces](#spaces)
-  - [Workspaces](#workspaces)
-  - [Templates](#templates)
-  - [Secrets](#secrets)
-  - [GitProviders](#gitproviders)
-  - [User Configuration](#user-configuration)
 - [Workspace Configuration](#workspace-configuration)
 - [Access Methods](#access-methods)
   - [CLI](#cli)
@@ -46,28 +39,6 @@ Cordium is a free and open source, self-hosted, identity-based, horizontally sca
 - **Ready for agentic AI.** Cordium is not only a sandbox for isolated long-lived and short-lived process execution by sandboxed AI agents. It leverages Octelium's zero-trust infrastructure to provide identity-based, fine-grained, L7-aware, context-aware, ABAC-based access to resources of any type from within Workspaces. This includes secretless access for resources that require application-layer credentials (API keys, access tokens, SSH passwords and private keys, database passwords, and mTLS private keys) without exposing, distributing, or sharing such credentials with the sandboxed AI agent. Credential mappings and privilege scopes can be dynamically assigned to specific agents based on identity and context.
 
 - **Open source and designed for self-hosting.** Cordium, like Octelium itself, is fully open source and designed for single-tenant self-hosting. There is no proprietary cloud-based control plane, and this is not a limited open source version of a separate fully functional paid SaaS product. Cordium can be deployed on a single-node Kubernetes cluster running on a low-cost cloud VM/VPS, or on production-grade multi-node Kubernetes installations, cloud-based or on-premises, with no vendor lock-in.
-
-## Architecture
-
-Cordium runs entirely on Kubernetes. Each Workspace is a managed Kubernetes pod, provisioned and controlled by **Nocturne**, the Workspace controller. Each Workspace pod uses a three-layer isolation model:
-
-1. **Outer supervisor container** (privileged, bootstrap only): sets up the cgroup hierarchy, configures user namespace mappings, creates device nodes, and launches the inner container via rootless Podman. Does not run user code.
-
-2. **Hardened inner container**: runs with `--cap-drop ALL` and selective capability grants, a custom seccomp profile, `hidepid=2` on `/proc`, a mostly read-only filesystem, and a customized nested cgroup hierarchy. This is the actual security boundary.
-
-3. **Workspace container** (rootless, user-facing): runs inside the rootless context with slirp4netns network isolation and cgroup-enforced resource limits. Despite being rootless from the host's perspective, the Workspace container provides full root capability within its user namespace. Users can install packages, run nested containers via rootless Podman, manage services, and execute arbitrary processes as root, all without affecting the host.
-
-```
-Kubernetes Node (dedicated Workspace pool)
-└── Workspace Pod
-    └── Outer Supervisor Container  (privileged, bootstrap only)
-        └── Inner Container         (hardened: seccomp, cap-drop, hidepid)
-            └── Workspace Container (rootless Podman, full root in user namespace)
-```
-
-Workspace storage is backed by Kubernetes PersistentVolumeClaims, compatible with any CSI driver. Template pre-builds use Kubernetes VolumeSnapshots to capture a fully initialized Workspace state, enabling subsequent Workspaces to restore from the snapshot and start in seconds.
-
-When a Workspace starts, a dedicated Octelium Session is created for that Workspace run. An `octelium connect` process running inside the Workspace establishes an encrypted tunnel to the Octelium gateway using this Session as its identity. Processes inside the Workspace then access Octelium-managed resources through standard tools and the credential exchange happens entirely at the Octelium gateway. The Workspace never holds the actual credentials.
 
 
 ## Core Concepts
