@@ -123,19 +123,17 @@ func (s *Server) CreateWorkspace(ctx context.Context, req *cordiumv1.Workspace) 
 			}
 		}
 	} else {
-		if err := apivalidation.CheckGetOptions(&metav1.GetOptions{
-			Uid:  req.Status.TemplateRef.Uid,
-			Name: req.Status.TemplateRef.Name,
-		}, &apivalidation.CheckGetOptionsOpts{
-			ParentsMust: 2,
-		}); err != nil {
+
+		templateRef := getFullNamResourceRefSpaceChild(ctx, req.Status.TemplateRef)
+
+		if err := apivalidation.CheckGetOptions(apivalidation.ObjectReferenceToGetOptions(templateRef),
+			&apivalidation.CheckGetOptionsOpts{
+				ParentsMust: 2,
+			}); err != nil {
 			return nil, err
 		}
 
-		template, err = s.octeliumC.CordiumC().GetTemplate(ctx, &rmetav1.GetOptions{
-			Uid:  req.Status.TemplateRef.Uid,
-			Name: req.Status.TemplateRef.Name,
-		})
+		template, err = s.octeliumC.CordiumC().GetTemplate(ctx, apivalidation.ObjectReferenceToRGetOptions(templateRef))
 		if err != nil {
 			return nil, serr.K8sNotFoundOrInternalWithErr(err)
 		}

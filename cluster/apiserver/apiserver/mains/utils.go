@@ -156,6 +156,27 @@ func getFullNamResourceSpaceChild(ctx context.Context, req umetav1.ResourceObjec
 	return req
 }
 
+func getFullNamResourceRefSpaceChild(ctx context.Context, req *metav1.ObjectReference) *metav1.ObjectReference {
+	if req == nil || req.Name == "" {
+		return req
+	}
+
+	if isNameFQDN(req.Name, 2) {
+		return req
+	}
+	if isNameFQDN(req.Name, 0) {
+		req.Name = fmt.Sprintf("%s.default", req.Name)
+	}
+
+	i, err := commonw.GetUserCtx(ctx)
+	if err != nil {
+		return req
+	}
+
+	req.Name = getFullGetOptionsUserCtx(i, req.Name, 2)
+	return req
+}
+
 func getFullGetOptionsUserCtx(i *userctx.UserCtx, name string, parents int) string {
 	args := strings.Split(name, ".")
 
