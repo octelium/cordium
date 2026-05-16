@@ -25,6 +25,7 @@ import (
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/cluster/apiserver/apiserver/common"
 	"github.com/octelium/octelium/cluster/apiserver/apiserver/serr"
+	"github.com/octelium/octelium/cluster/common/apivalidation"
 	"github.com/octelium/octelium/cluster/common/grpcutils"
 )
 
@@ -333,6 +334,18 @@ func ValidateWorkspace(ctx context.Context, req *ValidateWorkspaceReq) error {
 							return serr.InvalidArg("Too long feature option value")
 						}
 					}
+				}
+			}
+		}
+
+		if spec.Runtime.Octelium != nil {
+			if len(spec.Runtime.Octelium.ServeServices) > 128 {
+				return serr.InvalidArg("Too many serveServices")
+			}
+
+			for _, svc := range spec.Runtime.Octelium.ServeServices {
+				if err := apivalidation.ValidateName(svc, 0, 2); err != nil {
+					return serr.InvalidArg("Invalid serveService: %s", err.Error())
 				}
 			}
 		}

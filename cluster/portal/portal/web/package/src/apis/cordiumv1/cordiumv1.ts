@@ -404,6 +404,10 @@ export interface Workspace_Spec_Runtime {
      * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers devcontainers = 6
      */
     devcontainers?: Workspace_Spec_Runtime_Devcontainers;
+    /**
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Octelium octelium = 7
+     */
+    octelium?: Workspace_Spec_Runtime_Octelium;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.EnvVar
@@ -554,6 +558,19 @@ export interface Workspace_Spec_Runtime_Devcontainers_Feature_Option {
      * @generated from protobuf field: string value = 2
      */
     value: string;
+}
+/**
+ * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Octelium
+ */
+export interface Workspace_Spec_Runtime_Octelium {
+    /**
+     * @generated from protobuf field: repeated string serveServices = 1
+     */
+    serveServices: string[];
+    /**
+     * @generated from protobuf field: bool serveAll = 2
+     */
+    serveAll: boolean;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Application
@@ -1319,9 +1336,7 @@ export interface StartWorkspaceRequest {
     /**
      * @generated from protobuf field: octelium.api.main.meta.v1.ObjectReference regionRef = 2
      */
-    regionRef?: ObjectReference; // 
-    // string fromRunID = 4;
-    // string fromRunTag = 5;
+    regionRef?: ObjectReference;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.StartWorkspaceResponse
@@ -4515,7 +4530,8 @@ class Workspace_Spec_Runtime$Type extends MessageType<Workspace_Spec_Runtime> {
             { no: 3, name: "disableInit", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 4, name: "cmd", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 5, name: "entrypoint", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 6, name: "devcontainers", kind: "message", T: () => Workspace_Spec_Runtime_Devcontainers }
+            { no: 6, name: "devcontainers", kind: "message", T: () => Workspace_Spec_Runtime_Devcontainers },
+            { no: 7, name: "octelium", kind: "message", T: () => Workspace_Spec_Runtime_Octelium }
         ]);
     }
     create(value?: PartialMessage<Workspace_Spec_Runtime>): Workspace_Spec_Runtime {
@@ -4552,6 +4568,9 @@ class Workspace_Spec_Runtime$Type extends MessageType<Workspace_Spec_Runtime> {
                 case /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers devcontainers */ 6:
                     message.devcontainers = Workspace_Spec_Runtime_Devcontainers.internalBinaryRead(reader, reader.uint32(), options, message.devcontainers);
                     break;
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Octelium octelium */ 7:
+                    message.octelium = Workspace_Spec_Runtime_Octelium.internalBinaryRead(reader, reader.uint32(), options, message.octelium);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -4582,6 +4601,9 @@ class Workspace_Spec_Runtime$Type extends MessageType<Workspace_Spec_Runtime> {
         /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers devcontainers = 6; */
         if (message.devcontainers)
             Workspace_Spec_Runtime_Devcontainers.internalBinaryWrite(message.devcontainers, writer.tag(6, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Octelium octelium = 7; */
+        if (message.octelium)
+            Workspace_Spec_Runtime_Octelium.internalBinaryWrite(message.octelium, writer.tag(7, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -4975,6 +4997,61 @@ class Workspace_Spec_Runtime_Devcontainers_Feature_Option$Type extends MessageTy
  * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers.Feature.Option
  */
 export const Workspace_Spec_Runtime_Devcontainers_Feature_Option = new Workspace_Spec_Runtime_Devcontainers_Feature_Option$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class Workspace_Spec_Runtime_Octelium$Type extends MessageType<Workspace_Spec_Runtime_Octelium> {
+    constructor() {
+        super("octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Octelium", [
+            { no: 1, name: "serveServices", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "serveAll", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
+        ]);
+    }
+    create(value?: PartialMessage<Workspace_Spec_Runtime_Octelium>): Workspace_Spec_Runtime_Octelium {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.serveServices = [];
+        message.serveAll = false;
+        if (value !== undefined)
+            reflectionMergePartial<Workspace_Spec_Runtime_Octelium>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Workspace_Spec_Runtime_Octelium): Workspace_Spec_Runtime_Octelium {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* repeated string serveServices */ 1:
+                    message.serveServices.push(reader.string());
+                    break;
+                case /* bool serveAll */ 2:
+                    message.serveAll = reader.bool();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: Workspace_Spec_Runtime_Octelium, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* repeated string serveServices = 1; */
+        for (let i = 0; i < message.serveServices.length; i++)
+            writer.tag(1, WireType.LengthDelimited).string(message.serveServices[i]);
+        /* bool serveAll = 2; */
+        if (message.serveAll !== false)
+            writer.tag(2, WireType.Varint).bool(message.serveAll);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Octelium
+ */
+export const Workspace_Spec_Runtime_Octelium = new Workspace_Spec_Runtime_Octelium$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class Workspace_Spec_Application$Type extends MessageType<Workspace_Spec_Application> {
     constructor() {

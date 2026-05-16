@@ -554,35 +554,21 @@ func (t *task) getEnv() []string {
 
 func (t *taskManager) newTaskOcteliumConnect(req *ccordiumv1.PrepareRequest) (*task, error) {
 
-	/*
-		return &task{
-			tUID:    vutils.UUIDv4(),
-			name:    "octelium-connect",
-			command: "octelium connect",
-			user:    "root",
-			homeDir: "/root",
-			env: map[string]string{
-				"OCTELIUM_DOMAIN":            req.Domain,
-				"OCTELIUM_HOME":              "mem",
-				"OCTELIUM_USER_HOME":         t.userInfo.homeDir,
-				"OCTELIUM_AUTH_PROXY_SOCKET": "/var/run/octelium-proxy.sock",
-				"OCTELIUM_ESSH":              "true",
-				"OCTELIUM_ESSH_USER":         t.userInfo.name,
-				"OCTELIUM_ESSH_IP_ADDRS":     "0.0.0.0",
-				"OCTELIUM_ESSH_PORT":         "2022",
-				"OCTELIUM_LOCAL_DNS_SERVER":  "true",
-			},
+	cmd := "octelium connect"
 
-			typ:            cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
-			isBackground:   true,
-			shellPath:      t.shellPath,
-			eventPublisher: t.eventPublisher,
+	if t.srv.spec != nil && t.srv.spec.Runtime != nil && t.srv.spec.Runtime.Octelium != nil {
+		if t.srv.spec.Runtime.Octelium.ServeAll {
+			cmd = fmt.Sprintf("%s --serve-all", cmd)
 		}
-	*/
+
+		for _, svc := range t.srv.spec.Runtime.Octelium.ServeServices {
+			cmd = fmt.Sprintf("%s --serve %s", cmd, svc)
+		}
+	}
 
 	return t.newTask(&cordiumv1.Workspace_Spec_Runtime_Task{
 		Name:         "octelium-connect",
-		Run:          "octelium connect",
+		Run:          cmd,
 		IsBackground: true,
 		RunAsRoot:    true,
 		Type:         cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
