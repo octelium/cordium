@@ -1,9 +1,11 @@
 /// <reference types="vite-plugin-svgr/client" />
 
 import { useAppSelector } from "@/utils/hooks";
-import { Avatar, Menu, Text } from "@mantine/core";
+import { Avatar, Menu } from "@mantine/core";
 import { User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
+import Logo from "@/assets/main.svg?react";
 
 const TopBar = () => {
   const navigate = useNavigate();
@@ -46,34 +48,7 @@ const TopBar = () => {
           borderRadius: 6,
         }}
       >
-        <div
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: 6,
-            background: "#1e293b",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <div
-            style={{
-              width: 12,
-              height: 12,
-              borderRadius: 2,
-              background: "white",
-              opacity: 0.9,
-            }}
-          />
-        </div>
-        <Text
-          fw={700}
-          size="sm"
-          style={{ color: "#1e293b", letterSpacing: "-0.01em" }}
-        >
-          Cordium
-        </Text>
+        <Logo className="w-[120px] md:w-[160px] h-auto" />
       </button>
 
       <div style={{ flex: 1 }} />
