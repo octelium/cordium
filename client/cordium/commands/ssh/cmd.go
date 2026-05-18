@@ -164,7 +164,8 @@ Host cordium-%s
     ControlPersist 10m
 
     HostKeyAlias cordium-%s
-    StrictHostKeyChecking accept-new
+    StrictHostKeyChecking no
+	UserKnownHostsFile /dev/null
     CheckHostIP no
 
     ConnectTimeout 10
