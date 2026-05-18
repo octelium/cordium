@@ -61,6 +61,9 @@ type CreateWorkspaceArgs struct {
 
 	Vars []string
 
+	ServeServices []string
+	ServeAll      bool
+
 	Out string
 }
 
@@ -106,6 +109,11 @@ func init() {
 
 	Cmd.PersistentFlags().StringArrayVar(&cmdArgs.Vars, "var", nil,
 		`Set a variable (NAME=VALUE). Repeatable: --var BRANCH=main --var SERVICE=payments`)
+
+	Cmd.PersistentFlags().BoolVar(&cmdArgs.ServeAll, "serve-all", false,
+		"Serve all Octelium services assigned to the User")
+	Cmd.PersistentFlags().StringSliceVar(&cmdArgs.ServeServices, "serve", nil,
+		"Select the Octelium Service names assigned to this User to be served")
 
 	Cmd.MarkFlagsMutuallyExclusive("space", "template")
 	Cmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
@@ -223,6 +231,9 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		AppPorts:          cmdArgs.AppPorts,
 		AutoStop:          cmdArgs.AutoStop,
 		Vars:              cmdArgs.Vars,
+
+		ServeServices: cmdArgs.ServeServices,
+		ServeAll:      cmdArgs.ServeAll,
 	})
 	if err != nil {
 		return err
@@ -269,6 +280,9 @@ type DoCreateWorkspaceOpts struct {
 	StorageMB     uint32
 
 	AutoStop bool
+
+	ServeServices []string
+	ServeAll      bool
 
 	AppPorts []string
 
@@ -338,6 +352,30 @@ func DoCreateWorkspace(ctx context.Context, c pb.MainServiceClient, o *DoCreateW
 				},
 			},
 		}
+	}
+
+	if o.ServeAll {
+		if ws.Spec.Runtime == nil {
+			ws.Spec.Runtime = &pb.Workspace_Spec_Runtime{}
+		}
+
+		if ws.Spec.Runtime.Octelium == nil {
+			ws.Spec.Runtime.Octelium = &pb.Workspace_Spec_Runtime_Octelium{}
+		}
+
+		ws.Spec.Runtime.Octelium.ServeAll = o.ServeAll
+	}
+
+	if len(o.ServeServices) > 0 {
+		if ws.Spec.Runtime == nil {
+			ws.Spec.Runtime = &pb.Workspace_Spec_Runtime{}
+		}
+
+		if ws.Spec.Runtime.Octelium == nil {
+			ws.Spec.Runtime.Octelium = &pb.Workspace_Spec_Runtime_Octelium{}
+		}
+
+		ws.Spec.Runtime.Octelium.ServeServices = o.ServeServices
 	}
 
 	if len(o.EnvVars) > 0 || len(o.EnvVarFromSecrets) > 0 {

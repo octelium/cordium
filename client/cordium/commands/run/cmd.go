@@ -78,6 +78,11 @@ func init() {
 	Cmd.PersistentFlags().StringArrayVar(&cmdArgs.Vars, "var", nil,
 		`Set a variable (NAME=VALUE). Repeatable: --var BRANCH=main --var SERVICE=payments`)
 
+	Cmd.PersistentFlags().BoolVar(&cmdArgs.ServeAll, "serve-all", false,
+		"Serve all Octelium services assigned to the User")
+	Cmd.PersistentFlags().StringSliceVar(&cmdArgs.ServeServices, "serve", nil,
+		"Select the Octelium Service names assigned to this User to be served")
+
 	Cmd.MarkFlagsMutuallyExclusive("space", "template")
 	Cmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
 }
