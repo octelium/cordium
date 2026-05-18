@@ -573,7 +573,7 @@ func (c *Controller) setPersistentVolumeClaim(ctx context.Context, ws *cordiumv1
 				if ws.Status.IsBuild {
 					return nil
 				}
-				if !ws.Status.IsEphemeral && ws.Status.SuccessfulRuns > 0 {
+				if !ws.Spec.IsEphemeral && ws.Status.SuccessfulRuns > 0 {
 					return nil
 				}
 

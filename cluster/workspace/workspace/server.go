@@ -610,7 +610,7 @@ func (s *Server) doPrepare(ctx context.Context, req *ccordiumv1.PrepareRequest) 
 			if ws.Status.IsBuild {
 				return true
 			}
-			return (ws.Status.IsEphemeral || ws.Status.SuccessfulRuns == 0) &&
+			return (ws.Spec.IsEphemeral || ws.Status.SuccessfulRuns == 0) &&
 				!(ucordiumv1.ToTemplate(s.initReq.Template).HasReadyBuild() &&
 					s.initReq.TemplateHasSnapshot)
 		}()

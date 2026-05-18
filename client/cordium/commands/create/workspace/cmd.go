@@ -454,11 +454,9 @@ func DoCreateWorkspace(ctx context.Context, c pb.MainServiceClient, o *DoCreateW
 	}
 
 	ws.Spec.AutoStop = o.AutoStop
+	ws.Spec.IsEphemeral = o.Ephemeral
 
 	ws.Metadata = &metav1.Metadata{}
-	ws.Status = &pb.Workspace_Status{
-		IsEphemeral: o.Ephemeral,
-	}
 
 	if o.Template != "" {
 		ws.Status.TemplateRef = &metav1.ObjectReference{

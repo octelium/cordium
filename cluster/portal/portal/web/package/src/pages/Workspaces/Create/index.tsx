@@ -109,9 +109,9 @@ const CreateWorkspace = () => {
 
       <ItemContainer title="Ephemeral Storage" isHorizontal>
         <Switch
-          val={(req as WsPB.Workspace).status?.isEphemeral}
+          val={(req as WsPB.Workspace).spec?.isEphemeral}
           onChange={(v) => {
-            (req as WsPB.Workspace).status!.isEphemeral = v;
+            (req as WsPB.Workspace).spec!.isEphemeral = v;
             setReq(WsPB.Workspace.clone(req));
           }}
         />

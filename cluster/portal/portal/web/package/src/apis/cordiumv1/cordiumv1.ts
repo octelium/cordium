@@ -98,6 +98,10 @@ export interface Workspace_Spec {
      * @generated from protobuf field: repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars = 8
      */
     vars: Workspace_Spec_Var[];
+    /**
+     * @generated from protobuf field: bool isEphemeral = 9
+     */
+    isEphemeral: boolean;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Image
@@ -746,10 +750,6 @@ export interface Workspace_Status {
      * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Status.StoppingReason lastStoppingReason = 23
      */
     lastStoppingReason: Workspace_Status_StoppingReason;
-    /**
-     * @generated from protobuf field: bool isEphemeral = 24
-     */
-    isEphemeral: boolean;
     /**
      * @generated from protobuf field: repeated octelium.api.main.cordium.v1.Workspace.Status.Run runs = 25
      */
@@ -3538,7 +3538,8 @@ class Workspace_Spec$Type extends MessageType<Workspace_Spec> {
             { no: 5, name: "applications", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_Application },
             { no: 6, name: "limit", kind: "message", T: () => Workspace_Spec_Limit },
             { no: 7, name: "autoStop", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 8, name: "vars", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_Var }
+            { no: 8, name: "vars", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_Var },
+            { no: 9, name: "isEphemeral", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
         ]);
     }
     create(value?: PartialMessage<Workspace_Spec>): Workspace_Spec {
@@ -3547,6 +3548,7 @@ class Workspace_Spec$Type extends MessageType<Workspace_Spec> {
         message.applications = [];
         message.autoStop = false;
         message.vars = [];
+        message.isEphemeral = false;
         if (value !== undefined)
             reflectionMergePartial<Workspace_Spec>(this, message, value);
         return message;
@@ -3579,6 +3581,9 @@ class Workspace_Spec$Type extends MessageType<Workspace_Spec> {
                     break;
                 case /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars */ 8:
                     message.vars.push(Workspace_Spec_Var.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                case /* bool isEphemeral */ 9:
+                    message.isEphemeral = reader.bool();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -3616,6 +3621,9 @@ class Workspace_Spec$Type extends MessageType<Workspace_Spec> {
         /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars = 8; */
         for (let i = 0; i < message.vars.length; i++)
             Workspace_Spec_Var.internalBinaryWrite(message.vars[i], writer.tag(8, WireType.LengthDelimited).fork(), options).join();
+        /* bool isEphemeral = 9; */
+        if (message.isEphemeral !== false)
+            writer.tag(9, WireType.Varint).bool(message.isEphemeral);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -5406,7 +5414,6 @@ class Workspace_Status$Type extends MessageType<Workspace_Status> {
             { no: 21, name: "spaceType", kind: "enum", T: () => ["octelium.api.main.cordium.v1.Space.Status.Type", Space_Status_Type] },
             { no: 22, name: "stoppingReason", kind: "enum", T: () => ["octelium.api.main.cordium.v1.Workspace.Status.StoppingReason", Workspace_Status_StoppingReason, "STOPPING_REASON_"] },
             { no: 23, name: "lastStoppingReason", kind: "enum", T: () => ["octelium.api.main.cordium.v1.Workspace.Status.StoppingReason", Workspace_Status_StoppingReason, "STOPPING_REASON_"] },
-            { no: 24, name: "isEphemeral", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 25, name: "runs", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Status_Run }
         ]);
     }
@@ -5421,7 +5428,6 @@ class Workspace_Status$Type extends MessageType<Workspace_Status> {
         message.spaceType = 0;
         message.stoppingReason = 0;
         message.lastStoppingReason = 0;
-        message.isEphemeral = false;
         message.runs = [];
         if (value !== undefined)
             reflectionMergePartial<Workspace_Status>(this, message, value);
@@ -5500,9 +5506,6 @@ class Workspace_Status$Type extends MessageType<Workspace_Status> {
                     break;
                 case /* octelium.api.main.cordium.v1.Workspace.Status.StoppingReason lastStoppingReason */ 23:
                     message.lastStoppingReason = reader.int32();
-                    break;
-                case /* bool isEphemeral */ 24:
-                    message.isEphemeral = reader.bool();
                     break;
                 case /* repeated octelium.api.main.cordium.v1.Workspace.Status.Run runs */ 25:
                     message.runs.push(Workspace_Status_Run.internalBinaryRead(reader, reader.uint32(), options));
@@ -5588,9 +5591,6 @@ class Workspace_Status$Type extends MessageType<Workspace_Status> {
         /* octelium.api.main.cordium.v1.Workspace.Status.StoppingReason lastStoppingReason = 23; */
         if (message.lastStoppingReason !== 0)
             writer.tag(23, WireType.Varint).int32(message.lastStoppingReason);
-        /* bool isEphemeral = 24; */
-        if (message.isEphemeral !== false)
-            writer.tag(24, WireType.Varint).bool(message.isEphemeral);
         /* repeated octelium.api.main.cordium.v1.Workspace.Status.Run runs = 25; */
         for (let i = 0; i < message.runs.length; i++)
             Workspace_Status_Run.internalBinaryWrite(message.runs[i], writer.tag(25, WireType.LengthDelimited).fork(), options).join();

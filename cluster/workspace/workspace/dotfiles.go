@@ -39,7 +39,7 @@ func (s *Server) setupDotFiles(ctx context.Context) error {
 		return nil
 	}
 
-	if !s.ws.Status.IsEphemeral && s.ws.Status.SuccessfulRuns > 0 {
+	if !s.ws.Spec.IsEphemeral && s.ws.Status.SuccessfulRuns > 0 {
 		zap.L().Debug("No need to setup dotfiles. This is not a first run")
 		return nil
 	}

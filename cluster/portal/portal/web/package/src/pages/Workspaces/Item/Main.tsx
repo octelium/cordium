@@ -384,7 +384,7 @@ const InfoBar = (props: { item: WsPB.Workspace }) => {
               <TimeAgo rfc3339={item.metadata?.createdAt} />
             </InfoItem>
 
-            {item.status?.isEphemeral && (
+            {item.spec?.isEphemeral && (
               <InfoItem title="Storage">
                 <Badge size="sm" color="orange" variant="light">
                   Ephemeral

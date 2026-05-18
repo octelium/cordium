@@ -38,7 +38,7 @@ const ItemWorkspace = (props: {
                   </span>
                 </Label>
               )}
-              {item.status?.isEphemeral && <Label>Ephemeral</Label>}
+              {item.spec?.isEphemeral && <Label>Ephemeral</Label>}
 
               {props.showTemplate && item.status?.templateRef && (
                 <Label>

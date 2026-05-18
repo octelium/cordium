@@ -83,9 +83,8 @@ func (s *Server) CreateWorkspace(ctx context.Context, req *cordiumv1.Workspace) 
 		},
 		Spec: req.Spec,
 		Status: &cordiumv1.Workspace_Status{
-			UserRef:     umetav1.GetObjectReference(i.User),
-			State:       cordiumv1.Workspace_Status_STOPPED,
-			IsEphemeral: req.Status.IsEphemeral,
+			UserRef: umetav1.GetObjectReference(i.User),
+			State:   cordiumv1.Workspace_Status_STOPPED,
 		},
 	}
 

@@ -74,7 +74,7 @@ func (s *Server) doInitialize() error {
 		if ws.Status.IsBuild {
 			return true
 		}
-		return (ws.Status.IsEphemeral || ws.Status.SuccessfulRuns == 0) &&
+		return (ws.Spec.IsEphemeral || ws.Status.SuccessfulRuns == 0) &&
 			!(ucordiumv1.ToTemplate(s.initReq.Template).HasReadyBuild() &&
 				s.initReq.TemplateHasSnapshot)
 	}()

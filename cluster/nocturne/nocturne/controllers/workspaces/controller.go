@@ -281,7 +281,7 @@ func (c *Controller) stopWorkspace(ctx context.Context, ws *cordiumv1.Workspace)
 			zap.String("uid", ws.Metadata.Uid), zap.String("name", ws.Metadata.Name))
 	}
 
-	if ws.Status.IsEphemeral {
+	if ws.Spec.IsEphemeral {
 		if err := c.removePersistentClaim(ctx, ws); err != nil {
 			return err
 		}

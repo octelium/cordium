@@ -141,7 +141,7 @@ const WrapC = (props: {
   const mutation = useMutation({
     mutationFn: async () => {
       const cloned = WsPB.Workspace.clone(req);
-      cloned.status!.isEphemeral = isEphemeral;
+      cloned.spec!.isEphemeral = isEphemeral;
       const { response } = await client.createWorkspace(cloned);
 
       if (doStart) {
