@@ -7,7 +7,7 @@ import { GetOptions, ObjectReference } from "@/apis/metav1/metav1";
 import { getClientWorkspace } from "@/utils/client";
 import { Group, Select } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
-import { cloneResource } from "../../utils/pb";
+import { cloneResource, getShortName } from "../../utils/pb";
 import Divider from "../Divider";
 import EditItem from "../EditItem";
 import Editor from "../Editor";
@@ -274,7 +274,7 @@ const EditSpec = (props: {
                               description="Set the Secret of the HTTP authentication password"
                               required
                               data={qrySecret.data!.items.map((x) => ({
-                                label: x.metadata!.name.split(".").at(0) ?? "",
+                                label: getShortName(x),
                                 value: x.metadata!.name,
                               }))}
                               defaultValue={
@@ -429,8 +429,7 @@ const EditSpec = (props: {
                                   label="Password Secret"
                                   description="Set the Secret of the HTTP authentication password"
                                   data={qrySecret.data!.items.map((x) => ({
-                                    label:
-                                      x.metadata!.name.split(".").at(0) ?? "",
+                                    label: getShortName(x),
                                     value: x.metadata!.name,
                                   }))}
                                   defaultValue={
@@ -1286,8 +1285,7 @@ const EditSpec = (props: {
                                 label="Password Secret"
                                 description="Set the Secret of the git repo authentication password"
                                 data={qrySecret.data!.items.map((x) => ({
-                                  label:
-                                    x.metadata!.name.split(".").at(0) ?? "",
+                                  label: getShortName(x),
                                   value: x.metadata!.name,
                                 }))}
                                 defaultValue={
@@ -1328,7 +1326,10 @@ const EditSpec = (props: {
         qryGitProvider.data.listResponseMeta?.totalCount > 0 && (
           <Select
             label="Git Provider"
-            data={qryGitProvider.data!.items.map((x) => x.metadata!.name)}
+            data={qryGitProvider.data!.items.map((x) => ({
+              label: getShortName(x),
+              value: x.metadata!.name,
+            }))}
             defaultValue={(req as WsPB.Template).spec!.gitProvider}
             onChange={(val) => {
               if (!val) {
@@ -1540,7 +1541,7 @@ const EnvVarItem = (props: {
               data={
                 qrySecrets.data?.items.map((s) => ({
                   value: s.metadata!.name,
-                  label: s.metadata!.name.split(".").at(0) ?? s.metadata!.name,
+                  label: getShortName(s),
                 })) ?? []
               }
               value={envVar.type.fromSecret || null}

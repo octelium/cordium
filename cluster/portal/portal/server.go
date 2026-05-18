@@ -155,12 +155,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case r.URL.Path == "/connect":
 		s.handleConnect(w, r)
 		return
-
-		/*
-			case r.Method == "GET" && r.URL.Path == "/manifest.octelium.json":
-				s.handleManifest(w, r)
-				return
-		*/
 	case r.Method == "GET" && strings.HasPrefix(r.URL.Path, "/assets/"):
 		s.handleAsset(w, r)
 		return

@@ -52,7 +52,6 @@ const LoginGitProvider = (props: { item: WsPB.Workspace }) => {
 
   if (
     !item.status?.templateRef ||
-    item.status.spaceType !== WsPB.Space_Status_Type.ORGANIZATION ||
     item.status.state !== WsPB.Workspace_Status_State.STOPPED
   )
     return null;
