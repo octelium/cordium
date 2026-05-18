@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package template
+package secret
 
 import (
 	"fmt"
@@ -41,24 +41,24 @@ func init() {
 }
 
 var Cmd = &cobra.Command{
-	Use:   "template [name] [flags]",
-	Short: "Get or list Templates",
+	Use:   "secret [name] [flags]",
+	Short: "Get or list Secrets",
 	Example: `
-  # List all Templates
-  cordium get templates
+  # List all Secrets
+  cordium get secrets
 
-  # Get a specific Template
-  cordium get tmpl ml-env.my-project
+  # Get a specific Secret
+  cordium get sec db-password.my-project
 
-  # List Templates in a Space
-  cordium get tmpl --space my-project
+  # List Secrets in a Space
+  cordium get sec --space my-project
 
-  # Output a specific Template as JSON
-  cordium get tmpl ml-env.my-project -o json
+  # Output a specific Secret as JSON
+  cordium get sec db-password.my-project -o json
 
-  # Output all Templates as YAML
-  cordium get templates -o yaml`,
-	Aliases: []string{"templates", "tmpl"},
+  # Output all Secrets as YAML
+  cordium get secrets -o yaml`,
+	Aliases: []string{"secrets", "sec"},
 	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return doCmd(cmd, args)
@@ -80,7 +80,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 	c := pb.NewMainServiceClient(conn)
 
 	if i.FirstArg() != "" {
-		res, err := c.GetTemplate(cmd.Context(), &metav1.GetOptions{
+		res, err := c.GetSecret(cmd.Context(), &metav1.GetOptions{
 			Name: i.FirstArg(),
 		})
 		if err != nil {
@@ -94,7 +94,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	listOpts := &pb.ListTemplateOptions{}
+	listOpts := &pb.ListSecretOptions{}
 
 	if cmdArgs.Space != "" {
 		listOpts.SpaceRef = &metav1.ObjectReference{
@@ -106,7 +106,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	itmList, err := c.ListTemplate(cmd.Context(), listOpts)
+	itmList, err := c.ListSecret(cmd.Context(), listOpts)
 	if err != nil {
 		return err
 	}
@@ -121,15 +121,17 @@ func doCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(itmList.Items) == 0 {
-		cliutils.LineInfo("No Templates Found\n")
+		cliutils.LineInfo("No Secrets Found\n")
 		return nil
 	}
 
 	p := printer.NewPrinter("Name", "Created", "Space")
 	for _, itm := range itmList.Items {
-		p.AppendRow(ccommon.GetResourceShortName(itm),
+		p.AppendRow(
+			ccommon.GetResourceShortName(itm),
 			cliutils.GetResourceAge(itm),
-			ccommon.GetResourceRefShortName(itm.Status.SpaceRef))
+			ccommon.GetResourceRefShortName(itm.Status.SpaceRef),
+		)
 	}
 
 	p.Render()

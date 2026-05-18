@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package template
+package usersecret
 
 import (
 	"fmt"
@@ -29,36 +29,31 @@ import (
 )
 
 type args struct {
-	Out   string
-	Space string
+	Out string
 }
 
 var cmdArgs args
 
 func init() {
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Out, "out", "o", "", "Output format")
-	Cmd.PersistentFlags().StringVarP(&cmdArgs.Space, "space", "", "", "Filter by Space")
 }
 
 var Cmd = &cobra.Command{
-	Use:   "template [name] [flags]",
-	Short: "Get or list Templates",
+	Use:   "usersecret [name] [flags]",
+	Short: "Get or list UserSecrets",
 	Example: `
-  # List all Templates
-  cordium get templates
+  # List all UserSecrets
+  cordium get usersecrets
 
-  # Get a specific Template
-  cordium get tmpl ml-env.my-project
+  # Get a specific UserSecret
+  cordium get usec my-github-token
 
-  # List Templates in a Space
-  cordium get tmpl --space my-project
+  # Output a specific UserSecret as JSON
+  cordium get usec my-github-token -o json
 
-  # Output a specific Template as JSON
-  cordium get tmpl ml-env.my-project -o json
-
-  # Output all Templates as YAML
-  cordium get templates -o yaml`,
-	Aliases: []string{"templates", "tmpl"},
+  # Output all UserSecrets as YAML
+  cordium get usersecrets -o yaml`,
+	Aliases: []string{"usersecrets", "usec"},
 	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return doCmd(cmd, args)
@@ -80,7 +75,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 	c := pb.NewMainServiceClient(conn)
 
 	if i.FirstArg() != "" {
-		res, err := c.GetTemplate(cmd.Context(), &metav1.GetOptions{
+		res, err := c.GetUserSecret(cmd.Context(), &metav1.GetOptions{
 			Name: i.FirstArg(),
 		})
 		if err != nil {
@@ -94,19 +89,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	listOpts := &pb.ListTemplateOptions{}
-
-	if cmdArgs.Space != "" {
-		listOpts.SpaceRef = &metav1.ObjectReference{
-			Name: cmdArgs.Space,
-		}
-	} else {
-		listOpts.SpaceRef = &metav1.ObjectReference{
-			Name: "default",
-		}
-	}
-
-	itmList, err := c.ListTemplate(cmd.Context(), listOpts)
+	itmList, err := c.ListUserSecret(cmd.Context(), &pb.ListUserSecretOptions{})
 	if err != nil {
 		return err
 	}
@@ -121,15 +104,16 @@ func doCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(itmList.Items) == 0 {
-		cliutils.LineInfo("No Templates Found\n")
+		cliutils.LineInfo("No UserSecrets Found\n")
 		return nil
 	}
 
-	p := printer.NewPrinter("Name", "Created", "Space")
+	p := printer.NewPrinter("Name", "Created")
 	for _, itm := range itmList.Items {
-		p.AppendRow(ccommon.GetResourceShortName(itm),
+		p.AppendRow(
+			ccommon.GetResourceShortName(itm),
 			cliutils.GetResourceAge(itm),
-			ccommon.GetResourceRefShortName(itm.Status.SpaceRef))
+		)
 	}
 
 	p.Render()

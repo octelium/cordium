@@ -17,9 +17,10 @@
 package create
 
 import (
+	"github.com/octelium/cordium/client/cordium/commands/create/gitprovider"
 	"github.com/octelium/cordium/client/cordium/commands/create/secret"
 	"github.com/octelium/cordium/client/cordium/commands/create/space"
-	tmp "github.com/octelium/cordium/client/cordium/commands/create/template"
+	"github.com/octelium/cordium/client/cordium/commands/create/template"
 	"github.com/octelium/cordium/client/cordium/commands/create/usersecret"
 	"github.com/octelium/cordium/client/cordium/commands/create/workspace"
 	"github.com/spf13/cobra"
@@ -31,8 +32,9 @@ var Cmd = &cobra.Command{
 
 func AddSubcommands() {
 	Cmd.AddCommand(workspace.Cmd)
-	Cmd.AddCommand(tmp.Cmd)
+	Cmd.AddCommand(template.Cmd)
 	Cmd.AddCommand(space.Cmd)
 	Cmd.AddCommand(secret.Cmd)
 	Cmd.AddCommand(usersecret.Cmd)
+	Cmd.AddCommand(gitprovider.Cmd)
 }

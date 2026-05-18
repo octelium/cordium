@@ -17,8 +17,11 @@
 package get
 
 import (
+	"github.com/octelium/cordium/client/cordium/commands/get/gitprovider"
+	"github.com/octelium/cordium/client/cordium/commands/get/secret"
 	"github.com/octelium/cordium/client/cordium/commands/get/space"
 	"github.com/octelium/cordium/client/cordium/commands/get/template"
+	"github.com/octelium/cordium/client/cordium/commands/get/usersecret"
 	"github.com/octelium/cordium/client/cordium/commands/get/workspace"
 	"github.com/spf13/cobra"
 )
@@ -31,4 +34,7 @@ func AddSubcommands() {
 	Cmd.AddCommand(workspace.Cmd)
 	Cmd.AddCommand(space.Cmd)
 	Cmd.AddCommand(template.Cmd)
+	Cmd.AddCommand(secret.Cmd)
+	Cmd.AddCommand(usersecret.Cmd)
+	Cmd.AddCommand(gitprovider.Cmd)
 }

@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package template
+package gitprovider
 
 import (
 	"fmt"
@@ -41,24 +41,24 @@ func init() {
 }
 
 var Cmd = &cobra.Command{
-	Use:   "template [name] [flags]",
-	Short: "Get or list Templates",
+	Use:   "gitprovider [name] [flags]",
+	Short: "Get or list GitProviders",
 	Example: `
-  # List all Templates
-  cordium get templates
+  # List all GitProviders
+  cordium get gitproviders
 
-  # Get a specific Template
-  cordium get tmpl ml-env.my-project
+  # Get a specific GitProvider
+  cordium get gp my-github.my-project
 
-  # List Templates in a Space
-  cordium get tmpl --space my-project
+  # List GitProviders in a Space
+  cordium get gp --space my-project
 
-  # Output a specific Template as JSON
-  cordium get tmpl ml-env.my-project -o json
+  # Output a specific GitProvider as JSON
+  cordium get gp my-github.my-project -o json
 
-  # Output all Templates as YAML
-  cordium get templates -o yaml`,
-	Aliases: []string{"templates", "tmpl"},
+  # Output all GitProviders as YAML
+  cordium get gitproviders -o yaml`,
+	Aliases: []string{"gitproviders", "gp"},
 	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return doCmd(cmd, args)
@@ -80,7 +80,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 	c := pb.NewMainServiceClient(conn)
 
 	if i.FirstArg() != "" {
-		res, err := c.GetTemplate(cmd.Context(), &metav1.GetOptions{
+		res, err := c.GetGitProvider(cmd.Context(), &metav1.GetOptions{
 			Name: i.FirstArg(),
 		})
 		if err != nil {
@@ -94,19 +94,15 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	listOpts := &pb.ListTemplateOptions{}
+	listOpts := &pb.ListGitProviderOptions{}
 
 	if cmdArgs.Space != "" {
 		listOpts.SpaceRef = &metav1.ObjectReference{
 			Name: cmdArgs.Space,
 		}
-	} else {
-		listOpts.SpaceRef = &metav1.ObjectReference{
-			Name: "default",
-		}
 	}
 
-	itmList, err := c.ListTemplate(cmd.Context(), listOpts)
+	itmList, err := c.ListGitProvider(cmd.Context(), listOpts)
 	if err != nil {
 		return err
 	}
@@ -118,21 +114,44 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		}
 		fmt.Printf("%s\n", string(out))
 		return nil
+	} else {
+		listOpts.SpaceRef = &metav1.ObjectReference{
+			Name: "default",
+		}
 	}
 
 	if len(itmList.Items) == 0 {
-		cliutils.LineInfo("No Templates Found\n")
+		cliutils.LineInfo("No GitProviders Found\n")
 		return nil
 	}
 
-	p := printer.NewPrinter("Name", "Created", "Space")
+	p := printer.NewPrinter("Name", "Created", "Type", "Space")
 	for _, itm := range itmList.Items {
-		p.AppendRow(ccommon.GetResourceShortName(itm),
+		p.AppendRow(
+			ccommon.GetResourceShortName(itm),
 			cliutils.GetResourceAge(itm),
-			ccommon.GetResourceRefShortName(itm.Status.SpaceRef))
+			gitProviderType(itm),
+			ccommon.GetResourceRefShortName(itm.Status.SpaceRef),
+		)
 	}
 
 	p.Render()
 
 	return nil
+}
+
+func gitProviderType(gp *pb.GitProvider) string {
+	if gp.Spec == nil {
+		return ""
+	}
+	switch gp.Spec.Type.(type) {
+	case *pb.GitProvider_Spec_Github_:
+		return "github"
+	case *pb.GitProvider_Spec_Gitlab_:
+		return "gitlab"
+	case *pb.GitProvider_Spec_Oauth2:
+		return "oauth2"
+	default:
+		return ""
+	}
 }
