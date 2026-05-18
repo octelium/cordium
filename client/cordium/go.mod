@@ -5,7 +5,10 @@ go 1.25.8
 require (
 	al.essio.dev/pkg/shellescape v1.6.0
 	github.com/fatih/color v1.18.0
+	github.com/ghodss/yaml v1.0.0
+	github.com/go-resty/resty/v2 v2.17.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
+	github.com/hashicorp/go-version v1.8.0
 	github.com/juju/errors v1.0.0
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
@@ -28,14 +31,11 @@ require (
 	github.com/clipperhouse/stringish v0.1.1 // indirect
 	github.com/clipperhouse/uax29/v2 v2.3.0 // indirect
 	github.com/denisbrodbeck/machineid v1.0.1 // indirect
-	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
-	github.com/go-resty/resty/v2 v2.17.2 // indirect
 	github.com/gofrs/flock v0.13.0 // indirect
 	github.com/google/go-attestation v0.6.0 // indirect
 	github.com/google/go-tpm v0.9.6 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/hashicorp/go-version v1.8.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/manifoldco/promptui v0.9.0 // indirect

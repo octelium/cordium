@@ -32,9 +32,9 @@ import (
 	"github.com/octelium/cordium/client/cordium/commands/status"
 	"github.com/octelium/cordium/client/cordium/commands/stop"
 	"github.com/octelium/cordium/client/cordium/commands/terminal"
+	"github.com/octelium/cordium/client/cordium/commands/version"
 	"github.com/octelium/octelium/client/common/cliutils"
 	"github.com/octelium/octelium/client/common/commands/auth"
-	"github.com/octelium/octelium/client/common/commands/version"
 	"github.com/spf13/cobra"
 )
 
