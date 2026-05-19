@@ -17,31 +17,20 @@
 package apply
 
 import (
-	"context"
-
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/client/common/client"
 	"github.com/octelium/octelium/client/common/cliutils"
 	"github.com/octelium/octelium/client/common/resources"
-	"github.com/octelium/octelium/client/common/rscdiff"
-	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"github.com/spf13/cobra"
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-type args struct {
-	FilePath         string
-	DoDelete         bool
-	ResourceIncludes []string
-	ResourceExcludes []string
-}
-
 var examples = `
-cordium man apply -f /path/to/file.yaml
-cordium man apply -f /path/to/directory
-cat /path/to/file.yaml | cordium man apply -f -
+cordium man apply /path/to/file.yaml
+cordium man apply /path/to/directory
+
+# Apply from stdin
+cat /path/to/file.yaml | cordium man apply -
 `
 
 var Cmd = &cobra.Command{
@@ -53,38 +42,14 @@ accepts both single yaml files and directories. For the case of directories, all
 `,
 
 	Example: examples,
+	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return doCmd(cmd, args)
 	},
 }
 
-var cmdArgs args
-
 func init() {
-	Cmd.PersistentFlags().StringVarP(&cmdArgs.FilePath, "file", "f", "",
-		"File/Directory path that contains the desired resources. If it is a directory all files including files in sub-directories are going to be included")
-	Cmd.PersistentFlags().BoolVar(&cmdArgs.DoDelete, "prune", false,
-		"Delete all objects that do not exist in the current desired resources as described in file/directory path but do exist in the Cluster. In other words, this synchronizes the current described state in the file/directory path and prunes all additional resources that exist on the Cluster but not in the current desired configuration. Disabled by default.")
-	Cmd.PersistentFlags().StringSliceVar(&cmdArgs.ResourceIncludes, "include-kind", nil,
-		"Only include this resource kind")
-	Cmd.PersistentFlags().StringSliceVar(&cmdArgs.ResourceExcludes, "exclude-kind", nil,
-		"Exclude this resource kind")
-}
 
-func diffResource(ctx context.Context,
-	kind string, conn *grpc.ClientConn, desiredItems []umetav1.ResourceObjectI, doDelete bool) error {
-	ctl, err := rscdiff.NewDiffCtl(ucordiumv1.API, kind, cordiumv1.NewMainServiceClient(conn),
-		func() (umetav1.ResourceObjectI, error) {
-			return ucordiumv1.NewObject(kind)
-		}, func() (protoreflect.ProtoMessage, error) {
-			return ucordiumv1.NewObjectListOptions(kind)
-		}, desiredItems, doDelete)
-	if err != nil {
-		return err
-	}
-	_, err = ctl.Run(ctx)
-
-	return err
 }
 
 func doCmd(cmd *cobra.Command, args []string) error {
@@ -101,7 +66,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 	}
 	defer conn.Close()
 
-	resources, err := resources.LoadResources(cmdArgs.FilePath, ucordiumv1.NewObject)
+	resources, err := resources.LoadResources(i.FirstArg(), ucordiumv1.NewObject)
 	if err != nil {
 		return err
 	}
@@ -124,36 +89,5 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		cliutils.LineNotify("\n Cluster Configuration updated\n")
 	}
 
-	cliutils.LineNotify("Cluster resources successfully applied\n")
-
 	return nil
-}
-
-func isInList(lst []string, arg string) bool {
-	for _, itm := range lst {
-		if itm == arg {
-			return true
-		}
-	}
-	return false
-}
-
-func deleteItem(lst []string, arg string) []string {
-	for i, itm := range lst {
-		if itm == arg {
-			ret := append(lst[:i], lst[i+1:]...)
-			return ret
-		}
-	}
-	return lst
-}
-
-func deduplicateItems(lst []string) []string {
-	var ret []string
-	for _, itm := range lst {
-		if !isInList(ret, itm) {
-			ret = append(ret, itm)
-		}
-	}
-	return ret
 }
