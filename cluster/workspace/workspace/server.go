@@ -469,7 +469,7 @@ func (s *Server) setUser(ctx context.Context) error {
 		if vutils.FSPathExists("/workspace") {
 			zap.L().Debug("chowning workspace dir")
 			if err := s.chownDirToUser(ctx, "/workspace"); err != nil {
-				return err
+				zap.L().Warn("Could not chown workspace dir", zap.Error(err))
 			}
 		} else {
 			zap.L().Debug("Could not find /workspace dir. Skipping chown")
@@ -538,7 +538,7 @@ func (s *Server) chownDirToUser(ctx context.Context, dir string) error {
 	cmdStr := fmt.Sprintf("chown -R %s:%s %s", s.userInfo.name, s.userInfo.group, dir)
 	cmd := s.getCmd(ctx, cmdStr)
 	if err := cmd.Run(); err != nil {
-		zap.S().Errorf("Could not chown dir: %s: %+v", dir, err)
+		zap.L().Error("Could not chown dir", zap.String("dir", dir), zap.Error(err))
 	}
 	return nil
 }
@@ -621,16 +621,14 @@ func (s *Server) doPrepare(ctx context.Context, req *ccordiumv1.PrepareRequest) 
 	}
 
 	if err := s.doShallowCloneMainRepository(ctx); err != nil {
-		zap.L().Error("Could not doShallowCloneMainRepository", zap.Error(err))
+		zap.L().Warn("Could not doShallowCloneMainRepository", zap.Error(err))
 	}
 
 	if err := s.setWorkspaceFile(ctx); err != nil {
-		zap.L().Error("Could not set workspace.yaml file spec", zap.Error(err))
+		zap.L().Warn("Could not set workspace.yaml file spec", zap.Error(err))
 	}
 
-	if err := s.setEnvVars(ctx); err != nil {
-		return errors.Errorf("Could not set envVars: %+v", err)
-	}
+	s.setEnvVars(ctx)
 
 	if ldflags.IsTest() {
 		s.taskManager, err = s.newTaskManager()
@@ -642,7 +640,7 @@ func (s *Server) doPrepare(ctx context.Context, req *ccordiumv1.PrepareRequest) 
 	}
 
 	if err := s.setSSHKeys(ctx); err != nil {
-		zap.L().Error("Could not set SSH keys", zap.Error(err))
+		zap.L().Warn("Could not set SSH keys", zap.Error(err))
 	}
 
 	if err := s.setHostsFile(ctx); err != nil {
@@ -650,7 +648,7 @@ func (s *Server) doPrepare(ctx context.Context, req *ccordiumv1.PrepareRequest) 
 	}
 
 	if err := runTunnel(ctx, req); err != nil {
-		zap.L().Error("Could not run Workspace tunnel", zap.Error(err))
+		zap.L().Warn("Could not run Workspace tunnel", zap.Error(err))
 	}
 
 	s.setState(cordiumv1.Workspace_Status_PREPARING)
@@ -915,9 +913,9 @@ func (s *Server) setSUIDBit(ctx context.Context) error {
 	return nil
 }
 
-func (s *Server) setEnvVars(ctx context.Context) error {
+func (s *Server) setEnvVars(_ context.Context) {
 	if s.initReq == nil || s.ws == nil {
-		return nil
+		return
 	}
 
 	s.env = os.Environ()
@@ -989,7 +987,6 @@ func (s *Server) setEnvVars(ctx context.Context) error {
 
 	zap.L().Debug("Env vars set to", zap.Strings("env", s.env))
 
-	return nil
 }
 
 func (s *Server) getDevContainerJSONPath(ctx context.Context) string {
