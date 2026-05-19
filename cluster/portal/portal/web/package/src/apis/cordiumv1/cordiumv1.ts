@@ -412,6 +412,14 @@ export interface Workspace_Spec_Runtime {
      * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Octelium octelium = 7
      */
     octelium?: Workspace_Spec_Runtime_Octelium;
+    /**
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network network = 8
+     */
+    network?: Workspace_Spec_Runtime_Network;
+    /**
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Filesystem filesystem = 9
+     */
+    filesystem?: Workspace_Spec_Runtime_Filesystem;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.EnvVar
@@ -575,6 +583,59 @@ export interface Workspace_Spec_Runtime_Octelium {
      * @generated from protobuf field: bool serveAll = 2
      */
     serveAll: boolean;
+}
+/**
+ * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network
+ */
+export interface Workspace_Spec_Runtime_Network {
+}
+/**
+ * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule
+ */
+export interface Workspace_Spec_Runtime_Network_Rule {
+    /**
+     * @generated from protobuf field: repeated string cidrs = 1
+     */
+    cidrs: string[];
+}
+/**
+ * @generated from protobuf enum octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule.Action
+ */
+export enum Workspace_Spec_Runtime_Network_Rule_Action {
+    /**
+     * @generated from protobuf enum value: ACTION_UNSET = 0;
+     */
+    ACTION_UNSET = 0,
+    /**
+     * @generated from protobuf enum value: ALLOW = 1;
+     */
+    ALLOW = 1,
+    /**
+     * @generated from protobuf enum value: DENY = 2;
+     */
+    DENY = 2
+}
+/**
+ * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Egress
+ */
+export interface Workspace_Spec_Runtime_Network_Egress {
+    /**
+     * @generated from protobuf field: repeated octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule rules = 1
+     */
+    rules: Workspace_Spec_Runtime_Network_Rule[];
+    /**
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule.Action defaultAction = 2
+     */
+    defaultAction: Workspace_Spec_Runtime_Network_Rule_Action;
+}
+/**
+ * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Filesystem
+ */
+export interface Workspace_Spec_Runtime_Filesystem {
+    /**
+     * @generated from protobuf field: bool readOnly = 1
+     */
+    readOnly: boolean;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Application
@@ -4539,7 +4600,9 @@ class Workspace_Spec_Runtime$Type extends MessageType<Workspace_Spec_Runtime> {
             { no: 4, name: "cmd", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 5, name: "entrypoint", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 6, name: "devcontainers", kind: "message", T: () => Workspace_Spec_Runtime_Devcontainers },
-            { no: 7, name: "octelium", kind: "message", T: () => Workspace_Spec_Runtime_Octelium }
+            { no: 7, name: "octelium", kind: "message", T: () => Workspace_Spec_Runtime_Octelium },
+            { no: 8, name: "network", kind: "message", T: () => Workspace_Spec_Runtime_Network },
+            { no: 9, name: "filesystem", kind: "message", T: () => Workspace_Spec_Runtime_Filesystem }
         ]);
     }
     create(value?: PartialMessage<Workspace_Spec_Runtime>): Workspace_Spec_Runtime {
@@ -4579,6 +4642,12 @@ class Workspace_Spec_Runtime$Type extends MessageType<Workspace_Spec_Runtime> {
                 case /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Octelium octelium */ 7:
                     message.octelium = Workspace_Spec_Runtime_Octelium.internalBinaryRead(reader, reader.uint32(), options, message.octelium);
                     break;
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network network */ 8:
+                    message.network = Workspace_Spec_Runtime_Network.internalBinaryRead(reader, reader.uint32(), options, message.network);
+                    break;
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Filesystem filesystem */ 9:
+                    message.filesystem = Workspace_Spec_Runtime_Filesystem.internalBinaryRead(reader, reader.uint32(), options, message.filesystem);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -4612,6 +4681,12 @@ class Workspace_Spec_Runtime$Type extends MessageType<Workspace_Spec_Runtime> {
         /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Octelium octelium = 7; */
         if (message.octelium)
             Workspace_Spec_Runtime_Octelium.internalBinaryWrite(message.octelium, writer.tag(7, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network network = 8; */
+        if (message.network)
+            Workspace_Spec_Runtime_Network.internalBinaryWrite(message.network, writer.tag(8, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Filesystem filesystem = 9; */
+        if (message.filesystem)
+            Workspace_Spec_Runtime_Filesystem.internalBinaryWrite(message.filesystem, writer.tag(9, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -5060,6 +5135,193 @@ class Workspace_Spec_Runtime_Octelium$Type extends MessageType<Workspace_Spec_Ru
  * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Octelium
  */
 export const Workspace_Spec_Runtime_Octelium = new Workspace_Spec_Runtime_Octelium$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class Workspace_Spec_Runtime_Network$Type extends MessageType<Workspace_Spec_Runtime_Network> {
+    constructor() {
+        super("octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network", []);
+    }
+    create(value?: PartialMessage<Workspace_Spec_Runtime_Network>): Workspace_Spec_Runtime_Network {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<Workspace_Spec_Runtime_Network>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Workspace_Spec_Runtime_Network): Workspace_Spec_Runtime_Network {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: Workspace_Spec_Runtime_Network, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network
+ */
+export const Workspace_Spec_Runtime_Network = new Workspace_Spec_Runtime_Network$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class Workspace_Spec_Runtime_Network_Rule$Type extends MessageType<Workspace_Spec_Runtime_Network_Rule> {
+    constructor() {
+        super("octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule", [
+            { no: 1, name: "cidrs", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<Workspace_Spec_Runtime_Network_Rule>): Workspace_Spec_Runtime_Network_Rule {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.cidrs = [];
+        if (value !== undefined)
+            reflectionMergePartial<Workspace_Spec_Runtime_Network_Rule>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Workspace_Spec_Runtime_Network_Rule): Workspace_Spec_Runtime_Network_Rule {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* repeated string cidrs */ 1:
+                    message.cidrs.push(reader.string());
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: Workspace_Spec_Runtime_Network_Rule, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* repeated string cidrs = 1; */
+        for (let i = 0; i < message.cidrs.length; i++)
+            writer.tag(1, WireType.LengthDelimited).string(message.cidrs[i]);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule
+ */
+export const Workspace_Spec_Runtime_Network_Rule = new Workspace_Spec_Runtime_Network_Rule$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class Workspace_Spec_Runtime_Network_Egress$Type extends MessageType<Workspace_Spec_Runtime_Network_Egress> {
+    constructor() {
+        super("octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Egress", [
+            { no: 1, name: "rules", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_Runtime_Network_Rule },
+            { no: 2, name: "defaultAction", kind: "enum", T: () => ["octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule.Action", Workspace_Spec_Runtime_Network_Rule_Action] }
+        ]);
+    }
+    create(value?: PartialMessage<Workspace_Spec_Runtime_Network_Egress>): Workspace_Spec_Runtime_Network_Egress {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.rules = [];
+        message.defaultAction = 0;
+        if (value !== undefined)
+            reflectionMergePartial<Workspace_Spec_Runtime_Network_Egress>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Workspace_Spec_Runtime_Network_Egress): Workspace_Spec_Runtime_Network_Egress {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule rules */ 1:
+                    message.rules.push(Workspace_Spec_Runtime_Network_Rule.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule.Action defaultAction */ 2:
+                    message.defaultAction = reader.int32();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: Workspace_Spec_Runtime_Network_Egress, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule rules = 1; */
+        for (let i = 0; i < message.rules.length; i++)
+            Workspace_Spec_Runtime_Network_Rule.internalBinaryWrite(message.rules[i], writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule.Action defaultAction = 2; */
+        if (message.defaultAction !== 0)
+            writer.tag(2, WireType.Varint).int32(message.defaultAction);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Egress
+ */
+export const Workspace_Spec_Runtime_Network_Egress = new Workspace_Spec_Runtime_Network_Egress$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class Workspace_Spec_Runtime_Filesystem$Type extends MessageType<Workspace_Spec_Runtime_Filesystem> {
+    constructor() {
+        super("octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Filesystem", [
+            { no: 1, name: "readOnly", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
+        ]);
+    }
+    create(value?: PartialMessage<Workspace_Spec_Runtime_Filesystem>): Workspace_Spec_Runtime_Filesystem {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.readOnly = false;
+        if (value !== undefined)
+            reflectionMergePartial<Workspace_Spec_Runtime_Filesystem>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Workspace_Spec_Runtime_Filesystem): Workspace_Spec_Runtime_Filesystem {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* bool readOnly */ 1:
+                    message.readOnly = reader.bool();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: Workspace_Spec_Runtime_Filesystem, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* bool readOnly = 1; */
+        if (message.readOnly !== false)
+            writer.tag(1, WireType.Varint).bool(message.readOnly);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Filesystem
+ */
+export const Workspace_Spec_Runtime_Filesystem = new Workspace_Spec_Runtime_Filesystem$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class Workspace_Spec_Application$Type extends MessageType<Workspace_Spec_Application> {
     constructor() {

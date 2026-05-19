@@ -357,6 +357,9 @@ func (s *Server) podmanRunImage(ctx context.Context) error {
 	if ldflags.IsDev() {
 		podmanRunArgs = append(podmanRunArgs, "--env=OCTELIUM_DEV=true")
 	}
+	if s.spec.Runtime != nil && s.spec.Runtime.Filesystem != nil && s.spec.Runtime.Filesystem.ReadOnly {
+		podmanRunArgs = append(podmanRunArgs, "--read-only")
+	}
 
 	for _, bin := range s.mountBinaries {
 		podmanRunArgs = append(podmanRunArgs, fmt.Sprintf("--volume %s:%s:ro,exec,nosuid", bin, bin))
