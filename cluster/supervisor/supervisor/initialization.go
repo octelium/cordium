@@ -199,7 +199,7 @@ func (s *Server) doInitialize() error {
 	go s.runStatsLoop()
 
 	if err := s.copyToContainer(ctx); err != nil {
-		return errors.Errorf("Could not copy to Workspace container: %+v", err)
+		zap.L().Error("Could not copy to Workspace container", zap.Error(err))
 	}
 
 	{

@@ -357,7 +357,8 @@ func (s *Server) podmanRunImage(ctx context.Context) error {
 	if ldflags.IsDev() {
 		podmanRunArgs = append(podmanRunArgs, "--env=OCTELIUM_DEV=true")
 	}
-	if s.spec.Runtime != nil && s.spec.Runtime.Filesystem != nil && s.spec.Runtime.Filesystem.ReadOnly {
+	if !ws.Status.IsBuild &&
+		s.spec.Runtime != nil && s.spec.Runtime.Filesystem != nil && s.spec.Runtime.Filesystem.ReadOnly {
 		podmanRunArgs = append(podmanRunArgs, "--read-only")
 	}
 
