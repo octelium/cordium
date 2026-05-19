@@ -64,6 +64,8 @@ type CreateWorkspaceArgs struct {
 	ServeServices []string
 	ServeAll      bool
 
+	ReadOnlyRootFilesystem bool
+
 	Out string
 }
 
@@ -114,6 +116,9 @@ func init() {
 		"Serve all Octelium services assigned to the User")
 	Cmd.PersistentFlags().StringSliceVar(&cmdArgs.ServeServices, "serve", nil,
 		"Select the Octelium Service names assigned to this User to be served")
+
+	Cmd.PersistentFlags().BoolVar(&cmdArgs.ReadOnlyRootFilesystem, "read-only", false,
+		"Use read-only root filesystem")
 
 	Cmd.MarkFlagsMutuallyExclusive("space", "template")
 	Cmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
@@ -234,6 +239,8 @@ func doCmd(cmd *cobra.Command, args []string) error {
 
 		ServeServices: cmdArgs.ServeServices,
 		ServeAll:      cmdArgs.ServeAll,
+
+		ReadOnlyRootFilesystem: cmdArgs.ReadOnlyRootFilesystem,
 	})
 	if err != nil {
 		return err
@@ -285,6 +292,8 @@ type DoCreateWorkspaceOpts struct {
 	ServeAll      bool
 
 	AppPorts []string
+
+	ReadOnlyRootFilesystem bool
 
 	Vars []string
 }
@@ -451,6 +460,18 @@ func DoCreateWorkspace(ctx context.Context, c pb.MainServiceClient, o *DoCreateW
 			Name:  name,
 			Value: value,
 		})
+	}
+
+	if o.ReadOnlyRootFilesystem {
+		if ws.Spec.Runtime == nil {
+			ws.Spec.Runtime = &pb.Workspace_Spec_Runtime{}
+		}
+
+		if ws.Spec.Runtime.Filesystem == nil {
+			ws.Spec.Runtime.Filesystem = &pb.Workspace_Spec_Runtime_Filesystem{}
+		}
+
+		ws.Spec.Runtime.Filesystem.ReadOnly = o.ReadOnlyRootFilesystem
 	}
 
 	ws.Spec.AutoStop = o.AutoStop

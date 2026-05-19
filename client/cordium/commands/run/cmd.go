@@ -83,6 +83,9 @@ func init() {
 	Cmd.PersistentFlags().StringSliceVar(&cmdArgs.ServeServices, "serve", nil,
 		"Select the Octelium Service names assigned to this User to be served")
 
+	Cmd.PersistentFlags().BoolVar(&cmdArgs.ReadOnlyRootFilesystem, "read-only", false,
+		"Use read-only root filesystem")
+
 	Cmd.MarkFlagsMutuallyExclusive("space", "template")
 	Cmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
 }
@@ -210,6 +213,8 @@ func doCmd(cmd *cobra.Command, args []string) error {
 			AppPorts:          cmdArgs.AppPorts,
 			AutoStop:          cmdArgs.AutoStop,
 			Vars:              cmdArgs.Vars,
+
+			ReadOnlyRootFilesystem: cmdArgs.ReadOnlyRootFilesystem,
 		})
 		if err != nil {
 			return err
