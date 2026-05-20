@@ -5,10 +5,10 @@ go 1.25.8
 require (
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/cluster/apiserver v0.0.0-20260502210026-401b624fb197 // indirect
-	github.com/octelium/octelium/cluster/common v0.0.0-20260502210026-401b624fb197
-	github.com/octelium/octelium/cluster/genesis v0.0.0-20260502210026-401b624fb197
-	github.com/octelium/octelium/pkg v0.0.0-20260502210026-401b624fb197
+	github.com/octelium/octelium/cluster/apiserver v0.0.0-20260519091848-5d41b9212cf4 // indirect
+	github.com/octelium/octelium/cluster/common v0.0.0-20260519091848-5d41b9212cf4
+	github.com/octelium/octelium/cluster/genesis v0.0.0-20260519091848-5d41b9212cf4
+	github.com/octelium/octelium/pkg v0.0.0-20260519091848-5d41b9212cf4
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.10.2
 	go.uber.org/zap v1.27.1
