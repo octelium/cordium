@@ -157,9 +157,7 @@ jobs:
           Priority: optional
           Architecture: ${DEB_ARCH}
           Maintainer: George Badawi <contact@octelium.com>
-          Description: ${PKG_NAME} - A unified zero trust secure access platform that
-           can operate as a remote access VPN, a ZTNA platform, API/AI/MCP gateway,
-           a PaaS, an ngrok-alternative and a homelab infrastructure.
+          Description: ${PKG_NAME} - A modern, free and open source, identity-based sandbox platform for humans and AI agents.
           Homepage: https://octelium.com
           License: Apache-2.0
           EOF
@@ -197,7 +195,7 @@ jobs:
           Name:           ${PKG_NAME}
           Version:        ${VERSION}
           Release:        ${RELEASE}%{?dist}
-          Summary:        ${PKG_NAME} - Octelium is a unified zero trust secure access platform
+          Summary:        ${PKG_NAME} - A modern, open source, identity-based sandbox platform for humans and AI agents
           License:        Apache-2.0
           URL:            https://octelium.com
           Source0:        ${PKG_NAME}
@@ -207,8 +205,7 @@ jobs:
           %define __strip /bin/true
 
           %description
-          A unified zero trust secure access platform that can operate as a remote access VPN,
-          a ZTNA platform, API/AI/MCP gateway, a PaaS, an ngrok-alternative and a homelab infrastructure.
+          A modern, free and open source, identity-based sandbox platform for humans and AI agents.
 
           %install
           mkdir -p %{buildroot}/usr/bin
