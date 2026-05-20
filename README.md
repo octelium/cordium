@@ -43,8 +43,7 @@ What sets Cordium apart is how Workspaces access infrastructure (e.g. remote int
 
 ## Workspace Configuration
 
-Here are some Workspace/Template configurations that can be used to create and run Workspaces:
-
+Workspace and Template specs are defined in YAML and applied via `cordium run --file spec.yaml` or `cordium create template --file spec.yaml`. Here is a minimal example:
 
 ```yaml
 spec:
@@ -52,116 +51,94 @@ spec:
     registry:
       url: python:3.12-bookworm
 
+  repository:
+    url: https://github.com/myorg/my-project
+
   runtime:
     tasks:
-      - name: hello
+      - name: install
         type: ON_CREATE
-        run: |
-          python3 --version
-          echo "Cordium Workspace is ready"
-
-  limit:
-    cpu:
-      millicores: 1000
-    memory:
-      megabytes: 2048
-    storage:
-      megabytes: 10000
+        workingDir: /workspace/repo
+        run: pip install -r requirements.txt
+        onFailure: ON_FAILURE_ABORT
 ```
+
+Here is a more comprehensive example:
 
 ```yaml
 spec:
   image:
     dockerfile:
       inline: |
-        FROM ubuntu:24.04
+        FROM node:22-bookworm
 
         ENV DEBIAN_FRONTEND=noninteractive
 
-        RUN apt-get update && apt-get install -y \
-            ca-certificates \
-            curl \
-            wget \
-            git \
-            jq \
-            vim \
-            nano \
-            htop
+        RUN apt-get update -qq && \
+            apt-get install -y --no-install-recommends \
+              podman \
+              postgresql-client \
+              curl \
+              git \
+            && rm -rf /var/lib/apt/lists/*
+
+        RUN npm install -g @anthropic-ai/claude-code
 
   repository:
-    url: https://github.com/example/payment-service
+    url: https://github.com/myorg/api-service
     cloneOptions:
-      branch: main
+      branch: ${{ vars.BRANCH }}
       depth: 1
-      singleBranch: true
+
+  autoStop: true
 
   vars:
-    name: CODEX_PROMPT
-    value: |
-      The test suite is failing.
-      Analyze the repository, fix the failing tests,
-      run the tests again, and create a git commit
-      describing the fix.
+    - name: BRANCH
+      value: main
+    - name: TASK
+      value: "Review the codebase and fix any failing tests."
 
   runtime:
     envVars:
-      - key: OPENAI_API_KEY
-        fromSecret: openai-api-key
-
-      - key: OPENAI_MODEL
-        value: o4-mini
-
-      - key: GIT_AUTHOR_NAME
-        value: cordium-codex
-
-      - key: GIT_AUTHOR_EMAIL
-        value: codex@example.com
+      - key: NODE_ENV
+        value: test
+      - key: SENTRY_DSN
+        fromSecret: sentry-dsn
 
     tasks:
-      - name: setup
+      - name: install-dependencies
         type: ON_CREATE
-        run: |
-          apt-get update
-          apt-get install -y git curl nodejs npm podman
-
-          npm install -g @openai/codex
-
-          npm ci
+        workingDir: /workspace/repo
+        run: npm ci
+        onFailure: ON_FAILURE_ABORT
 
       - name: start-postgres
         type: POST_START
+        runAsRoot: true
         run: |
-          sudo podman run \
+          podman rm -f workspace-postgres 2>/dev/null || true
+          podman run \
+            --name workspace-postgres \
             --net host \
             -e POSTGRES_PASSWORD=password \
             -e POSTGRES_DB=app \
             -d docker.io/postgres:16
 
+          for i in $(seq 1 30); do
+            pg_isready -h localhost -p 5432 -U postgres && break
+            sleep 2
+          done
+
       - name: run-tests
         type: POST_START
-        run: |
-          npm test
+        workingDir: /workspace/repo
+        run: npm test
         onFailure: ON_FAILURE_CONTINUE
 
-      - name: start-service
+      - name: run-agent
         type: POST_START
         workingDir: /workspace/repo
-        isBackground: true
-        run: |
-          if [ -f package.json ]; then npm run dev; fi
-
-      - name: codex-remediation
-        type: POST_START
-        run: |
-          codex exec "${{ vars.CODEX_PROMPT}}"
-
-      - name: push-branch
-        type: POST_START
-        run: |
-          BRANCH=codex-fix-$(date +%s)
-
-          git checkout -b $BRANCH
-          git push origin $BRANCH
+        run: claude "${{ vars.TASK }}"
 
   limit:
     cpu:
@@ -169,7 +146,7 @@ spec:
     memory:
       megabytes: 8192
     storage:
-      megabytes: 30000
+      megabytes: 20480
 ```
 
 ## Access Methods
