@@ -12,6 +12,8 @@ Cordium is a free and open source, self-hosted, identity-based, horizontally sca
 - [Workspace Configuration](#workspace-configuration)
 - [Access Methods](#access-methods)
   - [CLI](#cli)
+- [Install CLI](#install-cli)
+- [Install your First Cluster](#install-your-first-cluster)
 - [Comparison with Other Platforms](#comparison-with-other-platforms)
 - [License](#license)
 
@@ -319,6 +321,51 @@ cordium run --template go-build.my-project \
   --var SERVICE=services/payments \
   --var BRANCH=main \
   --ephemeral
+```
+
+
+## Install your First Cluster
+
+Read this quick guide [here](https://octelium.com/docs/cordium/latest/overview/quick-install) to install a single-node Cordium _Cluster_ on top of any cheap cloud VM/VPS instance (e.g. DigitalOcean Droplet, Hetzner server, AWS EC2, Vultr, etc...) or a local Linux machine/Linux VM inside a MacOS/Windows machine with at least 4GB of RAM and 20GB of disk storage running a recent Linux distribution (Ubuntu 24.04 LTS or later, Debian 12+, etc...), which is good enough for most development, personal or undemanding production use cases that do not require highly available multi-node _Clusters_. Once you SSH into your VPS/VM as root, you can install the _Cluster_ as follows:
+
+```bash
+curl -o install-cluster.sh https://octelium.com/install-cluster.sh
+chmod +x install-cluster.sh
+
+# Replace <DOMAIN> with your actual domain
+./install-cluster.sh --domain <DOMAIN> --cordium
+```
+
+Once the _Cluster_ is installed. You can run your first Workspace as follows:
+
+```bash
+cordium run
+```
+
+
+## Install CLI
+
+Install the `cordium` CLI as follows:
+
+For Linux and MacOS
+
+```bash
+curl -fsSL https://octelium.com/install.sh | bash
+curl -fsSL https://octelium.com/install-cordium.sh | bash
+```
+
+For Windows in Powershell
+
+```powershell
+iwr https://octelium.com/install.ps1 -useb | iex
+iwr https://octelium.com/install-cordium.ps1 -useb | iex
+```
+
+You can also install the CLIs via Homebrew as follows:
+
+```bash
+brew install octelium/tap/octelium
+brew install octelium/tap/cordium
 ```
 
 
