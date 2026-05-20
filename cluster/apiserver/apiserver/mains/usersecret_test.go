@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	otests "github.com/octelium/cordium/cluster/common/tests"
+	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/corev1"
 	"github.com/octelium/octelium/apis/main/metav1"
@@ -101,8 +102,7 @@ func TestUserSecret(t *testing.T) {
 			},
 		}
 		_, err = srv.CreateUserSecret(usr.Ctx(), req)
-		assert.NotNil(t, err)
-
+		assert.Nil(t, err, "%+v", err)
 	}
 
 	{
@@ -127,7 +127,7 @@ func TestUserSecret(t *testing.T) {
 		sec, err := srv.CreateUserSecret(usr.Ctx(), req)
 		assert.Nil(t, err)
 
-		assert.Equal(t, sec.Data.GetValue(), req.Data.GetValue())
+		assert.Equal(t, "", ucordiumv1.ToUserSecret(sec).GetValueStr())
 
 		_, err = srv.GetUserSecret(usr2.Ctx(), &metav1.GetOptions{
 			Name: sec.Metadata.Name,
