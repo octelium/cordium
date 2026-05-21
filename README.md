@@ -351,32 +351,33 @@ brew install octelium/tap/cordium
 | **Nested container support** | Supported | Docker/container support | Limited | Supported | Supported | Provider-dependent |
 | **Persistent stateful environments** | Yes | Yes | Limited/session-oriented | Yes | Yes | Provider-dependent |
 | **Ephemeral execution support** | Yes | Yes | Yes | Limited | Limited | Limited |
-| **Volume snapshot support** | CSI VolumeSnapshots | Limited | Platform-managed | Managed internally | Provider-dependent | No |
 | **Devcontainer support** | Yes | Yes | Partial | Yes | Yes | Yes |
 | **Template-based provisioning** | Yes | Yes | Limited | Limited | Yes | Yes |
 | **Secretless infrastructure access** | Yes | No | No | No | No | No |
-| **Built-in infrastructure access proxying** | SSH, Kubernetes, databases, HTTP APIs | No | No | No | Limited/external | No |
-| **OpenTelemetry-native auditing** | Yes | Partial | Limited | Platform-managed | External integrations | No |
+| **Built-in infrastructure access** | Yes | Limited / external VPN integration | No | No | Limited / external | No |
+| **Credential-sprawl reduction for infrastructure access** | First-class design goal | No, typically relies on sandbox/app credentials or external network integration | No, API-key-driven sandbox access | Limited to GitHub ecosystem integrations | External secret management / platform integrations | No centralized model |
+| **Workspace identity model** | Dedicated Octelium Session identity per Workspace | Sandbox/user/org identity model | API-key / sandbox identity model | GitHub user/org identity | Coder user/workspace identity | Local user/provider identity |
+| **L7-aware access control to infrastructure** | Yes, via Octelium Policies | No | No | No | No / external only | No |
+| **Policy-as-code access control** | Yes, CEL and OPA | Limited / platform policy model | Limited | GitHub/org policies | RBAC/templates/external policy patterns | No |
+| **OIDC human authentication** | Yes | Yes / Auth0-backed | Not primary user model | Enterprise SSO via GitHub org/enterprise | Yes | Provider-dependent / external |
+| **SAML human authentication** | Yes | Enterprise option / contact Daytona | Not primary user model | Enterprise SSO via GitHub org/enterprise | Yes / enterprise-oriented | Provider-dependent / external |
+| **GitHub identity provider** | Yes | Yes | Not primary user model | Native | Yes | Provider-dependent / external |
+| **Native Passkeys / WebAuthn / FIDO2** | Yes | Not primary documented OSS feature | Not primary model | Via GitHub account security | External IdP / deployment-dependent | External |
+| **Workload OIDC assertion authentication** | Yes | No / not primary documented feature | No | GitHub Actions OIDC for GitHub workflows, not sandbox identity | External IdP / deployment-dependent | No |
+| **OAuth2 client credentials support** | Yes, through Octelium workload / IdP patterns where configured | API/JWT/token model, not primary OAuth2 client-credentials infrastructure access model | No, API-key/access-token model | GitHub Apps/OAuth ecosystem | External IdP / deployment-dependent | No |
+| **Bearer/API-token authentication for platform API** | Yes | Yes, API keys/JWT | Yes, `E2B_API_KEY` / access token | Yes, GitHub tokens/API | Yes | Limited/provider-dependent |
+| **SSH access** | Yes | Yes, token-based SSH access | Limited | Yes | Yes | Provider-dependent |
+| **OpenTelemetry-native auditing** | Yes | Partial / SDK tracing | Limited | Platform-managed | External integrations | No |
 | **CLI-first workflows** | Yes | Yes | Yes | Partial | Yes | Yes |
 | **Multi-user platform** | Yes | Yes | Limited | Yes | Yes | No |
-| **SSH access** | Yes | Yes | Limited | Yes | Yes | Provider-dependent |
 | **Public API / SDK access** | Yes | Yes | Yes | Yes | Yes | Limited |
 | **Web terminal support** | Yes | Yes | Limited | Yes | Yes | IDE/provider-dependent |
 | **GitOps declarative management** | Yes | Partial | No | No | Partial | No |
 | **AI-agent-oriented SDK usage** | Yes | Yes | First-class | Limited | Emerging | Limited |
 | **Long-running background workloads** | Yes | Yes | Session-oriented | Limited | Yes | Provider-dependent |
 | **CI/CD-oriented execution** | Yes | Possible | Possible | Limited | Possible | No |
+| **No proprietary control plane required** | Yes | No for managed, yes for OSS deployment | No for managed E2B | No | Yes for self-hosted Coder | Yes |
 | **Primary differentiation** | Identity-centric sandbox platform with integrated secure infrastructure access | Fast stateful AI/dev sandboxes | Ephemeral AI code execution | Managed GitHub-native development | Enterprise remote development | Portable devcontainer orchestration |
-
-### Notes
-
-- Cordium focuses on combining sandboxed execution with identity-aware infrastructure access, policy enforcement, and Kubernetes-native orchestration.
-- Daytona has evolved beyond traditional developer workspaces into a broader AI-agent and sandbox platform with strong emphasis on fast startup times and stateful environments.
-- E2B focuses primarily on ephemeral AI code execution environments with strong isolation using Firecracker microVMs.
-- GitHub Codespaces is a managed cloud development environment tightly integrated with GitHub and Visual Studio Code.
-- Coder primarily focuses on self-hosted remote development infrastructure, though recent positioning increasingly includes AI-assisted and agent-driven workflows.
-- DevPod focuses primarily on portable devcontainer orchestration across different infrastructure providers rather than centralized multi-tenant sandbox management.
-
 
 ## License
 
