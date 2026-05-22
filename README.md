@@ -10,7 +10,7 @@ What sets Cordium apart is how Workspaces access infrastructure (e.g. remote int
 - [Core Concepts](#core-concepts)
 - [Workspace Configuration](#workspace-configuration)
 - [Access Methods](#access-methods)
-  - [CLI](#cli)
+- [CLI Usage](#cli-usage)
 - [Install CLI](#install-cli)
 - [Install your First Cluster](#install-your-first-cluster)
 - [Comparison with Other Platforms](#comparison-with-other-platforms)
@@ -155,7 +155,7 @@ spec:
 
 The Cordium web portal is a browser-based interface for managing and interacting with Workspaces without installing any software. It is the primary interface for users and teams who want clientless access to their Workspaces. The Octelium web portal authenticates users through Octelium's IdentityProviders, including GitHub OAuth2 or any OpenID Connect or SAML 2.0 IdP (read more here) or directly via Passkeys (read more [here](https://octelium.com/docs/octelium/latest/management/core/identity-providers)).
 
-### CLI
+## CLI Usage
 
 The `cordium` CLI provides full command-line access to Workspace management. Here are some examples:
 
