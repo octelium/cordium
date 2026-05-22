@@ -17,20 +17,20 @@
 package workspace
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"io"
 	"os/exec"
+	"slices"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
 
-	"slices"
-
 	"github.com/octelium/cordium/cluster/common/broker"
 	"github.com/octelium/octelium/apis/cluster/ccordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
+	"github.com/octelium/octelium/cluster/common/apivalidation"
 	"github.com/octelium/octelium/cluster/common/vutils"
 	"github.com/octelium/octelium/pkg/common/pbutils"
 	"github.com/octelium/octelium/pkg/utils/ldflags"
@@ -52,10 +52,11 @@ type taskManager struct {
 	startCancelFn context.CancelFunc
 	req           *ccordiumv1.PrepareRequest
 	srv           *Server
+
+	runningTasks map[string]*task
 }
 
 func (s *Server) newTaskManager() (*taskManager, error) {
-
 	req := s.initReq
 	if req == nil {
 		return nil, errors.Errorf("Could not initialize a task manager. No initReq")
@@ -69,6 +70,7 @@ func (s *Server) newTaskManager() (*taskManager, error) {
 		isBuild:        req.Workspace.Status.IsBuild,
 		eventPublisher: s.eventPublisher,
 		srv:            s,
+		runningTasks:   make(map[string]*task),
 	}
 
 	zap.L().Debug("Created a new task manager")
@@ -88,7 +90,6 @@ func (t *taskManager) appendTask(tsk *cordiumv1.Workspace_Spec_Runtime_Task) err
 }
 
 func (t *taskManager) run() error {
-
 	if !t.req.Workspace.Status.IsBuild {
 		connectTask, err := t.newTaskOcteliumConnect(t.req)
 		if err != nil {
@@ -98,23 +99,22 @@ func (t *taskManager) run() error {
 	}
 
 	if ldflags.IsDev() {
-
-		t.appendTask(&cordiumv1.Workspace_Spec_Runtime_Task{
+		_ = t.appendTask(&cordiumv1.Workspace_Spec_Runtime_Task{
 			Type: cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
 			Run:  "cat /etc/passwd",
 		})
 
-		t.appendTask(&cordiumv1.Workspace_Spec_Runtime_Task{
+		_ = t.appendTask(&cordiumv1.Workspace_Spec_Runtime_Task{
 			Type: cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
 			Run:  "ls -lah",
 		})
 
-		t.appendTask(&cordiumv1.Workspace_Spec_Runtime_Task{
+		_ = t.appendTask(&cordiumv1.Workspace_Spec_Runtime_Task{
 			Type: cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
 			Run:  "whoami",
 		})
 
-		t.appendTask(&cordiumv1.Workspace_Spec_Runtime_Task{
+		_ = t.appendTask(&cordiumv1.Workspace_Spec_Runtime_Task{
 			Type: cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
 			Run:  "users",
 		})
@@ -154,6 +154,7 @@ func (t *taskManager) run() error {
 
 	ctx, cancelFn := context.WithTimeout(context.Background(), timeout)
 	t.startCancelFn = cancelFn
+	defer cancelFn()
 
 	if t.doOnCreate {
 		if err := t.runTasksByType(ctx, cordiumv1.Workspace_Spec_Runtime_Task_ON_CREATE); err != nil {
@@ -199,9 +200,28 @@ func (t *taskManager) filterByType(typ cordiumv1.Workspace_Spec_Runtime_Task_Typ
 	return ret
 }
 
+func (t *taskManager) addRunningTask(tsk *task) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.runningTasks[tsk.tUID] = tsk
+}
+
+func (t *taskManager) removeRunningTask(tsk *task) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	delete(t.runningTasks, tsk.tUID)
+}
+
 func (t *taskManager) getTaskByName(name string) (*task, error) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
+
+	for _, task := range t.runningTasks {
+		if task.name == name {
+			return task, nil
+		}
+	}
+
 	for _, task := range t.tasks {
 		if task.name == name {
 			return task, nil
@@ -218,22 +238,43 @@ func (t *taskManager) close() error {
 		return nil
 	}
 	t.isClosed = true
+	if t.startCancelFn != nil {
+		t.startCancelFn()
+	}
 	t.mu.Unlock()
+
 	t.srv.setState(cordiumv1.Workspace_Status_STOPPING)
 
 	ctx, cancelFn := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancelFn()
 
+	var retErr error
 	if !t.isBuild {
 		if err := t.runTasksByType(ctx, cordiumv1.Workspace_Spec_Runtime_Task_PRE_STOP); err != nil {
-			return err
+			retErr = err
 		}
-		return nil
 	} else {
 		zap.L().Debug("Skipping PRE_STOP commands for prebuild runs")
 	}
 
-	return nil
+	t.closeRunningTasks()
+
+	return retErr
+}
+
+func (t *taskManager) closeRunningTasks() {
+	t.mu.Lock()
+	tasks := make([]*task, 0, len(t.runningTasks))
+	for _, task := range t.runningTasks {
+		tasks = append(tasks, task)
+	}
+	t.mu.Unlock()
+
+	for _, task := range tasks {
+		if err := task.close(); err != nil {
+			zap.L().Warn("Could not close task", zap.String("name", task.name), zap.Error(err))
+		}
+	}
 }
 
 type task struct {
@@ -262,17 +303,21 @@ type task struct {
 
 	parentEnv []string
 
-	isExec   bool
-	isClosed bool
-	hasStdin bool
+	isExec    bool
+	isClosed  bool
+	hasExited bool
+	hasStdin  bool
 
 	listenBroker *broker.Broker[*cordiumv1.ExecResponse]
 
 	stdinPipe io.WriteCloser
 
-	ctx                context.Context
-	ctxCancelFn        context.CancelFunc
+	ctx         context.Context
+	ctxCancelFn context.CancelFunc
+	cmdCancelFn context.CancelFunc
+
 	listenExecResponse []*cordiumv1.ExecResponse
+	respMu             sync.Mutex
 
 	taskExecListener      <-chan *cordiumv1.ExecResponse
 	taskExecListenerUnsub func()
@@ -327,29 +372,33 @@ func (t *task) isUserRoot() bool {
 	return t.uid == 0 && t.gid == 0
 }
 
-func (t *task) run(ctx context.Context) error {
+func (t *task) run(parentCtx context.Context) error {
 	var err error
 
-	go func() {
-		for msg := range t.taskExecListener {
-			if msg == nil {
-				return
-			}
-
-			t.listenExecResponse = append(t.listenExecResponse, msg)
-		}
-	}()
+	go t.captureExecResponses()
 
 	zap.L().Debug("Starting running task",
 		zap.String("name", t.name),
 		zap.String("cmd", t.command),
 		zap.String("shellPath", t.shellPath))
 
-	if t.isBackground {
-		ctx = context.Background()
+	baseCtx := parentCtx
+	if t.isBackground || t.isExec {
+		baseCtx = context.Background()
 	}
 
-	t.cmd = exec.CommandContext(ctx, t.shellPath, "-c", t.command)
+	cmdCtx, cmdCancelFn := context.WithCancel(baseCtx)
+	t.cmdCancelFn = cmdCancelFn
+
+	go func() {
+		select {
+		case <-t.ctx.Done():
+			cmdCancelFn()
+		case <-cmdCtx.Done():
+		}
+	}()
+
+	t.cmd = exec.CommandContext(cmdCtx, t.shellPath, "-c", t.command)
 
 	t.stdinPipe, err = t.cmd.StdinPipe()
 	if err != nil {
@@ -357,81 +406,104 @@ func (t *task) run(ctx context.Context) error {
 	}
 
 	if err := t.startStdoutLoop(); err != nil {
+		_ = t.close()
 		return err
 	}
 	if err := t.startStderrLoop(); err != nil {
+		_ = t.close()
 		return err
 	}
 
-	t.cmd.Dir = t.workingDir
+	if t.workingDir != "" {
+		t.cmd.Dir = t.workingDir
+	}
 
 	if !ldflags.IsTest() {
-		if !t.isUserRoot() {
-			t.cmd.SysProcAttr = &syscall.SysProcAttr{
-				Credential: &syscall.Credential{Uid: t.uid, Gid: t.gid},
-			}
-		}
+		t.cmd.SysProcAttr = t.sysProcAttr()
 	}
 
 	t.cmd.Env = t.getEnv()
 
 	if err := t.cmd.Start(); err != nil {
 		zap.L().Warn("Could not start task cmd", zap.String("name", t.name), zap.Error(err))
+		_ = t.close()
 
-		if t.onFailure == cordiumv1.Workspace_Spec_Runtime_Task_ON_FAILURE_ABORT {
+		if t.shouldAbortOnFailure() {
 			t.publishFailure(err)
 			return errors.Errorf("Running task: %s failed: %+v", t.name, err)
 		}
-		return err
+
+		return nil
 	}
 
-	t.taskManager.mu.Lock()
-	t.taskManager.tasks = append(t.taskManager.tasks, t)
-	t.taskManager.mu.Unlock()
+	t.taskManager.addRunningTask(t)
 
 	if t.isBackground || t.isExec {
-		go t.wait()
-	} else {
+		go func() {
+			if err := t.wait(); err != nil {
+				zap.L().Warn("Background task exited with error",
+					zap.String("name", t.name),
+					zap.Error(err))
 
-		t.wait()
-		/*
-			err := t.cmd.Run()
-			if err != nil {
-				zap.L().Warn("Could not run task cmd", zap.String("name", t.name), zap.Error(err))
-				if t.onFailure == cordiumv1.Workspace_Spec_Runtime_Task_ON_FAILURE_ABORT {
+				if t.shouldAbortOnFailure() {
 					t.publishFailure(err)
-					return errors.Errorf("Running task: %s failed: %+v", t.name, err)
 				}
 			}
+		}()
 
-		*/
+		return nil
+	}
 
-		// t.publishTaskDone(err)
+	err = t.wait()
+	if err != nil {
+		zap.L().Warn("Task exited with error",
+			zap.String("name", t.name),
+			zap.Error(err))
 
+		if t.shouldAbortOnFailure() {
+			t.publishFailure(err)
+			return errors.Errorf("Running task: %s failed: %+v", t.name, err)
+		}
 	}
 
 	return nil
 }
 
+func (t *task) sysProcAttr() *syscall.SysProcAttr {
+	ret := &syscall.SysProcAttr{
+		Setpgid: true,
+	}
+
+	if !t.isUserRoot() {
+		ret.Credential = &syscall.Credential{
+			Uid: t.uid,
+			Gid: t.gid,
+		}
+	}
+
+	return ret
+}
+
+func (t *task) shouldAbortOnFailure() bool {
+	return t.onFailure == cordiumv1.Workspace_Spec_Runtime_Task_ON_FAILURE_ABORT
+}
+
+func (t *task) captureExecResponses() {
+	for msg := range t.taskExecListener {
+		if msg == nil {
+			return
+		}
+
+		t.respMu.Lock()
+		t.listenExecResponse = append(t.listenExecResponse, msg)
+		t.respMu.Unlock()
+	}
+}
+
 func (t *task) wait() error {
 	err := t.cmd.Wait()
 
-	var exitCode int
-	if err != nil {
-
-		if exitError, ok := err.(*exec.ExitError); ok {
-			waitStatus := exitError.Sys().(syscall.WaitStatus)
-
-			switch {
-			case waitStatus.Exited():
-				exitCode = waitStatus.ExitStatus()
-			case waitStatus.Signaled():
-				exitCode = -1
-			default:
-				exitCode = -1
-			}
-		}
-	}
+	exitCode := t.exitCodeFromError(err)
 
 	t.listenBroker.Publish(&cordiumv1.ExecResponse{
 		Type: &cordiumv1.ExecResponse_Exit_{
@@ -441,67 +513,106 @@ func (t *task) wait() error {
 		},
 	})
 
-	// t.publishTaskDone(err)
+	t.mu.Lock()
+	t.hasExited = true
+	t.mu.Unlock()
 
-	t.close()
+	_ = t.close()
 
 	zap.L().Debug("Task wait done", zap.Int("exitCode", exitCode))
 
 	return err
 }
 
+func (t *task) exitCodeFromError(err error) int {
+	if err == nil {
+		return 0
+	}
+
+	exitError, ok := err.(*exec.ExitError)
+	if !ok {
+		return -1
+	}
+
+	waitStatus, ok := exitError.Sys().(syscall.WaitStatus)
+	if !ok {
+		return exitError.ExitCode()
+	}
+
+	switch {
+	case waitStatus.Exited():
+		return waitStatus.ExitStatus()
+	case waitStatus.Signaled():
+		return -1
+	default:
+		return -1
+	}
+}
+
 func (t *task) close() error {
 	t.mu.Lock()
-	defer t.mu.Unlock()
 	if t.isClosed {
+		t.mu.Unlock()
 		return nil
 	}
 	t.isClosed = true
 
-	if t.stdinPipe != nil {
-		t.stdinPipe.Close()
+	stdinPipe := t.stdinPipe
+	ctxCancelFn := t.ctxCancelFn
+	cmdCancelFn := t.cmdCancelFn
+	cmd := t.cmd
+	hasExited := t.hasExited
+	t.mu.Unlock()
+
+	if stdinPipe != nil {
+		_ = stdinPipe.Close()
 	}
 
-	if t.ctxCancelFn != nil {
-		t.ctxCancelFn()
+	if cmdCancelFn != nil {
+		cmdCancelFn()
+	}
+
+	if ctxCancelFn != nil {
+		ctxCancelFn()
+	}
+
+	if cmd != nil && cmd.Process != nil && !hasExited {
+		t.terminateProcessGroup(cmd.Process.Pid)
 	}
 
 	if t.taskExecListenerUnsub != nil {
 		t.taskExecListenerUnsub()
 	}
 
-	t.taskManager.mu.Lock()
-	t.taskManager.tasks = slices.DeleteFunc(t.taskManager.tasks, func(tsk *task) bool {
-		return tsk.tUID == t.tUID
-	})
-	t.taskManager.mu.Unlock()
+	t.taskManager.removeRunningTask(t)
 
 	zap.L().Debug("task closed", zap.String("name", t.name))
 
 	return nil
 }
 
-/*
-func (t *task) publishTaskDone(err error) {
-	var exitCode int
-	if err != nil {
-		if exiterr, ok := err.(*exec.ExitError); ok {
-			exitCode = exiterr.ExitCode()
-		}
+func (t *task) terminateProcessGroup(pid int) {
+	if pid <= 0 {
+		return
 	}
 
+	_ = syscall.Kill(-pid, syscall.SIGTERM)
 
-		t.eventPublisher.publish(&cordiumv1.ListenEventResponse{
-			Type: &cordiumv1.ListenEventResponse_TaskDone_{
-				TaskDone: &cordiumv1.ListenEventResponse_TaskDone{
-					Uid:      t.tUID,
-					ExitCode: int64(exitCode),
-				},
-			},
-		})
+	go func() {
+		timer := time.NewTimer(5 * time.Second)
+		defer timer.Stop()
 
+		<-timer.C
+
+		t.mu.Lock()
+		hasExited := t.hasExited
+		t.mu.Unlock()
+
+		if !hasExited {
+			_ = syscall.Kill(-pid, syscall.SIGKILL)
+		}
+	}()
 }
-*/
 
 func (t *task) publishFailure(err error) {
 	failure := &cordiumv1.Workspace_Status_Failure{
@@ -525,39 +636,39 @@ func (t *task) publishFailure(err error) {
 			},
 		})
 	}
-
 }
 
 func (t *task) getEnv() []string {
-	ret := t.parentEnv
+	ret := slices.Clone(t.parentEnv)
 
 	for k, v := range t.env {
 		ret = append(ret, fmt.Sprintf("%s=%s", k, v))
 	}
 
 	setEnv(&ret, "HOME", t.homeDir)
-	// setEnv(&ret, "CONTAINER_HOST", "unix:///var/run/docker.sock")
 
 	return ret
 }
 
 func (t *taskManager) newTaskOcteliumConnect(req *ccordiumv1.PrepareRequest) (*task, error) {
-
-	cmd := "octelium connect"
+	args := []string{"octelium", "connect"}
 
 	if t.srv.spec != nil && t.srv.spec.Runtime != nil && t.srv.spec.Runtime.Octelium != nil {
 		if t.srv.spec.Runtime.Octelium.ServeAll {
-			cmd = fmt.Sprintf("%s --serve-all", cmd)
+			args = append(args, "--serve-all")
 		}
 
 		for _, svc := range t.srv.spec.Runtime.Octelium.ServeServices {
-			cmd = fmt.Sprintf("%s --serve %s", cmd, svc)
+			if err := apivalidation.ValidateName(svc, 0, 1); err != nil {
+				return nil, err
+			}
+			args = append(args, "--serve", svc)
 		}
 	}
 
 	return t.newTask(&cordiumv1.Workspace_Spec_Runtime_Task{
 		Name:         "octelium-connect",
-		Run:          cmd,
+		Run:          shellJoin(args),
 		IsBackground: true,
 		RunAsRoot:    true,
 		Type:         cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
@@ -574,8 +685,7 @@ func (t *taskManager) newTaskOcteliumConnect(req *ccordiumv1.PrepareRequest) (*t
 				"OCTELIUM_ESSH_IP_ADDRS":     "0.0.0.0",
 				"OCTELIUM_ESSH_PORT":         "2022",
 				"OCTELIUM_LOCAL_DNS_SERVER":  "true",
-
-				"OCTELIUM_ESSH_SFTP_USER": "true",
+				"OCTELIUM_ESSH_SFTP_USER":    "true",
 			}
 
 			for k, v := range envMap {
@@ -590,6 +700,21 @@ func (t *taskManager) newTaskOcteliumConnect(req *ccordiumv1.PrepareRequest) (*t
 	})
 }
 
+func shellJoin(args []string) string {
+	var ret []string
+	for _, arg := range args {
+		ret = append(ret, shellQuote(arg))
+	}
+	return strings.Join(ret, " ")
+}
+
+func shellQuote(in string) string {
+	if in == "" {
+		return "''"
+	}
+	return "'" + strings.ReplaceAll(in, "'", "'\"'\"'") + "'"
+}
+
 func (t *task) startStdoutLoop() error {
 	if t.cmd == nil {
 		return errors.Errorf("Could not start stdout loop. Nil cmd")
@@ -600,24 +725,70 @@ func (t *task) startStdoutLoop() error {
 		return err
 	}
 
-	go func() {
-		zap.L().Debug("Starting task stdoutLoop", zap.String("name", t.name), zap.String("uid", t.tUID))
-		scanner := bufio.NewScanner(stdoutPipe)
-		for scanner.Scan() {
-			t.publishStdout(scanner.Bytes())
-		}
-		zap.L().Debug("Task stdoutLoop ended", zap.String("name", t.name), zap.String("uid", t.tUID))
-	}()
+	go t.readOutputLoop(stdoutPipe, cordiumv1.ListenLogResponse_MODE_STDOUT)
 
 	return nil
 }
 
+func (t *task) startStderrLoop() error {
+	if t.cmd == nil {
+		return errors.Errorf("Could not start stderr loop. Nil cmd")
+	}
+
+	stderrPipe, err := t.cmd.StderrPipe()
+	if err != nil {
+		return err
+	}
+
+	go t.readOutputLoop(stderrPipe, cordiumv1.ListenLogResponse_MODE_STDERR)
+
+	return nil
+}
+
+func (t *task) readOutputLoop(r io.Reader, mode cordiumv1.ListenLogResponse_Mode) {
+	zap.L().Debug("Starting task output loop",
+		zap.String("name", t.name),
+		zap.String("uid", t.tUID),
+		zap.String("mode", mode.String()))
+
+	buf := make([]byte, 32*1024)
+
+	for {
+		n, err := r.Read(buf)
+		if n > 0 {
+			data := cloneBytes(buf[:n])
+			if mode == cordiumv1.ListenLogResponse_MODE_STDOUT {
+				t.publishStdout(data)
+			} else {
+				t.publishStderr(data)
+			}
+		}
+
+		if err != nil {
+			if !errors.Is(err, io.EOF) {
+				zap.L().Warn("Task output loop ended with error",
+					zap.String("name", t.name),
+					zap.String("uid", t.tUID),
+					zap.String("mode", mode.String()),
+					zap.Error(err))
+			}
+			break
+		}
+	}
+
+	zap.L().Debug("Task output loop ended",
+		zap.String("name", t.name),
+		zap.String("uid", t.tUID),
+		zap.String("mode", mode.String()))
+}
+
 func (t *task) publishStdout(buf []byte) {
+	data := cloneBytes(buf)
 
 	t.listenBroker.Publish(&cordiumv1.ExecResponse{
 		Type: &cordiumv1.ExecResponse_Stdout_{
 			Stdout: &cordiumv1.ExecResponse_Stdout{
-				Data: buf,
+				Data: data,
 			},
 		},
 	})
@@ -633,41 +804,20 @@ func (t *task) publishStdout(buf []byte) {
 					CreatedAt: pbutils.Now(),
 					Type:      cordiumv1.ListenLogResponse_TYPE_TASK,
 					Mode:      cordiumv1.ListenLogResponse_MODE_STDOUT,
-					Data:      buf,
+					Data:      cloneBytes(buf),
 				},
 			},
 		})
 	}
 }
 
-func (t *task) startStderrLoop() error {
-	if t.cmd == nil {
-		return errors.Errorf("Could not start stderr loop. Nil cmd")
-	}
-
-	stderrPipe, err := t.cmd.StderrPipe()
-	if err != nil {
-		return err
-	}
-
-	go func() {
-		zap.L().Debug("Starting task stderrLoop", zap.String("name", t.name), zap.String("uid", t.tUID))
-		scanner := bufio.NewScanner(stderrPipe)
-		for scanner.Scan() {
-			t.publishStderr(scanner.Bytes())
-		}
-		zap.L().Debug("Task stderrLoop ended", zap.String("name", t.name), zap.String("uid", t.tUID))
-	}()
-
-	return nil
-}
-
 func (t *task) publishStderr(buf []byte) {
+	data := cloneBytes(buf)
 
 	t.listenBroker.Publish(&cordiumv1.ExecResponse{
 		Type: &cordiumv1.ExecResponse_Stderr_{
 			Stderr: &cordiumv1.ExecResponse_Stderr{
-				Data: buf,
+				Data: data,
 			},
 		},
 	})
@@ -683,10 +833,19 @@ func (t *task) publishStderr(buf []byte) {
 					CreatedAt: pbutils.Now(),
 					Type:      cordiumv1.ListenLogResponse_TYPE_TASK,
 					Mode:      cordiumv1.ListenLogResponse_MODE_STDERR,
-					Data:      buf,
+					Data:      cloneBytes(buf),
 				},
 			},
 		})
 	}
+}
 
+func cloneBytes(in []byte) []byte {
+	if in == nil {
+		return nil
+	}
+
+	ret := make([]byte, len(in))
+	copy(ret, in)
+	return ret
 }
