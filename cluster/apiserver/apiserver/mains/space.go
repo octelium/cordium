@@ -19,6 +19,7 @@ package mains
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/asaskevich/govalidator"
@@ -611,7 +612,31 @@ func (s *Server) validateSpace(ctx context.Context, req *cordiumv1.Space, isUpda
 
 			}
 		}
+
+		if specContainer.Capabilities != nil {
+			if len(specContainer.Capabilities.Add) > 100 {
+				return grpcutils.InvalidArg("Too many capabilities")
+			}
+
+			if len(specContainer.Capabilities.Drop) > 100 {
+				return grpcutils.InvalidArg("Too many capabilities")
+			}
+
+			for _, cap := range specContainer.Capabilities.Add {
+				if !k8sCapabilityRegex.MatchString(cap) {
+					return grpcutils.InvalidArg("Invalid capability: %s", cap)
+				}
+			}
+
+			for _, cap := range specContainer.Capabilities.Drop {
+				if !k8sCapabilityRegex.MatchString(cap) {
+					return grpcutils.InvalidArg("Invalid capability: %s", cap)
+				}
+			}
+		}
 	}
 
 	return nil
 }
+
+var k8sCapabilityRegex = regexp.MustCompile(`^(ALL|[A-Z][A-Z0-9_]{0,29})$`)

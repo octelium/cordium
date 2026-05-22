@@ -388,7 +388,45 @@ func (s *Server) podmanRunImage(ctx context.Context) error {
 	}
 
 	if containerSpec != nil && containerSpec.Entrypoint != "" {
-		podmanRunArgs = append(podmanRunArgs, fmt.Sprintf("--entrypoint %s", strings.TrimSpace(containerSpec.Entrypoint)))
+		podmanRunArgs = append(podmanRunArgs,
+			fmt.Sprintf("--entrypoint %s", strings.TrimSpace(containerSpec.Entrypoint)))
+	}
+
+	setCapAdd := func(caps []string) {
+		caps = deduplicateCapabilities(caps)
+		if len(caps) > 0 && len(caps) < 128 {
+			podmanRunArgs = append(podmanRunArgs, "--cap-add "+strings.Join(caps, ","))
+		}
+	}
+
+	setCapDrop := func(caps []string) {
+		caps = deduplicateCapabilities(caps)
+		if len(caps) > 0 && len(caps) < 128 {
+			podmanRunArgs = append(podmanRunArgs, "--cap-drop "+strings.Join(caps, ","))
+		}
+	}
+
+	if containerSpec != nil && containerSpec.Capabilities != nil {
+		caps := containerSpec.Capabilities
+		setCapAdd(caps.Add)
+		setCapDrop(caps.Drop)
+	}
+
+	if s.initReq.Space != nil && s.initReq.Space.Spec.Runtime != nil &&
+		s.initReq.Space.Spec.Runtime.Capabilities != nil {
+		caps := s.initReq.Space.Spec.Runtime.Capabilities
+		setCapAdd(caps.Add)
+		setCapDrop(caps.Drop)
+	}
+
+	if s.initReq.ClusterConfig != nil {
+		cc := s.initReq.ClusterConfig
+		if cc.Spec.Workspace != nil && cc.Spec.Workspace.Runtime != nil &&
+			cc.Spec.Workspace.Runtime.Capabilities != nil {
+			caps := cc.Spec.Workspace.Runtime.Capabilities
+			setCapAdd(caps.Add)
+			setCapDrop(caps.Drop)
+		}
 	}
 
 	if err := s.doRunContainer(ctx, podmanRunArgs, containerCmd); err != nil {
@@ -1007,4 +1045,18 @@ type inspectContainerState struct {
 	RestoreLog     string    `json:"RestoreLog,omitempty"`
 	Restored       bool      `json:"Restored,omitempty"`
 	StoppedByUser  bool      `json:"StoppedByUser,omitempty"`
+}
+
+func deduplicateCapabilities(levels ...[]string) []string {
+	seen := make(map[string]struct{})
+	var result []string
+	for _, level := range levels {
+		for _, cap := range level {
+			if _, ok := seen[cap]; !ok {
+				seen[cap] = struct{}{}
+				result = append(result, cap)
+			}
+		}
+	}
+	return result
 }

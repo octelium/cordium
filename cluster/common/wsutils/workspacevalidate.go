@@ -19,6 +19,7 @@ package wsutils
 import (
 	"context"
 	"net/url"
+	"regexp"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
@@ -286,6 +287,28 @@ func ValidateWorkspace(ctx context.Context, req *ValidateWorkspaceReq) error {
 			}
 		}
 
+		if specContainer.Capabilities != nil {
+			if len(specContainer.Capabilities.Add) > 100 {
+				return grpcutils.InvalidArg("Too many capabilities")
+			}
+
+			if len(specContainer.Capabilities.Drop) > 100 {
+				return grpcutils.InvalidArg("Too many capabilities")
+			}
+
+			for _, cap := range specContainer.Capabilities.Add {
+				if !k8sCapabilityRegex.MatchString(cap) {
+					return grpcutils.InvalidArg("Invalid capability: %s", cap)
+				}
+			}
+
+			for _, cap := range specContainer.Capabilities.Drop {
+				if !k8sCapabilityRegex.MatchString(cap) {
+					return grpcutils.InvalidArg("Invalid capability: %s", cap)
+				}
+			}
+		}
+
 		if spec.Runtime.Devcontainers != nil {
 			if spec.Runtime.Devcontainers.Features != nil {
 				if len(spec.Runtime.Devcontainers.Features) > 100 {
@@ -525,3 +548,5 @@ func ValidateWorkspace(ctx context.Context, req *ValidateWorkspaceReq) error {
 
 	return nil
 }
+
+var k8sCapabilityRegex = regexp.MustCompile(`^(ALL|[A-Z][A-Z0-9_]{0,29})$`)

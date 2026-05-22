@@ -650,6 +650,11 @@ func (c *statusWatcher) onReadyInit(ctx context.Context) error {
 		}
 	}
 
+	cco, err := c.octeliumC.CordiumV1Utils().GetClusterConfig(ctx)
+	if err != nil {
+		return err
+	}
+
 	initializeReq := &ccordiumv1.InitializeRequest{
 		Workspace: ws,
 		Space:     space,
@@ -668,6 +673,7 @@ func (c *statusWatcher) onReadyInit(ctx context.Context) error {
 		UserSecretList:      userSecretList,
 		UserConfig:          userConfig,
 		TemplateHasSnapshot: templateHasSnapshot,
+		ClusterConfig:       cco,
 	}
 
 	zap.L().Debug("Sending an Initialize call", zap.String("name", c.name))

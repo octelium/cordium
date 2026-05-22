@@ -420,6 +420,10 @@ export interface Workspace_Spec_Runtime {
      * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Filesystem filesystem = 9
      */
     filesystem?: Workspace_Spec_Runtime_Filesystem;
+    /**
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities capabilities = 10
+     */
+    capabilities?: Workspace_Spec_Runtime_Capabilities;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.EnvVar
@@ -636,6 +640,19 @@ export interface Workspace_Spec_Runtime_Filesystem {
      * @generated from protobuf field: bool readOnly = 1
      */
     readOnly: boolean;
+}
+/**
+ * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities
+ */
+export interface Workspace_Spec_Runtime_Capabilities {
+    /**
+     * @generated from protobuf field: repeated string add = 1
+     */
+    add: string[];
+    /**
+     * @generated from protobuf field: repeated string drop = 2
+     */
+    drop: string[];
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Application
@@ -1684,6 +1701,10 @@ export interface Space_Spec_Runtime {
      * @generated from protobuf field: repeated octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task tasks = 2
      */
     tasks: Workspace_Spec_Runtime_Task[];
+    /**
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities capabilities = 3
+     */
+    capabilities?: Workspace_Spec_Runtime_Capabilities;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Space.Spec.Authorization
@@ -3246,6 +3267,10 @@ export interface ClusterConfig_Spec_Workspace {
      * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout timeout = 3
      */
     timeout?: ClusterConfig_Spec_Workspace_Timeout;
+    /**
+     * @generated from protobuf field: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Runtime runtime = 4
+     */
+    runtime?: ClusterConfig_Spec_Workspace_Runtime;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage
@@ -3353,6 +3378,15 @@ export interface ClusterConfig_Spec_Workspace_Timeout {
      * @generated from protobuf field: octelium.api.main.meta.v1.Duration maxActiveDuration = 4
      */
     maxActiveDuration?: Duration;
+}
+/**
+ * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Runtime
+ */
+export interface ClusterConfig_Spec_Workspace_Runtime {
+    /**
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities capabilities = 1
+     */
+    capabilities?: Workspace_Spec_Runtime_Capabilities;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.ClusterConfig.Status
@@ -4602,7 +4636,8 @@ class Workspace_Spec_Runtime$Type extends MessageType<Workspace_Spec_Runtime> {
             { no: 6, name: "devcontainers", kind: "message", T: () => Workspace_Spec_Runtime_Devcontainers },
             { no: 7, name: "octelium", kind: "message", T: () => Workspace_Spec_Runtime_Octelium },
             { no: 8, name: "network", kind: "message", T: () => Workspace_Spec_Runtime_Network },
-            { no: 9, name: "filesystem", kind: "message", T: () => Workspace_Spec_Runtime_Filesystem }
+            { no: 9, name: "filesystem", kind: "message", T: () => Workspace_Spec_Runtime_Filesystem },
+            { no: 10, name: "capabilities", kind: "message", T: () => Workspace_Spec_Runtime_Capabilities }
         ]);
     }
     create(value?: PartialMessage<Workspace_Spec_Runtime>): Workspace_Spec_Runtime {
@@ -4648,6 +4683,9 @@ class Workspace_Spec_Runtime$Type extends MessageType<Workspace_Spec_Runtime> {
                 case /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Filesystem filesystem */ 9:
                     message.filesystem = Workspace_Spec_Runtime_Filesystem.internalBinaryRead(reader, reader.uint32(), options, message.filesystem);
                     break;
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities capabilities */ 10:
+                    message.capabilities = Workspace_Spec_Runtime_Capabilities.internalBinaryRead(reader, reader.uint32(), options, message.capabilities);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -4687,6 +4725,9 @@ class Workspace_Spec_Runtime$Type extends MessageType<Workspace_Spec_Runtime> {
         /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Filesystem filesystem = 9; */
         if (message.filesystem)
             Workspace_Spec_Runtime_Filesystem.internalBinaryWrite(message.filesystem, writer.tag(9, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities capabilities = 10; */
+        if (message.capabilities)
+            Workspace_Spec_Runtime_Capabilities.internalBinaryWrite(message.capabilities, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -5322,6 +5363,61 @@ class Workspace_Spec_Runtime_Filesystem$Type extends MessageType<Workspace_Spec_
  * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Filesystem
  */
 export const Workspace_Spec_Runtime_Filesystem = new Workspace_Spec_Runtime_Filesystem$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class Workspace_Spec_Runtime_Capabilities$Type extends MessageType<Workspace_Spec_Runtime_Capabilities> {
+    constructor() {
+        super("octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities", [
+            { no: 1, name: "add", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "drop", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<Workspace_Spec_Runtime_Capabilities>): Workspace_Spec_Runtime_Capabilities {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.add = [];
+        message.drop = [];
+        if (value !== undefined)
+            reflectionMergePartial<Workspace_Spec_Runtime_Capabilities>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Workspace_Spec_Runtime_Capabilities): Workspace_Spec_Runtime_Capabilities {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* repeated string add */ 1:
+                    message.add.push(reader.string());
+                    break;
+                case /* repeated string drop */ 2:
+                    message.drop.push(reader.string());
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: Workspace_Spec_Runtime_Capabilities, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* repeated string add = 1; */
+        for (let i = 0; i < message.add.length; i++)
+            writer.tag(1, WireType.LengthDelimited).string(message.add[i]);
+        /* repeated string drop = 2; */
+        for (let i = 0; i < message.drop.length; i++)
+            writer.tag(2, WireType.LengthDelimited).string(message.drop[i]);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities
+ */
+export const Workspace_Spec_Runtime_Capabilities = new Workspace_Spec_Runtime_Capabilities$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class Workspace_Spec_Application$Type extends MessageType<Workspace_Spec_Application> {
     constructor() {
@@ -8499,7 +8595,8 @@ class Space_Spec_Runtime$Type extends MessageType<Space_Spec_Runtime> {
     constructor() {
         super("octelium.api.main.cordium.v1.Space.Spec.Runtime", [
             { no: 1, name: "envVars", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_Runtime_EnvVar },
-            { no: 2, name: "tasks", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_Runtime_Task }
+            { no: 2, name: "tasks", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_Runtime_Task },
+            { no: 3, name: "capabilities", kind: "message", T: () => Workspace_Spec_Runtime_Capabilities }
         ]);
     }
     create(value?: PartialMessage<Space_Spec_Runtime>): Space_Spec_Runtime {
@@ -8521,6 +8618,9 @@ class Space_Spec_Runtime$Type extends MessageType<Space_Spec_Runtime> {
                 case /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task tasks */ 2:
                     message.tasks.push(Workspace_Spec_Runtime_Task.internalBinaryRead(reader, reader.uint32(), options));
                     break;
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities capabilities */ 3:
+                    message.capabilities = Workspace_Spec_Runtime_Capabilities.internalBinaryRead(reader, reader.uint32(), options, message.capabilities);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -8539,6 +8639,9 @@ class Space_Spec_Runtime$Type extends MessageType<Space_Spec_Runtime> {
         /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task tasks = 2; */
         for (let i = 0; i < message.tasks.length; i++)
             Workspace_Spec_Runtime_Task.internalBinaryWrite(message.tasks[i], writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities capabilities = 3; */
+        if (message.capabilities)
+            Workspace_Spec_Runtime_Capabilities.internalBinaryWrite(message.capabilities, writer.tag(3, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -13533,7 +13636,8 @@ class ClusterConfig_Spec_Workspace$Type extends MessageType<ClusterConfig_Spec_W
         super("octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace", [
             { no: 1, name: "storage", kind: "message", T: () => ClusterConfig_Spec_Workspace_Storage },
             { no: 2, name: "limit", kind: "message", T: () => ClusterConfig_Spec_Workspace_Limit },
-            { no: 3, name: "timeout", kind: "message", T: () => ClusterConfig_Spec_Workspace_Timeout }
+            { no: 3, name: "timeout", kind: "message", T: () => ClusterConfig_Spec_Workspace_Timeout },
+            { no: 4, name: "runtime", kind: "message", T: () => ClusterConfig_Spec_Workspace_Runtime }
         ]);
     }
     create(value?: PartialMessage<ClusterConfig_Spec_Workspace>): ClusterConfig_Spec_Workspace {
@@ -13556,6 +13660,9 @@ class ClusterConfig_Spec_Workspace$Type extends MessageType<ClusterConfig_Spec_W
                 case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout timeout */ 3:
                     message.timeout = ClusterConfig_Spec_Workspace_Timeout.internalBinaryRead(reader, reader.uint32(), options, message.timeout);
                     break;
+                case /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Runtime runtime */ 4:
+                    message.runtime = ClusterConfig_Spec_Workspace_Runtime.internalBinaryRead(reader, reader.uint32(), options, message.runtime);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -13577,6 +13684,9 @@ class ClusterConfig_Spec_Workspace$Type extends MessageType<ClusterConfig_Spec_W
         /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout timeout = 3; */
         if (message.timeout)
             ClusterConfig_Spec_Workspace_Timeout.internalBinaryWrite(message.timeout, writer.tag(3, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Runtime runtime = 4; */
+        if (message.runtime)
+            ClusterConfig_Spec_Workspace_Runtime.internalBinaryWrite(message.runtime, writer.tag(4, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -13992,6 +14102,52 @@ class ClusterConfig_Spec_Workspace_Timeout$Type extends MessageType<ClusterConfi
  * @generated MessageType for protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout
  */
 export const ClusterConfig_Spec_Workspace_Timeout = new ClusterConfig_Spec_Workspace_Timeout$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class ClusterConfig_Spec_Workspace_Runtime$Type extends MessageType<ClusterConfig_Spec_Workspace_Runtime> {
+    constructor() {
+        super("octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Runtime", [
+            { no: 1, name: "capabilities", kind: "message", T: () => Workspace_Spec_Runtime_Capabilities }
+        ]);
+    }
+    create(value?: PartialMessage<ClusterConfig_Spec_Workspace_Runtime>): ClusterConfig_Spec_Workspace_Runtime {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<ClusterConfig_Spec_Workspace_Runtime>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ClusterConfig_Spec_Workspace_Runtime): ClusterConfig_Spec_Workspace_Runtime {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities capabilities */ 1:
+                    message.capabilities = Workspace_Spec_Runtime_Capabilities.internalBinaryRead(reader, reader.uint32(), options, message.capabilities);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: ClusterConfig_Spec_Workspace_Runtime, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities capabilities = 1; */
+        if (message.capabilities)
+            Workspace_Spec_Runtime_Capabilities.internalBinaryWrite(message.capabilities, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Runtime
+ */
+export const ClusterConfig_Spec_Workspace_Runtime = new ClusterConfig_Spec_Workspace_Runtime$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class ClusterConfig_Status$Type extends MessageType<ClusterConfig_Status> {
     constructor() {
