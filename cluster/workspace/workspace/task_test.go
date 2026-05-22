@@ -89,49 +89,16 @@ func TestTask(t *testing.T) {
 
 	zap.L().Debug("tm shellPath", zap.String("val", tm.shellPath))
 
-	{
-		tm.tasks = append(tm.tasks, &task{
-			name:    "ls",
-			command: "ls",
-			user:    tm.userInfo.name,
-			homeDir: tm.userInfo.homeDir,
-
-			typ:            cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
-			shellPath:      tm.shellPath,
-			eventPublisher: tm.eventPublisher,
-		})
-	}
-
-	/*
-		{
-			tm.tasks = append(tm.tasks, &task{
-				name:    "ls",
-				command: "ls",
-				user:    tm.userInfo.name,
-				homeDir: tm.userInfo.homeDir,
-
-				typ:            cordiumv1.Workspace_Spec_Runtime_Task_PRE_STOP,
-				shellPath:      tm.shellPath,
-				eventPublisher: tm.eventPublisher,
-			})
-		}
-	*/
-	{
-		tm.tasks = append(tm.tasks, &task{
-			name: "ls",
-			command: `
+	task, err := tm.newTask(&cordiumv1.Workspace_Spec_Runtime_Task{
+		Name: "ls",
+		Run: `
 ls
-uname -a
-			`,
-			user:    tm.userInfo.name,
-			homeDir: tm.userInfo.homeDir,
+uname -a`,
+		Type: cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
+	})
+	assert.Nil(t, err)
+	tm.tasks = append(tm.tasks, task)
 
-			typ:            cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
-			shellPath:      tm.shellPath,
-			eventPublisher: tm.eventPublisher,
-			onFailure:      cordiumv1.Workspace_Spec_Runtime_Task_ON_FAILURE_ABORT,
-		})
-	}
 	err = tm.run()
 	assert.Nil(t, err)
 
@@ -139,45 +106,38 @@ uname -a
 	assert.Nil(t, err)
 
 	{
-		tm.tasks = append(tm.tasks, &task{
-			name: "bash",
-			command: `
+		task, err := tm.newTask(&cordiumv1.Workspace_Spec_Runtime_Task{
+			Name: "bash",
+			Run: `
 #!/bin/bash
 if false; then
 	echo "True"
 else
 	echo "False"
-fi
-			`,
-			user:    tm.userInfo.name,
-			homeDir: tm.userInfo.homeDir,
-
-			typ:            cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
-			shellPath:      tm.shellPath,
-			eventPublisher: tm.eventPublisher,
-			onFailure:      cordiumv1.Workspace_Spec_Runtime_Task_ON_FAILURE_ABORT,
+fi`,
+			Type: cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
 		})
+		assert.Nil(t, err)
+		tm.tasks = append(tm.tasks, task)
+
 		err = tm.run()
 		assert.Nil(t, err)
 
 	}
 
 	{
-		tm.tasks = append(tm.tasks, &task{
-			name: "ls",
-			command: `
+		task, err := tm.newTask(&cordiumv1.Workspace_Spec_Runtime_Task{
+			Name: "ls2",
+			Run: `
 ls -la
-command-that-does-not-exist
-			`,
-			user:    tm.userInfo.name,
-			homeDir: tm.userInfo.homeDir,
-
-			typ:            cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
-			shellPath:      tm.shellPath,
-			eventPublisher: tm.eventPublisher,
-			onFailure:      cordiumv1.Workspace_Spec_Runtime_Task_ON_FAILURE_ABORT,
+command-that-does-not-exist`,
+			Type:      cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
+			OnFailure: cordiumv1.Workspace_Spec_Runtime_Task_ON_FAILURE_ABORT,
 		})
-		err = tm.run()
+		assert.Nil(t, err)
+		tm.tasks = append(tm.tasks, task)
+
+		err = task.run(ctx)
 		assert.NotNil(t, err)
 
 	}

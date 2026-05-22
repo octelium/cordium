@@ -71,6 +71,9 @@ func (s *Server) doInitialize() error {
 	ws := s.initReq.Workspace
 
 	s.isFreshRun = func() bool {
+		if ldflags.IsTest() {
+			return true
+		}
 		if ws.Status.IsBuild {
 			return true
 		}

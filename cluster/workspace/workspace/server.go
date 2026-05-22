@@ -605,6 +605,9 @@ func (s *Server) doPrepare(ctx context.Context, req *ccordiumv1.PrepareRequest) 
 	{
 
 		s.isFreshRun = func() bool {
+			if ldflags.IsTest() {
+				return true
+			}
 			ws := s.ws
 
 			if ws.Status.IsBuild {

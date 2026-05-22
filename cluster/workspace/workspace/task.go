@@ -375,17 +375,6 @@ func (t *task) run(ctx context.Context) error {
 
 	t.cmd.Env = t.getEnv()
 
-	/*
-		t.eventPublisher.publish(&cordiumv1.ListenEventResponse{
-			Type: &cordiumv1.ListenEventResponse_TaskStart_{
-				TaskStart: &cordiumv1.ListenEventResponse_TaskStart{
-					Uid:  t.tUID,
-					Name: t.name,
-				},
-			},
-		})
-	*/
-
 	if err := t.cmd.Start(); err != nil {
 		zap.L().Warn("Could not start task cmd", zap.String("name", t.name), zap.Error(err))
 
