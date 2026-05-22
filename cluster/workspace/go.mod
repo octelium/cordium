@@ -4,7 +4,7 @@ go 1.25.8
 
 require (
 	github.com/creack/pty v1.1.24
-	github.com/go-git/go-git/v5 v5.19.0 // indirect
+	github.com/go-git/go-git/v5 v5.19.1 // indirect
 	github.com/moby/term v0.5.2
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000

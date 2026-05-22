@@ -6,7 +6,7 @@ require (
 	github.com/containerd/cgroups/v3 v3.1.3
 	github.com/containerd/continuity v0.4.5
 	github.com/ghodss/yaml v1.0.0 // indirect
-	github.com/go-git/go-git/v5 v5.19.0 // indirect
+	github.com/go-git/go-git/v5 v5.19.1 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
 	github.com/octelium/cordium/cluster/workspace v0.0.0-00010101000000-000000000000

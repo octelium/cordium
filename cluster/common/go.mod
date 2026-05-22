@@ -20,7 +20,7 @@ require (
 
 require (
 	github.com/codeclysm/extract/v4 v4.0.0
-	github.com/go-git/go-git/v5 v5.19.0
+	github.com/go-git/go-git/v5 v5.19.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/cluster/rscserver v0.0.0-20260519091848-5d41b9212cf4
