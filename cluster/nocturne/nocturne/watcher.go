@@ -177,7 +177,7 @@ func (c *watcher) doHandleStalledState(ctx context.Context, ws *cordiumv1.Worksp
 			return c.doHandleStalledStateInitializingOrStopping(ctx, ws)
 		}
 	case ws.Status.State == cordiumv1.Workspace_Status_RUNNING:
-		if err := c.doHandleInactiveRunning(ctx, ws, c.getTimeout(ws, cc)); err != nil {
+		if err := c.doHandleInactiveRunning(ctx, ws, cc, c.getTimeout(ws, cc)); err != nil {
 			return err
 		}
 	case ucordiumv1.ToWorkspace(ws).IsPreRunning():
@@ -230,7 +230,8 @@ func (c *watcher) doHandleStalledStateInitializingOrStopping(ctx context.Context
 	return nil
 }
 
-func (c *watcher) doHandleInactiveRunning(ctx context.Context, ws *cordiumv1.Workspace, timeout time.Duration) error {
+func (c *watcher) doHandleInactiveRunning(ctx context.Context,
+	ws *cordiumv1.Workspace, cc *cordiumv1.ClusterConfig, timeout time.Duration) error {
 
 	if ws.Status.State != cordiumv1.Workspace_Status_RUNNING {
 		return nil
@@ -242,6 +243,17 @@ func (c *watcher) doHandleInactiveRunning(ctx context.Context, ws *cordiumv1.Wor
 
 	if !ws.Status.LastActivityAt.IsValid() {
 		return nil
+	}
+
+	if ws.Spec.Runtime != nil && ws.Spec.Runtime.Timeout != nil {
+		switch ws.Spec.Runtime.Timeout.Mode {
+		case cordiumv1.Workspace_Spec_Runtime_Timeout_DISABLED:
+			if cc.Spec.Workspace != nil &&
+				cc.Spec.Workspace.Timeout != nil &&
+				cc.Spec.Workspace.Timeout.AllowNoTimeout {
+				return nil
+			}
+		}
 	}
 
 	lastActivity := ws.Status.LastActivityAt.AsTime()

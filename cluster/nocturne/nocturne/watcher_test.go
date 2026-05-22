@@ -79,7 +79,10 @@ func TestServer(t *testing.T) {
 
 	watcher := newWatcher(fakeC.OcteliumC, fakeC.K8sC, regionRef)
 
-	err = watcher.doHandleInactiveRunning(ctx, ws, 0)
+	cc, err := fakeC.OcteliumC.CordiumV1Utils().GetClusterConfig(ctx)
+	assert.Nil(t, err)
+
+	err = watcher.doHandleInactiveRunning(ctx, ws, cc, 0)
 	assert.Nil(t, err)
 
 	ws1, err := fakeC.OcteliumC.CordiumC().GetWorkspace(ctx, &rmetav1.GetOptions{Uid: ws.Metadata.Uid})
@@ -91,7 +94,7 @@ func TestServer(t *testing.T) {
 	ws1, err = fakeC.OcteliumC.CordiumC().UpdateWorkspace(ctx, ws1)
 	assert.Nil(t, err)
 
-	err = watcher.doHandleInactiveRunning(ctx, ws1, 4*time.Hour)
+	err = watcher.doHandleInactiveRunning(ctx, ws1, cc, 4*time.Hour)
 	assert.Nil(t, err)
 
 	ws2, err := fakeC.OcteliumC.CordiumC().GetWorkspace(ctx, &rmetav1.GetOptions{Uid: ws.Metadata.Uid})
