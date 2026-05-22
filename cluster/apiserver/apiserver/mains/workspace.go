@@ -523,7 +523,12 @@ func (s *Server) StartWorkspace(ctx context.Context, req *cordiumv1.StartWorkspa
 		return nil, serr.InvalidArg("Workspace cannot be started as it is not stopped")
 	}
 
-	region, err := s.chooseRegion(ctx, ws, req.RegionRef)
+	region, err := s.chooseRegion(ctx, ws, func() *metav1.ObjectReference {
+		if req.Config == nil || req.Config.RegionRef == nil {
+			return nil
+		}
+		return req.Config.RegionRef
+	}())
 	if err != nil {
 		return nil, err
 	}
@@ -546,16 +551,21 @@ func (s *Server) StartWorkspace(ctx context.Context, req *cordiumv1.StartWorkspa
 	ws.Status.LastActivityAt = nowRFC3339
 	ws.Status.Hostname = commonw.GetWorkspaceHostname(ws.Metadata.Name, region, cc)
 
-	maxRuns := 1000
+	maxRuns := 100
 
-	if len(ws.Status.Runs) >= maxRuns {
-		ws.Status.Runs = ws.Status.Runs[:maxRuns-2]
+	if len(ws.Status.LastRuns) >= maxRuns {
+		ws.Status.LastRuns = ws.Status.LastRuns[:maxRuns-2]
 	}
 
-	ws.Status.Runs = append([]*cordiumv1.Workspace_Status_Run{{
+	if ws.Status.Run != nil {
+		ws.Status.LastRuns = append([]*cordiumv1.Workspace_Status_Run{ws.Status.Run}, ws.Status.LastRuns...)
+	}
+
+	ws.Status.Run = &cordiumv1.Workspace_Status_Run{
 		Id:            utilrand.GetRandomStringCanonical(6),
 		InitializedAt: ws.Status.LastInitializedAt,
-	}}, ws.Status.Runs...)
+		Config:        req.Config,
+	}
 
 	if err := s.setWorkspaceLimit(ctx, ws, spc, cco); err != nil {
 		return nil, err

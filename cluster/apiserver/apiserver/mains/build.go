@@ -230,10 +230,10 @@ func (s *Server) createBuildRun(ctx context.Context, req *cordiumv1.BuildTemplat
 
 			TemplateRef: umetav1.GetObjectReference(tmpl),
 			SpaceRef:    tmpl.Status.SpaceRef,
-			Runs: []*cordiumv1.Workspace_Status_Run{{
+			Run: &cordiumv1.Workspace_Status_Run{
 				Id:            utilrand.GetRandomStringCanonical(6),
 				InitializedAt: now,
-			}},
+			},
 		},
 	}
 

@@ -196,7 +196,8 @@ func TestWorkspace(t *testing.T) {
 		assert.Nil(t, err, "%+v", err)
 
 		assert.Nil(t, ws.Status.SessionRef)
-		assert.Equal(t, 0, len(ws.Status.Runs))
+		assert.Equal(t, 0, len(ws.Status.LastRuns))
+		assert.Nil(t, ws.Status.Run)
 
 		_, err = srv.StartWorkspace(usr.Ctx(), &cordiumv1.StartWorkspaceRequest{
 			WorkspaceRef: umetav1.GetObjectReference(ws),
@@ -207,9 +208,10 @@ func TestWorkspace(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, cordiumv1.Workspace_Status_INIT_REQUEST, ws.Status.State)
 
-		assert.Equal(t, 1, len(ws.Status.Runs))
-		assert.True(t, ws.Status.Runs[0].Id != "")
-		assert.True(t, ws.Status.Runs[0].InitializedAt.IsValid())
+		assert.Equal(t, 0, len(ws.Status.LastRuns))
+		assert.NotNil(t, ws.Status.Run)
+		assert.True(t, ws.Status.Run.Id != "")
+		assert.True(t, ws.Status.Run.InitializedAt.IsValid())
 
 		assert.NotNil(t, ws.Status.SessionRef)
 		// sess, err := fakeC.OcteliumC.CoreC().GetSession(ctx, &rmetav1.GetOptions{Uid: ws.Status.SessionRef.Uid})

@@ -114,10 +114,8 @@ func TestWatcher(t *testing.T) {
 				RegionRef:   regionRef,
 				SpaceRef:    umetav1.GetObjectReference(org),
 				TemplateRef: umetav1.GetObjectReference(tmpl),
-				Runs: []*cordiumv1.Workspace_Status_Run{
-					{
-						Id: utilrand.GetRandomStringCanonical(8),
-					},
+				Run: &cordiumv1.Workspace_Status_Run{
+					Id: utilrand.GetRandomStringCanonical(8),
 				},
 			},
 		}
@@ -172,10 +170,8 @@ func TestWatcher(t *testing.T) {
 				RegionRef:   regionRef,
 				SpaceRef:    umetav1.GetObjectReference(org),
 				TemplateRef: umetav1.GetObjectReference(tmpl),
-				Runs: []*cordiumv1.Workspace_Status_Run{
-					{
-						Id: utilrand.GetRandomStringCanonical(8),
-					},
+				Run: &cordiumv1.Workspace_Status_Run{
+					Id: utilrand.GetRandomStringCanonical(8),
 				},
 			},
 		}

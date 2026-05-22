@@ -320,23 +320,10 @@ func (w *Workspace) GetDefaultApplication() *cordiumv1.Workspace_Spec_Applicatio
 }
 
 func (w *Workspace) GetCurrentRun() *cordiumv1.Workspace_Status_Run {
-	if w.Status.Runs == nil || len(w.Status.Runs) < 1 {
+	if w == nil {
 		return nil
 	}
-	return w.Status.Runs[0]
-}
-
-func (w *Workspace) GeRunByID(id string) *cordiumv1.Workspace_Status_Run {
-	if w.Status.Runs == nil || len(w.Status.Runs) < 1 {
-		return nil
-	}
-	for _, run := range w.Status.Runs {
-		if run.Id == id {
-			return run
-		}
-	}
-
-	return nil
+	return w.Status.Run
 }
 
 func (t *Template) HasReadyBuild() bool {

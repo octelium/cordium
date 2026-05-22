@@ -829,9 +829,13 @@ export interface Workspace_Status {
      */
     lastStoppingReason: Workspace_Status_StoppingReason;
     /**
-     * @generated from protobuf field: repeated octelium.api.main.cordium.v1.Workspace.Status.Run runs = 25
+     * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Status.Run run = 24
      */
-    runs: Workspace_Status_Run[];
+    run?: Workspace_Status_Run;
+    /**
+     * @generated from protobuf field: repeated octelium.api.main.cordium.v1.Workspace.Status.Run lastRuns = 25
+     */
+    lastRuns: Workspace_Status_Run[];
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Status.Failure
@@ -1069,6 +1073,10 @@ export interface Workspace_Status_Run {
      * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Status.Failure failure = 4
      */
     failure?: Workspace_Status_Failure;
+    /**
+     * @generated from protobuf field: octelium.api.main.cordium.v1.StartWorkspaceRequest.Config config = 5
+     */
+    config?: StartWorkspaceRequest_Config;
 }
 /**
  * @generated from protobuf enum octelium.api.main.cordium.v1.Workspace.Status.State
@@ -1411,6 +1419,19 @@ export interface StartWorkspaceRequest {
      * @generated from protobuf field: octelium.api.main.meta.v1.ObjectReference workspaceRef = 1
      */
     workspaceRef?: ObjectReference;
+    /**
+     * @generated from protobuf field: octelium.api.main.cordium.v1.StartWorkspaceRequest.Config config = 3
+     */
+    config?: StartWorkspaceRequest_Config;
+}
+/**
+ * @generated from protobuf message octelium.api.main.cordium.v1.StartWorkspaceRequest.Config
+ */
+export interface StartWorkspaceRequest_Config {
+    /**
+     * @generated from protobuf field: repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars = 1
+     */
+    vars: Workspace_Spec_Var[];
     /**
      * @generated from protobuf field: octelium.api.main.meta.v1.ObjectReference regionRef = 2
      */
@@ -5772,7 +5793,8 @@ class Workspace_Status$Type extends MessageType<Workspace_Status> {
             { no: 21, name: "spaceType", kind: "enum", T: () => ["octelium.api.main.cordium.v1.Space.Status.Type", Space_Status_Type] },
             { no: 22, name: "stoppingReason", kind: "enum", T: () => ["octelium.api.main.cordium.v1.Workspace.Status.StoppingReason", Workspace_Status_StoppingReason, "STOPPING_REASON_"] },
             { no: 23, name: "lastStoppingReason", kind: "enum", T: () => ["octelium.api.main.cordium.v1.Workspace.Status.StoppingReason", Workspace_Status_StoppingReason, "STOPPING_REASON_"] },
-            { no: 25, name: "runs", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Status_Run }
+            { no: 24, name: "run", kind: "message", T: () => Workspace_Status_Run },
+            { no: 25, name: "lastRuns", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Status_Run }
         ]);
     }
     create(value?: PartialMessage<Workspace_Status>): Workspace_Status {
@@ -5786,7 +5808,7 @@ class Workspace_Status$Type extends MessageType<Workspace_Status> {
         message.spaceType = 0;
         message.stoppingReason = 0;
         message.lastStoppingReason = 0;
-        message.runs = [];
+        message.lastRuns = [];
         if (value !== undefined)
             reflectionMergePartial<Workspace_Status>(this, message, value);
         return message;
@@ -5865,8 +5887,11 @@ class Workspace_Status$Type extends MessageType<Workspace_Status> {
                 case /* octelium.api.main.cordium.v1.Workspace.Status.StoppingReason lastStoppingReason */ 23:
                     message.lastStoppingReason = reader.int32();
                     break;
-                case /* repeated octelium.api.main.cordium.v1.Workspace.Status.Run runs */ 25:
-                    message.runs.push(Workspace_Status_Run.internalBinaryRead(reader, reader.uint32(), options));
+                case /* octelium.api.main.cordium.v1.Workspace.Status.Run run */ 24:
+                    message.run = Workspace_Status_Run.internalBinaryRead(reader, reader.uint32(), options, message.run);
+                    break;
+                case /* repeated octelium.api.main.cordium.v1.Workspace.Status.Run lastRuns */ 25:
+                    message.lastRuns.push(Workspace_Status_Run.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -5949,9 +5974,12 @@ class Workspace_Status$Type extends MessageType<Workspace_Status> {
         /* octelium.api.main.cordium.v1.Workspace.Status.StoppingReason lastStoppingReason = 23; */
         if (message.lastStoppingReason !== 0)
             writer.tag(23, WireType.Varint).int32(message.lastStoppingReason);
-        /* repeated octelium.api.main.cordium.v1.Workspace.Status.Run runs = 25; */
-        for (let i = 0; i < message.runs.length; i++)
-            Workspace_Status_Run.internalBinaryWrite(message.runs[i], writer.tag(25, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.Workspace.Status.Run run = 24; */
+        if (message.run)
+            Workspace_Status_Run.internalBinaryWrite(message.run, writer.tag(24, WireType.LengthDelimited).fork(), options).join();
+        /* repeated octelium.api.main.cordium.v1.Workspace.Status.Run lastRuns = 25; */
+        for (let i = 0; i < message.lastRuns.length; i++)
+            Workspace_Status_Run.internalBinaryWrite(message.lastRuns[i], writer.tag(25, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -6808,7 +6836,8 @@ class Workspace_Status_Run$Type extends MessageType<Workspace_Status_Run> {
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "initializedAt", kind: "message", T: () => Timestamp },
             { no: 3, name: "stoppedAt", kind: "message", T: () => Timestamp },
-            { no: 4, name: "failure", kind: "message", T: () => Workspace_Status_Failure }
+            { no: 4, name: "failure", kind: "message", T: () => Workspace_Status_Failure },
+            { no: 5, name: "config", kind: "message", T: () => StartWorkspaceRequest_Config }
         ]);
     }
     create(value?: PartialMessage<Workspace_Status_Run>): Workspace_Status_Run {
@@ -6835,6 +6864,9 @@ class Workspace_Status_Run$Type extends MessageType<Workspace_Status_Run> {
                 case /* octelium.api.main.cordium.v1.Workspace.Status.Failure failure */ 4:
                     message.failure = Workspace_Status_Failure.internalBinaryRead(reader, reader.uint32(), options, message.failure);
                     break;
+                case /* octelium.api.main.cordium.v1.StartWorkspaceRequest.Config config */ 5:
+                    message.config = StartWorkspaceRequest_Config.internalBinaryRead(reader, reader.uint32(), options, message.config);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -6859,6 +6891,9 @@ class Workspace_Status_Run$Type extends MessageType<Workspace_Status_Run> {
         /* octelium.api.main.cordium.v1.Workspace.Status.Failure failure = 4; */
         if (message.failure)
             Workspace_Status_Failure.internalBinaryWrite(message.failure, writer.tag(4, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.StartWorkspaceRequest.Config config = 5; */
+        if (message.config)
+            StartWorkspaceRequest_Config.internalBinaryWrite(message.config, writer.tag(5, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -7665,7 +7700,7 @@ class StartWorkspaceRequest$Type extends MessageType<StartWorkspaceRequest> {
     constructor() {
         super("octelium.api.main.cordium.v1.StartWorkspaceRequest", [
             { no: 1, name: "workspaceRef", kind: "message", T: () => ObjectReference },
-            { no: 2, name: "regionRef", kind: "message", T: () => ObjectReference }
+            { no: 3, name: "config", kind: "message", T: () => StartWorkspaceRequest_Config }
         ]);
     }
     create(value?: PartialMessage<StartWorkspaceRequest>): StartWorkspaceRequest {
@@ -7682,8 +7717,8 @@ class StartWorkspaceRequest$Type extends MessageType<StartWorkspaceRequest> {
                 case /* octelium.api.main.meta.v1.ObjectReference workspaceRef */ 1:
                     message.workspaceRef = ObjectReference.internalBinaryRead(reader, reader.uint32(), options, message.workspaceRef);
                     break;
-                case /* octelium.api.main.meta.v1.ObjectReference regionRef */ 2:
-                    message.regionRef = ObjectReference.internalBinaryRead(reader, reader.uint32(), options, message.regionRef);
+                case /* octelium.api.main.cordium.v1.StartWorkspaceRequest.Config config */ 3:
+                    message.config = StartWorkspaceRequest_Config.internalBinaryRead(reader, reader.uint32(), options, message.config);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -7700,9 +7735,9 @@ class StartWorkspaceRequest$Type extends MessageType<StartWorkspaceRequest> {
         /* octelium.api.main.meta.v1.ObjectReference workspaceRef = 1; */
         if (message.workspaceRef)
             ObjectReference.internalBinaryWrite(message.workspaceRef, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* octelium.api.main.meta.v1.ObjectReference regionRef = 2; */
-        if (message.regionRef)
-            ObjectReference.internalBinaryWrite(message.regionRef, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.cordium.v1.StartWorkspaceRequest.Config config = 3; */
+        if (message.config)
+            StartWorkspaceRequest_Config.internalBinaryWrite(message.config, writer.tag(3, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -7713,6 +7748,60 @@ class StartWorkspaceRequest$Type extends MessageType<StartWorkspaceRequest> {
  * @generated MessageType for protobuf message octelium.api.main.cordium.v1.StartWorkspaceRequest
  */
 export const StartWorkspaceRequest = new StartWorkspaceRequest$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class StartWorkspaceRequest_Config$Type extends MessageType<StartWorkspaceRequest_Config> {
+    constructor() {
+        super("octelium.api.main.cordium.v1.StartWorkspaceRequest.Config", [
+            { no: 1, name: "vars", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_Var },
+            { no: 2, name: "regionRef", kind: "message", T: () => ObjectReference }
+        ]);
+    }
+    create(value?: PartialMessage<StartWorkspaceRequest_Config>): StartWorkspaceRequest_Config {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.vars = [];
+        if (value !== undefined)
+            reflectionMergePartial<StartWorkspaceRequest_Config>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: StartWorkspaceRequest_Config): StartWorkspaceRequest_Config {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars */ 1:
+                    message.vars.push(Workspace_Spec_Var.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                case /* octelium.api.main.meta.v1.ObjectReference regionRef */ 2:
+                    message.regionRef = ObjectReference.internalBinaryRead(reader, reader.uint32(), options, message.regionRef);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: StartWorkspaceRequest_Config, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars = 1; */
+        for (let i = 0; i < message.vars.length; i++)
+            Workspace_Spec_Var.internalBinaryWrite(message.vars[i], writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* octelium.api.main.meta.v1.ObjectReference regionRef = 2; */
+        if (message.regionRef)
+            ObjectReference.internalBinaryWrite(message.regionRef, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message octelium.api.main.cordium.v1.StartWorkspaceRequest.Config
+ */
+export const StartWorkspaceRequest_Config = new StartWorkspaceRequest_Config$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class StartWorkspaceResponse$Type extends MessageType<StartWorkspaceResponse> {
     constructor() {
