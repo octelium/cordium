@@ -17,13 +17,11 @@
 package start
 
 import (
-	"strings"
-
+	"github.com/octelium/cordium/client/cordium/commands/ccommon"
 	pb "github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/client/common/client"
 	"github.com/octelium/octelium/client/common/cliutils"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
@@ -84,7 +82,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(cmdArgs.Vars) > 0 {
-		vars, err := parseVars(cmdArgs.Vars)
+		vars, err := ccommon.ParseVars(cmdArgs.Vars)
 		if err != nil {
 			return err
 		}
@@ -100,19 +98,4 @@ func doCmd(cmd *cobra.Command, args []string) error {
 	cliutils.LineNotify("Successfully started Workspace: %s\n", i.FirstArg())
 
 	return nil
-}
-
-func parseVars(raw []string) ([]*pb.Workspace_Spec_Var, error) {
-	vars := make([]*pb.Workspace_Spec_Var, 0, len(raw))
-	for _, s := range raw {
-		name, value, ok := strings.Cut(s, "=")
-		if !ok || name == "" {
-			return nil, errors.Errorf("invalid --var value %q: expected NAME=VALUE", s)
-		}
-		vars = append(vars, &pb.Workspace_Spec_Var{
-			Name:  name,
-			Value: value,
-		})
-	}
-	return vars, nil
 }

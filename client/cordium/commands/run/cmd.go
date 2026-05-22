@@ -22,6 +22,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/octelium/cordium/client/cordium/commands/ccommon"
 	"github.com/octelium/cordium/client/cordium/commands/create/workspace"
 	"github.com/octelium/cordium/client/cordium/commands/terminal"
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
@@ -265,6 +266,18 @@ func doRun(ctx context.Context, conn *grpc.ClientConn, ws *pb.Workspace) error {
 	case ucordiumv1.ToWorkspace(ws).IsStopped():
 		if _, err := c.StartWorkspace(ctx, &pb.StartWorkspaceRequest{
 			WorkspaceRef: umetav1.GetObjectReference(ws),
+			Config: func() *pb.StartWorkspaceRequest_Config {
+				if len(ws.Status.LastRuns) > 0 && len(cmdArgs.Vars) > 0 {
+
+					if vars, err := ccommon.ParseVars(cmdArgs.Vars); err == nil {
+						return &pb.StartWorkspaceRequest_Config{
+							Vars: vars,
+						}
+					}
+				}
+
+				return nil
+			}(),
 		}); err != nil {
 			if !grpcerr.AlreadyExists(err) {
 				return err
