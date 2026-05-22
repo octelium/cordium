@@ -66,6 +66,9 @@ type CreateWorkspaceArgs struct {
 
 	ReadOnlyRootFilesystem bool
 
+	AddCaps  []string
+	DropCaps []string
+
 	Out string
 }
 
@@ -119,6 +122,11 @@ func init() {
 
 	Cmd.PersistentFlags().BoolVar(&cmdArgs.ReadOnlyRootFilesystem, "read-only", false,
 		"Use read-only root filesystem")
+
+	Cmd.PersistentFlags().StringArrayVar(&cmdArgs.AddCaps, "cap-add", nil,
+		"Add a Linux capability to the Workspace container (repeatable: --cap-add NET_ADMIN --cap-add SYS_PTRACE)")
+	Cmd.PersistentFlags().StringArrayVar(&cmdArgs.DropCaps, "cap-drop", nil,
+		"Drop a Linux capability from the Workspace container (repeatable: --cap-drop NET_RAW)")
 
 	Cmd.MarkFlagsMutuallyExclusive("space", "template")
 	Cmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
@@ -241,6 +249,9 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		ServeAll:      cmdArgs.ServeAll,
 
 		ReadOnlyRootFilesystem: cmdArgs.ReadOnlyRootFilesystem,
+
+		AddCaps:  cmdArgs.AddCaps,
+		DropCaps: cmdArgs.DropCaps,
 	})
 	if err != nil {
 		return err
@@ -294,6 +305,9 @@ type DoCreateWorkspaceOpts struct {
 	AppPorts []string
 
 	ReadOnlyRootFilesystem bool
+
+	AddCaps  []string
+	DropCaps []string
 
 	Vars []string
 }
@@ -411,6 +425,19 @@ func DoCreateWorkspace(ctx context.Context, c pb.MainServiceClient, o *DoCreateW
 				Type: &pb.Workspace_Spec_Runtime_EnvVar_FromSecret{FromSecret: secretName},
 			})
 		}
+	}
+
+	if len(o.AddCaps) > 0 || len(o.DropCaps) > 0 {
+		if ws.Spec.Runtime == nil {
+			ws.Spec.Runtime = &pb.Workspace_Spec_Runtime{}
+		}
+		if ws.Spec.Runtime.Capabilities == nil {
+			ws.Spec.Runtime.Capabilities = &pb.Workspace_Spec_Runtime_Capabilities{}
+		}
+		ws.Spec.Runtime.Capabilities.Add = append(
+			ws.Spec.Runtime.Capabilities.Add, o.AddCaps...)
+		ws.Spec.Runtime.Capabilities.Drop = append(
+			ws.Spec.Runtime.Capabilities.Drop, o.DropCaps...)
 	}
 
 	for _, raw := range o.AdditionalRepos {

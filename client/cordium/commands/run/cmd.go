@@ -86,6 +86,11 @@ func init() {
 	Cmd.PersistentFlags().BoolVar(&cmdArgs.ReadOnlyRootFilesystem, "read-only", false,
 		"Use read-only root filesystem")
 
+	Cmd.PersistentFlags().StringArrayVar(&cmdArgs.AddCaps, "cap-add", nil,
+		"Add a Linux capability to the Workspace container (repeatable: --cap-add NET_ADMIN --cap-add SYS_PTRACE)")
+	Cmd.PersistentFlags().StringArrayVar(&cmdArgs.DropCaps, "cap-drop", nil,
+		"Drop a Linux capability from the Workspace container (repeatable: --cap-drop NET_RAW)")
+
 	Cmd.MarkFlagsMutuallyExclusive("space", "template")
 	Cmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
 }
@@ -215,6 +220,9 @@ func doCmd(cmd *cobra.Command, args []string) error {
 			Vars:              cmdArgs.Vars,
 
 			ReadOnlyRootFilesystem: cmdArgs.ReadOnlyRootFilesystem,
+
+			AddCaps:  cmdArgs.AddCaps,
+			DropCaps: cmdArgs.DropCaps,
 		})
 		if err != nil {
 			return err
