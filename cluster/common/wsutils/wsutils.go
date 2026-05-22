@@ -186,17 +186,24 @@ func mergeSpec(req *MergeSpecReq) (*cordiumv1.Workspace_Spec, error) {
 }
 
 func MergeSpec(req *MergeSpecReq) (*cordiumv1.Workspace_Spec, error) {
-	merged := &cordiumv1.Workspace_Spec{}
-
-	templateSpec := req.Template.GetSpec()
-	workspaceSpec := req.Workspace.GetSpec()
-
 	merged, err := mergeSpec(req)
 	if err != nil {
 		return nil, err
 	}
 
-	vars := resolveVars(templateSpec.GetVars(), workspaceSpec.GetVars())
+	vars := resolveVars(
+		req.Template.GetSpec().GetVars(),
+		req.Workspace.GetSpec().GetVars(),
+		func() []*cordiumv1.Workspace_Spec_Var {
+			if req.Workspace.Status.Run == nil || req.Workspace.Status.Run.Config == nil {
+				return nil
+			}
+			if len(req.Workspace.Status.Run.Config.Vars) > 1000 {
+				return nil
+			}
+			return req.Workspace.GetStatus().GetRun().GetConfig().GetVars()
+		}(),
+	)
 	if len(vars) > 0 {
 		renderSpec(merged, vars)
 	}
@@ -207,8 +214,9 @@ func MergeSpec(req *MergeSpecReq) (*cordiumv1.Workspace_Spec, error) {
 func resolveVars(
 	templateVars []*cordiumv1.Workspace_Spec_Var,
 	workspaceVars []*cordiumv1.Workspace_Spec_Var,
+	runConfigVars []*cordiumv1.Workspace_Spec_Var,
 ) map[string]string {
-	if len(templateVars) == 0 && len(workspaceVars) == 0 {
+	if len(templateVars) == 0 && len(workspaceVars) == 0 && len(runConfigVars) == 0 {
 		return nil
 	}
 
@@ -220,6 +228,11 @@ func resolveVars(
 		}
 	}
 	for _, v := range workspaceVars {
+		if v.Name != "" {
+			ret[v.Name] = v.Value
+		}
+	}
+	for _, v := range runConfigVars {
 		if v.Name != "" {
 			ret[v.Name] = v.Value
 		}
