@@ -169,7 +169,7 @@ func (s *Server) DeleteTemplate(ctx context.Context, req *metav1.DeleteOptions) 
 		return nil, serr.K8sNotFoundOrInternalWithErr(err)
 	}
 
-	if err := s.checkResourceDefault(tmpl); err != nil {
+	if err := s.checkResourceDefault(tmpl); err == nil {
 		return nil, grpcutils.InvalidArg("You cannot delete the default Template: %s", tmpl.Metadata.Name)
 	}
 

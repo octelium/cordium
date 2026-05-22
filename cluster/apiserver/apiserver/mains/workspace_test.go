@@ -430,13 +430,13 @@ func TestWorkspace(t *testing.T) {
 			Name: ws.Status.SpaceRef.Name,
 		})
 		assert.Nil(t, err)
-		assert.Nil(t, srv.checkResourceDefault(spc))
+		assert.Nil(t, srv.checkResourceDefault(spc), "%+v", err)
 
 		tmpl, err := srv.GetTemplate(usr.Ctx(), &metav1.GetOptions{
 			Name: ws.Status.TemplateRef.Name,
 		})
 		assert.Nil(t, err)
-		assert.Nil(t, srv.checkResourceDefault(tmpl))
+		assert.Nil(t, srv.checkResourceDefault(tmpl), "%+v", err)
 	})
 
 }

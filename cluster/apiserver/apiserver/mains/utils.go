@@ -86,7 +86,7 @@ func (s *Server) checkResourceDefault(rsc umetav1.ResourceObjectI) error {
 		return grpcutils.InvalidArg("Resource name is not set")
 	}
 
-	if strings.HasPrefix(rsc.GetMetadata().Name, "default.") {
+	if !strings.HasPrefix(rsc.GetMetadata().Name, "default.") {
 		return grpcutils.InvalidArg("This resource is not a default resource")
 	}
 
