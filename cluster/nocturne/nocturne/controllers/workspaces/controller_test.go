@@ -23,6 +23,7 @@ import (
 
 	"context"
 
+	snapshotclientfake "github.com/kubernetes-csi/external-snapshotter/client/v8/clientset/versioned/fake"
 	otests "github.com/octelium/cordium/cluster/common/tests"
 	"github.com/octelium/cordium/cluster/common/wsutils"
 	"github.com/octelium/cordium/cluster/supervisor/supervisor"
@@ -117,6 +118,9 @@ func TestServer(t *testing.T) {
 		Spec: &cordiumv1.Template_Spec{},
 		Status: &cordiumv1.Template_Status{
 			SpaceRef: umetav1.GetObjectReference(org),
+			BuildInfo: &cordiumv1.Template_Status_BuildInfo{
+				CurrentReadyBuildID: utilrand.GetRandomStringCanonical(8),
+			},
 		},
 	})
 	assert.Nil(t, err)
@@ -144,6 +148,9 @@ func TestServer(t *testing.T) {
 
 	ctl, err := NewController(ctx, ctx, fakeC.OcteliumC, fakeC.K8sC, jwkCtl, regionRef)
 	assert.Nil(t, err)
+
+	ctl.snapshotC = snapshotclientfake.NewSimpleClientset()
+
 	err = ctl.startWorkspace(ctx, ws)
 	assert.Nil(t, err, "%+v", err)
 

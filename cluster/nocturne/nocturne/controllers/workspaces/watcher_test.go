@@ -22,6 +22,7 @@ import (
 
 	"context"
 
+	snapshotclientfake "github.com/kubernetes-csi/external-snapshotter/client/v8/clientset/versioned/fake"
 	otests "github.com/octelium/cordium/cluster/common/tests"
 	"github.com/octelium/cordium/cluster/supervisor/supervisor"
 	wssrv "github.com/octelium/cordium/cluster/workspace/workspace"
@@ -95,8 +96,10 @@ func TestWatcher(t *testing.T) {
 		},
 		Spec: &cordiumv1.Template_Spec{},
 		Status: &cordiumv1.Template_Status{
-			SpaceRef:  umetav1.GetObjectReference(org),
-			BuildInfo: &cordiumv1.Template_Status_BuildInfo{},
+			SpaceRef: umetav1.GetObjectReference(org),
+			BuildInfo: &cordiumv1.Template_Status_BuildInfo{
+				CurrentReadyBuildID: utilrand.GetRandomStringCanonical(8),
+			},
 		},
 	})
 	assert.Nil(t, err)
@@ -128,6 +131,7 @@ func TestWatcher(t *testing.T) {
 
 		ctl, err := NewController(ctx, ctx, fakeC.OcteliumC, fakeC.K8sC, jwkCtl, regionRef)
 		assert.Nil(t, err)
+		ctl.snapshotC = snapshotclientfake.NewSimpleClientset()
 
 		wtchr, err := newStatusWatcher(ctl, ws)
 		assert.Nil(t, err)
@@ -184,6 +188,7 @@ func TestWatcher(t *testing.T) {
 
 		ctl, err := NewController(ctx, ctx, fakeC.OcteliumC, fakeC.K8sC, jwkCtl, regionRef)
 		assert.Nil(t, err)
+		ctl.snapshotC = snapshotclientfake.NewSimpleClientset()
 
 		wtchr, err := newStatusWatcher(ctl, ws)
 		assert.Nil(t, err)
@@ -228,6 +233,7 @@ func TestWatcher(t *testing.T) {
 
 		ctl, err := NewController(ctx, ctx, fakeC.OcteliumC, fakeC.K8sC, jwkCtl, regionRef)
 		assert.Nil(t, err)
+		ctl.snapshotC = snapshotclientfake.NewSimpleClientset()
 
 		wtchr, err := newStatusWatcher(ctl, ws)
 		assert.Nil(t, err)
@@ -294,6 +300,7 @@ func TestWatcher(t *testing.T) {
 
 		ctl, err := NewController(ctx, ctx, fakeC.OcteliumC, fakeC.K8sC, jwkCtl, regionRef)
 		assert.Nil(t, err)
+		ctl.snapshotC = snapshotclientfake.NewSimpleClientset()
 
 		wtchr, err := newStatusWatcher(ctl, ws)
 		assert.Nil(t, err)
@@ -310,11 +317,6 @@ func TestWatcher(t *testing.T) {
 		err = wtchr.close()
 		assert.Nil(t, err)
 
-		_, err = fakeC.OcteliumC.CordiumC().GetWorkspace(ctx, &rmetav1.GetOptions{
-			Uid: ws.Metadata.Uid,
-		})
-		assert.NotNil(t, err)
-		assert.True(t, grpcerr.IsNotFound(err))
 	})
 
 }

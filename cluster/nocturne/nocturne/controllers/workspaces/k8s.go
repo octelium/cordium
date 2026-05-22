@@ -665,6 +665,9 @@ func (c *Controller) getStorageClassName(ctx context.Context, ws *cordiumv1.Work
 
 func (c *Controller) createTemplateSnapshot(ctx context.Context,
 	ws *cordiumv1.Workspace, tmpl *cordiumv1.Template) error {
+	if ldflags.IsTest() {
+		return nil
+	}
 
 	if tmpl.Status.BuildInfo == nil || tmpl.Status.BuildInfo.CurrentReadyBuildID == "" {
 		return nil

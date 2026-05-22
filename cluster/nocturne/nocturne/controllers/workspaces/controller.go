@@ -33,6 +33,7 @@ import (
 	"github.com/octelium/octelium/cluster/common/k8sutils"
 	"github.com/octelium/octelium/pkg/common/pbutils"
 	"github.com/octelium/octelium/pkg/grpcerr"
+	"github.com/octelium/octelium/pkg/utils/ldflags"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	k8serr "k8s.io/apimachinery/pkg/api/errors"
@@ -68,16 +69,6 @@ func NewController(
 	regionRef *metav1.ObjectReference,
 ) (*Controller, error) {
 
-	cfg, err := k8sutils.GetInClusterConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	snapshotC, err := snapshotset.NewForConfig(cfg)
-	if err != nil {
-		return nil, err
-	}
-
 	cc, err := octeliumC.CoreV1Utils().GetClusterConfig(ctx)
 	if err != nil {
 		return nil, err
@@ -88,7 +79,7 @@ func NewController(
 		return nil, err
 	}
 
-	return &Controller{
+	ret := &Controller{
 		ctxMain:   ctxMain,
 		octeliumC: octeliumC,
 		k8sC:      k8sC,
@@ -96,14 +87,27 @@ func NewController(
 		jwkCtl:    jwkCtl,
 		regionRef: regionRef,
 		celEngine: celEngine,
-		snapshotC: snapshotC,
 		watcherMap: struct {
 			mp map[string]*statusWatcher
 			mu sync.RWMutex
 		}{
 			mp: make(map[string]*statusWatcher),
 		},
-	}, nil
+	}
+
+	if !ldflags.IsTest() {
+		cfg, err := k8sutils.GetInClusterConfig()
+		if err != nil {
+			return nil, err
+		}
+
+		ret.snapshotC, err = snapshotset.NewForConfig(cfg)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return ret, nil
 }
 
 func (c *Controller) isMyRegion(ws *cordiumv1.Workspace) bool {
