@@ -40,7 +40,7 @@ What sets Cordium apart is how Workspaces access infrastructure (e.g. remote int
 
 - **Purpose-built for AI agents.** Every agent run gets a dedicated Octelium identity and a clean, isolated Workspace with enforced resource limits and no state bleed between runs. Agents access databases, APIs, and internal services through their Workspace identity with no credential injection, so a compromised or misbehaving agent cannot exfiltrate credentials that were never present. Ephemeral storage and auto-stop on task completion require no manual cleanup. Pre-built Templates with agent frameworks pre-installed start in seconds via snapshot restoration.
 
-- **Open source and self-hosted.** Cordium is fully open source under AGPLv3. It runs on any Kubernetes cluster, from a single-node VM to production multi-node installations, cloud or on-premises. There is no proprietary control plane, no tiered feature set, and no vendor lock-in.
+- **Open source and self-hosted.** Cordium is fully open source under Apache-2.0. It runs on any Kubernetes cluster, from a single-node VM to production multi-node installations, cloud or on-premises. There is no proprietary control plane, no tiered feature set, and no vendor lock-in.
 
 ## Concepts
 
@@ -350,7 +350,7 @@ brew install octelium/tap/cordium
 | Capability / Property | Cordium | Daytona | E2B | GitHub Codespaces | Coder | DevPod |
 |---|---|---|---|---|---|---|
 | **Primary workloads** | Developers, AI agents, automation workloads | Developers, AI agents | AI agents | Developers | Developers, AI-assisted development | Developers |
-| **License** | AGPLv3 | AGPLv3 | Mixed / managed-first | Proprietary | AGPLv3 | MPL 2.0 |
+| **License** | Apache 2.0 | AGPLv3 | Mixed / managed-first | Proprietary | AGPLv3 | MPL 2.0 |
 | **Self-hosted** | Yes | Yes | Limited | No | Yes | Local/client-side |
 | **Managed SaaS offering** | No | Yes | Yes | Yes | Yes | No |
 | **Kubernetes-native architecture** | Yes | Partial | No | No | Yes | No |
@@ -390,6 +390,10 @@ brew install octelium/tap/cordium
 
 ## License
 
-Cordium is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+Cordium-owned source code is licensed under the [Apache License 2.0](LICENSE).
+
+Cordium is built on top of Octelium. Some Cordium components or complete deployments may include Octelium Cluster components, which are publicly licensed under AGPLv3. Octelium Labs, LLC owns the relevant copyrights for both projects.
+
+Commercial licensing is available for organizations that require alternative terms for combined Cordium and Octelium deployments.
 
 Copyright © Octelium Labs, LLC. All rights reserved.
