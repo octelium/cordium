@@ -289,7 +289,6 @@ jobs:
           ARCH: ${{ matrix.arch }}
         run: |
           .github/scripts/windows/build-msi.ps1 `
-            -PackageName "cordium" `
             -Version $env:VERSION `
             -Arch $env:ARCH
 
