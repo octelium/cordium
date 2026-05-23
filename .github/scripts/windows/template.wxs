@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+    Name="Cordium"
+    Version="${VERSION}.0"
+    Manufacturer="Octelium Labs, LLC"
+    UpgradeCode="${UPGRADE_CODE}"
+    Language="1033"
+    Codepage="1252"
+    Scope="perMachine">
+
+    <SummaryInformation
+      Description="${DESCRIPTION}"
+      Manufacturer="Octelium Labs, LLC"
+      Keywords="Installer, CLI, Cordium, Octelium" />
+
+    <MajorUpgrade
+      DowngradeErrorMessage="A newer version of Cordium is already installed."
+      AllowSameVersionUpgrades="yes" />
+
+    <Media Id="1" Cabinet="cordium.cab" EmbedCab="yes" />
+
+    <Feature Id="ProductFeature" Title="Cordium CLI" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentRef Id="PATH" />
+    </Feature>
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="Octelium">
+        <Directory Id="BIN_FOLDER" Name="Cordium" />
+      </Directory>
+    </StandardDirectory>
+  </Package>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="BIN_FOLDER">
+      <Component Id="MainExecutable" Guid="${COMPONENT_GUID}">
+        <File Id="MainExe" Source="${BINARY_PATH}" Name="cordium.exe" KeyPath="yes" />
+        <RegistryValue
+          Root="HKLM"
+          Key="Software\Octelium\Cordium"
+          Name="Version"
+          Type="string"
+          Value="${VERSION}"
+          KeyPath="no" />
+      </Component>
+    </ComponentGroup>
+
+    <Component Id="PATH" Guid="${PATH_GUID}" Directory="BIN_FOLDER">
+      <Environment
+        Id="PATH"
+        Name="PATH"
+        Value="[BIN_FOLDER]"
+        Permanent="no"
+        Part="last"
+        Action="set"
+        System="yes" />
+
+      <RegistryValue
+        Root="HKLM"
+        Key="Software\Octelium\Cordium"
+        Name="Path"
+        Type="string"
+        Value="[BIN_FOLDER]"
+        KeyPath="yes" />
+    </Component>
+  </Fragment>
+</Wix>
