@@ -8,8 +8,8 @@ on:
       - "v*.*.*"
     branches:
       - b-*
-      # - main
-      # - dev
+      - main
+      - dev
 
 jobs:
   build:
@@ -30,14 +30,14 @@ jobs:
           ]
         arch:
           - amd64
-          # - arm64
+          - arm64
         include:
           - arch: amd64
             platform: linux/amd64
             runner: ubuntu-24.04
-          # - arch: arm64
-          #   platform: linux/arm64
-          #   runner: ubuntu-24.04-arm
+          - arch: arm64
+            platform: linux/arm64
+            runner: ubuntu-24.04-arm
     steps:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v4
@@ -180,6 +180,6 @@ jobs:
             docker buildx imagetools create \
               "${ANNOTATIONS[@]}" \
               -t "$TAG" \
-              "${BASE_IMAGE}:${VERSION}-amd64"
-              # "${BASE_IMAGE}:${VERSION}-arm64"
+              "${BASE_IMAGE}:${VERSION}-amd64" \
+              "${BASE_IMAGE}:${VERSION}-arm64"
           done
