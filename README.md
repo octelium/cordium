@@ -255,6 +255,12 @@ cordium ssh abc -D 1080 -N
 # Generate an SSH config block for use with VS Code, JetBrains, Zed, rsync
 cordium ssh abc --print-config >> ~/.ssh/config
 
+# Then use VS Code Remote SSH
+code --remote ssh-remote+cordium-abc /workspace/repo
+
+# You can also use other tools such as rsync
+rsync -avz ./dist/ cordium-abc:/workspace/repo/dist/
+
 # Copy a local file to a Workspace
 cordium cp ./config.json abc:/workspace/repo/config.json
 
