@@ -98,8 +98,6 @@ spec:
       branch: ${{ vars.BRANCH }}
       depth: 1
 
-  autoStop: true
-
   vars:
     - name: BRANCH
       value: main
@@ -107,6 +105,7 @@ spec:
       value: "Review the codebase and fix any failing tests."
 
   runtime:
+    autoStop: true
     envVars:
       - key: NODE_ENV
         value: test
