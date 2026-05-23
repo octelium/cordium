@@ -234,9 +234,11 @@ func (s *Genesis) setWSNamespace(ctx context.Context) error {
 		return err
 	}
 
-	if err := s.copyRegcred(ctx); err != nil {
-		return err
-	}
+	/*
+		if err := s.copyRegcred(ctx); err != nil {
+			return err
+		}
+	*/
 
 	return nil
 }

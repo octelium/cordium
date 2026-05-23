@@ -22,7 +22,6 @@ import (
 	"os"
 	"time"
 
-	workspacecommon "github.com/octelium/cordium/cluster/common"
 	"github.com/octelium/cordium/cluster/common/components"
 	"github.com/octelium/cordium/cluster/common/octeliumc"
 	"github.com/octelium/cordium/cluster/common/ovutils"
@@ -42,8 +41,6 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/structpb"
-	k8scorev1 "k8s.io/api/core/v1"
-	k8smetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type InitOpts struct {
@@ -214,9 +211,9 @@ func (g *Genesis) installSystemResources(ctx context.Context, region *corev1.Reg
 			},
 			Status: &corev1.Service_Status{
 				ManagedService: &corev1.Service_Status_ManagedService{
-					Image:           ldflags.GetImage(components.CordiumComponent(components.APIServer), ""),
-					Type:            "apiserver",
-					ImagePullSecret: "octelium-regcred",
+					Image: ldflags.GetImage(components.CordiumComponent(components.APIServer), ""),
+					Type:  "apiserver",
+					// ImagePullSecret: "octelium-regcred",
 					HealthCheck: &corev1.Service_Status_ManagedService_HealthCheck{
 						Type: &corev1.Service_Status_ManagedService_HealthCheck_Grpc{
 							Grpc: &corev1.Service_Status_ManagedService_HealthCheck_GRPC{
@@ -249,10 +246,10 @@ func (g *Genesis) installSystemResources(ctx context.Context, region *corev1.Reg
 			},
 			Status: &corev1.Service_Status{
 				ManagedService: &corev1.Service_Status_ManagedService{
-					Image:           ldflags.GetImage(components.CordiumComponent(components.Portal), ""),
-					HasSubdomain:    true,
-					ForwardHost:     true,
-					ImagePullSecret: "octelium-regcred",
+					Image:        ldflags.GetImage(components.CordiumComponent(components.Portal), ""),
+					HasSubdomain: true,
+					ForwardHost:  true,
+					// ImagePullSecret: "octelium-regcred",
 					HealthCheck: &corev1.Service_Status_ManagedService_HealthCheck{
 						Type: &corev1.Service_Status_ManagedService_HealthCheck_Grpc{
 							Grpc: &corev1.Service_Status_ManagedService_HealthCheck_GRPC{
@@ -310,9 +307,9 @@ func (g *Genesis) installSystemResources(ctx context.Context, region *corev1.Reg
 			},
 			Status: &corev1.Service_Status{
 				ManagedService: &corev1.Service_Status_ManagedService{
-					Type:            "vigil",
-					Image:           ldflags.GetImage(components.CordiumComponent(components.Vigil), ""),
-					ImagePullSecret: "octelium-regcred",
+					Type:  "vigil",
+					Image: ldflags.GetImage(components.CordiumComponent(components.Vigil), ""),
+					// ImagePullSecret: "octelium-regcred",
 				},
 			},
 		}
@@ -325,6 +322,7 @@ func (g *Genesis) installSystemResources(ctx context.Context, region *corev1.Reg
 	return nil
 }
 
+/*
 func (g *Genesis) copyRegcred(ctx context.Context) error {
 	if !ovutils.IsPrivateRegistry() {
 		return nil
@@ -353,6 +351,7 @@ func (g *Genesis) copyRegcred(ctx context.Context) error {
 	}
 	return nil
 }
+*/
 
 func (g *Genesis) setInitClusterCertificate(ctx context.Context, region *corev1.Region) error {
 

@@ -52,11 +52,15 @@ var tcpProtocol = k8scorev1.ProtocolTCP
 var udpProtocol = k8scorev1.ProtocolUDP
 
 func getImagePullSecrets() []k8scorev1.LocalObjectReference {
-	return []k8scorev1.LocalObjectReference{
-		{
-			Name: "octelium-regcred",
-		},
-	}
+	return nil
+
+	/*
+		return []k8scorev1.LocalObjectReference{
+			{
+				Name: "octelium-regcred",
+			},
+		}
+	*/
 }
 
 func getComponentName(arg string) string {
