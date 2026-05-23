@@ -41,6 +41,8 @@ CMD_TIDY := go mod tidy
 build-cli-cordium:
 	CGO_ENABLED=0 go build $(LDFLAGS) -o bin/ github.com/octelium/cordium/client/cordium
 
+build-cli: build-cli-cordium
+
 build-workspace:
 	CGO_ENABLED=0 GOOS=linux go build $(LDFLAGS) -o bin/cordium-workspace github.com/octelium/cordium/cluster/workspace
 build-workspace-git-cred-helper:
