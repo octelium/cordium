@@ -22,7 +22,6 @@ import (
 	"io"
 	"os"
 	"os/signal"
-	"syscall"
 	"time"
 
 	pb "github.com/octelium/octelium/apis/main/cordiumv1"
@@ -80,7 +79,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 }
 
 func DoCmdTerminal(ctx context.Context, conn *grpc.ClientConn, wsName string) error {
-	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
+	ctx, cancel := notifyTerminalExitContext(ctx)
 	defer cancel()
 
 	c := pb.NewWorkspaceServiceClient(conn)
@@ -118,10 +117,10 @@ func DoCmdTerminal(ctx context.Context, conn *grpc.ClientConn, wsName string) er
 	}
 
 	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGWINCH)
+	notifyWindowSizeChange(sigCh)
+	defer signal.Stop(sigCh)
 
 	go func(ctx context.Context) {
-
 		for {
 			select {
 			case <-ctx.Done():
@@ -144,7 +143,6 @@ func DoCmdTerminal(ctx context.Context, conn *grpc.ClientConn, wsName string) er
 				}
 			}
 		}
-
 	}(ctx)
 
 	go func(ctx context.Context) {
