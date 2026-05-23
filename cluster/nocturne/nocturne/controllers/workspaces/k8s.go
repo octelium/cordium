@@ -109,18 +109,6 @@ func (c *Controller) newPodSpec(ws *cordiumv1.Workspace) corev1.PodSpec {
 			},
 		},
 
-		ImagePullSecrets: func() []corev1.LocalObjectReference {
-			if ovutils.IsPrivateRegistry() {
-				return []corev1.LocalObjectReference{
-					{
-						Name: "octelium-regcred",
-					},
-				}
-			}
-
-			return nil
-		}(),
-
 		Hostname:                      "octelium",
 		TerminationGracePeriodSeconds: utils_types.Int64ToPtr(120),
 		Volumes: func() []corev1.Volume {
@@ -159,17 +147,6 @@ func (c *Controller) newPodSpec(ws *cordiumv1.Workspace) corev1.PodSpec {
 						},
 					},
 				},
-			}
-
-			if ovutils.IsPrivateRegistry() {
-				ret = append(ret, corev1.Volume{
-					Name: "octelium-regcred",
-					VolumeSource: corev1.VolumeSource{
-						Secret: &corev1.SecretVolumeSource{
-							SecretName: "octelium-regcred",
-						},
-					},
-				})
 			}
 
 			return ret
@@ -358,13 +335,6 @@ func (c *Controller) newPodSpec(ws *cordiumv1.Workspace) corev1.PodSpec {
 						*/
 					}
 
-					if ovutils.IsPrivateRegistry() {
-						ret = append(ret, corev1.VolumeMount{
-							Name:      "octelium-regcred",
-							MountPath: "/etc/regcred.json",
-							SubPath:   ".dockerconfigjson",
-						})
-					}
 					return ret
 				}(),
 			},
