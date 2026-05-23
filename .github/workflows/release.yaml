@@ -148,7 +148,7 @@ jobs:
             mkdir -p ${PKG_DIR}/DEBIAN
             
             cp bin/${PKG_NAME} ${PKG_DIR}/usr/bin/
-            cp LICENSE-APACHE ${PKG_DIR}/usr/share/doc/${PKG_NAME}/copyright
+            cp LICENSE ${PKG_DIR}/usr/share/doc/${PKG_NAME}/copyright
             
             cat > ${PKG_DIR}/DEBIAN/control <<EOF
           Package: ${PKG_NAME}
@@ -189,7 +189,7 @@ jobs:
             mkdir -p ${BASE_DIR}/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
             
             cp bin/${PKG_NAME} ${BASE_DIR}/SOURCES/
-            cp LICENSE-APACHE ${BASE_DIR}/SOURCES/LICENSE
+            cp LICENSE ${BASE_DIR}/SOURCES/LICENSE
             
             cat > ${BASE_DIR}/SPECS/${PKG_NAME}.spec <<EOF
           Name:           ${PKG_NAME}
