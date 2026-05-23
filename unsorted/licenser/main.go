@@ -53,7 +53,7 @@ func doMain(ctx context.Context) error {
 		"pkg",
 	}
 
-	agplv3, err := os.ReadFile("./unsorted/licenser/agplv3.txt")
+	apachev2, err := os.ReadFile("./unsorted/licenser/apachev2.txt")
 	if err != nil {
 		return err
 	}
@@ -69,42 +69,42 @@ func doMain(ctx context.Context) error {
 		}
 	*/
 
-	if err := os.WriteFile("LICENSE-AGPL-3.0", []byte(agplv3), 0666); err != nil {
+	if err := os.WriteFile("LICENSE", []byte(apachev2), 0666); err != nil {
 		return err
 	}
 
 	for _, comp := range clusterComponents {
 
-		if err := os.WriteFile(path.Join("cluster", comp, "LICENSE"), []byte(agplv3), 0666); err != nil {
+		if err := os.WriteFile(path.Join("cluster", comp, "LICENSE"), []byte(apachev2), 0666); err != nil {
 			return err
 		}
 	}
 
 	for _, comp := range clientComponents {
-		if err := os.WriteFile(path.Join("client", comp, "LICENSE"), []byte(agplv3), 0666); err != nil {
+		if err := os.WriteFile(path.Join("client", comp, "LICENSE"), []byte(apachev2), 0666); err != nil {
 			return err
 		}
 	}
 
 	for _, mod := range additionalApacheModules {
-		if err := os.WriteFile(path.Join(mod, "LICENSE"), []byte(agplv3), 0666); err != nil {
+		if err := os.WriteFile(path.Join(mod, "LICENSE"), []byte(apachev2), 0666); err != nil {
 			return err
 		}
 	}
 
-	if err := setHeader(ctx, "./apis", agplHeader); err != nil {
+	if err := setHeader(ctx, "./apis", header); err != nil {
 		return err
 	}
 
-	if err := setHeader(ctx, "./pkg", agplHeader); err != nil {
+	if err := setHeader(ctx, "./pkg", header); err != nil {
 		return err
 	}
 
-	if err := setHeader(ctx, "./client", agplHeader); err != nil {
+	if err := setHeader(ctx, "./client", header); err != nil {
 		return err
 	}
 
-	if err := setHeader(ctx, "./cluster", agplHeader); err != nil {
+	if err := setHeader(ctx, "./cluster", header); err != nil {
 		return err
 	}
 
@@ -112,7 +112,7 @@ func doMain(ctx context.Context) error {
 }
 
 func setClusterHeader(ctx context.Context) error {
-	return setHeader(ctx, "./cluster", agplHeader)
+	return setHeader(ctx, "./cluster", header)
 }
 
 func setHeader(ctx context.Context, rootPath string, header string) error {
@@ -176,19 +176,19 @@ func getIdx(src []byte) int {
 	return ret
 }
 
-const agplHeader = `/*
+const header = `/*
  * Copyright Octelium Labs, LLC. All rights reserved.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License version 3,
- * as published by the Free Software Foundation of the License.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 `
