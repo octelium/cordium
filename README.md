@@ -1,6 +1,15 @@
-# Cordium
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![Discord](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://octelium.com/external/discord)
+[![Slack](https://img.shields.io/badge/Slack-purple?logo=slack&logoColor=white)](https://octelium.com/external/slack)
 
-Cordium is a free and open source, self-hosted, identity-based sandbox platform built on Kubernetes and [Octelium](https://octelium.com). It provides isolated, reproducible general-purpose sandboxes for developers, AI agents, and automated workloads that are accessible through web terminals, SSH, CLI, and gRPC APIs.
+<div align="center">
+    <br />
+    <img src="./unsorted/logo/main.png" alt="Cordium Logo" width="350"/>
+</div>
+
+
+Cordium is a free and open source, self-hosted, identity-based sandbox platform built on Kubernetes and [Octelium](https://github.com/octelium/octelium). It provides isolated, reproducible general-purpose sandboxes for developers, AI agents, and automated workloads that are accessible through web terminals, SSH, CLI, and gRPC APIs.
 
 What sets Cordium apart is how Workspaces access infrastructure (e.g. remote internal resources behind NAT, publicly protected SaaS resources, IoT, etc.). Instead of injecting credentials into the environment, every Workspace operates with a dedicated Octelium identity. Databases, SSH servers, HTTP APIs, and Kubernetes clusters are accessed through Octelium's identity-aware, secretless access ZTNA infrastructure without exposing long-lived credentials such as API tokens, passwords, SSH private keys, or kubeconfigs directly inside the Workspace.
 
