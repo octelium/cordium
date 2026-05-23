@@ -569,7 +569,8 @@ func (s *Server) startWaitAndSetRunning() {
 	s.setState(cordiumv1.Workspace_Status_RUNNING)
 	s.initReq.SecretList = nil
 	time.Sleep(1000 * time.Millisecond)
-	if s.initReq.Workspace.Status.IsBuild || s.initReq.Workspace.Spec.AutoStop {
+	if s.initReq.Workspace.Status.IsBuild ||
+		(s.spec != nil && s.spec.Runtime != nil && s.spec.Runtime.AutoStop) {
 		s.buildDoneCh <- struct{}{}
 	}
 }

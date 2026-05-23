@@ -91,15 +91,11 @@ export interface Workspace_Spec {
      */
     limit?: Workspace_Spec_Limit;
     /**
-     * @generated from protobuf field: bool autoStop = 7
-     */
-    autoStop: boolean;
-    /**
-     * @generated from protobuf field: repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars = 8
+     * @generated from protobuf field: repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars = 7
      */
     vars: Workspace_Spec_Var[];
     /**
-     * @generated from protobuf field: bool isEphemeral = 9
+     * @generated from protobuf field: bool isEphemeral = 8
      */
     isEphemeral: boolean;
 }
@@ -428,6 +424,10 @@ export interface Workspace_Spec_Runtime {
      * @generated from protobuf field: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Timeout timeout = 11
      */
     timeout?: Workspace_Spec_Runtime_Timeout;
+    /**
+     * @generated from protobuf field: bool autoStop = 12
+     */
+    autoStop: boolean;
 }
 /**
  * @generated from protobuf message octelium.api.main.cordium.v1.Workspace.Spec.Runtime.EnvVar
@@ -3687,16 +3687,14 @@ class Workspace_Spec$Type extends MessageType<Workspace_Spec> {
             { no: 4, name: "additionalRepositories", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_AdditionalRepository },
             { no: 5, name: "applications", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_Application },
             { no: 6, name: "limit", kind: "message", T: () => Workspace_Spec_Limit },
-            { no: 7, name: "autoStop", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 8, name: "vars", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_Var },
-            { no: 9, name: "isEphemeral", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
+            { no: 7, name: "vars", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => Workspace_Spec_Var },
+            { no: 8, name: "isEphemeral", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
         ]);
     }
     create(value?: PartialMessage<Workspace_Spec>): Workspace_Spec {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.additionalRepositories = [];
         message.applications = [];
-        message.autoStop = false;
         message.vars = [];
         message.isEphemeral = false;
         if (value !== undefined)
@@ -3726,13 +3724,10 @@ class Workspace_Spec$Type extends MessageType<Workspace_Spec> {
                 case /* octelium.api.main.cordium.v1.Workspace.Spec.Limit limit */ 6:
                     message.limit = Workspace_Spec_Limit.internalBinaryRead(reader, reader.uint32(), options, message.limit);
                     break;
-                case /* bool autoStop */ 7:
-                    message.autoStop = reader.bool();
-                    break;
-                case /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars */ 8:
+                case /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars */ 7:
                     message.vars.push(Workspace_Spec_Var.internalBinaryRead(reader, reader.uint32(), options));
                     break;
-                case /* bool isEphemeral */ 9:
+                case /* bool isEphemeral */ 8:
                     message.isEphemeral = reader.bool();
                     break;
                 default:
@@ -3765,15 +3760,12 @@ class Workspace_Spec$Type extends MessageType<Workspace_Spec> {
         /* octelium.api.main.cordium.v1.Workspace.Spec.Limit limit = 6; */
         if (message.limit)
             Workspace_Spec_Limit.internalBinaryWrite(message.limit, writer.tag(6, WireType.LengthDelimited).fork(), options).join();
-        /* bool autoStop = 7; */
-        if (message.autoStop !== false)
-            writer.tag(7, WireType.Varint).bool(message.autoStop);
-        /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars = 8; */
+        /* repeated octelium.api.main.cordium.v1.Workspace.Spec.Var vars = 7; */
         for (let i = 0; i < message.vars.length; i++)
-            Workspace_Spec_Var.internalBinaryWrite(message.vars[i], writer.tag(8, WireType.LengthDelimited).fork(), options).join();
-        /* bool isEphemeral = 9; */
+            Workspace_Spec_Var.internalBinaryWrite(message.vars[i], writer.tag(7, WireType.LengthDelimited).fork(), options).join();
+        /* bool isEphemeral = 8; */
         if (message.isEphemeral !== false)
-            writer.tag(9, WireType.Varint).bool(message.isEphemeral);
+            writer.tag(8, WireType.Varint).bool(message.isEphemeral);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -4693,7 +4685,8 @@ class Workspace_Spec_Runtime$Type extends MessageType<Workspace_Spec_Runtime> {
             { no: 8, name: "network", kind: "message", T: () => Workspace_Spec_Runtime_Network },
             { no: 9, name: "filesystem", kind: "message", T: () => Workspace_Spec_Runtime_Filesystem },
             { no: 10, name: "capabilities", kind: "message", T: () => Workspace_Spec_Runtime_Capabilities },
-            { no: 11, name: "timeout", kind: "message", T: () => Workspace_Spec_Runtime_Timeout }
+            { no: 11, name: "timeout", kind: "message", T: () => Workspace_Spec_Runtime_Timeout },
+            { no: 12, name: "autoStop", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
         ]);
     }
     create(value?: PartialMessage<Workspace_Spec_Runtime>): Workspace_Spec_Runtime {
@@ -4703,6 +4696,7 @@ class Workspace_Spec_Runtime$Type extends MessageType<Workspace_Spec_Runtime> {
         message.disableInit = false;
         message.cmd = "";
         message.entrypoint = "";
+        message.autoStop = false;
         if (value !== undefined)
             reflectionMergePartial<Workspace_Spec_Runtime>(this, message, value);
         return message;
@@ -4744,6 +4738,9 @@ class Workspace_Spec_Runtime$Type extends MessageType<Workspace_Spec_Runtime> {
                     break;
                 case /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Timeout timeout */ 11:
                     message.timeout = Workspace_Spec_Runtime_Timeout.internalBinaryRead(reader, reader.uint32(), options, message.timeout);
+                    break;
+                case /* bool autoStop */ 12:
+                    message.autoStop = reader.bool();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -4790,6 +4787,9 @@ class Workspace_Spec_Runtime$Type extends MessageType<Workspace_Spec_Runtime> {
         /* octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Timeout timeout = 11; */
         if (message.timeout)
             Workspace_Spec_Runtime_Timeout.internalBinaryWrite(message.timeout, writer.tag(11, WireType.LengthDelimited).fork(), options).join();
+        /* bool autoStop = 12; */
+        if (message.autoStop !== false)
+            writer.tag(12, WireType.Varint).bool(message.autoStop);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

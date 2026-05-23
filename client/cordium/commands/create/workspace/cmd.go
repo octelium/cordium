@@ -501,7 +501,14 @@ func DoCreateWorkspace(ctx context.Context, c pb.MainServiceClient, o *DoCreateW
 		ws.Spec.Runtime.Filesystem.ReadOnly = o.ReadOnlyRootFilesystem
 	}
 
-	ws.Spec.AutoStop = o.AutoStop
+	if o.AutoStop {
+		if ws.Spec.Runtime == nil {
+			ws.Spec.Runtime = &pb.Workspace_Spec_Runtime{}
+		}
+
+		ws.Spec.Runtime.AutoStop = o.AutoStop
+	}
+
 	ws.Spec.IsEphemeral = o.Ephemeral
 
 	ws.Metadata = &metav1.Metadata{}
