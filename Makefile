@@ -1,6 +1,5 @@
 
 export GO111MODULE=on
-export GOPRIVATE=github.com/octelium/*
 export PATH := $(PATH):$(shell go env GOPATH)/bin
 
 .PHONY: gen-api build-cli build-octelium clean fmt lint test unit vendor
@@ -10,7 +9,7 @@ REGISTRY ?= ghcr.io
 IMAGE_PREFIX := octelium
 
 COMMIT := $(shell git rev-parse HEAD)
-TAG := $(shell git describe --exact-match $(COMMIT) 2>/dev/null)
+TAG := $(shell git describe --tags --exact-match $(COMMIT) 2>/dev/null)
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
 LDFLAGS_PATH := $(REPOSITORY)/pkg/utils/ldflags
@@ -19,13 +18,14 @@ LDF_IMAGE_REGISTRY := $(LDFLAGS_PATH).ImageRegistry=$(REGISTRY)
 LDF_IMAGE_REGISTRY_PREFIX := $(LDFLAGS_PATH).ImageRegistryPrefix=$(IMAGE_PREFIX)
 LDF_COMMIT := $(LDFLAGS_PATH).GitCommit=$(COMMIT)
 LDF_TAG := $(LDFLAGS_PATH).GitTag=$(TAG)
+LDF_SEMVER := $(LDFLAGS_PATH).SemVer=$(TAG)
 LDF_BRANCH := $(LDFLAGS_PATH).GitBranch=$(BRANCH)
 
 GENERATED_API_DOCS_DIR := ./tmp/docs/apis
 GENERATED_API_DOCS_TEMP := ./unsorted/protoc/template.tmpl
 GO_BIN_DIR := $${HOME}/go/bin
 
-LDFLAGS := -ldflags '-X $(LDF_COMMIT) -X $(LDF_TAG) -X $(LDF_BRANCH)\
+LDFLAGS := -ldflags '-X $(LDF_COMMIT) -X $(LDF_TAG) -X $(LDF_BRANCH) -X $(LDF_SEMVER)\
 -X $(LDF_IMAGE_REGISTRY) -X $(LDF_IMAGE_REGISTRY_PREFIX)'
 
 PROTO_GO_OPT := --go_opt=paths=source_relative
