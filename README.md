@@ -11,7 +11,7 @@
 Cordium is a free and open source, self-hosted, identity-based sandbox platform built on Kubernetes and [Octelium](https://github.com/octelium/octelium). It provides isolated, reproducible general-purpose sandboxes for developers, AI agents, and automated workloads that are accessible through web terminals, SSH, CLI, and gRPC APIs.
 
 
-What sets Cordium apart is how Workspaces access infrastructure. Instead of injecting credentials into the sandbox, every Workspace runs with a dedicated Octelium identity. Authorized databases, SSH servers, HTTP APIs, Kubernetes clusters, and internal services are accessed through Octelium’s identity-aware, secretless access platform, so API tokens, passwords, SSH private keys, kubeconfigs, and other long-lived credentials do not need to be placed inside the Workspace.
+What sets Cordium apart is how sandboxes access infrastructure. Instead of injecting credentials into the sandbox, every sandbox runs with a dedicated Octelium identity. Authorized databases, SSH servers, HTTP APIs, Kubernetes clusters, and internal services are accessed through Octelium’s identity-aware, secretless access platform, so API tokens, passwords, SSH private keys, kubeconfigs, and other long-lived credentials do not need to be placed inside the sandbox.
 
 ## Table of Contents
 
@@ -28,7 +28,7 @@ What sets Cordium apart is how Workspaces access infrastructure. Instead of inje
 
 ## Main Features
 
-- **Workspaces for humans and machines.** Every Workspace is an isolated, rootless container sandbox running on standard Kubernetes, accessible via browser terminal, SSH, CLI, and gRPC API. Workspaces can be persistent (filesystem preserved across restarts) or ephemeral and can stop automatically when their tasks complete. The same platform can be used for long-lived coding sessions (e.g. via VSCode, Zed, etc.) and short-lived automated workloads (e.g. AI agent tasks, CI/CD, etc.).
+- **Unified platform for humans and AI agents.** Every sandbox (i.e. Workspace) is an isolated, rootless container sandbox running on standard Kubernetes, accessible via browser terminal, SSH, CLI, and gRPC API. Workspaces can be persistent (filesystem preserved across restarts) or ephemeral and can stop automatically when their tasks complete. The same platform can be used for long-lived coding sessions (e.g. via VSCode, Zed, etc.) and short-lived automated workloads (e.g. AI agent tasks, CI/CD, etc.).
 
 - **Declarative, reproducible environments.** Workspace environments are defined in YAML specs covering the container image, repository cloning, lifecycle tasks, environment variables, resource limits (i.e. CPU, memory, storage), variable substitution, and application ports. Templates allow a single configuration to be reused across many Workspaces. Pre-built Templates capture a fully initialized filesystem as a Kubernetes VolumeSnapshot, reducing cold startup from minutes to seconds.
 
