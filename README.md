@@ -10,7 +10,8 @@
 
 Cordium is a free and open source, self-hosted, identity-based sandbox platform built on Kubernetes and [Octelium](https://github.com/octelium/octelium). It provides isolated, reproducible general-purpose sandboxes for developers, AI agents, and automated workloads that are accessible through web terminals, SSH, CLI, and gRPC APIs.
 
-What sets Cordium apart is how Workspaces access infrastructure (e.g. remote internal resources behind NAT, publicly protected SaaS resources, IoT, etc.). Instead of injecting credentials into the environment, every Workspace operates with a dedicated Octelium identity. Databases, SSH servers, HTTP APIs, and Kubernetes clusters are accessed through Octelium's identity-aware, secretless access ZTNA infrastructure without exposing long-lived credentials such as API tokens, passwords, SSH private keys, or kubeconfigs directly inside the Workspace.
+
+What sets Cordium apart is how Workspaces access infrastructure. Instead of injecting credentials into the sandbox, every Workspace runs with a dedicated Octelium identity. Authorized databases, SSH servers, HTTP APIs, Kubernetes clusters, and internal services are accessed through Octelium’s identity-aware, secretless access platform, so API tokens, passwords, SSH private keys, kubeconfigs, and other long-lived credentials do not need to be placed inside the Workspace.
 
 ## Table of Contents
 
@@ -173,6 +174,7 @@ The Cordium web portal is a browser-based interface for managing and interacting
 The `cordium` CLI provides full command-line access to Workspace management. Here are some examples:
 
 ```sh
+export OCTELIUM_DOMAIN=example.com
 # Create from the default Template and attach a terminal
 cordium run
 
@@ -256,6 +258,9 @@ cordium ssh abc -N -L 5432:localhost:5432 -L 6379:localhost:6379
 
 # Dynamic SOCKS5 proxy
 cordium ssh abc -D 1080 -N
+
+# Connect to the Octelium Cluster for native SSH
+octelium connect -d
 
 # Generate an SSH config block for use with VS Code, JetBrains, Zed, rsync
 cordium ssh abc --print-config >> ~/.ssh/config
@@ -403,7 +408,5 @@ brew install octelium/tap/cordium
 Cordium-owned source code is licensed under the [Apache License 2.0](LICENSE).
 
 Cordium is built on top of Octelium. Some Cordium components or complete deployments may include Octelium Cluster components, which are publicly licensed under AGPLv3. Octelium Labs, LLC owns the relevant copyrights for both projects.
-
-Commercial licensing is available for organizations that require alternative terms for combined Cordium and Octelium deployments.
 
 Copyright © Octelium Labs, LLC. All rights reserved.
