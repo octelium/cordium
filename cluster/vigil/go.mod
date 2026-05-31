@@ -7,10 +7,10 @@ require (
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/cluster/apiserver v0.0.0-20260519091848-5d41b9212cf4
-	github.com/octelium/octelium/cluster/common v0.0.0-20260519091848-5d41b9212cf4
-	github.com/octelium/octelium/cluster/vigil v0.0.0-20260519091848-5d41b9212cf4
-	github.com/octelium/octelium/pkg v0.0.0-20260519091848-5d41b9212cf4
+	github.com/octelium/octelium/cluster/apiserver v0.0.0-20260531075706-5971faa7d298
+	github.com/octelium/octelium/cluster/common v0.0.0-20260531075706-5971faa7d298
+	github.com/octelium/octelium/cluster/vigil v0.0.0-20260531075706-5971faa7d298
+	github.com/octelium/octelium/pkg v0.0.0-20260531075706-5971faa7d298
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.11.1
@@ -30,7 +30,6 @@ require (
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cncf/xds/go v0.0.0-20251210132809-ee656c7534f5 // indirect
-	github.com/coreos/go-oidc/v3 v3.17.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
@@ -86,8 +85,8 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/octelium/octelium/cluster/octovigil v0.0.0-20260519091848-5d41b9212cf4 // indirect
-	github.com/octelium/octelium/cluster/rscserver v0.0.0-20260519091848-5d41b9212cf4 // indirect
+	github.com/octelium/octelium/cluster/octovigil v0.0.0-20260531075706-5971faa7d298 // indirect
+	github.com/octelium/octelium/cluster/rscserver v0.0.0-20260531075706-5971faa7d298 // indirect
 	github.com/open-policy-agent/opa v1.14.0 // indirect
 	github.com/oschwald/geoip2-golang/v2 v2.1.0 // indirect
 	github.com/oschwald/maxminddb-golang/v2 v2.1.1 // indirect
@@ -109,7 +108,6 @@ require (
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/yashtewari/glob-intersection v0.2.0 // indirect
 	github.com/yuin/gopher-lua v1.1.1 // indirect
-	go.etcd.io/bbolt v1.4.3 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel v1.43.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc v0.19.0 // indirect

@@ -5,10 +5,10 @@ go 1.25.8
 require (
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/cluster/apiserver v0.0.0-20260519091848-5d41b9212cf4 // indirect
-	github.com/octelium/octelium/cluster/common v0.0.0-20260519091848-5d41b9212cf4
-	github.com/octelium/octelium/cluster/genesis v0.0.0-20260519091848-5d41b9212cf4
-	github.com/octelium/octelium/pkg v0.0.0-20260519091848-5d41b9212cf4
+	github.com/octelium/octelium/cluster/apiserver v0.0.0-20260531075706-5971faa7d298 // indirect
+	github.com/octelium/octelium/cluster/common v0.0.0-20260531075706-5971faa7d298
+	github.com/octelium/octelium/cluster/genesis v0.0.0-20260531075706-5971faa7d298
+	github.com/octelium/octelium/pkg v0.0.0-20260531075706-5971faa7d298
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.10.2
 	go.uber.org/zap v1.27.1
@@ -43,7 +43,6 @@ require (
 	github.com/cilium/proxy v0.0.0-20250623105955-2136f59a4ea1 // indirect
 	github.com/cilium/statedb v0.4.6 // indirect
 	github.com/cilium/stream v0.0.1 // indirect
-	github.com/coreos/go-oidc/v3 v3.17.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
