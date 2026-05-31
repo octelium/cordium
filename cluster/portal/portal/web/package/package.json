@@ -36,7 +36,7 @@
     "@xterm/addon-web-links": "^0.12.0",
     "@xterm/addon-webgl": "^0.19.0",
     "@xterm/xterm": "^6.0.0",
-    "axios": "^1.15.2",
+    "axios": "^1.16.0",
     "chance": "^1.1.13",
     "dayjs": "^1.11.20",
     "framer-motion": "^12.38.0",
