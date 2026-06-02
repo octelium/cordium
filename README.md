@@ -341,14 +341,18 @@ Install the `cordium` CLI as follows:
 For Linux and MacOS
 
 ```bash
+# Install Octelium CLIs
 curl -fsSL https://octelium.com/install.sh | bash
+# Install Cordium CLI
 curl -fsSL https://octelium.com/install-cordium.sh | bash
 ```
 
 For Windows in Powershell
 
 ```powershell
+# Install Octelium CLIs
 iwr https://octelium.com/install.ps1 -useb | iex
+# Install Cordium CLI
 iwr https://octelium.com/install-cordium.ps1 -useb | iex
 ```
 
