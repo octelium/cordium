@@ -11,7 +11,7 @@
 Cordium is a free and open source, self-hosted, identity-based sandbox platform built on Kubernetes and [Octelium](https://github.com/octelium/octelium). It provides isolated, reproducible general-purpose sandboxes for developers, AI agents, and automated workloads that are accessible through web terminals, SSH, CLI, and gRPC APIs.
 
 
-What sets Cordium apart is how sandboxes access infrastructure. Instead of injecting credentials into the sandbox, every sandbox runs with a dedicated Octelium identity. Authorized databases, SSH servers, HTTP APIs, Kubernetes clusters, and internal services are accessed through Octelium’s identity-aware, secretless access platform, so API tokens, passwords, SSH private keys, kubeconfigs, and other long-lived credentials do not need to be placed inside the sandbox.
+What sets Cordium apart is how sandboxes access infrastructure (e.g. remote private resources behind NAT, publicly protected SaaS resources, etc.). Instead of injecting credentials into the sandbox, every sandbox runs with a dedicated Octelium identity. Authorized databases, SSH servers, HTTP APIs, Kubernetes clusters, and internal services are accessed through Octelium’s identity-aware, secretless access platform, so API tokens, passwords, SSH private keys, kubeconfigs, and other long-lived credentials do not need to be placed inside the sandbox.
 
 ## Table of Contents
 
@@ -38,7 +38,7 @@ What sets Cordium apart is how sandboxes access infrastructure. Instead of injec
 
 - **OpenTelemetry-native auditing and visibility.** Real-time, identity-based, L7-aware visibility and access logging. Every request is logged and exported to your OpenTelemetry OTLP receivers for integration with log management and SIEM providers.
 
-- **Purpose-built for AI agents.** Every agent run gets a dedicated Octelium identity and a clean, isolated Workspace with enforced resource limits and no state bleed between runs. Agents access databases, APIs, and internal services through their Workspace identity with no credential injection, so a compromised or misbehaving agent cannot exfiltrate credentials that were never present. Ephemeral storage and auto-stop on task completion require no manual cleanup. Pre-built Templates with agent frameworks pre-installed start in seconds via snapshot restoration.
+- **Ready for AI agents.** Every agent run gets a dedicated Octelium identity and a clean, isolated Workspace with enforced resource limits and no state bleed between runs. Agents access databases, APIs, and internal services through their Workspace identity with no credential injection, so a compromised or misbehaving agent cannot exfiltrate credentials that were never present. Ephemeral storage and auto-stop on task completion require no manual cleanup. Pre-built Templates with agent frameworks pre-installed start in seconds via snapshot restoration.
 
 - **Open source and self-hosted.** Cordium is fully open source under Apache-2.0. It runs on any Kubernetes cluster, from a single-node VM to production multi-node installations, cloud or on-premises. There is no proprietary control plane, no tiered feature set, and no vendor lock-in.
 
@@ -259,7 +259,7 @@ cordium ssh abc -N -L 5432:localhost:5432 -L 6379:localhost:6379
 # Dynamic SOCKS5 proxy
 cordium ssh abc -D 1080 -N
 
-# Connect to the Octelium Cluster for native SSH
+# Connect to the Octelium Cluster to be able to use native SSH utils (e.g. OpenSSH, scp, rsync, etc.)
 octelium connect -d
 
 # Generate an SSH config block for use with VS Code, JetBrains, Zed, rsync
