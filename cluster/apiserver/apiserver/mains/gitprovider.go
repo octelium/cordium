@@ -121,17 +121,12 @@ func (s *Server) UpdateGitProvider(ctx context.Context, req *cordiumv1.GitProvid
 	}
 
 	itm, err := s.octeliumC.CordiumC().GetGitProvider(ctx,
-		&rmetav1.GetOptions{
-			Name: req.Metadata.Name,
-			Uid:  req.Metadata.Uid,
-		})
+		apivalidation.ObjectToRGetOptions(req))
 	if err != nil {
 		return nil, serr.K8sNotFoundOrInternalWithErr(err)
 	}
 
-	org, err := s.octeliumC.CordiumC().GetSpace(ctx, &rmetav1.GetOptions{
-		Uid: itm.Status.SpaceRef.Uid,
-	})
+	org, err := s.octeliumC.CordiumC().GetSpace(ctx, apivalidation.ObjectReferenceToRGetOptions(itm.Status.SpaceRef))
 	if err != nil {
 		return nil, err
 	}
@@ -166,10 +161,7 @@ func (s *Server) DeleteGitProvider(ctx context.Context, req *metav1.DeleteOption
 		return nil, err
 	}
 
-	itm, err := s.octeliumC.CordiumC().GetGitProvider(ctx, &rmetav1.GetOptions{
-		Uid:  req.Uid,
-		Name: req.Name,
-	})
+	itm, err := s.octeliumC.CordiumC().GetGitProvider(ctx, apivalidation.DeleteOptionsToRGetOptions(req))
 	if err != nil {
 		return nil, serr.K8sNotFoundOrInternalWithErr(err)
 	}
@@ -178,7 +170,7 @@ func (s *Server) DeleteGitProvider(ctx context.Context, req *metav1.DeleteOption
 		return nil, err
 	}
 
-	if _, err := s.octeliumC.CordiumC().DeleteGitProvider(ctx, &rmetav1.DeleteOptions{Uid: itm.Metadata.Uid}); err != nil {
+	if _, err := s.octeliumC.CordiumC().DeleteGitProvider(ctx, apivalidation.ObjectToRDeleteOptions(itm)); err != nil {
 		return nil, serr.InternalWithErr(err)
 	}
 
@@ -315,10 +307,7 @@ func (s *Server) GetGitProvider(ctx context.Context, req *metav1.GetOptions) (*c
 		return nil, err
 	}
 
-	item, err := s.octeliumC.CordiumC().GetGitProvider(ctx, &rmetav1.GetOptions{
-		Uid:  req.Uid,
-		Name: req.Name,
-	})
+	item, err := s.octeliumC.CordiumC().GetGitProvider(ctx, apivalidation.GetOptionsToRGetOptions(req))
 	if err != nil {
 		return nil, serr.K8sNotFoundOrInternalWithErr(err)
 	}

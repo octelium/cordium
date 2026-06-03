@@ -237,9 +237,7 @@ func (s *Server) createBuildRun(ctx context.Context, req *cordiumv1.BuildTemplat
 		},
 	}
 
-	org, err := s.octeliumC.CordiumC().GetSpace(ctx, &rmetav1.GetOptions{
-		Uid: tmpl.Status.SpaceRef.Uid,
-	})
+	org, err := s.octeliumC.CordiumC().GetSpace(ctx, apivalidation.ObjectReferenceToRGetOptions(tmpl.Status.SpaceRef))
 	if err != nil {
 		return err
 	}
