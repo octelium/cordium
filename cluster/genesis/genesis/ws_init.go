@@ -342,7 +342,33 @@ func (s *Genesis) getWSNetworkPolicy() *networkingv1.NetworkPolicy {
 				},
 
 				{
+					Ports: []networkingv1.NetworkPolicyPort{
+						{
+							Protocol: &tcpProtocol,
+							Port: &intstr.IntOrString{
+								IntVal: 8080,
+							},
+						},
+					},
+					To: []networkingv1.NetworkPolicyPeer{
+						{
+							PodSelector: &k8smetav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"app":                         "octelium",
+									"octelium.com/component":      "ingress-dataplane",
+									"octelium.com/component-type": "cluster",
+								},
+							},
+							NamespaceSelector: &k8smetav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"kubernetes.io/metadata.name": "octelium",
+								},
+							},
+						},
+					},
+				},
 
+				{
 					Ports: []networkingv1.NetworkPolicyPort{
 						{
 							Protocol: &tcpProtocol,
