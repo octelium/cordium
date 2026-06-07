@@ -8,7 +8,7 @@
 </div>
 
 
-Cordium is a free and open source, self-hosted, identity-based sandbox platform built on Kubernetes and [Octelium](https://github.com/octelium/octelium). It provides isolated, reproducible general-purpose sandboxes for developers, AI agents, and automated workloads that are accessible through web terminals, SSH, CLI, and gRPC APIs.
+Cordium is a free and open source, self-hosted, identity-based sandbox platform built on Kubernetes and [Octelium](https://github.com/octelium/octelium). It provides isolated, reproducible sandboxes for developers, AI agents, and automated workloads that are accessible through web terminals, SSH, CLI, and gRPC APIs. Cordium is a general-purpose platform that can be used for various use cases, including as a remote development environment for coding sessions (e.g. VSCode, Zed, etc.), sandboxes for AI agents and CI/CD workloads, and secretless secure remote access to infrastructure for developers and AI agents.
 
 
 What sets Cordium apart is how sandboxes access infrastructure (e.g. remote private resources behind NAT, publicly protected SaaS resources, etc.). Instead of injecting credentials into the sandbox, every sandbox runs with a dedicated Octelium identity. Authorized databases, SSH servers, HTTP APIs, Kubernetes clusters, and internal services are accessed through Octelium’s identity-aware, secretless access platform, so API tokens, passwords, SSH private keys, kubeconfigs, and other long-lived credentials do not need to be placed inside the sandbox.
