@@ -2,7 +2,7 @@ FROM node as builder-web
 COPY cluster/portal/portal/web/package /build
 RUN cd /build && npm install && npm run build
 
-FROM golang:1.25.8 as builder
+FROM golang:1.26.4 as builder
 RUN mkdir /build
 ADD . /build/
 WORKDIR /build

@@ -1,5 +1,3 @@
-//go:build !windows
-
 /*
  * Copyright Octelium Labs, LLC. All rights reserved.
  *

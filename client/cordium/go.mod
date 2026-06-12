@@ -1,6 +1,6 @@
 module github.com/octelium/cordium/client/cordium
 
-go 1.25.8
+go 1.26.4
 
 require (
 	al.essio.dev/pkg/shellescape v1.6.0
@@ -12,9 +12,9 @@ require (
 	github.com/juju/errors v1.0.0
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/client/common v0.0.0-20260602000909-6c6655fb38c0
-	github.com/octelium/octelium/client/octelium v0.0.0-20260602000909-6c6655fb38c0
-	github.com/octelium/octelium/pkg v0.0.0-20260602000909-6c6655fb38c0
+	github.com/octelium/octelium/client/common v0.0.0-20260611175852-0f09263a7eea
+	github.com/octelium/octelium/client/octelium v0.0.0-20260611175852-0f09263a7eea
+	github.com/octelium/octelium/pkg v0.0.0-20260611175852-0f09263a7eea
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.10.2
 	go.uber.org/zap v1.27.1
@@ -41,7 +41,7 @@ require (
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.19 // indirect
-	github.com/octelium/octelium/octelium-go v0.0.0-20260602000909-6c6655fb38c0 // indirect
+	github.com/octelium/octelium/octelium-go v0.0.0-20260611175852-0f09263a7eea // indirect
 	github.com/olekukonko/cat v0.0.0-20250911104152-50322a0618f6 // indirect
 	github.com/olekukonko/errors v1.1.0 // indirect
 	github.com/olekukonko/ll v0.1.4-0.20260115111900-9e59c2286df0 // indirect

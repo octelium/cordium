@@ -1,10 +1,10 @@
 module github.com/octelium/cordium/pkg
 
-go 1.25.8
+go 1.26.4
 
 require (
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/pkg v0.0.0-20260602000909-6c6655fb38c0
+	github.com/octelium/octelium/pkg v0.0.0-20260611175852-0f09263a7eea
 	github.com/pkg/errors v0.9.1
 	google.golang.org/protobuf v1.36.11
 )

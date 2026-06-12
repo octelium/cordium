@@ -1,6 +1,6 @@
 module github.com/octelium/cordium/cluster/workspace
 
-go 1.25.8
+go 1.26.4
 
 require (
 	github.com/creack/pty v1.1.24
@@ -8,8 +8,8 @@ require (
 	github.com/moby/term v0.5.2
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/cluster/common v0.0.0-20260602000909-6c6655fb38c0
-	github.com/octelium/octelium/pkg v0.0.0-20260602000909-6c6655fb38c0
+	github.com/octelium/octelium/cluster/common v0.0.0-20260611175852-0f09263a7eea
+	github.com/octelium/octelium/pkg v0.0.0-20260611175852-0f09263a7eea
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
@@ -84,8 +84,8 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/octelium/octelium/cluster/apiserver v0.0.0-20260602000909-6c6655fb38c0 // indirect
-	github.com/octelium/octelium/cluster/rscserver v0.0.0-20260602000909-6c6655fb38c0 // indirect
+	github.com/octelium/octelium/cluster/apiserver v0.0.0-20260611175852-0f09263a7eea // indirect
+	github.com/octelium/octelium/cluster/rscserver v0.0.0-20260611175852-0f09263a7eea // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/pjbgf/sha1cd v0.6.0 // indirect
