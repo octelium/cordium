@@ -32,19 +32,19 @@ The main differentiator for Cordium, when compared to remote development environ
 
 - **Declarative, reproducible environments.** Workspace environments are defined in YAML specs covering the container image, repository cloning, lifecycle tasks, environment variables, resource limits (i.e. CPU, memory, storage), variable substitution, and application ports. Templates allow a single configuration to be reused across many Workspaces. Pre-built Templates capture a fully initialized filesystem as a Kubernetes VolumeSnapshot, reducing cold startup from minutes to seconds.
 
-- **Secretless access to infrastructure.** Workspaces access databases, SSH servers, HTTP APIs, Kubernetes clusters, and mTLS-protected services without credentials ever reaching the Workspace. API keys, passwords, SSH private keys, and kubeconfigs are held at the Octelium identity-aware proxy and injected at the protocol layer if the Workspace identity is authorized. The Workspace itself does not hold credentials, eliminating credential sprawl for both developers and AI agents.
+- **Secretless, identity-based access to infrastructure.** Workspaces access databases, SSH servers, HTTP APIs, Kubernetes clusters, and mTLS-protected services without credentials ever reaching the Workspace. API keys, passwords, SSH private keys, and kubeconfigs are held at the Octelium identity-aware proxy and injected at the protocol layer if the Workspace identity is authorized. The Workspace itself does not hold credentials, eliminating credential sprawl for both developers and AI agents.
 
 - **Identity-based access control and observability.** Every Workspace has an Octelium Session that represents its identity. Infrastructure access is governed by per-request, L7-aware attribute-based access control (ABAC) with policy-as-code using CEL and OPA, enforcing zero standing privileges by default. Authentication supports any OIDC or SAML 2.0 identity provider (IdP), GitHub OAuth2, workload OIDC assertions, and native FIDO2, WebAuthn, and TOTP.
 
-- **OpenTelemetry-native auditing and visibility.** Real-time, identity-based, L7-aware visibility and access logging. Every request is logged and exported to your OpenTelemetry OTLP receivers for integration with log management and SIEM providers.
+- **OpenTelemetry-native auditing and visibility.** Real-time, identity-based, L7-aware visibility and access logging. Every request is audited by the Octelium Cluster and exported to your OpenTelemetry OTLP receivers for integration with log management and SIEM providers.
 
 - **Open source and self-hosted.** Cordium is fully open source under Apache-2.0. It runs on any Kubernetes cluster, from a single-node VM to production multi-node installations, cloud or on-premises. There is no proprietary control plane, no tiered feature set, and no vendor lock-in.
 
 ## Concepts
 
-
+<!--
 ![Cordium](https://octelium.com/assets/cordium-hierarchy-k-2W_obH.webp)
-
+-->
 
 - **Space** is the top-level namespace in Cordium. It groups Templates, Workspaces, Secrets, and GitProviders under a single organizational unit.
 - **Workspace** (synonymous with sandbox) is the fundamental execution unit in Cordium. It is an isolated, rootless container-based environment that can be used interactively or programmatically via web-based console, cordium CLI, standard SSH, and gRPC-based APIs.
@@ -239,6 +239,8 @@ cordium exec abc -w /workspace/repo -- go build ./...
 
 # Run as root
 cordium exec abc --root -- apt-get install -y ripgrep
+# Or
+cordium exec abc -- sudo pt-get install -y ripgrep
 
 # Set per-command environment variables
 cordium exec abc -e GOOS=linux -e GOARCH=amd64 -- go build ./...
