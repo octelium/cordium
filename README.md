@@ -8,10 +8,10 @@
 </div>
 
 
-Cordium is a free and open source, self-hosted, identity-based sandbox platform built on Kubernetes and [Octelium](https://github.com/octelium/octelium). It provides isolated, reproducible sandboxes for developers, AI agents, and automated workloads that are accessible through web terminals, SSH, CLI, and gRPC APIs. Cordium is a general-purpose platform that can be used for various use cases, including as a remote development environment for coding sessions (e.g. VSCode, Zed, etc.), sandboxes for AI agents and CI/CD workloads, and secretless secure remote access to infrastructure for developers and AI agents.
+Cordium is a free and open source, self-hosted, identity-based sandbox platform built on Kubernetes and [Octelium](https://github.com/octelium/octelium). Cordium is a general-purpose platform that provides isolated, reproducible isolated sandboxes for developers, AI agents, and automated workloads. Cordium can be used for various use cases, including as a remote development environment for coding sessions (e.g. VSCode, Zed, etc.), sandboxes for AI agents and CI/CD workloads, and secretless secure remote access to infrastructure for developers and AI agents.
 
 
-What sets Cordium apart is how sandboxes access infrastructure (e.g. remote private resources behind NAT, publicly protected SaaS resources, etc.). Instead of injecting credentials into the sandbox, every sandbox runs with a dedicated Octelium identity. Authorized databases, SSH servers, HTTP APIs, Kubernetes clusters, and internal services are accessed through Octelium’s identity-aware, secretless access platform, so API tokens, passwords, SSH private keys, kubeconfigs, and other long-lived credentials do not need to be placed inside the sandbox.
+The main differentiator for Cordium, when compared to remote development environments (e.g. GitHub Codespaces, Coder, etc.) and sandbox platforms (e.g. E2B, Daytona, etc.), is that Cordium automatically provides identity-based, secretless access to resources and infrastructure from within the sandboxes. Cordium leverages Octelium ZTNA capabilities to provide secretless, policy-driven access to infrastructure resources (SSH servers, databases, internal HTTP APIs, mTLS services) from within the sandbox, without exposing, distributing, or managing upstream application-layer credentials (e.g. API keys and access tokens, SSH private keys, database passwords, etc.). In short, Cordium is not just a sandbox platform for isolated execution, but also a platform for secure access to infrastructure that eliminates credential injection at scale.
 
 ## Table of Contents
 
@@ -38,11 +38,13 @@ What sets Cordium apart is how sandboxes access infrastructure (e.g. remote priv
 
 - **OpenTelemetry-native auditing and visibility.** Real-time, identity-based, L7-aware visibility and access logging. Every request is logged and exported to your OpenTelemetry OTLP receivers for integration with log management and SIEM providers.
 
-- **Ready for AI agents.** Every agent run gets a dedicated Octelium identity and a clean, isolated Workspace with enforced resource limits and no state bleed between runs. Agents access databases, APIs, and internal services through their Workspace identity with no credential injection, so a compromised or misbehaving agent cannot exfiltrate credentials that were never present. Ephemeral storage and auto-stop on task completion require no manual cleanup. Pre-built Templates with agent frameworks pre-installed start in seconds via snapshot restoration.
-
 - **Open source and self-hosted.** Cordium is fully open source under Apache-2.0. It runs on any Kubernetes cluster, from a single-node VM to production multi-node installations, cloud or on-premises. There is no proprietary control plane, no tiered feature set, and no vendor lock-in.
 
 ## Concepts
+
+
+![Cordium](https://octelium.com/assets/cordium-hierarchy-k-2W_obH.webp)
+
 
 - **Space** is the top-level namespace in Cordium. It groups Templates, Workspaces, Secrets, and GitProviders under a single organizational unit.
 - **Workspace** (synonymous with sandbox) is the fundamental execution unit in Cordium. It is an isolated, rootless container-based environment that can be used interactively or programmatically via web-based console, cordium CLI, standard SSH, and gRPC-based APIs.
