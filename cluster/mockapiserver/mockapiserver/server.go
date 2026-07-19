@@ -359,7 +359,7 @@ func newMiddleware(ctx context.Context, octeliumC octeliumc.ClientInterface) (*M
 		return nil, err
 	}
 
-	jwkCtl, err := jwkctl.NewJWKController(ctx, octeliumC)
+	jwkCtl, err := jwkctl.NewJWKController(ctx, octeliumC, nil)
 	if err != nil {
 		return nil, err
 	}

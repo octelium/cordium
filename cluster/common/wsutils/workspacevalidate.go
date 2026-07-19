@@ -24,7 +24,6 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
-	"github.com/octelium/octelium/cluster/apiserver/apiserver/common"
 	"github.com/octelium/octelium/cluster/apiserver/apiserver/serr"
 	"github.com/octelium/octelium/cluster/common/apivalidation"
 	"github.com/octelium/octelium/cluster/common/grpcutils"
@@ -462,8 +461,8 @@ func ValidateWorkspace(ctx context.Context, req *ValidateWorkspaceReq) error {
 			if project.Name == "" {
 				return serr.InvalidArg("Empty additional repository name")
 			}
-			if !common.IsNameValid(project.Name) {
-				return serr.InvalidArg("Invalid additional repository name: %s", project.Name)
+			if err := apivalidation.ValidateName(project.Name, 0, 0); err != nil {
+				return err
 			}
 			if isInList(names, project.Name) {
 				return serr.InvalidArg("The additional repository name: %s already exists", project.Name)
@@ -492,8 +491,9 @@ func ValidateWorkspace(ctx context.Context, req *ValidateWorkspaceReq) error {
 			if app.Name == "" {
 				return serr.InvalidArg("Application name cannot be empty")
 			}
-			if !common.IsNameValid(app.Name) {
-				return serr.InvalidArg("Invalid Application name: %s", app.Name)
+
+			if err := apivalidation.ValidateName(app.Name, 0, 0); err != nil {
+				return err
 			}
 
 			if isInList(names, app.Name) {

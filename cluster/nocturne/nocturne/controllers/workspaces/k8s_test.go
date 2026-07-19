@@ -95,7 +95,7 @@ func TestK8s(t *testing.T) {
 	ws, err = fakeC.OcteliumC.CordiumC().CreateWorkspace(ctx, ws)
 	assert.Nil(t, err)
 
-	jwkCtl, err := jwkctl.NewJWKController(ctx, fakeC.OcteliumC)
+	jwkCtl, err := jwkctl.NewJWKController(ctx, fakeC.OcteliumC, nil)
 	assert.Nil(t, err)
 
 	ctl, err := NewController(ctx, ctx, fakeC.OcteliumC, fakeC.K8sC, jwkCtl, regionRef)

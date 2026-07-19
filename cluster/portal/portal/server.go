@@ -40,7 +40,6 @@ import (
 	"github.com/octelium/octelium/cluster/common/commoninit"
 	"github.com/octelium/octelium/cluster/common/healthcheck"
 	"github.com/octelium/octelium/cluster/common/httputils"
-	"github.com/octelium/octelium/cluster/common/jwkctl"
 	"github.com/octelium/octelium/cluster/common/vutils"
 	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"github.com/patrickmn/go-cache"
@@ -53,7 +52,7 @@ type Server struct {
 
 	svcUID string
 
-	jwkCtl        *jwkctl.Controller
+	// jwkCtl        *jwkctl.Controller
 	clusterDomain string
 	genCache      *cache.Cache
 	tunnelSrv     *tunnelSrv
@@ -105,11 +104,6 @@ func newServer(ctx context.Context, octeliumC octeliumc.ClientInterface) (*Serve
 	}
 
 	ret.clusterDomain = cc.Status.Domain
-
-	ret.jwkCtl, err = jwkctl.NewJWKController(ctx, octeliumC)
-	if err != nil {
-		return nil, err
-	}
 
 	region, err := octeliumC.CoreC().GetRegion(ctx, &rmetav1.GetOptions{Name: vutils.GetMyRegionName()})
 	if err != nil {
@@ -173,9 +167,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) Run(ctx context.Context) error {
-	if err := s.jwkCtl.Run(ctx); err != nil {
-		return err
-	}
 
 	if err := s.activityCtl.Run(ctx); err != nil {
 		return err
