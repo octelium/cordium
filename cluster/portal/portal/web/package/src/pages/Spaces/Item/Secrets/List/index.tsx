@@ -1,13 +1,12 @@
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
+import { getClientWorkspace } from "@/utils/client";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 import {
   ListSecretOptions,
   Secret,
   SecretList,
-} from "@/apis/cordiumv1/cordiumv1";
-import { getClientWorkspace } from "@/utils/client";
+} from "@octelium/apis/main/cordiumv1";
 import * as React from "react";
 
-import * as MetaPB from "@/apis/metav1/metav1";
 import DeleteResource from "@/components/DeleteResource";
 import EmptyList from "@/components/EmptyList";
 import Meta from "@/components/Meta";
@@ -23,6 +22,7 @@ import { useContextSpace } from "@/pages/Spaces/utils";
 import { onError } from "@/utils";
 import { getPathSpace } from "@/utils/octelium";
 import { getResourceRef, isMemberAdmin } from "@/utils/pb";
+import * as MetaPB from "@octelium/apis/main/metav1";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const Item = (props: { item: Secret }) => {

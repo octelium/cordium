@@ -4,14 +4,14 @@ import { getClientWorkspace } from "@/utils/client";
 
 import { onError } from "@/utils";
 
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 
 import { useParams } from "react-router-dom";
 
 import { useNavigate } from "react-router-dom";
 
-import { GetOptions } from "@/apis/metav1/metav1";
 import { Button } from "@mantine/core";
+import { GetOptions } from "@octelium/apis/main/metav1";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 

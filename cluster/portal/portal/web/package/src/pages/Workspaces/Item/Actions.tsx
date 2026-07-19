@@ -2,12 +2,12 @@ import { useAppDispatch } from "@/utils/hooks";
 
 import { getClientWorkspace } from "@/utils/client";
 
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 
 import { useNavigate } from "react-router-dom";
 
-import { DeleteOptions } from "@/apis/metav1/metav1";
 import DeleteResource from "@/components/DeleteResource";
+import { DeleteOptions } from "@octelium/apis/main/metav1";
 import { useMutation } from "@tanstack/react-query";
 // import { sendListenEvent } from "@/features/conn/slice";
 

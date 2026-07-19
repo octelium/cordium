@@ -1,9 +1,9 @@
 import * as React from "react";
 
-import * as WsPB from "../../apis/cordiumv1/cordiumv1";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 
-import { ObjectReference } from "@/apis/metav1/metav1";
 import { Tabs } from "@mantine/core";
+import { ObjectReference } from "@octelium/apis/main/metav1";
 import {
   cloneResource,
   resourceFromYAML,

@@ -1,13 +1,12 @@
+import { getClientWorkspace } from "@/utils/client";
 import {
   GetSpaceMembershipRequest,
   Membership,
   MembershipList,
   Membership_Spec_Role,
-} from "@/apis/cordiumv1/cordiumv1";
-import { getClientWorkspace } from "@/utils/client";
+} from "@octelium/apis/main/cordiumv1";
 import * as React from "react";
 
-import { DeleteOptions, GetOptions } from "@/apis/metav1/metav1";
 import DeleteResource from "@/components/DeleteResource";
 import Label from "@/components/Label";
 import Meta from "@/components/Meta";
@@ -17,6 +16,7 @@ import {
   ResourceListItem,
   ResourceListWrapper,
 } from "@/components/ResourceList";
+import { DeleteOptions, GetOptions } from "@octelium/apis/main/metav1";
 
 import { onError, toNumOrZero } from "@/utils";
 import { useAppSelector } from "@/utils/hooks";
@@ -25,8 +25,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "react-router-dom";
 import { match } from "ts-pattern";
 
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
 import { Select } from "@mantine/core";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 
 const Item = (props: {
   item: Membership;

@@ -1,4 +1,4 @@
-import { ListResponseMeta } from "@/apis/metav1/metav1";
+import { ListResponseMeta } from "@octelium/apis/main/metav1";
 import { useNavigate } from "react-router-dom";
 
 import { Pagination } from "@mantine/core";

@@ -1,5 +1,5 @@
-import { GetOptions } from "@/apis/metav1/metav1";
 import { getClientWorkspace } from "@/utils/client";
+import { GetOptions } from "@octelium/apis/main/metav1";
 import { useQuery } from "@tanstack/react-query";
 import * as React from "react";
 import { match } from "ts-pattern";

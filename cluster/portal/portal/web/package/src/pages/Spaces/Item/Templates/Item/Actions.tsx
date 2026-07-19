@@ -1,10 +1,10 @@
-import { DeleteOptions } from "@/apis/metav1/metav1";
 import DeleteResource from "@/components/DeleteResource";
 import Meta from "@/components/Meta";
 import PageWrap from "@/components/PageWrap";
 import { useContextSpace } from "@/pages/Spaces/utils";
 import { getClientWorkspace } from "@/utils/client";
 import { getPathSpaceRef, invalidateTemplate } from "@/utils/octelium";
+import { DeleteOptions } from "@octelium/apis/main/metav1";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 

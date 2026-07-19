@@ -1,9 +1,9 @@
-import { ObjectReference } from "@/apis/metav1/metav1";
+import { ObjectReference } from "@octelium/apis/main/metav1";
 import * as grpcWeb from "@protobuf-ts/grpcweb-transport";
 
+import * as WsGRPC from "@octelium/apis/main/cordiumv1";
+import * as UserGRPC from "@octelium/apis/main/userv1";
 import { getDomain, isDev } from "..";
-import * as WsGRPC from "../../apis/cordiumv1/cordiumv1.client";
-import * as UserGRPC from "../../apis/userv1/userv1.client";
 
 const getTransport = () => {
   const domain = getDomain();

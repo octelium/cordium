@@ -1,5 +1,5 @@
-import { LeaveSpaceRequest } from "@/apis/cordiumv1/cordiumv1";
-import { DeleteOptions } from "@/apis/metav1/metav1";
+import { LeaveSpaceRequest } from "@octelium/apis/main/cordiumv1";
+import { DeleteOptions } from "@octelium/apis/main/metav1";
 
 import DeleteResource from "@/components/DeleteResource";
 import Meta from "@/components/Meta";

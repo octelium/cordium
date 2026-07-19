@@ -1,9 +1,9 @@
+import { getClientWorkspace } from "@/utils/client";
 import {
   GitProvider,
   GitProviderList,
   ListGitProviderOptions,
-} from "@/apis/cordiumv1/cordiumv1";
-import { getClientWorkspace } from "@/utils/client";
+} from "@octelium/apis/main/cordiumv1";
 import * as React from "react";
 
 import EmptyList from "@/components/EmptyList";

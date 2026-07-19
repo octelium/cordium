@@ -9,7 +9,7 @@ import { debounce } from "lodash";
 import { connect, ConnectedProps } from "react-redux";
 import { AppDispatch, RootState } from "../../store";
 
-import * as WsPB from "../../apis/cordiumv1/cordiumv1";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 import {
   sendListenTerminal,
   sendListenTerminalEnd,

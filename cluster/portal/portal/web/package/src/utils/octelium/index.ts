@@ -1,7 +1,7 @@
-import * as MetaPB from "@/apis/metav1/metav1";
 import { queryClient } from "@/utils";
-import * as WsPB from "../../apis/cordiumv1/cordiumv1";
-import * as UserPB from "../../apis/userv1/userv1";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
+import * as MetaPB from "@octelium/apis/main/metav1";
+import * as UserPB from "@octelium/apis/main/userv1";
 import { getResourceRef, getShortNameFromRef, Resource } from "../pb";
 
 export const getServiceHostname = (arg: UserPB.Service): string => {

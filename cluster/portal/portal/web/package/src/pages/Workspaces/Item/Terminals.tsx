@@ -1,4 +1,3 @@
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
 import EmptyList from "@/components/EmptyList";
 import PageWrap from "@/components/PageWrap";
 import Terminal from "@/components/Terminal";
@@ -25,6 +24,7 @@ import {
   Text,
   Tooltip,
 } from "@mantine/core";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 import {
   IconExternalLink,
   IconPlus,

@@ -1,7 +1,7 @@
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
 import { getClientWorkspace } from "@/utils/client";
 import { useAppSelector } from "@/utils/hooks";
 import { getResourceRef } from "@/utils/pb";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { useQuery } from "@tanstack/react-query";
 import * as React from "react";
 import EmptyList from "../EmptyList";

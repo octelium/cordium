@@ -1,5 +1,5 @@
-import { DeleteOptions, GetOptions } from "@/apis/metav1/metav1";
 import { getClientWorkspace } from "@/utils/client";
+import { DeleteOptions, GetOptions } from "@octelium/apis/main/metav1";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 

@@ -1,9 +1,9 @@
+import { Anchor, Badge, Group } from "@mantine/core";
 import {
   Template,
   Workspace,
   Workspace_Spec_Repository,
-} from "@/apis/cordiumv1/cordiumv1";
-import { Anchor, Badge, Group } from "@mantine/core";
+} from "@octelium/apis/main/cordiumv1";
 import {
   IconBrandBitbucket,
   IconBrandGithub,

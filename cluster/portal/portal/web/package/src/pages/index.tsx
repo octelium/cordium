@@ -10,15 +10,15 @@ import { useAppDispatch } from "@/utils/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 
-import {
-  ListSpaceOptions,
-  Space,
-  Space_Status_Type,
-} from "@/apis/cordiumv1/cordiumv1";
 import SideBar from "@/components/SideBar";
 import { invalidateSpaces } from "@/utils/octelium";
 import { AppShell, Burger } from "@mantine/core";
 import { useDisclosure, useHeadroom } from "@mantine/hooks";
+import {
+  ListSpaceOptions,
+  Space,
+  Space_Status_Type,
+} from "@octelium/apis/main/cordiumv1";
 
 import "@fontsource/ubuntu/400.css";
 import "@fontsource/ubuntu/500.css";

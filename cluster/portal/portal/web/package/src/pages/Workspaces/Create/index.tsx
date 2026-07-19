@@ -1,16 +1,16 @@
 import { getClientWorkspace } from "@/utils/client";
 import * as React from "react";
 
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
 import Field from "@/components/Field";
 import ItemContainer from "@/components/ItemContainer";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { GetOptions } from "@/apis/metav1/metav1";
 import WorkspaceEdit from "@/components/WorkspaceEdit";
 import { onError } from "@/utils";
 import { getResourceRef } from "@/utils/pb";
+import { GetOptions } from "@octelium/apis/main/metav1";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import Switch from "@/components/Switch";

@@ -1,10 +1,10 @@
+import { getClientWorkspace } from "@/utils/client";
+import { isMemberAdmin } from "@/utils/pb";
 import {
   Membership_Spec_Role,
   Space_Status_Type,
-} from "@/apis/cordiumv1/cordiumv1";
-import { DeleteOptions } from "@/apis/metav1/metav1";
-import { getClientWorkspace } from "@/utils/client";
-import { isMemberAdmin } from "@/utils/pb";
+} from "@octelium/apis/main/cordiumv1";
+import { DeleteOptions } from "@octelium/apis/main/metav1";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 

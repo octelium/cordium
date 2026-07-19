@@ -6,12 +6,12 @@ import { useContextSpace } from "@/pages/Spaces/utils";
 import { useAppSelector } from "@/utils/hooks";
 import { useQuery } from "@tanstack/react-query";
 
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
 import Meta from "@/components/Meta";
 import PageWrap from "@/components/PageWrap";
 import Paginator from "@/components/Paginator";
 import WorkspaceListC from "@/components/ScopeResourceList/WorkspaceList";
 import { getResourceRef } from "@/utils/pb";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 
 const ListWorkspace = (props: { item: WsPB.Template }) => {
   const { item } = props;

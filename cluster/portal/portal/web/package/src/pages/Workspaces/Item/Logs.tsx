@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 
 // import { sendListenEvent } from "@/features/conn/slice";
 import TerminalEvent from "@/components/TerminalEvent";

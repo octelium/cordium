@@ -1,7 +1,7 @@
 import Settings from "@/utils/types/settings";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
-import * as UserPB from "@/apis/userv1/userv1";
+import * as UserPB from "@octelium/apis/main/userv1";
 
 export const slice = createSlice({
   name: "settings",

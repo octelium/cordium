@@ -3,11 +3,11 @@ import { onError } from "@/utils";
 import { useAppSelector } from "@/utils/hooks";
 import { getPathSpace, invalidateSpace } from "@/utils/octelium";
 import { Button, Divider, Group, Stack, Text, ThemeIcon } from "@mantine/core";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { useMutation } from "@tanstack/react-query";
 import { Layers } from "lucide-react";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
-import * as WsPB from "../../../apis/cordiumv1/cordiumv1";
 import { getClientWorkspace } from "../../../utils/client";
 
 const CreateSpace = () => {

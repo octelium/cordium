@@ -1,7 +1,7 @@
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { Loader2 } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 import { match } from "ts-pattern";
-import * as WsPB from "../../apis/cordiumv1/cordiumv1";
 
 type State = WsPB.Workspace_Status_State;
 const S = WsPB.Workspace_Status_State;

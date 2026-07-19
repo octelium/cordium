@@ -1,5 +1,5 @@
-import { Workspace } from "@/apis/cordiumv1/cordiumv1";
 import { useAppSelector } from "@/utils/hooks";
+import { Workspace } from "@octelium/apis/main/cordiumv1";
 import { ResourceListItem, ResourceListItemMetadata } from ".";
 import Label from "../Label";
 import Repository from "../Repository";

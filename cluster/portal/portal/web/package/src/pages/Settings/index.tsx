@@ -1,9 +1,3 @@
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
-import {
-  UserConfig,
-  UserConfig_Spec_Dotfiles,
-  UserConfig_Spec_EnvVar,
-} from "@/apis/cordiumv1/cordiumv1";
 import EditItem from "@/components/EditItem";
 import Editor from "@/components/Editor";
 import ItemContainer from "@/components/ItemContainer";
@@ -21,6 +15,12 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
+import {
+  UserConfig,
+  UserConfig_Spec_Dotfiles,
+  UserConfig_Spec_EnvVar,
+} from "@octelium/apis/main/cordiumv1";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as React from "react";
 import { toast } from "react-hot-toast";

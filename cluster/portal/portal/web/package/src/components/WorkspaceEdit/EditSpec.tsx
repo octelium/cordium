@@ -1,11 +1,11 @@
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 import * as React from "react";
-import * as WsPB from "../../apis/cordiumv1/cordiumv1";
 import Field from "../Field";
 import ItemContainer from "../ItemContainer";
 
-import { GetOptions, ObjectReference } from "@/apis/metav1/metav1";
 import { getClientWorkspace } from "@/utils/client";
 import { Group, Select } from "@mantine/core";
+import { GetOptions, ObjectReference } from "@octelium/apis/main/metav1";
 import { useQuery } from "@tanstack/react-query";
 import { cloneResource, getShortName } from "../../utils/pb";
 import Divider from "../Divider";
@@ -13,8 +13,8 @@ import EditItem from "../EditItem";
 import Editor from "../Editor";
 import Switch from "../Switch";
 
-import * as MetaPB from "@/apis/metav1/metav1";
 import { SegmentedControl, Text, TextInput } from "@mantine/core";
+import * as MetaPB from "@octelium/apis/main/metav1";
 
 const EditSpec = (props: {
   item: WsPB.Workspace | WsPB.Template;

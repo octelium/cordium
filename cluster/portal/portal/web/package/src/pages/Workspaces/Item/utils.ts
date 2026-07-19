@@ -1,4 +1,4 @@
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { match } from "ts-pattern";
 
 export const canUseWorkspaceService = (item: WsPB.Workspace) => {

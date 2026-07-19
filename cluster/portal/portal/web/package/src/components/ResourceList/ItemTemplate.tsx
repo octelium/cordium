@@ -1,4 +1,4 @@
-import { Template } from "@/apis/cordiumv1/cordiumv1";
+import { Template } from "@octelium/apis/main/cordiumv1";
 import { ResourceListItem, ResourceListItemMetadata } from ".";
 import Repository from "../Repository";
 

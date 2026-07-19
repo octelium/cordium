@@ -1,4 +1,3 @@
-import { ListSpaceOptions, SpaceList } from "@/apis/cordiumv1/cordiumv1";
 import EmptyList from "@/components/EmptyList";
 import PageWrap from "@/components/PageWrap";
 import Paginator from "@/components/Paginator";
@@ -9,6 +8,7 @@ import {
 import ItemSpace from "@/components/ResourceList/ItemSpace";
 import { getClientWorkspace } from "@/utils/client";
 import { useAppSelector } from "@/utils/hooks";
+import { ListSpaceOptions, SpaceList } from "@octelium/apis/main/cordiumv1";
 import { useQuery } from "@tanstack/react-query";
 import * as React from "react";
 import { Navigate } from "react-router-dom";

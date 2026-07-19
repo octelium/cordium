@@ -4,7 +4,7 @@ import { getClientWorkspace } from "@/utils/client";
 
 import { onError } from "@/utils";
 
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 
 import { useNavigate } from "react-router-dom";
 

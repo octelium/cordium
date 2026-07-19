@@ -1,12 +1,11 @@
+import { getClientWorkspace } from "@/utils/client";
 import {
   ListUserSecretOptions,
   UserSecret,
   UserSecretList,
   UserSecret_Spec_Type,
-} from "@/apis/cordiumv1/cordiumv1";
-import { getClientWorkspace } from "@/utils/client";
+} from "@octelium/apis/main/cordiumv1";
 
-import * as MetaPB from "@/apis/metav1/metav1";
 import CopyText from "@/components/CopyText";
 import DeleteResource from "@/components/DeleteResource";
 import EmptyList from "@/components/EmptyList";
@@ -23,6 +22,7 @@ import {
 import { onError, toNumOrZero } from "@/utils";
 import { useAppSelector } from "@/utils/hooks";
 import { getResourceRef } from "@/utils/pb";
+import * as MetaPB from "@octelium/apis/main/metav1";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";

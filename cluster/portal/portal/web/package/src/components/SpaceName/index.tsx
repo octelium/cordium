@@ -1,6 +1,6 @@
-import * as MetaPB from "@/apis/metav1/metav1";
 import { useAppSelector } from "@/utils/hooks";
 import { getShortNameFromRef } from "@/utils/pb";
+import * as MetaPB from "@octelium/apis/main/metav1";
 import Label from "../Label";
 
 const SpaceName = (props: {

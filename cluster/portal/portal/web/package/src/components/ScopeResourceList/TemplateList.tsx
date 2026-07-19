@@ -1,6 +1,6 @@
-import { TemplateList } from "@/apis/cordiumv1/cordiumv1";
 import EmptyList from "@/components/EmptyList";
 import { ResourceListWrapper } from "@/components/ResourceList";
+import { TemplateList } from "@octelium/apis/main/cordiumv1";
 import { useNavigate } from "react-router-dom";
 import Label from "../Label";
 import ItemTemplate from "../ResourceList/ItemTemplate";

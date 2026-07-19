@@ -1,6 +1,6 @@
-import { Metadata } from "@/apis/metav1/metav1";
 import { getShortNameFromStr } from "@/utils/pb";
 import { Group, TextInput } from "@mantine/core";
+import { Metadata } from "@octelium/apis/main/metav1";
 import * as React from "react";
 
 const MetadataEdit = (props: {

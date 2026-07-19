@@ -1,10 +1,10 @@
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
 import { onError } from "@/utils";
 import { getClientWorkspace } from "@/utils/client";
 import { invalidateResource } from "@/utils/octelium";
 import { getResourceRef, getShortName } from "@/utils/pb";
 import { Button, Group, Modal, Stack, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { useMutation } from "@tanstack/react-query";
 import { Hammer } from "lucide-react";
 import { toast } from "react-hot-toast";

@@ -1,20 +1,20 @@
-import {
-  ListWorkspaceOptions,
-  WorkspaceList,
-} from "@/apis/cordiumv1/cordiumv1";
 import Meta from "@/components/Meta";
 import { getClientWorkspace } from "@/utils/client";
 import { useAppSelector } from "@/utils/hooks";
+import {
+  ListWorkspaceOptions,
+  WorkspaceList,
+} from "@octelium/apis/main/cordiumv1";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 
-import { GetOptions } from "@/apis/metav1/metav1";
 import EmptyList from "@/components/EmptyList";
 import Paginator from "@/components/Paginator";
 import { ResourceListWrapper } from "@/components/ResourceList";
 import ItemWorkspace from "@/components/ResourceList/ItemWorkspace";
 import { toNumOrZero } from "@/utils";
 import { getResourceRef } from "@/utils/pb";
+import { GetOptions } from "@octelium/apis/main/metav1";
 
 const WorkspaceListC = (props: {
   itemsList: WorkspaceList;

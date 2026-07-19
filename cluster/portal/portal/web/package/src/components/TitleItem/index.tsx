@@ -1,15 +1,15 @@
-import { GetOptions } from "@/apis/metav1/metav1";
 import { getClientWorkspace } from "@/utils/client";
+import { GetOptions } from "@octelium/apis/main/metav1";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { useAppSelector } from "@/utils/hooks";
 import { getPathSpace } from "@/utils/octelium";
 import { getResourceRef, getShortName } from "@/utils/pb";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { MdOutlineArrowForwardIos } from "react-icons/md";
 import { twMerge } from "tailwind-merge";
-import * as WsPB from "../../apis/cordiumv1/cordiumv1";
 import SpaceName from "../SpaceName";
 
 const Block = (props: { children?: React.ReactNode }) => {

@@ -1,11 +1,11 @@
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 import * as React from "react";
 
 import { getClientWorkspace } from "@/utils/client";
 
-import { GetOptions, ObjectReference } from "@/apis/metav1/metav1";
 import { onError } from "@/utils";
 import { getResourceRef } from "@/utils/pb";
+import { GetOptions, ObjectReference } from "@octelium/apis/main/metav1";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";

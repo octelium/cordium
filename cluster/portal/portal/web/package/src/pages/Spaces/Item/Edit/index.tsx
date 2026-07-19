@@ -1,12 +1,12 @@
 import * as React from "react";
 
+import { getClientWorkspace } from "@/utils/client";
+import { cloneResource, getResourceRef } from "@/utils/pb";
 import {
   GitProvider,
   GitProviderList,
   Membership_Spec_Role,
-} from "@/apis/cordiumv1/cordiumv1";
-import { getClientWorkspace } from "@/utils/client";
-import { cloneResource, getResourceRef } from "@/utils/pb";
+} from "@octelium/apis/main/cordiumv1";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
@@ -21,10 +21,10 @@ import { onError } from "@/utils";
 import { useAppSelector } from "@/utils/hooks";
 import { getPathSpace, invalidateSpace } from "@/utils/octelium";
 import { Button, Group, Select } from "@mantine/core";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { twMerge } from "tailwind-merge";
-import * as WsPB from "../../../../apis/cordiumv1/cordiumv1";
 import { useContextSpace } from "../../utils";
 
 interface AuthBegin {

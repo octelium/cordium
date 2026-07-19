@@ -1,10 +1,10 @@
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
 import PageWrap from "@/components/PageWrap";
 import WorkspaceStatus from "@/components/WorkspaceStatus";
 import { clearTerminalGroup } from "@/features/terminalgroup/slice";
 import { useAppDispatch } from "@/utils/hooks";
 import { getShortName } from "@/utils/pb";
 import { Tabs, Text } from "@mantine/core";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 import {
   IconActivity,
   IconBolt,

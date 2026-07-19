@@ -1,14 +1,14 @@
-import {
-  GetSpaceMembershipRequest,
-  Membership_Spec_Role,
-} from "@/apis/cordiumv1/cordiumv1";
-import { DeleteOptions, GetOptions } from "@/apis/metav1/metav1";
 import DeleteResource from "@/components/DeleteResource";
 import InfoItem from "@/components/InfoItem";
 import TimeAgo from "@/components/TimeAgo";
 import { onError } from "@/utils";
 import { getClientWorkspace } from "@/utils/client";
 import { getShortName } from "@/utils/pb";
+import {
+  GetSpaceMembershipRequest,
+  Membership_Spec_Role,
+} from "@octelium/apis/main/cordiumv1";
+import { DeleteOptions, GetOptions } from "@octelium/apis/main/metav1";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 

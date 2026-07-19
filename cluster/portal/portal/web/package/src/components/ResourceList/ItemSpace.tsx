@@ -1,5 +1,5 @@
-import { Space } from "@/apis/cordiumv1/cordiumv1";
 import { getPathSpace } from "@/utils/octelium";
+import { Space } from "@octelium/apis/main/cordiumv1";
 import { ResourceListItem, ResourceListItemMetadata } from ".";
 
 const ItemSpace = (props: { item: Space }) => {

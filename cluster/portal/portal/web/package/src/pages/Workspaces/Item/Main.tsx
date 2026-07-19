@@ -1,5 +1,3 @@
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
-import { GetOptions } from "@/apis/metav1/metav1";
 import CopyText from "@/components/CopyText";
 import InfoItem from "@/components/InfoItem";
 import LinkWrap from "@/components/LinkWrap";
@@ -29,6 +27,8 @@ import {
   Text,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
+import { GetOptions } from "@octelium/apis/main/metav1";
 import {
   IconBrandGit,
   IconCpu,

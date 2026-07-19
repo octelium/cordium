@@ -1,6 +1,5 @@
-import * as React from "react";
-import { Outlet, useOutletContext } from "react-router-dom";
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
+import { Outlet } from "react-router-dom";
 
 const Page = () => {
   return (

@@ -5,9 +5,9 @@ import { getClientWorkspace } from "@/utils/client";
 import { useContextSpace } from "@/pages/Spaces/utils";
 import { useAppSelector } from "@/utils/hooks";
 
-import * as WsPB from "@/apis/cordiumv1/cordiumv1";
-import * as MetaPB from "@/apis/metav1/metav1";
 import BuildTemplate from "@/components/BuildTemplate";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
+import * as MetaPB from "@octelium/apis/main/metav1";
 
 import EmptyList from "@/components/EmptyList";
 import Label from "@/components/Label";

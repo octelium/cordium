@@ -11,9 +11,9 @@ import { AppDispatch, RootState } from "../../store";
 
 import { getClientWorkspaceSvc } from "@/utils/client";
 import { getResourceRef } from "@/utils/pb";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { twMerge } from "tailwind-merge";
-import * as WsPB from "../../apis/cordiumv1/cordiumv1";
-import * as WsGRPC from "../../apis/cordiumv1/cordiumv1.client";
+
 import {
   sendCloseTerminal,
   sendCreateTerminal,
@@ -38,7 +38,7 @@ export class TerminalEvent extends React.Component<Props, State> {
   serializeAddon: SerializeAddon;
   disposables: IDisposable[];
 
-  c: WsGRPC.WorkspaceServiceClient;
+  c: WsPB.WorkspaceServiceClient;
 
   constructor(props: Props) {
     super(props);

@@ -1,9 +1,8 @@
-import { DeleteOptions, GetOptions } from "@/apis/metav1/metav1";
+import { DeleteOptions, GetOptions } from "@octelium/apis/main/metav1";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { getClientWorkspace } from "../../../utils/client";
 
-import { UserSecret_Spec_Type } from "@/apis/cordiumv1/cordiumv1";
 import CopyText from "@/components/CopyText";
 import DeleteResource from "@/components/DeleteResource";
 import InfoItem from "@/components/InfoItem";
@@ -11,6 +10,7 @@ import Label from "@/components/Label";
 import TimeAgo from "@/components/TimeAgo";
 import { onError } from "@/utils";
 import { getShortName } from "@/utils/pb";
+import { UserSecret_Spec_Type } from "@octelium/apis/main/cordiumv1";
 
 const Page = () => {
   let { uid } = useParams();
