@@ -345,6 +345,8 @@ func (s *Server) podmanRunImage(ctx context.Context) error {
 
 		`--security-opt=seccomp=/etc/containers/seccomp.json`,
 		"--runtime=crun",
+		fmt.Sprintf("-e OCTELIUM_DOMAIN=%s", s.initReq.ClientInfo.Domain),
+		`-e OCTELIUM_AUTH_PROXY_SOCKET="/var/run/octelium-proxy.sock"`,
 	}
 	if ldflags.IsDev() {
 		podmanRunArgs = append(podmanRunArgs, "--env=OCTELIUM_DEV=true")
