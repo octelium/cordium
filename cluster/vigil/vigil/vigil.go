@@ -22,6 +22,7 @@ import (
 
 	"github.com/octelium/cordium/cluster/common/octeliumc"
 	"github.com/octelium/cordium/cluster/common/watchers"
+	"github.com/octelium/cordium/cluster/common/wsutils"
 	"github.com/octelium/cordium/cluster/vigil/vigil/acache"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/corev1"
@@ -38,10 +39,11 @@ import (
 )
 
 type srv struct {
-	s         *vigil.Server
-	octeliumC octeliumc.ClientInterface
-	aCache    *acache.Cache
-	regionRef *metav1.ObjectReference
+	s           *vigil.Server
+	octeliumC   octeliumc.ClientInterface
+	aCache      *acache.Cache
+	regionRef   *metav1.ObjectReference
+	activityCtl *wsutils.ActivityCtl
 }
 
 func newServer(ctx context.Context, octeliumC octeliumc.ClientInterface) (*srv, error) {
@@ -74,6 +76,11 @@ func newServer(ctx context.Context, octeliumC octeliumc.ClientInterface) (*srv, 
 	}
 	ret.s = s
 	ret.aCache, err = acache.NewCache()
+	if err != nil {
+		return nil, err
+	}
+
+	ret.activityCtl, err = wsutils.NewActivityCtl(octeliumC)
 	if err != nil {
 		return nil, err
 	}
@@ -125,6 +132,10 @@ func (s *srv) Run(ctx context.Context) error {
 	}
 
 	if err := s.s.Run(ctx); err != nil {
+		return err
+	}
+
+	if err := s.activityCtl.Run(ctx); err != nil {
 		return err
 	}
 

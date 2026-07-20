@@ -119,6 +119,8 @@ func (s *srv) doPostAuthorize(ctx context.Context, req *modes.PostAuthorizeReque
 		zap.String("sessName", i.Session.Metadata.Name),
 	)
 
+	s.activityCtl.Set(ws.Metadata.Uid)
+
 	return &modes.PostAuthorizeResponse{
 		IsAuthorized: true,
 	}, nil
