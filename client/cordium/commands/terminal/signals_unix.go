@@ -1,3 +1,5 @@
+//go:build unix
+
 /*
  * Copyright Octelium Labs, LLC. All rights reserved.
  *
