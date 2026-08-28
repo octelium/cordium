@@ -1,7 +1,7 @@
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import * as MetaPB from "@octelium/apis/main/metav1";
 import * as UserPB from "@octelium/apis/main/userv1";
-import Yaml from "js-yaml";
+import { dump, load as loadYaml } from "js-yaml";
 
 export type Resource =
   | WsPB.Workspace
@@ -39,15 +39,15 @@ export const resourceSpecToJSON = (arg: Resource): string => {
 };
 
 export const resourceToYAML = (arg: Resource): string => {
-  return Yaml.dump(JSON.parse(resourceToJSON(arg)));
+  return dump(JSON.parse(resourceToJSON(arg)));
 };
 
 export const resourceSpecToYAML = (arg: Resource): string => {
-  return Yaml.dump(JSON.parse(resourceSpecToJSON(arg)));
+  return dump(JSON.parse(resourceSpecToJSON(arg)));
 };
 
 export const resourceFromYAML = (arg: string): Resource | undefined => {
-  const yamlObj = Yaml.load(arg) as any;
+  const yamlObj = loadYaml(arg) as any;
   const kind = yamlObj["kind"] as ResourceName;
   return WsPB[kind].fromJsonString(JSON.stringify(yamlObj));
 };
