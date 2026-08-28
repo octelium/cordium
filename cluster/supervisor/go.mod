@@ -1,6 +1,6 @@
 module github.com/octelium/cordium/cluster/supervisor
 
-go 1.26.4
+go 1.26.6
 
 require (
 	github.com/containerd/cgroups/v3 v3.1.3

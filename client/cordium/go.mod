@@ -1,6 +1,6 @@
 module github.com/octelium/cordium/client/cordium
 
-go 1.26.4
+go 1.26.6
 
 require (
 	al.essio.dev/pkg/shellescape v1.6.0

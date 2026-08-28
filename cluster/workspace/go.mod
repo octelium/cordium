@@ -1,6 +1,6 @@
 module github.com/octelium/cordium/cluster/workspace
 
-go 1.26.4
+go 1.26.6
 
 require (
 	github.com/creack/pty v1.1.24
