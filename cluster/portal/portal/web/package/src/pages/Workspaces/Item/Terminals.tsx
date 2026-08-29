@@ -47,11 +47,37 @@ const TabStrip = (props: {
     dispatch(removeTerminal({ id }));
   };
 
+  const handleTabWheel = React.useCallback((event: WheelEvent) => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    event.preventDefault();
+    const delta =
+      Math.abs(event.deltaX) > Math.abs(event.deltaY)
+        ? event.deltaX
+        : event.deltaY;
+    const maxScrollLeft = container.scrollWidth - container.clientWidth;
+    const nextScrollLeft = Math.min(
+      maxScrollLeft,
+      Math.max(0, container.scrollLeft + delta),
+    );
+
+    container.scrollLeft = nextScrollLeft;
+  }, []);
+
+  React.useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    container.addEventListener("wheel", handleTabWheel, { passive: false });
+    return () => container.removeEventListener("wheel", handleTabWheel);
+  }, [handleTabWheel]);
+
   return (
     <div className="flex min-w-0 flex-1 items-center gap-1">
       <div
         ref={scrollRef}
-        className="scrollbar-none flex min-w-0 flex-1 items-center gap-1 overflow-x-auto"
+        className="scrollbar-none flex min-w-0 flex-1 items-center gap-1 overflow-x-auto overscroll-none"
       >
         {tg.terminals.map((t) => {
           const isActive = tg.activeTerminal === t.id;
@@ -100,28 +126,30 @@ const TabStrip = (props: {
           );
         })}
         <div
-          className="min-w-4 flex-1 self-stretch"
+          className="min-w-4 shrink-0 self-stretch"
           aria-hidden="true"
           title="Double-click to open a new terminal"
           onDoubleClick={() => {
             if (!props.creating) props.onCreate();
           }}
         />
-      </div>
 
-      <Tooltip label="New terminal">
-        <ActionIcon
-          size={27}
-          variant="transparent"
-          aria-label="New terminal"
-          className={consoleToolbarButtonClass}
-          vars={consoleToolbarButtonVars}
-          loading={props.creating}
-          onClick={props.onCreate}
-        >
-          <IconSquareRoundedPlus size={15} stroke={1.9} />
-        </ActionIcon>
-      </Tooltip>
+        <div className="sticky right-0 z-10 shrink-0 self-stretch bg-[var(--console-chrome)] pl-1">
+          <Tooltip label="New terminal">
+            <ActionIcon
+              size={27}
+              variant="transparent"
+              aria-label="New terminal"
+              className={consoleToolbarButtonClass}
+              vars={consoleToolbarButtonVars}
+              loading={props.creating}
+              onClick={props.onCreate}
+            >
+              <IconSquareRoundedPlus size={15} stroke={1.9} />
+            </ActionIcon>
+          </Tooltip>
+        </div>
+      </div>
     </div>
   );
 };
