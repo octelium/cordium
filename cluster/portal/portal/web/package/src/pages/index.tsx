@@ -69,7 +69,10 @@ const Root = () => {
       padding={0}
       className="bg-slate-100"
     >
-      <AppShell.Header className="border-b border-slate-200 bg-slate-100">
+      <AppShell.Header
+        className="border-b border-slate-200 bg-slate-100"
+        style={{ backgroundColor: "var(--color-slate-100)" }}
+      >
         <div className="flex h-full items-center">
           <Burger
             opened={navOpened}
@@ -83,7 +86,10 @@ const Root = () => {
         </div>
       </AppShell.Header>
 
-      <AppShell.Navbar className="border-r border-slate-200 bg-slate-100 p-3">
+      <AppShell.Navbar
+        className="border-r border-slate-200 bg-slate-100 p-3"
+        style={{ backgroundColor: "var(--color-slate-100)" }}
+      >
         <SideBar onNavigate={closeNav} />
       </AppShell.Navbar>
 

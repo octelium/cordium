@@ -27,7 +27,7 @@ const TopBar = () => {
   const email = status?.user?.spec?.email;
 
   return (
-    <div className="flex h-full w-full items-center gap-3 px-4">
+    <div className="flex h-full w-full items-center gap-3 bg-slate-100 px-4">
       <Link
         to="/"
         aria-label="Cordium home"

@@ -60,7 +60,7 @@ const SectionLabel = (props: { children: React.ReactNode }) => (
 );
 
 const SideBar = (props: { onNavigate?: () => void }) => (
-  <nav className="flex h-full flex-col gap-1">
+  <nav className="flex h-full flex-col gap-1 bg-slate-100">
     {primary.map((item) => (
       <Item key={item.to} item={item} onNavigate={props.onNavigate} />
     ))}
