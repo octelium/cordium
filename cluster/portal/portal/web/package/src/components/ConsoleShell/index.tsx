@@ -20,8 +20,11 @@ import * as React from "react";
 import { twMerge } from "tailwind-merge";
 
 const ToolbarDivider = () => (
-  <span className="mx-1 h-4 w-px shrink-0 bg-slate-700" />
+  <span className="mx-1.5 h-5 w-px shrink-0 bg-slate-700/80" />
 );
+
+export const consoleToolbarButtonClass =
+  "border border-slate-600/80 bg-slate-800/90 text-slate-300 shadow-sm transition-all duration-150 hover:border-slate-500 hover:bg-slate-700 hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--console-chrome)] disabled:border-slate-700 disabled:bg-slate-800/50 disabled:text-slate-600 disabled:shadow-none";
 
 const ConsoleShell = (props: {
   tabs?: React.ReactNode;
@@ -47,7 +50,7 @@ const ConsoleShell = (props: {
   }, [dispatch]);
 
   const toolbar = (
-    <div className="flex items-center gap-2 border-b border-slate-900 bg-[var(--console-chrome)] px-2 py-1.5">
+    <div className="flex items-center gap-2 border-b border-slate-800 bg-[var(--console-chrome)] px-3 py-2">
       <div className="flex min-w-0 flex-1 items-center">{props.tabs}</div>
 
       <div className="flex shrink-0 items-center gap-1">
@@ -56,79 +59,91 @@ const ConsoleShell = (props: {
         {props.withFontControls !== false && (
           <>
             {props.actions && <ToolbarDivider />}
-            <Tooltip label="Decrease font size">
-              <ActionIcon
-                size={26}
-                variant="subtle"
-                color="gray"
-                aria-label="Decrease font size"
-                disabled={fontSize <= TERMINAL_FONT_SIZE_MIN}
-                onClick={() =>
-                  dispatch(setTerminalFontSize({ value: fontSize - 1 }))
-                }
-              >
-                <IconMinus size={13} />
-              </ActionIcon>
-            </Tooltip>
-            <span className="w-6 text-center font-mono text-[0.68rem] font-semibold text-slate-400">
-              {fontSize}
-            </span>
-            <Tooltip label="Increase font size">
-              <ActionIcon
-                size={26}
-                variant="subtle"
-                color="gray"
-                aria-label="Increase font size"
-                disabled={fontSize >= TERMINAL_FONT_SIZE_MAX}
-                onClick={() =>
-                  dispatch(setTerminalFontSize({ value: fontSize + 1 }))
-                }
-              >
-                <IconPlus size={13} />
-              </ActionIcon>
-            </Tooltip>
+            <div className="flex items-center gap-0.5 rounded-lg border border-slate-700 bg-slate-900/60 p-0.5">
+              <Tooltip label="Decrease font size">
+                <ActionIcon
+                  size={27}
+                  variant="transparent"
+                  aria-label="Decrease font size"
+                  className={consoleToolbarButtonClass}
+                  disabled={fontSize <= TERMINAL_FONT_SIZE_MIN}
+                  onClick={() =>
+                    dispatch(setTerminalFontSize({ value: fontSize - 1 }))
+                  }
+                >
+                  <IconMinus size={13} stroke={2.25} />
+                </ActionIcon>
+              </Tooltip>
+              <span className="min-w-7 px-1 text-center font-mono text-[0.7rem] font-semibold tabular-nums text-slate-200">
+                {fontSize}
+              </span>
+              <Tooltip label="Increase font size">
+                <ActionIcon
+                  size={27}
+                  variant="transparent"
+                  aria-label="Increase font size"
+                  className={consoleToolbarButtonClass}
+                  disabled={fontSize >= TERMINAL_FONT_SIZE_MAX}
+                  onClick={() =>
+                    dispatch(setTerminalFontSize({ value: fontSize + 1 }))
+                  }
+                >
+                  <IconPlus size={13} stroke={2.25} />
+                </ActionIcon>
+              </Tooltip>
+            </div>
           </>
         )}
 
         <ToolbarDivider />
 
-        {!fullscreen && (
-          <Tooltip label={wide ? "Exit wide mode" : "Wide mode"}>
+        <div className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-900/60 p-0.5">
+          {!fullscreen && (
+            <Tooltip label={wide ? "Exit wide mode" : "Wide mode"}>
+              <ActionIcon
+                size={27}
+                variant="transparent"
+                aria-label="Toggle wide mode"
+                className={twMerge(
+                  consoleToolbarButtonClass,
+                  wide &&
+                    "border-emerald-400/50 bg-emerald-400/10 text-emerald-200 hover:bg-emerald-400/20",
+                )}
+                onClick={() => dispatch(setTerminalWide({ value: !wide }))}
+              >
+                {wide ? (
+                  <IconArrowsDiagonalMinimize2 size={14} />
+                ) : (
+                  <IconArrowsDiagonal size={14} />
+                )}
+              </ActionIcon>
+            </Tooltip>
+          )}
+
+          <Tooltip
+            label={fullscreen ? "Exit full screen (Esc)" : "Full screen"}
+          >
             <ActionIcon
-              size={26}
-              variant={wide ? "light" : "subtle"}
-              color="gray"
-              aria-label="Toggle wide mode"
-              onClick={() => dispatch(setTerminalWide({ value: !wide }))}
+              size={27}
+              variant="transparent"
+              aria-label="Toggle full screen"
+              className={twMerge(
+                consoleToolbarButtonClass,
+                fullscreen &&
+                  "border-emerald-400/50 bg-emerald-400/10 text-emerald-200 hover:bg-emerald-400/20",
+              )}
+              onClick={() =>
+                dispatch(setTerminalFullscreen({ value: !fullscreen }))
+              }
             >
-              {wide ? (
-                <IconArrowsDiagonalMinimize2 size={14} />
+              {fullscreen ? (
+                <IconArrowsMinimize size={14} />
               ) : (
-                <IconArrowsDiagonal size={14} />
+                <IconArrowsMaximize size={14} />
               )}
             </ActionIcon>
           </Tooltip>
-        )}
-
-        <Tooltip
-          label={fullscreen ? "Exit full screen (Esc)" : "Full screen"}
-        >
-          <ActionIcon
-            size={26}
-            variant={fullscreen ? "light" : "subtle"}
-            color="gray"
-            aria-label="Toggle full screen"
-            onClick={() =>
-              dispatch(setTerminalFullscreen({ value: !fullscreen }))
-            }
-          >
-            {fullscreen ? (
-              <IconArrowsMinimize size={14} />
-            ) : (
-              <IconArrowsMaximize size={14} />
-            )}
-          </ActionIcon>
-        </Tooltip>
+        </div>
       </div>
     </div>
   );

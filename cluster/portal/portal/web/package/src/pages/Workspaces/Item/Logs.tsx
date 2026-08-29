@@ -1,4 +1,6 @@
-import ConsoleShell from "@/components/ConsoleShell";
+import ConsoleShell, {
+  consoleToolbarButtonClass,
+} from "@/components/ConsoleShell";
 import Empty from "@/components/Empty";
 import LogConsole from "@/components/LogConsole";
 import { useAppSelector } from "@/utils/hooks";
@@ -37,10 +39,10 @@ const Page = () => {
       actions={
         <Tooltip label="Clear">
           <ActionIcon
-            size={26}
-            variant="subtle"
-            color="gray"
+            size={27}
+            variant="transparent"
             aria-label="Clear logs"
+            className={consoleToolbarButtonClass}
             onClick={() => setClearToken((v) => v + 1)}
           >
             <IconEraser size={14} />

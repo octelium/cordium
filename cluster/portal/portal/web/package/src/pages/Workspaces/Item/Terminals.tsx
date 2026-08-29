@@ -1,4 +1,6 @@
-import ConsoleShell from "@/components/ConsoleShell";
+import ConsoleShell, {
+  consoleToolbarButtonClass,
+} from "@/components/ConsoleShell";
 import Empty from "@/components/Empty";
 import Terminal from "@/components/Terminal";
 import {
@@ -76,9 +78,8 @@ const TabStrip = (props: {
               <ActionIcon
                 size={16}
                 variant="transparent"
-                color="gray"
                 aria-label="Close terminal"
-                className="shrink-0 hover:text-rose-400"
+                className="shrink-0 text-slate-500 transition-colors hover:bg-slate-600/70 hover:text-rose-300"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleRemove(t.id);
@@ -93,10 +94,10 @@ const TabStrip = (props: {
 
       <Tooltip label="New terminal">
         <ActionIcon
-          size={26}
-          variant="subtle"
-          color="gray"
+          size={27}
+          variant="transparent"
           aria-label="New terminal"
+          className={consoleToolbarButtonClass}
           loading={props.creating}
           onClick={props.onCreate}
         >
