@@ -17,7 +17,12 @@ import { getResourceRef } from "@/utils/pb";
 import TerminalT from "@/utils/types/terminal";
 import { ActionIcon, Button, Tooltip } from "@mantine/core";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
-import { IconPlus, IconTerminal2, IconX } from "@tabler/icons-react";
+import {
+  IconPlus,
+  IconSquareRoundedPlus,
+  IconTerminal2,
+  IconX,
+} from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import * as React from "react";
 import { twMerge } from "tailwind-merge";
@@ -73,7 +78,7 @@ const TabStrip = (props: {
               />
               <span
                 className={twMerge(
-                  "truncate font-mono text-[0.72rem] font-medium",
+                  "truncate font-mono text-[0.72rem] font-semibold",
                   isActive ? "text-slate-100" : "text-slate-400",
                 )}
               >
@@ -94,6 +99,14 @@ const TabStrip = (props: {
             </div>
           );
         })}
+        <div
+          className="min-w-4 flex-1 self-stretch"
+          aria-hidden="true"
+          title="Double-click to open a new terminal"
+          onDoubleClick={() => {
+            if (!props.creating) props.onCreate();
+          }}
+        />
       </div>
 
       <Tooltip label="New terminal">
@@ -106,7 +119,7 @@ const TabStrip = (props: {
           loading={props.creating}
           onClick={props.onCreate}
         >
-          <IconPlus size={14} />
+          <IconSquareRoundedPlus size={15} stroke={1.9} />
         </ActionIcon>
       </Tooltip>
     </div>

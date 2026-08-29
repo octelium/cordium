@@ -1,7 +1,6 @@
 import {
   setTerminalFontSize,
   setTerminalFullscreen,
-  setTerminalWide,
   TERMINAL_FONT_SIZE_MAX,
   TERMINAL_FONT_SIZE_MIN,
 } from "@/features/settings/slice";
@@ -9,8 +8,6 @@ import { useAppDispatch, useAppSelector } from "@/utils/hooks";
 import { ActionIcon, RemoveScroll, Tooltip } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
 import {
-  IconArrowsDiagonal,
-  IconArrowsDiagonalMinimize2,
   IconArrowsMaximize,
   IconArrowsMinimize,
   IconMinus,
@@ -54,7 +51,6 @@ const ConsoleShell = (props: {
   withFontControls?: boolean;
 }) => {
   const dispatch = useAppDispatch();
-  const wide = useAppSelector((s) => s.settings.terminalWide);
   const fullscreen = useAppSelector((s) => s.settings.terminalFullscreen);
   const fontSize = useAppSelector((s) => s.settings.terminalFontSize);
 
@@ -65,7 +61,6 @@ const ConsoleShell = (props: {
   React.useEffect(() => {
     return () => {
       dispatch(setTerminalFullscreen({ value: false }));
-      dispatch(setTerminalWide({ value: false }));
     };
   }, [dispatch]);
 
@@ -73,7 +68,7 @@ const ConsoleShell = (props: {
     <div className="flex items-center gap-2 border-b border-slate-800 bg-[var(--console-chrome)] px-3 py-2">
       <div className="flex min-w-0 flex-1 items-center">{props.tabs}</div>
 
-      <div className="flex shrink-0 items-center gap-1">
+      <div className="flex shrink-0 items-center gap-1 border-l border-slate-700/80 pl-3">
         {props.actions}
 
         {props.withFontControls !== false && (
@@ -120,29 +115,6 @@ const ConsoleShell = (props: {
         <ToolbarDivider />
 
         <div className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-900/60 p-0.5">
-          {!fullscreen && (
-            <Tooltip label={wide ? "Exit wide mode" : "Wide mode"}>
-              <ActionIcon
-                size={27}
-                variant="transparent"
-                aria-label="Toggle wide mode"
-                vars={wide ? consoleToolbarActiveButtonVars : consoleToolbarButtonVars}
-                className={twMerge(
-                  consoleToolbarButtonClass,
-                  wide &&
-                    "border-emerald-400/50 bg-emerald-400/10 text-emerald-200 hover:bg-emerald-400/20",
-                )}
-                onClick={() => dispatch(setTerminalWide({ value: !wide }))}
-              >
-                {wide ? (
-                  <IconArrowsDiagonalMinimize2 size={14} />
-                ) : (
-                  <IconArrowsDiagonal size={14} />
-                )}
-              </ActionIcon>
-            </Tooltip>
-          )}
-
           <Tooltip
             label={fullscreen ? "Exit full screen (Esc)" : "Full screen"}
           >

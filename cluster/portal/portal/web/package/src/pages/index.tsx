@@ -27,9 +27,7 @@ import "@fontsource/ubuntu/700.css";
 const Root = () => {
   const dispatch = useAppDispatch();
   const [navOpened, { toggle: toggleNav, close: closeNav }] = useDisclosure();
-  const consoleWide = useAppSelector(
-    (s) => s.settings.terminalWide || s.settings.terminalFullscreen,
-  );
+  const consoleWide = useAppSelector((s) => s.settings.terminalFullscreen);
 
   useQuery({
     queryKey: ["user/getStatus"],

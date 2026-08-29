@@ -12,17 +12,12 @@ const clampFontSize = (v: number) =>
 export const slice = createSlice({
   name: "settings",
   initialState: {
-    terminalWide: false,
     terminalFullscreen: false,
     terminalFontSize: 15,
     itemsPerPage: 10,
     navCollapsed: false,
   } as Settings,
   reducers: {
-    setTerminalWide: (state, action: PayloadAction<{ value: boolean }>) => {
-      state.terminalWide = action.payload.value;
-    },
-
     setTerminalFullscreen: (
       state,
       action: PayloadAction<{ value: boolean }>,
@@ -55,7 +50,6 @@ export const slice = createSlice({
 });
 
 export const {
-  setTerminalWide,
   setTerminalFullscreen,
   setTerminalFontSize,
   setItemsPerPage,

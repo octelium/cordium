@@ -1,7 +1,6 @@
 import * as UserPB from "@octelium/apis/main/userv1";
 
 interface Settings {
-  terminalWide: boolean;
   terminalFullscreen: boolean;
   terminalFontSize: number;
   itemsPerPage: number;
