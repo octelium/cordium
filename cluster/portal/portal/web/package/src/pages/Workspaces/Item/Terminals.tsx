@@ -73,7 +73,7 @@ const TabStrip = (props: {
               />
               <span
                 className={twMerge(
-                  "truncate font-mono text-[0.72rem]",
+                  "truncate font-mono text-[0.72rem] font-medium",
                   isActive ? "text-slate-100" : "text-slate-400",
                 )}
               >
