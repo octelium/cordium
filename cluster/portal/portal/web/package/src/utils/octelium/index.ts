@@ -4,6 +4,29 @@ import * as MetaPB from "@octelium/apis/main/metav1";
 import * as UserPB from "@octelium/apis/main/userv1";
 import { getResourceRef, getShortNameFromStr, Resource } from "../pb";
 
+const ORGANIZATION_SPACE_PARENT = "cordium";
+
+const getSpacePathName = (name: string, organization: boolean): string => {
+  const shortName = getShortNameFromStr(name);
+  return organization ? `@${shortName}` : shortName;
+};
+
+export const getSpaceResourceName = (
+  pathName: string,
+  userName?: string,
+): string | undefined => {
+  if (pathName.startsWith("@")) {
+    const shortName = pathName.slice(1);
+    return shortName ? `${shortName}.${ORGANIZATION_SPACE_PARENT}` : undefined;
+  }
+
+  if (pathName.includes(".")) {
+    return pathName;
+  }
+
+  return userName ? `${pathName}.${userName}` : undefined;
+};
+
 export const getServiceHostname = (arg: UserPB.Service): string => {
   if (arg.status!.namespace === `default`) {
     return arg.metadata!.name.split(".")[0];
@@ -33,11 +56,17 @@ export const getServicePublicURL = (
 };
 
 export const getPathSpaceRef = (arg: MetaPB.ObjectReference): string => {
-  return `/spaces/${arg.name}`;
+  return `/spaces/${getSpacePathName(
+    arg.name,
+    arg.name.endsWith(`.${ORGANIZATION_SPACE_PARENT}`),
+  )}`;
 };
 
 export const getPathSpace = (arg: WsPB.Space): string => {
-  return `/spaces/${arg.metadata!.name}`;
+  return `/spaces/${getSpacePathName(
+    arg.metadata!.name,
+    arg.status?.type === WsPB.Space_Status_Type.ORGANIZATION,
+  )}`;
 };
 
 export const getPathTemplateRef = (

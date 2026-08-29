@@ -1,4 +1,6 @@
 import { getClientWorkspace } from "@/utils/client";
+import { useAppSelector } from "@/utils/hooks";
+import { getSpaceResourceName } from "@/utils/octelium";
 import { getResourceRef, isMemberAdmin, isMemberOwner } from "@/utils/pb";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import * as MetaPB from "@octelium/apis/main/metav1";
@@ -8,27 +10,35 @@ import { useParams } from "react-router-dom";
 export const useContextSpace = () => {
   const { spaceName, templateName } = useParams();
   const client = getClientWorkspace();
+  const userName = useAppSelector(
+    (state) => state.settings.status?.user?.metadata?.name,
+  );
+  const resourceSpaceName = spaceName
+    ? getSpaceResourceName(spaceName, userName)
+    : undefined;
 
   const space = useQuery({
-    queryKey: ["workspace/getSpace", spaceName],
+    queryKey: ["workspace/getSpace", resourceSpaceName],
     queryFn: () => {
       const { response } = client.getSpace(
-        MetaPB.GetOptions.create({ name: spaceName }),
+        MetaPB.GetOptions.create({ name: resourceSpaceName }),
       );
       return response;
     },
-    enabled: !!spaceName,
+    enabled: !!resourceSpaceName,
   });
 
   const template = useQuery({
-    queryKey: ["workspace/getTemplate", `${templateName}.${spaceName}`],
+    queryKey: ["workspace/getTemplate", `${templateName}.${resourceSpaceName}`],
     queryFn: () => {
       const { response } = client.getTemplate(
-        MetaPB.GetOptions.create({ name: `${templateName}.${spaceName}` }),
+        MetaPB.GetOptions.create({
+          name: `${templateName}.${resourceSpaceName}`,
+        }),
       );
       return response;
     },
-    enabled: !!templateName && !!spaceName,
+    enabled: !!templateName && !!resourceSpaceName,
   });
 
   const membership = useQuery({
