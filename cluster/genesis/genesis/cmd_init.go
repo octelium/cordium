@@ -43,12 +43,7 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-type InitOpts struct {
-	EnableSPIFFECSI         bool
-	SPIFFECSIDriver         string
-	SPIFFETrustDomain       string
-	EnableIngressFrontProxy bool
-}
+type InitOpts struct{}
 
 func (g *Genesis) RunInit(ctx context.Context, o *InitOpts) error {
 	zap.L().Info("Starting initializing the Cluster")
@@ -59,6 +54,11 @@ func (g *Genesis) RunInit(ctx context.Context, o *InitOpts) error {
 	}
 
 	g.octeliumCInit = octeliumCInit
+
+	clusterCfg, err := octeliumCInit.CoreV1Utils().GetClusterConfig(ctx)
+	if err != nil {
+		return err
+	}
 
 	regionName := func() string {
 		if os.Getenv("OCTELIUM_REGION_NAME") != "" {
@@ -74,10 +74,9 @@ func (g *Genesis) RunInit(ctx context.Context, o *InitOpts) error {
 
 	if err := g.installComponents(ctx, &oc.CommonOpts{
 		CommonOpts: gc.CommonOpts{
-			EnableSPIFFECSI:         o.EnableSPIFFECSI,
-			EnableIngressFrontProxy: o.EnableIngressFrontProxy,
-			SPIFFECSIDriver:         o.SPIFFECSIDriver,
-			SPIFFETrustDomain:       o.SPIFFETrustDomain,
+			K8sC:          g.k8sC,
+			ClusterConfig: clusterCfg,
+			Region:        region,
 		},
 	}); err != nil {
 		return errors.Errorf("Could not install components: %+v", err)

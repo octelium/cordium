@@ -40,12 +40,7 @@ var initCmd = &cobra.Command{
 			return err
 		}
 
-		if err := g.RunInit(context.Background(), &genesis.InitOpts{
-			EnableSPIFFECSI:         cmdArgs.EnableSPIFFECSIDriver,
-			SPIFFECSIDriver:         cmdArgs.SPIFFECSIDriver,
-			SPIFFETrustDomain:       cmdArgs.SPIFFETrustDomain,
-			EnableIngressFrontProxy: cmdArgs.EnableIngressFrontProxy,
-		}); err != nil {
+		if err := g.RunInit(context.Background(), &genesis.InitOpts{}); err != nil {
 			return err
 		}
 
@@ -61,12 +56,7 @@ var upgradeCmd = &cobra.Command{
 			return err
 		}
 
-		if err := g.RunUpgrade(context.Background(), &genesis.UpgradeOpts{
-			EnableSPIFFECSI:         cmdArgs.EnableSPIFFECSIDriver,
-			SPIFFECSIDriver:         cmdArgs.SPIFFECSIDriver,
-			SPIFFETrustDomain:       cmdArgs.SPIFFETrustDomain,
-			EnableIngressFrontProxy: cmdArgs.EnableIngressFrontProxy,
-		}); err != nil {
+		if err := g.RunUpgrade(context.Background(), &genesis.UpgradeOpts{}); err != nil {
 			return err
 		}
 
@@ -83,18 +73,23 @@ type args struct {
 	EnableIngressFrontProxy bool
 }
 
-func init() {
-	initCmd.PersistentFlags().BoolVar(&cmdArgs.EnableSPIFFECSIDriver, "enable-spiffe-csi", false, "Enable SPIFFE CSI Driver")
-	initCmd.PersistentFlags().StringVar(&cmdArgs.SPIFFECSIDriver, "spiffe-csi-driver", "", "SPIFFE CSI Driver name")
-	initCmd.PersistentFlags().StringVar(&cmdArgs.SPIFFETrustDomain, "spiffe-trust-domain", "", "SPIFFE trust domain")
-	initCmd.PersistentFlags().BoolVar(&cmdArgs.EnableIngressFrontProxy, "ingress-front-proxy", false, "Enable Ingress front proxy mode")
+func setDeprecatedFlags(cmd *cobra.Command) {
+	f := cmd.PersistentFlags()
+
+	f.BoolVar(&cmdArgs.EnableSPIFFECSIDriver, "enable-spiffe-csi", false, "Deprecated. Set via the bootstrap Config instead")
+	f.StringVar(&cmdArgs.SPIFFECSIDriver, "spiffe-csi-driver", "", "Deprecated. Set via the bootstrap Config instead")
+	f.StringVar(&cmdArgs.SPIFFETrustDomain, "spiffe-trust-domain", "", "Deprecated. Set via the bootstrap Config instead")
+	f.BoolVar(&cmdArgs.EnableIngressFrontProxy, "ingress-front-proxy", false, "Deprecated. Set via the bootstrap Config instead")
+
+	for _, name := range []string{"enable-spiffe-csi", "spiffe-csi-driver", "spiffe-trust-domain",
+		"ingress-front-proxy"} {
+		f.MarkHidden(name)
+	}
 }
 
 func init() {
-	upgradeCmd.PersistentFlags().BoolVar(&cmdArgs.EnableSPIFFECSIDriver, "enable-spiffe-csi", false, "Enable SPIFFE CSI Driver")
-	upgradeCmd.PersistentFlags().StringVar(&cmdArgs.SPIFFECSIDriver, "spiffe-csi-driver", "", "SPIFFE CSI Driver name")
-	upgradeCmd.PersistentFlags().StringVar(&cmdArgs.SPIFFETrustDomain, "spiffe-trust-domain", "", "SPIFFE trust domain")
-	upgradeCmd.PersistentFlags().BoolVar(&cmdArgs.EnableIngressFrontProxy, "ingress-front-proxy", false, "Enable Ingress front proxy mode")
+	setDeprecatedFlags(initCmd)
+	setDeprecatedFlags(upgradeCmd)
 }
 
 func init() {

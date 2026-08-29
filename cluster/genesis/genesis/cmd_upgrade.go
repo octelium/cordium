@@ -28,12 +28,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type UpgradeOpts struct {
-	EnableSPIFFECSI         bool
-	SPIFFECSIDriver         string
-	SPIFFETrustDomain       string
-	EnableIngressFrontProxy bool
-}
+type UpgradeOpts struct{}
 
 func (g *Genesis) RunUpgrade(ctx context.Context, o *UpgradeOpts) error {
 
@@ -57,12 +52,16 @@ func (g *Genesis) RunUpgrade(ctx context.Context, o *UpgradeOpts) error {
 		return err
 	}
 
+	clusterCfg, err := g.octeliumC.CoreV1Utils().GetClusterConfig(ctx)
+	if err != nil {
+		return err
+	}
+
 	if err := g.installComponents(ctx, &oc.CommonOpts{
 		CommonOpts: gc.CommonOpts{
-			EnableSPIFFECSI:         o.EnableSPIFFECSI,
-			EnableIngressFrontProxy: o.EnableIngressFrontProxy,
-			SPIFFECSIDriver:         o.SPIFFECSIDriver,
-			SPIFFETrustDomain:       o.SPIFFETrustDomain,
+			K8sC:          g.k8sC,
+			ClusterConfig: clusterCfg,
+			Region:        regionV,
 		},
 	}); err != nil {
 		return errors.Errorf("Could not install components: %+v", err)
