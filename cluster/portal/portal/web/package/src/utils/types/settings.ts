@@ -1,12 +1,12 @@
 import * as UserPB from "@octelium/apis/main/userv1";
+
 interface Settings {
-  wideTerminal?: boolean;
-  terminalFontSize?: number;
-  itemsPerPage?: number;
+  terminalWide: boolean;
+  terminalFullscreen: boolean;
+  terminalFontSize: number;
+  itemsPerPage: number;
+  navCollapsed: boolean;
   status?: UserPB.GetStatusResponse;
-  personalSpaceUID?: string;
-  autoCreateFirstTerminal?: boolean;
-  // itemsPerPageNavigator?: number;
 }
 
 export default Settings;

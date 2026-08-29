@@ -1,13 +1,5 @@
 import { Outlet } from "react-router-dom";
 
-const GitProviders = () => {
-  return (
-    <>
-      <div className="w-full">
-        <Outlet />
-      </div>
-    </>
-  );
-};
+const Page = () => <Outlet />;
 
-export default GitProviders;
+export default Page;

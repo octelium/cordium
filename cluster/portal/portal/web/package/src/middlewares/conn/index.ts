@@ -6,14 +6,12 @@ import {
   sendTerminalData,
 } from "../../features/conn/slice";
 
-// import { addWorkspace, setWorkspaces } from "../../features/workspaces/slice";
-
 import WebSocketCtl from "./websocket";
 
 export default (): Middleware => {
   const ws = new WebSocketCtl();
 
-  return (store) => (next) => (action) => {
+  return () => (next) => (action) => {
     if (sendTerminalData.match(action)) {
       const dataBytes = Uint8Array.from(action.payload.data, (x) =>
         x.charCodeAt(0),

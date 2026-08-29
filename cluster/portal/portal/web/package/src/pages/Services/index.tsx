@@ -1,11 +1,5 @@
 import { Outlet } from "react-router-dom";
 
-const Page = () => {
-  return (
-    <>
-      <Outlet />
-    </>
-  );
-};
+const Page = () => <Outlet />;
 
 export default Page;

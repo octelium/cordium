@@ -1,52 +1,57 @@
-import * as WsPB from "@octelium/apis/main/cordiumv1";
-import * as React from "react";
-
-import { getClientWorkspace } from "@/utils/client";
-
+import Meta from "@/components/Meta";
 import MetadataEdit from "@/components/MetadataEdit";
+import PageHeader from "@/components/PageHeader";
+import Panel, { PanelBody, PanelFooter, PanelHeader } from "@/components/Panel";
+import SecretSelect from "@/components/SecretSelect";
 import { useContextSpace } from "@/pages/Spaces/utils";
 import { onError } from "@/utils";
-import { getPathSpace } from "@/utils/octelium";
-import { cloneResource, getResourceRef } from "@/utils/pb";
+import { getClientWorkspace } from "@/utils/client";
+import { getPathSpace, invalidateGitProviders } from "@/utils/octelium";
+import { cloneResource, getResourceRef, getShortName } from "@/utils/pb";
 import {
+  Alert,
   Button,
-  Divider,
-  Group,
-  Select,
+  SegmentedControl,
   Stack,
-  Tabs,
+  TagsInput,
   Text,
   TextInput,
-  ThemeIcon,
 } from "@mantine/core";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { GitBranch, Settings2 } from "lucide-react";
-import { toast } from "react-hot-toast";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
+import { IconGitBranch, IconSettings2 } from "@tabler/icons-react";
+import { useMutation } from "@tanstack/react-query";
+import * as React from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 type ProviderKind = "github" | "gitlab" | "oauth2";
 
-const PROVIDER_TABS: { value: ProviderKind; label: string }[] = [
-  { value: "github", label: "GitHub" },
-  { value: "gitlab", label: "GitLab" },
-  { value: "oauth2", label: "Generic OAuth2" },
-];
+const emptySecret = () => ({
+  type: { oneofKind: "fromSecret" as const, fromSecret: "" },
+});
 
-const makeProviderSpec = (kind: ProviderKind): WsPB.GitProvider["spec"] => {
-  const secret = { type: { oneofKind: "fromSecret" as const, fromSecret: "" } };
+const makeSpec = (kind: ProviderKind): WsPB.GitProvider["spec"] => {
   switch (kind) {
     case "github":
       return {
         type: {
           oneofKind: "github",
-          github: { clientID: "", clientSecret: secret, scopes: [] },
+          github: {
+            clientID: "",
+            clientSecret: emptySecret(),
+            scopes: ["repo"],
+          },
         },
       };
     case "gitlab":
       return {
         type: {
           oneofKind: "gitlab",
-          gitlab: { clientID: "", clientSecret: secret, scopes: [] },
+          gitlab: {
+            clientID: "",
+            clientSecret: emptySecret(),
+            scopes: ["read_repository"],
+          },
         },
       };
     case "oauth2":
@@ -55,10 +60,10 @@ const makeProviderSpec = (kind: ProviderKind): WsPB.GitProvider["spec"] => {
           oneofKind: "oauth2",
           oauth2: {
             clientID: "",
+            clientSecret: emptySecret(),
             authURL: "",
             tokenURL: "",
             scopes: [],
-            clientSecret: secret,
           },
         },
       };
@@ -69,259 +74,231 @@ const CreateGitProvider = () => {
   const ctx = useContextSpace();
   const client = getClientWorkspace();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const space = ctx.space.data;
 
+  const [kind, setKind] = React.useState<ProviderKind>("github");
   const [req, setReq] = React.useState(
     WsPB.GitProvider.create({
       apiVersion: "cordium/v1",
       kind: "GitProvider",
       metadata: {},
-      spec: makeProviderSpec("github"),
+      spec: makeSpec("github"),
       status: {},
     }),
   );
 
-  const [activeTab, setActiveTab] = React.useState<ProviderKind>("github");
+  const patch = (fn: (draft: WsPB.GitProvider) => void) => {
+    const next = cloneResource(req);
+    fn(next);
+    setReq(next);
+  };
 
-  const updateReq = () => setReq(cloneResource(req) as WsPB.GitProvider);
+  const innerOf = (draft: WsPB.GitProvider) => {
+    const t = draft.spec!.type;
+    if (t.oneofKind === "github") return t.github;
+    if (t.oneofKind === "gitlab") return t.gitlab;
+    if (t.oneofKind === "oauth2") return t.oauth2;
+    return undefined;
+  };
 
   const mutation = useMutation({
     mutationFn: async () => {
-      req.status!.spaceRef = getResourceRef(ctx.space.data!);
-      const { response } = await client.createGitProvider(req);
+      const payload = cloneResource(req);
+      payload.status!.spaceRef = getResourceRef(space!);
+      const { response } = await client.createGitProvider(payload);
       return response;
     },
-    onSuccess: (data) => {
-      queryClient.refetchQueries({
-        queryKey: [
-          "workspace/listGitProvider",
-          ctx.space.data?.metadata?.uid,
-          0,
-        ],
-      });
+    onSuccess: () => {
+      invalidateGitProviders();
       toast.success("Git provider created");
-      navigate(`${getPathSpace(ctx.space.data!)}/gitproviders`);
+      navigate(`${getPathSpace(space!)}/gitproviders`);
     },
     onError,
   });
 
-  const qrySecret = useQuery({
-    queryKey: ["workspace/listSecret/", ctx.space.data?.metadata?.uid],
-    queryFn: () => {
-      const { response } = client.listSecret(
-        WsPB.ListSecretOptions.create({
-          spaceRef: getResourceRef(ctx.space.data!),
-          common: { itemsPerPage: 500 },
-        }),
-      );
-      return response;
-    },
-    enabled: ctx.space.isSuccess,
-  });
+  if (!space) return null;
 
-  if (!ctx.space.isSuccess || !qrySecret.isSuccess) return null;
+  const t = req.spec!.type;
+  const inner =
+    t.oneofKind === "github"
+      ? t.github
+      : t.oneofKind === "gitlab"
+        ? t.gitlab
+        : t.oneofKind === "oauth2"
+          ? t.oauth2
+          : undefined;
 
-  const data = ctx.space.data;
-
-  const secretOptions = qrySecret.data.items.map((x) => ({
-    value: x.metadata!.name,
-    label: x.metadata!.name.split(".").at(0) ?? x.metadata!.name,
-  }));
-
-  const getClientSecretValue = (): string => {
-    const t = req.spec!.type;
-    if (t.oneofKind === "github")
-      return t.github.clientSecret?.type.oneofKind === "fromSecret"
-        ? t.github.clientSecret.type.fromSecret
-        : "";
-    if (t.oneofKind === "gitlab")
-      return t.gitlab.clientSecret?.type.oneofKind === "fromSecret"
-        ? t.gitlab.clientSecret.type.fromSecret
-        : "";
-    if (t.oneofKind === "oauth2")
-      return t.oauth2.clientSecret?.type.oneofKind === "fromSecret"
-        ? t.oauth2.clientSecret.type.fromSecret
-        : "";
-    return "";
-  };
-
-  const setClientID = (v: string) => {
-    const t = req.spec!.type;
-    if (t.oneofKind === "github") t.github.clientID = v;
-    else if (t.oneofKind === "gitlab") t.gitlab.clientID = v;
-    else if (t.oneofKind === "oauth2") t.oauth2.clientID = v;
-    updateReq();
-  };
-
-  const setClientSecret = (val: string) => {
-    const t = req.spec!.type;
-    const patch = { oneofKind: "fromSecret" as const, fromSecret: val };
-    if (t.oneofKind === "github" && t.github.clientSecret)
-      t.github.clientSecret.type = patch;
-    else if (t.oneofKind === "gitlab" && t.gitlab.clientSecret)
-      t.gitlab.clientSecret.type = patch;
-    else if (t.oneofKind === "oauth2" && t.oauth2.clientSecret)
-      t.oauth2.clientSecret.type = patch;
-    updateReq();
-  };
-
-  const getClientID = (): string => {
-    const t = req.spec!.type;
-    if (t.oneofKind === "github") return t.github.clientID;
-    if (t.oneofKind === "gitlab") return t.gitlab.clientID;
-    if (t.oneofKind === "oauth2") return t.oauth2.clientID;
-    return "";
-  };
+  const clientSecret =
+    inner?.clientSecret?.type.oneofKind === "fromSecret"
+      ? inner.clientSecret.type.fromSecret
+      : "";
 
   return (
-    <Stack gap="xl">
-      <div
-        style={{
-          background: "#f8fafc",
-          border: "1px solid #e2e8f0",
-          borderRadius: 10,
-          padding: "16px 20px",
-        }}
-      >
-        <Group gap="xs" mb="md">
-          <ThemeIcon size="sm" variant="light" color="blue" radius="md">
-            <GitBranch size={13} />
-          </ThemeIcon>
-          <Text
-            size="xs"
-            fw={600}
-            tt="uppercase"
-            style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
-          >
-            Metadata
-          </Text>
-        </Group>
-        <MetadataEdit
-          metadata={req.metadata!}
-          onUpdate={(itm) => {
-            req.metadata = itm;
-            updateReq();
-          }}
-          parentName={data.metadata?.name}
-        />
-      </div>
+    <>
+      <Meta title="New Git provider" />
+      <PageHeader
+        title="New Git provider"
+        crumbs={[
+          { label: "Spaces", to: "/spaces" },
+          { label: getShortName(space), to: getPathSpace(space) },
+          { label: "Git providers", to: `${getPathSpace(space)}/gitproviders` },
+          { label: "New" },
+        ]}
+        description="Register an OAuth application so members can authorise Cordium to clone their private repositories."
+      />
 
-      <div
-        style={{
-          background: "#f8fafc",
-          border: "1px solid #e2e8f0",
-          borderRadius: 10,
-          padding: "16px 20px",
-        }}
-      >
-        <Group gap="xs" mb="md">
-          <ThemeIcon size="sm" variant="light" color="violet" radius="md">
-            <Settings2 size={13} />
-          </ThemeIcon>
-          <Text
-            size="xs"
-            fw={600}
-            tt="uppercase"
-            style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
-          >
-            Spec
-          </Text>
-        </Group>
+      <div className="max-w-3xl">
+        <Stack gap="lg">
+          <Panel>
+            <PanelHeader
+              icon={<IconGitBranch size={16} />}
+              title="Identity"
+              description="Templates reference this provider by name."
+            />
+            <PanelBody>
+              <MetadataEdit
+                metadata={req.metadata!}
+                parentName={space.metadata?.name}
+                onChange={(md) =>
+                  patch((d) => {
+                    d.metadata = md;
+                  })
+                }
+              />
+            </PanelBody>
+          </Panel>
 
-        <Tabs
-          value={activeTab}
-          onChange={(v) => {
-            const kind = v as ProviderKind;
-            setActiveTab(kind);
-            req.spec = makeProviderSpec(kind);
-            updateReq();
-          }}
-        >
-          <Tabs.List mb="md">
-            {PROVIDER_TABS.map((t) => (
-              <Tabs.Tab key={t.value} value={t.value} style={{ fontSize: 13 }}>
-                {t.label}
-              </Tabs.Tab>
-            ))}
-          </Tabs.List>
+          <Panel>
+            <PanelHeader
+              icon={<IconSettings2 size={16} />}
+              title="OAuth application"
+              description="Create the app with your provider first, then paste its credentials here."
+            />
+            <PanelBody>
+              <Stack gap="lg">
+                <div>
+                  <Text size="sm" fw={700} mb={6}>
+                    Provider
+                  </Text>
+                  <SegmentedControl
+                    value={kind}
+                    onChange={(v) => {
+                      const next = v as ProviderKind;
+                      setKind(next);
+                      patch((d) => {
+                        d.spec = makeSpec(next);
+                      });
+                    }}
+                    data={[
+                      { label: "GitHub", value: "github" },
+                      { label: "GitLab", value: "gitlab" },
+                      { label: "Generic OAuth2", value: "oauth2" },
+                    ]}
+                  />
+                </div>
 
-          {PROVIDER_TABS.map((t) => (
-            <Tabs.Panel key={t.value} value={t.value}>
-              <Stack gap="md">
-                <Group grow align="flex-start">
+                <Alert color="gray" variant="light">
+                  The client secret is never entered here directly — store it as
+                  a Secret in this Space first, then select it below.
+                </Alert>
+
+                <div className="grid gap-4 md:grid-cols-2">
                   <TextInput
                     label="Client ID"
-                    placeholder="abcdefg123456"
+                    description="Public identifier of the OAuth application."
+                    placeholder="Iv1.a1b2c3d4e5f6"
                     required
-                    value={getClientID()}
-                    onChange={(e) => setClientID(e.currentTarget.value)}
+                    value={inner?.clientID ?? ""}
+                    onChange={(e) => {
+                      const v = e.currentTarget.value;
+                      patch((d) => {
+                        const target = innerOf(d);
+                        if (target) target.clientID = v;
+                      });
+                    }}
                   />
-                  <Select
+                  <SecretSelect
+                    spaceRef={getResourceRef(space)}
+                    required
                     label="Client secret"
-                    placeholder="Select a secret…"
-                    required
-                    data={secretOptions}
-                    value={getClientSecretValue() || null}
-                    onChange={(val) => val && setClientSecret(val)}
+                    description="Space Secret holding the OAuth client secret."
+                    value={clientSecret}
+                    onChange={(val) =>
+                      patch((d) => {
+                        const target = innerOf(d);
+                        if (target) {
+                          target.clientSecret = {
+                            type: { oneofKind: "fromSecret", fromSecret: val },
+                          };
+                        }
+                      })
+                    }
                   />
-                </Group>
+                </div>
 
-                {t.value === "oauth2" &&
-                  req.spec!.type.oneofKind === "oauth2" && (
-                    <Group grow align="flex-start">
-                      <TextInput
-                        label="Auth URL"
-                        placeholder="https://example.com/oauth/authorize"
-                        required
-                        value={req.spec!.type.oauth2.authURL}
-                        onChange={(e) => {
-                          (
-                            req.spec!.type as {
-                              oneofKind: "oauth2";
-                              oauth2: WsPB.GitProvider_Spec_OAuth2;
-                            }
-                          ).oauth2.authURL = e.currentTarget.value;
-                          updateReq();
-                        }}
-                      />
-                      <TextInput
-                        label="Token URL"
-                        placeholder="https://example.com/oauth/token"
-                        required
-                        value={req.spec!.type.oauth2.tokenURL}
-                        onChange={(e) => {
-                          (
-                            req.spec!.type as {
-                              oneofKind: "oauth2";
-                              oauth2: WsPB.GitProvider_Spec_OAuth2;
-                            }
-                          ).oauth2.tokenURL = e.currentTarget.value;
-                          updateReq();
-                        }}
-                      />
-                    </Group>
-                  )}
+                {t.oneofKind === "oauth2" && (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <TextInput
+                      label="Authorization URL"
+                      description="Endpoint users are redirected to for consent."
+                      placeholder="https://git.example.com/oauth/authorize"
+                      required
+                      value={t.oauth2.authURL}
+                      onChange={(e) => {
+                        const v = e.currentTarget.value;
+                        patch((d) => {
+                          const dt = d.spec!.type;
+                          if (dt.oneofKind === "oauth2") dt.oauth2.authURL = v;
+                        });
+                      }}
+                    />
+                    <TextInput
+                      label="Token URL"
+                      description="Endpoint that exchanges the code for an access token."
+                      placeholder="https://git.example.com/oauth/token"
+                      required
+                      value={t.oauth2.tokenURL}
+                      onChange={(e) => {
+                        const v = e.currentTarget.value;
+                        patch((d) => {
+                          const dt = d.spec!.type;
+                          if (dt.oneofKind === "oauth2") dt.oauth2.tokenURL = v;
+                        });
+                      }}
+                    />
+                  </div>
+                )}
+
+                <TagsInput
+                  label="Scopes"
+                  description="OAuth scopes requested at sign-in. Press Enter after each."
+                  placeholder="repo"
+                  value={inner?.scopes ?? []}
+                  onChange={(v) =>
+                    patch((d) => {
+                      const target = innerOf(d);
+                      if (target) target.scopes = v;
+                    })
+                  }
+                />
               </Stack>
-            </Tabs.Panel>
-          ))}
-        </Tabs>
+            </PanelBody>
+            <PanelFooter>
+              <Button variant="default" onClick={() => navigate(-1)}>
+                Cancel
+              </Button>
+              <Button
+                loading={mutation.isPending}
+                disabled={!req.metadata?.name || !inner?.clientID}
+                onClick={() => mutation.mutate()}
+              >
+                Create provider
+              </Button>
+            </PanelFooter>
+          </Panel>
+        </Stack>
       </div>
-
-      <Divider />
-
-      <Group justify="flex-end" gap="sm">
-        <Button variant="default" size="sm" onClick={() => navigate(-1)}>
-          Cancel
-        </Button>
-        <Button
-          size="sm"
-          loading={mutation.isPending}
-          onClick={() => mutation.mutate()}
-        >
-          Create provider
-        </Button>
-      </Group>
-    </Stack>
+    </>
   );
 };
 

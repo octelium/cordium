@@ -4,8 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 
 export const useContextWorkspace = () => {
-  let { name } = useParams();
+  const { name } = useParams();
   const client = getClientWorkspace();
+
   const workspace = useQuery({
     queryKey: ["workspace/getWorkspace", name],
     queryFn: () => {
@@ -17,7 +18,5 @@ export const useContextWorkspace = () => {
     enabled: !!name,
   });
 
-  return {
-    workspace,
-  };
+  return { workspace };
 };

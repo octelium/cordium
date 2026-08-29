@@ -1,40 +1,35 @@
-import * as WsPB from "@octelium/apis/main/cordiumv1";
-import * as React from "react";
-
-import { getClientWorkspace } from "@/utils/client";
-
+import Meta from "@/components/Meta";
 import MetadataEdit from "@/components/MetadataEdit";
-import PageWrap from "@/components/PageWrap";
-import WorkspaceEdit from "@/components/WorkspaceEdit";
+import PageHeader from "@/components/PageHeader";
+import Panel, { PanelBody, PanelFooter, PanelHeader } from "@/components/Panel";
+import SpecEditor from "@/components/SpecEditor";
 import { useContextSpace } from "@/pages/Spaces/utils";
 import { onError } from "@/utils";
-import { getPathTemplate, invalidateTemplate } from "@/utils/octelium";
-import { getResourceRef } from "@/utils/pb";
-import { Button, Divider, Group, Stack, Text, ThemeIcon } from "@mantine/core";
+import { getClientWorkspace } from "@/utils/client";
+import { getPathSpace, getPathTemplate, invalidateTemplate } from "@/utils/octelium";
+import { getResourceRef, getShortName } from "@/utils/pb";
+import { Button, Stack } from "@mantine/core";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
+import { IconSettings2, IconTemplate } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
-import { LayoutTemplate, Settings2 } from "lucide-react";
+import * as React from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
-const CreateTemplate = () => {
-  const ctx = useContextSpace();
+const CreateForm = (props: { space: WsPB.Space }) => {
+  const { space } = props;
+  const client = getClientWorkspace();
+  const navigate = useNavigate();
 
-  const [req, setReq] = React.useState(
+  const [req, setReq] = React.useState(() =>
     WsPB.Template.create({
       apiVersion: "cordium/v1",
       kind: "Template",
       metadata: {},
       spec: {},
-      status: {
-        spaceRef: ctx.space.isSuccess
-          ? getResourceRef(ctx.space.data)
-          : undefined,
-      },
+      status: { spaceRef: getResourceRef(space) },
     }),
   );
-
-  const client = getClientWorkspace();
-  const navigate = useNavigate();
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -42,100 +37,87 @@ const CreateTemplate = () => {
       return response;
     },
     onSuccess: (data) => {
-      navigate(getPathTemplate(data));
       invalidateTemplate(data);
-      toast.success(`Template ${data.metadata?.name} created`);
+      toast.success("Template created");
+      navigate(getPathTemplate(data));
     },
     onError,
   });
 
-  if (!ctx.space.isSuccess) return null;
-
-  const data = ctx.space.data;
-
   return (
-    <PageWrap qry={ctx.space} title="Create a Template">
-      <Stack gap="xl">
-        <div
-          style={{
-            background: "#f8fafc",
-            border: "1px solid #e2e8f0",
-            borderRadius: 10,
-            padding: "16px 20px",
-          }}
-        >
-          <Group gap="xs" mb="md">
-            <ThemeIcon size="sm" variant="light" color="blue" radius="md">
-              <LayoutTemplate size={13} />
-            </ThemeIcon>
-            <Text
-              size="xs"
-              fw={600}
-              tt="uppercase"
-              style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
-            >
-              Metadata
-            </Text>
-          </Group>
-          <MetadataEdit
-            metadata={req.metadata!}
-            onUpdate={(itm) => {
-              req.metadata = itm;
-              setReq(WsPB.Template.clone(req));
-            }}
-            parentName={data.metadata?.name}
+    <>
+      <Meta title="New Template" />
+      <PageHeader
+        title="New Template"
+        crumbs={[
+          { label: "Spaces", to: "/spaces" },
+          { label: getShortName(space), to: getPathSpace(space) },
+          { label: "Templates", to: `${getPathSpace(space)}/templates` },
+          { label: "New" },
+        ]}
+        description={`Blueprint for Workspaces in ${getShortName(space)}.`}
+      />
+
+      <Stack gap="lg">
+        <Panel>
+          <PanelHeader
+            icon={<IconTemplate size={16} />}
+            title="Identity"
+            description="How this Template appears in the portal and the CLI."
           />
-        </div>
+          <PanelBody>
+            <MetadataEdit
+              metadata={req.metadata!}
+              parentName={space.metadata?.name}
+              withDescription
+              onChange={(md) => {
+                const next = WsPB.Template.clone(req);
+                next.metadata = md;
+                setReq(next);
+              }}
+            />
+          </PanelBody>
+        </Panel>
 
-        <div
-          style={{
-            background: "#f8fafc",
-            border: "1px solid #e2e8f0",
-            borderRadius: 10,
-            padding: "16px 20px",
-          }}
-        >
-          <Group gap="xs" mb="md">
-            <ThemeIcon size="sm" variant="light" color="violet" radius="md">
-              <Settings2 size={13} />
-            </ThemeIcon>
-            <Text
-              size="xs"
-              fw={600}
-              tt="uppercase"
-              style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
-            >
-              Configuration
-            </Text>
-          </Group>
-          <WorkspaceEdit
-            spaceRef={getResourceRef(data)}
-            item={req}
-            onUpdate={(itm) => {
-              const item = itm as WsPB.Template;
-              req.spec = item.spec;
-              setReq(WsPB.Template.clone(req));
-            }}
+        <Panel>
+          <PanelHeader
+            icon={<IconSettings2 size={16} />}
+            title="Configuration"
+            description="Defaults inherited by every Workspace created from this Template."
           />
-        </div>
-
-        <Divider />
-
-        <Group justify="flex-end" gap="sm">
-          <Button variant="default" size="sm" onClick={() => navigate(-1)}>
-            Cancel
-          </Button>
-          <Button
-            size="sm"
-            loading={mutation.isPending}
-            onClick={() => mutation.mutate()}
-          >
-            Create template
-          </Button>
-        </Group>
+          <PanelBody>
+            <SpecEditor
+              kind="Template"
+              item={req}
+              spaceRef={getResourceRef(space)}
+              onChange={(next) => setReq(next as WsPB.Template)}
+            />
+          </PanelBody>
+          <PanelFooter>
+            <Button variant="default" onClick={() => navigate(-1)}>
+              Cancel
+            </Button>
+            <Button
+              loading={mutation.isPending}
+              disabled={!req.metadata?.name}
+              onClick={() => mutation.mutate()}
+            >
+              Create Template
+            </Button>
+          </PanelFooter>
+        </Panel>
       </Stack>
-    </PageWrap>
+    </>
   );
+};
+
+const CreateTemplate = () => {
+  const ctx = useContextSpace();
+  const space = ctx.space.data;
+
+  if (!space) return null;
+
+  return <CreateForm key={space.metadata!.uid} space={space} />;
 };
 
 export default CreateTemplate;

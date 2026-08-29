@@ -1,19 +1,19 @@
 import Footer from "@/components/Footer";
+import SideBar from "@/components/SideBar";
 import TopBar from "@/components/TopBar";
 
 import { Navigate, Outlet } from "react-router-dom";
 
 import { setStatus } from "@/features/settings/slice";
 import { getClientUser, getClientWorkspace } from "@/utils/client";
-import { useAppDispatch } from "@/utils/hooks";
+import { useAppDispatch, useAppSelector } from "@/utils/hooks";
 
 import { useQuery } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 
-import SideBar from "@/components/SideBar";
 import { invalidateSpaces } from "@/utils/octelium";
 import { AppShell, Burger } from "@mantine/core";
-import { useDisclosure, useHeadroom } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import {
   ListSpaceOptions,
   Space,
@@ -24,18 +24,12 @@ import "@fontsource/ubuntu/400.css";
 import "@fontsource/ubuntu/500.css";
 import "@fontsource/ubuntu/700.css";
 
-export default () => {
+const Root = () => {
   const dispatch = useAppDispatch();
-
-  const [opened, { toggle }] = useDisclosure();
-  const pinned = useHeadroom({ fixedAt: 120 });
-
-  const urlSearchParams = new URLSearchParams(window.location.search);
-  if (urlSearchParams.get("redirect")) {
-    const val = urlSearchParams.get("redirect")!;
-    urlSearchParams.delete("redirect");
-    return <Navigate to={val} />;
-  }
+  const [navOpened, { toggle: toggleNav, close: closeNav }] = useDisclosure();
+  const consoleWide = useAppSelector(
+    (s) => s.settings.terminalWide || s.settings.terminalFullscreen,
+  );
 
   useQuery({
     queryKey: ["user/getStatus"],
@@ -65,65 +59,72 @@ export default () => {
   });
 
   return (
-    <>
-      <div className="bg-slate-100 min-h-screen antialiased">
-        <AppShell
-          header={{ height: 60, collapsed: !pinned, offset: false }}
-          navbar={{
-            width: 150,
-            breakpoint: "sm",
-            collapsed: { mobile: !opened },
-          }}
-          aside={{
-            width: 150,
-            breakpoint: "md",
-            collapsed: { desktop: false, mobile: true },
-          }}
-          padding="md"
-        >
-          <AppShell.Header style={{ background: "#f1f5f9" }}>
-            <div className="flex flex-row items-center">
-              <Burger
-                opened={opened}
-                onClick={toggle}
-                hiddenFrom="sm"
-                size="sm"
-                ml="sm"
-              />
-              <TopBar />
-            </div>
-          </AppShell.Header>
-
-          <AppShell.Navbar
-            p="md"
-            style={{ background: "#f1f5f9", marginTop: 60 }}
-          >
-            <SideBar />
-          </AppShell.Navbar>
-
-          <AppShell.Main
-            style={{
-              marginTop: 60,
-              background: "#f1f5f9",
-              display: "flex",
-              flexDirection: "column",
-              minHeight: "calc(100vh - 60px)",
-            }}
-          >
-            <div style={{ flex: 1 }}>
-              <Outlet />
-            </div>
-            <Footer />
-          </AppShell.Main>
-
-          <AppShell.Aside
-            p="md"
-            style={{ background: "#f1f5f9", marginTop: 60 }}
+    <AppShell
+      header={{ height: 60 }}
+      navbar={{
+        width: 232,
+        breakpoint: "md",
+        collapsed: { mobile: !navOpened },
+      }}
+      padding={0}
+      className="bg-slate-100"
+    >
+      <AppShell.Header className="border-b border-slate-200 bg-slate-100">
+        <div className="flex h-full items-center">
+          <Burger
+            opened={navOpened}
+            onClick={toggleNav}
+            hiddenFrom="md"
+            size="sm"
+            ml="sm"
+            aria-label="Toggle navigation"
           />
-        </AppShell>
+          <TopBar />
+        </div>
+      </AppShell.Header>
 
-        <Toaster position="bottom-center" />
-      </div>
+      <AppShell.Navbar className="border-r border-slate-200 bg-slate-100 p-3">
+        <SideBar onNavigate={closeNav} />
+      </AppShell.Navbar>
+
+      <AppShell.Main className="bg-slate-100">
+        <div
+          className={
+            consoleWide
+              ? "w-full px-4 py-6 md:px-8"
+              : "mx-auto w-full max-w-[1400px] px-4 py-6 md:px-8"
+          }
+        >
+          <Outlet />
+          <Footer />
+        </div>
+      </AppShell.Main>
+    </AppShell>
+  );
+};
+
+const Page = () => {
+  const urlSearchParams = new URLSearchParams(window.location.search);
+  const redirect = urlSearchParams.get("redirect");
+  if (redirect) {
+    return <Navigate to={redirect} replace />;
+  }
+
+  return (
+    <>
+      <Root />
+      <Toaster
+        position="bottom-center"
+        toastOptions={{
+          style: {
+            borderRadius: "10px",
+            fontSize: "0.85rem",
+            fontWeight: 500,
+          },
+        }}
+      />
     </>
   );
 };
+
+export default Page;

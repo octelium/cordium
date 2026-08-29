@@ -2,7 +2,7 @@ import { queryClient } from "@/utils";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import * as MetaPB from "@octelium/apis/main/metav1";
 import * as UserPB from "@octelium/apis/main/userv1";
-import { getResourceRef, getShortNameFromRef, Resource } from "../pb";
+import { getResourceRef, getShortNameFromStr, Resource } from "../pb";
 
 export const getServiceHostname = (arg: UserPB.Service): string => {
   if (arg.status!.namespace === `default`) {
@@ -33,25 +33,44 @@ export const getServicePublicURL = (
 };
 
 export const getPathSpaceRef = (arg: MetaPB.ObjectReference): string => {
-  return `/spaces/${getShortNameFromRef(arg)}`;
-};
-
-const getPathTemplateRef = (arg: MetaPB.ObjectReference): string => {
-  return `/templates/${getShortNameFromRef(arg)}`;
+  return `/spaces/${arg.name}`;
 };
 
 export const getPathSpace = (arg: WsPB.Space): string => {
-  return getPathSpaceRef(getResourceRef(arg));
+  return `/spaces/${arg.metadata!.name}`;
+};
+
+export const getPathTemplateRef = (
+  spaceRef: MetaPB.ObjectReference,
+  templateRef: MetaPB.ObjectReference,
+): string => {
+  return `${getPathSpaceRef(spaceRef)}/templates/${getShortNameFromStr(
+    templateRef.name,
+  )}`;
 };
 
 export const getPathTemplate = (arg: WsPB.Template): string => {
-  return `${getPathSpaceRef(arg.status!.spaceRef!)}${getPathTemplateRef(
-    getResourceRef(arg),
-  )}`;
+  return getPathTemplateRef(arg.status!.spaceRef!, getResourceRef(arg));
 };
 
 export const getPathWorkspace = (arg: WsPB.Workspace): string => {
   return `/workspaces/${arg.metadata!.name}`;
+};
+
+export const getWorkspaceURL = (arg: WsPB.Workspace): string | undefined => {
+  return arg.status?.hostname ? `https://${arg.status.hostname}` : undefined;
+};
+
+export const getApplicationURL = (
+  arg: WsPB.Workspace,
+  app: WsPB.Workspace_Spec_Application,
+): string | undefined => {
+  if (!arg.status?.hostname) {
+    return undefined;
+  }
+  return app.isDefault
+    ? `https://${arg.status.hostname}`
+    : `https://${app.name}_${arg.status.hostname}`;
 };
 
 export const invalidateResource = (arg: Resource) => {
@@ -63,39 +82,45 @@ export const invalidateResource = (arg: Resource) => {
   });
 };
 
+export const invalidateWorkspaces = () => {
+  queryClient.invalidateQueries({ queryKey: ["workspace/listWorkspace"] });
+};
+
 export const invalidateWorkspace = (arg: WsPB.Workspace) => {
   invalidateResource(arg);
-  queryClient.invalidateQueries({
-    queryKey: ["workspace/listWorkspace", 0],
-  });
-  queryClient.invalidateQueries({
-    queryKey: ["workspace/listWorkspace", arg.status?.spaceRef?.uid, 0],
-  });
-  queryClient.invalidateQueries({
-    queryKey: ["workspace/listWorkspace", arg.status?.templateRef?.uid, 0],
-  });
+  invalidateWorkspaces();
 };
 
 export const invalidateSpaces = () => {
-  queryClient.invalidateQueries({
-    queryKey: ["workspace/listSpace"],
-  });
+  queryClient.invalidateQueries({ queryKey: ["workspace/listSpace"] });
 };
 
 export const invalidateSpace = (arg: WsPB.Space) => {
   invalidateResource(arg);
-  queryClient.invalidateQueries({
-    queryKey: ["workspace/listSpace"],
-  });
+  invalidateSpaces();
+};
+
+export const invalidateTemplates = () => {
+  queryClient.invalidateQueries({ queryKey: ["workspace/listTemplate"] });
 };
 
 export const invalidateTemplate = (arg: WsPB.Template) => {
   invalidateResource(arg);
+  invalidateTemplates();
+};
 
-  queryClient.invalidateQueries({
-    queryKey: ["workspace/listTemplate", arg.status?.spaceRef?.uid, 0],
-  });
-  queryClient.invalidateQueries({
-    queryKey: ["workspace/listTemplate", arg.status?.spaceRef?.uid],
-  });
+export const invalidateSecrets = () => {
+  queryClient.invalidateQueries({ queryKey: ["workspace/listSecret"] });
+};
+
+export const invalidateGitProviders = () => {
+  queryClient.invalidateQueries({ queryKey: ["workspace/listGitProvider"] });
+};
+
+export const invalidateMemberships = () => {
+  queryClient.invalidateQueries({ queryKey: ["workspace/listMembership"] });
+};
+
+export const invalidateUserSecrets = () => {
+  queryClient.invalidateQueries({ queryKey: ["workspace/listUserSecret"] });
 };

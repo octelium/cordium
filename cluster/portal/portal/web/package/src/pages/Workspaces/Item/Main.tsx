@@ -1,69 +1,50 @@
 import CopyText from "@/components/CopyText";
-import InfoItem from "@/components/InfoItem";
-import LinkWrap from "@/components/LinkWrap";
-import PageWrap from "@/components/PageWrap";
-import Repository, { hasRepository } from "@/components/Repository";
-import ResourceYAML from "@/components/ResourceYAML";
-import SpaceName from "@/components/SpaceName";
+import Facts, { Fact } from "@/components/Facts";
+import Panel, { PanelBody, PanelHeader } from "@/components/Panel";
+import RepoLink from "@/components/RepoLink";
+import StateBadge from "@/components/StateBadge";
+import Tag from "@/components/Tag";
 import TimeAgo from "@/components/TimeAgo";
-import WorkspaceStatus from "@/components/WorkspaceStatus";
-import { clearTerminalGroup } from "@/features/terminalgroup/slice";
-import { onError } from "@/utils";
+import { formatMegabytes, formatMillicores, onError } from "@/utils";
 import { getClientWorkspace } from "@/utils/client";
-import { useAppDispatch } from "@/utils/hooks";
 import {
-  getPathSpace,
-  getPathTemplate,
-  invalidateResource,
+  getApplicationURL,
+  getPathSpaceRef,
+  getPathTemplateRef,
+  getWorkspaceURL,
 } from "@/utils/octelium";
-import { canStopWorkspace, getResourceRef, getShortName } from "@/utils/pb";
-import {
-  Anchor,
-  Badge,
-  Button,
-  Group,
-  Modal,
-  Stack,
-  Text,
-} from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { getShortNameFromRef, isWorkspaceStopped } from "@/utils/pb";
+import { Alert, Anchor, Button, Stack } from "@mantine/core";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { GetOptions } from "@octelium/apis/main/metav1";
 import {
+  IconAlertTriangle,
   IconBrandGit,
-  IconCpu,
-  IconDatabase,
   IconExternalLink,
-  IconPlayerPlay,
-  IconPlayerStop,
-  IconServer,
+  IconWorldWww,
 } from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import * as React from "react";
+import { Link } from "react-router-dom";
 import { useContextWorkspace } from "../utils";
+import { StartStopButtons } from "./index";
 
 interface AuthBegin {
   loginURL: string;
 }
 
-const LoginGitProvider = (props: { item: WsPB.Workspace }) => {
+const GitProviderLogin = (props: { item: WsPB.Workspace }) => {
   const { item } = props;
 
-  if (
-    !item.status?.templateRef ||
-    item.status.state !== WsPB.Workspace_Status_State.STOPPED
-  )
-    return null;
-
   const qryTemplate = useQuery({
-    queryKey: ["workspace/getTemplate", item.status.templateRef.uid],
+    queryKey: ["workspace/getTemplate", item.status?.templateRef?.uid],
     queryFn: () => {
       const { response } = getClientWorkspace().getTemplate(
         GetOptions.create({ uid: item.status!.templateRef!.uid }),
       );
       return response;
     },
+    enabled: !!item.status?.templateRef?.uid,
   });
 
   const mutation = useMutation({
@@ -79,8 +60,13 @@ const LoginGitProvider = (props: { item: WsPB.Workspace }) => {
     onError,
   });
 
-  if (!qryTemplate.isSuccess || !qryTemplate.data.status?.gitProviderRef)
+  if (
+    !isWorkspaceStopped(item) ||
+    !qryTemplate.isSuccess ||
+    !qryTemplate.data.status?.gitProviderRef
+  ) {
     return null;
+  }
 
   return (
     <Button
@@ -90,399 +76,266 @@ const LoginGitProvider = (props: { item: WsPB.Workspace }) => {
       loading={mutation.isPending}
       onClick={() => mutation.mutate()}
     >
-      Login to Git provider
+      Sign in to Git provider
     </Button>
   );
 };
 
-const StartStopButton = (props: { item: WsPB.Workspace }) => {
-  const dispatch = useAppDispatch();
-  const client = getClientWorkspace();
-  const { item } = props;
-  const canStop = canStopWorkspace(item);
-  const isStopped = item.status?.state === WsPB.Workspace_Status_State.STOPPED;
-  const [opened, { open, close }] = useDisclosure(false);
-
-  const mutationStop = useMutation({
-    mutationFn: async () => {
-      const { response } = await client.stopWorkspace(
-        WsPB.StopWorkspaceRequest.create({
-          workspaceRef: getResourceRef(item),
-        }),
-      );
-      return response;
-    },
-    onSuccess: () => {
-      close();
-      dispatch(clearTerminalGroup({}));
-      invalidateResource(item);
-    },
-    onError: () => close(),
-  });
-
-  const mutationStart = useMutation({
-    mutationFn: async () => {
-      const { response } = await client.startWorkspace(
-        WsPB.StartWorkspaceRequest.create({
-          workspaceRef: getResourceRef(item),
-        }),
-      );
-      return response;
-    },
-    onSuccess: () => invalidateResource(item),
-  });
-
-  return (
-    <>
-      {canStop && (
-        <Button
-          fullWidth
-          variant="outline"
-          color="red"
-          leftSection={<IconPlayerStop size={15} />}
-          onClick={open}
-        >
-          Stop workspace
-        </Button>
-      )}
-
-      {isStopped && (
-        <Button
-          fullWidth
-          leftSection={<IconPlayerPlay size={15} />}
-          loading={mutationStart.isPending}
-          onClick={() => mutationStart.mutate()}
-        >
-          Start workspace
-        </Button>
-      )}
-
-      <Modal
-        opened={opened}
-        onClose={close}
-        centered
-        title={
-          <Text fw={600} size="sm">
-            Stop workspace?
-          </Text>
-        }
-      >
-        <Stack gap="md">
-          <Text size="sm" c="dimmed">
-            This will stop the running workspace and terminate all active
-            sessions.
-          </Text>
-
-          <div
-            style={{
-              background: "#f8fafc",
-              borderRadius: 8,
-              border: "1px solid #e2e8f0",
-              padding: "8px 14px",
-            }}
-          >
-            <InfoItem title="Name">{item.metadata!.name}</InfoItem>
-            <InfoItem title="UID">{item.metadata!.uid}</InfoItem>
-          </div>
-
-          <Group justify="flex-end" gap="sm">
-            <Button variant="default" size="sm" onClick={close}>
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              color="red"
-              loading={mutationStop.isPending}
-              onClick={() => mutationStop.mutate()}
-            >
-              Stop workspace
-            </Button>
-          </Group>
-        </Stack>
-      </Modal>
-    </>
-  );
-};
-
-const ResourceLimits = (props: { item: WsPB.Workspace }) => {
-  const { item } = props;
-  const limit = item.status?.limit;
-  if (!limit || (!limit.cpu && !limit.memory && !limit.storage)) return null;
-
-  const chips: { icon: React.ReactNode; label: string }[] = [];
-
-  if (limit.cpu?.millicores) {
-    chips.push({
-      icon: <IconCpu size={12} />,
-      label: `${limit.cpu.millicores / 1000} CPU`,
-    });
+const failureLabel = (failure: WsPB.Workspace_Status_Failure): string => {
+  switch (failure.type.oneofKind) {
+    case "imageBuild":
+      return "Image build failed";
+    case "imagePull":
+      return "Image pull failed";
+    case "repoClone":
+      return "Repository clone failed";
+    case "additionalRepoClone":
+      return `Additional repository "${failure.type.additionalRepoClone.name}" failed to clone`;
+    case "buildTimeoutExceeded":
+      return "Build timed out";
+    case "task":
+      return `Task "${failure.type.task.name}" exited with code ${failure.type.task.exitCode}`;
+    case "startupTimeoutExceeded":
+      return "Startup timed out";
+    case "startupUnknown":
+      return "Startup failed";
+    case "loadStorage":
+      return "Loading persistent storage failed";
+    case "saveStorage":
+      return "Saving persistent storage failed";
+    case "stoppageTimeoutExceeded":
+      return "Shutdown timed out";
+    case "runContainer":
+      return "Container failed to run";
+    case "healthCheck":
+      return "Health check failed";
+    default:
+      return "Workspace failed";
   }
-  if (limit.memory?.megabytes) {
-    const mem =
-      limit.memory.megabytes >= 1000
-        ? `${limit.memory.megabytes / 1000}GB RAM`
-        : `${limit.memory.megabytes}MB RAM`;
-    chips.push({ icon: <IconServer size={12} />, label: mem });
-  }
-  if (limit.storage?.megabytes) {
-    const stor =
-      limit.storage.megabytes >= 1000
-        ? `${limit.storage.megabytes / 1000}GB Storage`
-        : `${limit.storage.megabytes}MB Storage`;
-    chips.push({ icon: <IconDatabase size={12} />, label: stor });
-  }
-
-  return (
-    <InfoItem title="Resource limits">
-      <Group gap={6}>
-        {chips.map((c) => (
-          <Badge key={c.label} size="sm" leftSection={c.icon}>
-            {c.label}
-          </Badge>
-        ))}
-      </Group>
-    </InfoItem>
-  );
-};
-
-const AppItem = (props: {
-  app: WsPB.Workspace_Spec_Application;
-  item: WsPB.Workspace;
-}) => {
-  const { item, app } = props;
-  const href = item.status?.hostname
-    ? app.isDefault
-      ? `https://${item.status.hostname}`
-      : `https://${app.name}_${item.status.hostname}`
-    : undefined;
-
-  return (
-    <Anchor
-      href={href}
-      target="_blank"
-      underline="never"
-      style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
-    >
-      <Badge
-        size="sm"
-        variant="outline"
-        rightSection={<IconExternalLink size={10} />}
-        style={{ cursor: "pointer" }}
-      >
-        {app.displayName || app.name}
-        {app.port > 0 && ` :${app.port}`}
-        {app.isDefault && " · default"}
-      </Badge>
-    </Anchor>
-  );
-};
-
-const InfoBar = (props: { item: WsPB.Workspace }) => {
-  const { item } = props;
-  const isActive = item.status?.state !== WsPB.Workspace_Status_State.STOPPED;
-
-  const qryTemplate = useQuery({
-    queryKey: ["workspace/getTemplate", item.status!.templateRef!.uid],
-    queryFn: () => {
-      const { response } = getClientWorkspace().getTemplate(
-        GetOptions.create({ uid: item.status!.templateRef!.uid }),
-      );
-      return response;
-    },
-  });
-
-  const qrySpace = useQuery({
-    queryKey: ["workspace/getSpace", item.status!.spaceRef!.uid],
-    queryFn: () => {
-      const { response } = getClientWorkspace().getSpace(
-        GetOptions.create({ uid: item.status!.spaceRef!.uid }),
-      );
-      return response;
-    },
-  });
-
-  const apps = item.spec?.applications ?? [];
-
-  return (
-    <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          style={{
-            background: "white",
-            border: "1px solid #e2e8f0",
-            borderRadius: 12,
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              padding: "14px 20px",
-              borderBottom: "1px solid #e2e8f0",
-              background: "#f8fafc",
-            }}
-          >
-            <Text
-              size="xs"
-              fw={700}
-              tt="uppercase"
-              style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
-            >
-              Info
-            </Text>
-          </div>
-
-          <div style={{ padding: "4px 20px 8px" }}>
-            <InfoItem title="Name">
-              <CopyText value={item.metadata!.name} />
-            </InfoItem>
-
-            {item.metadata?.displayName && (
-              <InfoItem title="Display name">
-                {item.metadata.displayName}
-              </InfoItem>
-            )}
-
-            <InfoItem title="State">
-              <WorkspaceStatus status={item.status!.state} />
-            </InfoItem>
-
-            {qrySpace.isSuccess && (
-              <InfoItem title="Space">
-                <LinkWrap to={getPathSpace(qrySpace.data!)}>
-                  <SpaceName spaceRef={getResourceRef(qrySpace.data!)} />
-                </LinkWrap>
-              </InfoItem>
-            )}
-
-            {qryTemplate.isSuccess && (
-              <InfoItem title="Template">
-                <LinkWrap to={getPathTemplate(qryTemplate.data)}>
-                  {getShortName(qryTemplate.data)}
-                </LinkWrap>
-              </InfoItem>
-            )}
-
-            {isActive && item.status?.hostname && (
-              <InfoItem title="URL">
-                <Anchor
-                  href={`https://${item.status.hostname}`}
-                  target="_blank"
-                  size="sm"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 4,
-                  }}
-                >
-                  {`https://${item.status.hostname}`}
-                  <IconExternalLink size={12} />
-                </Anchor>
-              </InfoItem>
-            )}
-
-            <InfoItem title="Created">
-              <TimeAgo rfc3339={item.metadata?.createdAt} />
-            </InfoItem>
-
-            {item.spec?.isEphemeral && (
-              <InfoItem title="Storage">
-                <Badge size="sm" color="orange" variant="light">
-                  Ephemeral
-                </Badge>
-              </InfoItem>
-            )}
-
-            {item.status?.lastInitializedAt && (
-              <InfoItem title="Last initialized">
-                <TimeAgo rfc3339={item.status.lastInitializedAt} />
-              </InfoItem>
-            )}
-
-            {item.status?.lastStoppedAt && (
-              <InfoItem title="Last stopped">
-                <TimeAgo rfc3339={item.status.lastStoppedAt} />
-              </InfoItem>
-            )}
-
-            {item.status?.state === WsPB.Workspace_Status_State.RUNNING &&
-              item.status?.lastActivityAt && (
-                <InfoItem title="Last activity">
-                  <TimeAgo rfc3339={item.status.lastActivityAt} />
-                </InfoItem>
-              )}
-
-            <ResourceLimits item={item} />
-
-            <InfoItem title="Config">
-              <ResourceYAML item={item} size="xs" />
-            </InfoItem>
-
-            {hasRepository(item) && (
-              <InfoItem title="Git Repo">
-                <Repository item={item} />
-              </InfoItem>
-            )}
-          </div>
-        </div>
-
-        {apps.length > 0 && (
-          <div
-            style={{
-              marginTop: 12,
-              background: "white",
-              border: "1px solid #e2e8f0",
-              borderRadius: 12,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                padding: "14px 20px",
-                borderBottom: "1px solid #e2e8f0",
-                background: "#f8fafc",
-              }}
-            >
-              <Text
-                size="xs"
-                fw={500}
-                tt="uppercase"
-                style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
-              >
-                Applications
-              </Text>
-            </div>
-            <div
-              style={{
-                padding: "12px 20px",
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 6,
-              }}
-            >
-              {apps.map((app) => (
-                <AppItem key={app.name} app={app} item={item} />
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div style={{ width: 220, flexShrink: 0 }}>
-        <Stack gap="sm">
-          <StartStopButton item={item} />
-          <LoginGitProvider item={item} />
-        </Stack>
-      </div>
-    </div>
-  );
 };
 
 const Page = () => {
   const ctx = useContextWorkspace();
+  const item = ctx.workspace.data;
+
+  const qryTemplate = useQuery({
+    queryKey: ["workspace/getTemplate", item?.status?.templateRef?.uid],
+    queryFn: () => {
+      const { response } = getClientWorkspace().getTemplate(
+        GetOptions.create({ uid: item!.status!.templateRef!.uid }),
+      );
+      return response;
+    },
+    enabled: !!item?.status?.templateRef?.uid,
+  });
+
+  if (!item) return null;
+
+  const url = getWorkspaceURL(item);
+  const apps = item.spec?.applications ?? [];
+  const limit = item.status?.limit;
+  const failure = item.status?.failure;
+  const active = !isWorkspaceStopped(item);
+
   return (
-    <PageWrap qry={ctx.workspace}>
-      {ctx.workspace.data && <InfoBar item={ctx.workspace.data} />}
-    </PageWrap>
+    <Stack gap="lg">
+      {failure && (
+        <Alert
+          color="red"
+          icon={<IconAlertTriangle size={16} />}
+          title={failureLabel(failure)}
+        >
+          {failure.message || "Check the logs tab for details."}
+        </Alert>
+      )}
+
+      <div className="grid gap-4 lg:grid-cols-[1fr_18rem]">
+        <Stack gap="md">
+          <Panel>
+            <PanelHeader title="Details" />
+            <PanelBody className="px-5 py-1">
+              <Facts>
+                <Fact label="Name">
+                  <CopyText value={item.metadata!.name} />
+                </Fact>
+                {item.metadata?.displayName && (
+                  <Fact label="Display name">{item.metadata.displayName}</Fact>
+                )}
+                <Fact label="State">
+                  <StateBadge state={item.status!.state} />
+                </Fact>
+                {item.status?.spaceRef && (
+                  <Fact label="Space">
+                    <Anchor
+                      component={Link}
+                      to={getPathSpaceRef(item.status.spaceRef)}
+                      size="sm"
+                      fw={600}
+                    >
+                      {getShortNameFromRef(item.status.spaceRef)}
+                    </Anchor>
+                  </Fact>
+                )}
+                {item.status?.spaceRef && item.status?.templateRef && (
+                  <Fact label="Template">
+                    <Anchor
+                      component={Link}
+                      to={getPathTemplateRef(
+                        item.status.spaceRef,
+                        item.status.templateRef,
+                      )}
+                      size="sm"
+                      fw={600}
+                    >
+                      {getShortNameFromRef(item.status.templateRef)}
+                    </Anchor>
+                  </Fact>
+                )}
+                {active && url && (
+                  <Fact label="URL">
+                    <Anchor
+                      href={url}
+                      target="_blank"
+                      rel="noreferrer"
+                      size="sm"
+                      className="inline-flex items-center gap-1"
+                    >
+                      {url}
+                      <IconExternalLink size={12} />
+                    </Anchor>
+                  </Fact>
+                )}
+                {item.spec?.repository?.url && (
+                  <Fact label="Repository">
+                    <RepoLink item={item} />
+                  </Fact>
+                )}
+                <Fact label="Storage">
+                  {item.spec?.isEphemeral
+                    ? "Ephemeral — discarded on stop"
+                    : "Persistent"}
+                </Fact>
+                {limit && (
+                  <Fact label="Resources">
+                    {[
+                      limit.cpu?.millicores
+                        ? formatMillicores(limit.cpu.millicores)
+                        : null,
+                      limit.memory?.megabytes
+                        ? formatMegabytes(limit.memory.megabytes)
+                        : null,
+                      limit.storage?.megabytes
+                        ? `${formatMegabytes(limit.storage.megabytes)} disk`
+                        : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ") || "—"}
+                  </Fact>
+                )}
+                {item.status?.regionRef?.name && (
+                  <Fact label="Region">{item.status.regionRef.name}</Fact>
+                )}
+                <Fact label="Created">
+                  <TimeAgo rfc3339={item.metadata?.createdAt} />
+                </Fact>
+                {item.status?.lastInitializedAt && (
+                  <Fact label="Last started">
+                    <TimeAgo rfc3339={item.status.lastInitializedAt} />
+                  </Fact>
+                )}
+                {item.status?.lastStoppedAt && (
+                  <Fact label="Last stopped">
+                    <TimeAgo rfc3339={item.status.lastStoppedAt} />
+                  </Fact>
+                )}
+                {active && item.status?.lastActivityAt && (
+                  <Fact label="Last activity">
+                    <TimeAgo rfc3339={item.status.lastActivityAt} />
+                  </Fact>
+                )}
+                <Fact label="Successful runs">
+                  {item.status?.successfulRuns ?? 0}
+                </Fact>
+              </Facts>
+            </PanelBody>
+          </Panel>
+
+          {apps.length > 0 && (
+            <Panel>
+              <PanelHeader
+                icon={<IconWorldWww size={16} />}
+                title="Applications"
+                description={
+                  active
+                    ? "Ports exposed by this workspace over HTTPS."
+                    : "Available once the workspace is running."
+                }
+              />
+              <PanelBody>
+                <div className="flex flex-wrap gap-2">
+                  {apps.map((app) => {
+                    const href = getApplicationURL(item, app);
+                    const label = `${app.displayName || app.name}${
+                      app.port ? ` :${app.port}` : ""
+                    }`;
+                    if (!href || !active) {
+                      return (
+                        <Tag key={app.name}>
+                          {label}
+                          {app.isDefault && " · default"}
+                        </Tag>
+                      );
+                    }
+                    return (
+                      <Anchor
+                        key={app.name}
+                        href={href}
+                        target="_blank"
+                        rel="noreferrer"
+                        underline="never"
+                      >
+                        <Tag
+                          tone="info"
+                          icon={<IconExternalLink size={11} />}
+                          className="cursor-pointer"
+                        >
+                          {label}
+                          {app.isDefault && " · default"}
+                        </Tag>
+                      </Anchor>
+                    );
+                  })}
+                </div>
+              </PanelBody>
+            </Panel>
+          )}
+        </Stack>
+
+        <Panel>
+          <PanelHeader title="Actions" />
+          <PanelBody>
+            <Stack gap="sm">
+              <StartStopButtons item={item} fullWidth />
+              <GitProviderLogin item={item} />
+              {qryTemplate.isSuccess && item.status?.spaceRef && (
+                <Button
+                  fullWidth
+                  variant="subtle"
+                  color="gray"
+                  component={Link}
+                  to={getPathTemplateRef(
+                    item.status.spaceRef,
+                    item.status.templateRef!,
+                  )}
+                >
+                  View Template
+                </Button>
+              )}
+            </Stack>
+          </PanelBody>
+        </Panel>
+      </div>
+    </Stack>
   );
 };
 

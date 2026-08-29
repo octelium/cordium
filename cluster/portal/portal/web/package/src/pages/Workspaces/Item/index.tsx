@@ -1,27 +1,114 @@
-import PageWrap from "@/components/PageWrap";
-import WorkspaceStatus from "@/components/WorkspaceStatus";
+import ConfirmAction from "@/components/ConfirmAction";
+import Meta from "@/components/Meta";
+import PageHeader from "@/components/PageHeader";
+import QueryBoundary from "@/components/QueryBoundary";
+import StateBadge from "@/components/StateBadge";
+import TabNav from "@/components/TabNav";
+import Tag from "@/components/Tag";
+import YamlDrawer from "@/components/YamlDrawer";
 import { clearTerminalGroup } from "@/features/terminalgroup/slice";
+import { onError } from "@/utils";
+import { getClientWorkspace } from "@/utils/client";
 import { useAppDispatch } from "@/utils/hooks";
-import { getShortName } from "@/utils/pb";
-import { Tabs, Text } from "@mantine/core";
+import {
+  getPathSpaceRef,
+  getPathWorkspace,
+  getWorkspaceURL,
+  invalidateResource,
+} from "@/utils/octelium";
+import { canStopWorkspace, getResourceRef, getShortNameFromRef, isWorkspaceStopped } from "@/utils/pb";
+import { Button } from "@mantine/core";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import {
   IconActivity,
   IconBolt,
+  IconExternalLink,
   IconLayoutGrid,
-  IconPencil,
+  IconPlayerPlay,
+  IconPlayerStop,
+  IconSettings,
   IconTerminal2,
 } from "@tabler/icons-react";
+import { useMutation } from "@tanstack/react-query";
 import * as React from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { match } from "ts-pattern";
+import { Outlet } from "react-router-dom";
 import { useContextWorkspace } from "../utils";
 
-const Workspace = () => {
+export const StartStopButtons = (props: {
+  item: WsPB.Workspace;
+  fullWidth?: boolean;
+}) => {
+  const { item } = props;
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+  const client = getClientWorkspace();
+
+  const mutationStart = useMutation({
+    mutationFn: async () => {
+      await client.startWorkspace(
+        WsPB.StartWorkspaceRequest.create({
+          workspaceRef: getResourceRef(item),
+        }),
+      );
+    },
+    onSuccess: () => invalidateResource(item),
+    onError,
+  });
+
+  const mutationStop = useMutation({
+    mutationFn: async () => {
+      await client.stopWorkspace(
+        WsPB.StopWorkspaceRequest.create({
+          workspaceRef: getResourceRef(item),
+        }),
+      );
+    },
+    onSuccess: () => {
+      dispatch(clearTerminalGroup({}));
+      invalidateResource(item);
+    },
+    onError,
+  });
+
+  if (isWorkspaceStopped(item)) {
+    return (
+      <Button
+        leftSection={<IconPlayerPlay size={15} />}
+        fullWidth={props.fullWidth}
+        loading={mutationStart.isPending}
+        onClick={() => mutationStart.mutate()}
+      >
+        Start
+      </Button>
+    );
+  }
+
+  if (canStopWorkspace(item)) {
+    return (
+      <ConfirmAction
+        triggerLabel="Stop"
+        triggerIcon={<IconPlayerStop size={14} />}
+        size="sm"
+        fullWidth={props.fullWidth}
+        title="Stop this workspace?"
+        confirmLabel="Stop workspace"
+        description={
+          item.spec?.isEphemeral
+            ? "This workspace uses ephemeral storage — everything outside the image is discarded when it stops."
+            : "Running processes and terminal sessions are terminated. Persistent storage is kept."
+        }
+        loading={mutationStop.isPending}
+        onConfirm={() => mutationStop.mutate()}
+      />
+    );
+  }
+
+  return null;
+};
+
+const Page = () => {
+  const dispatch = useAppDispatch();
   const ctx = useContextWorkspace();
-  const loc = useLocation();
+  const data = ctx.workspace.data;
 
   React.useEffect(() => {
     dispatch(clearTerminalGroup({}));
@@ -30,111 +117,89 @@ const Workspace = () => {
     };
   }, [dispatch]);
 
-  const data = ctx.workspace.data;
-
-  const activeTab = match(loc.pathname.split("/").reverse().at(0))
-    .with("edit", (v) => v)
-    .with("actions", (v) => v)
-    .with("terminals", (v) => v)
-    .with("logs", (v) => v)
-    .otherwise(() => "main");
-
-  const tabs = [
-    {
-      value: "main",
-      label: "Overview",
-      icon: <IconLayoutGrid size={14} />,
-      path: "./",
-    },
-    {
-      value: "terminals",
-      label: "Terminals",
-      icon: <IconTerminal2 size={14} />,
-      path: "./terminals",
-    },
-    {
-      value: "edit",
-      label: "Config",
-      icon: <IconPencil size={14} />,
-      path: "./edit",
-    },
-    {
-      value: "logs",
-      label: "Activity logs",
-      icon: <IconActivity size={14} />,
-      path: "./logs",
-    },
-    {
-      value: "actions",
-      label: "Actions",
-      icon: <IconBolt size={14} />,
-      path: "./actions",
-    },
-  ];
-
-  const isRunning = data?.status?.state === WsPB.Workspace_Status_State.RUNNING;
+  const url = data ? getWorkspaceURL(data) : undefined;
+  const base = data ? getPathWorkspace(data) : "";
 
   return (
-    <PageWrap qry={ctx.workspace}>
+    <QueryBoundary query={ctx.workspace}>
       {data && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-          <Tabs value={activeTab}>
-            <Tabs.List
-              style={{
-                background: "white",
-                borderRadius: "10px 10px 0 0",
-                border: "1px solid #e2e8f0",
-                borderBottom: "none",
-                padding: "0 8px",
-              }}
-            >
-              {tabs.map((t) => (
-                <Tabs.Tab
-                  key={t.value}
-                  value={t.value}
-                  leftSection={t.icon}
-                  onClick={() => navigate(t.path)}
-                  style={{ fontSize: 13 }}
-                >
-                  {t.label}
-                </Tabs.Tab>
-              ))}
-
-              <div
-                style={{
-                  marginLeft: "auto",
-                  display: "flex",
-                  alignItems: "center",
-                  paddingRight: 12,
-                  gap: 8,
-                }}
-              >
-                <Text size="xs" c="dimmed" style={{ fontFamily: "monospace" }}>
-                  {getShortName(data)}
-                </Text>
-                {data.status?.state !== undefined && (
-                  <WorkspaceStatus status={data.status.state} />
+        <>
+          <Meta title={`${data.metadata!.name} · Workspace`} />
+          <PageHeader
+            title={data.metadata?.displayName || data.metadata!.name}
+            crumbs={[
+              { label: "Workspaces", to: "/workspaces" },
+              ...(data.status?.spaceRef
+                ? [
+                    {
+                      label: getShortNameFromRef(data.status.spaceRef),
+                      to: getPathSpaceRef(data.status.spaceRef),
+                    },
+                  ]
+                : []),
+              { label: data.metadata!.name },
+            ]}
+            badges={
+              <>
+                <StateBadge state={data.status!.state} size="md" />
+                {data.spec?.isEphemeral && (
+                  <Tag tone="warning" icon={<IconBolt size={11} />}>
+                    Ephemeral
+                  </Tag>
                 )}
-              </div>
-            </Tabs.List>
+              </>
+            }
+            actions={
+              <>
+                <YamlDrawer item={data} />
+                {url && !isWorkspaceStopped(data) && (
+                  <Button
+                    variant="default"
+                    component="a"
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer"
+                    leftSection={<IconExternalLink size={15} />}
+                  >
+                    Open
+                  </Button>
+                )}
+                <StartStopButtons item={data} />
+              </>
+            }
+          />
 
-            <div
-              style={{
-                background: "white",
-                border: "1px solid #e2e8f0",
-                borderTop: "none",
-                borderRadius: "0 0 10px 10px",
-                padding: "20px",
-                minHeight: 200,
-              }}
-            >
-              <Outlet />
-            </div>
-          </Tabs>
-        </div>
+          <TabNav
+            items={[
+              {
+                label: "Overview",
+                to: base,
+                end: true,
+                icon: <IconLayoutGrid size={14} />,
+              },
+              {
+                label: "Terminals",
+                to: `${base}/terminals`,
+                icon: <IconTerminal2 size={14} />,
+              },
+              {
+                label: "Logs",
+                to: `${base}/logs`,
+                icon: <IconActivity size={14} />,
+              },
+              {
+                label: "Config",
+                to: `${base}/settings`,
+                icon: <IconSettings size={14} />,
+              },
+            ]}
+          />
+
+          <Outlet />
+        </>
       )}
-    </PageWrap>
+    </QueryBoundary>
   );
 };
 
-export default Workspace;
+export default Page;

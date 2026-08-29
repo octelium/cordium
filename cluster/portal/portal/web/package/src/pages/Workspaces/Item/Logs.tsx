@@ -1,52 +1,59 @@
+import ConsoleShell from "@/components/ConsoleShell";
+import Empty from "@/components/Empty";
+import LogConsole from "@/components/LogConsole";
+import { useAppSelector } from "@/utils/hooks";
+import { ActionIcon, Text, Tooltip } from "@mantine/core";
+import { IconActivity, IconEraser } from "@tabler/icons-react";
 import * as React from "react";
-
-import * as WsPB from "@octelium/apis/main/cordiumv1";
-
-// import { sendListenEvent } from "@/features/conn/slice";
-import TerminalEvent from "@/components/TerminalEvent";
-import { twMerge } from "tailwind-merge";
-
-import { canUseWorkspaceService } from "./utils";
-
-import EmptyList from "@/components/EmptyList";
-import PageWrap from "@/components/PageWrap";
-import { Button } from "@mantine/core";
 import { useContextWorkspace } from "../utils";
-
-const LogsBar = (props: { item: WsPB.Workspace }) => {
-  const { item } = props;
-  let [showLogs, setShowLogs] = React.useState(true);
-  if (!canUseWorkspaceService(item)) {
-    return <EmptyList title="Workspace needs to be active to see Logs" />;
-  }
-
-  return (
-    <div className="w-full flex flex-col items-center justify-center">
-      <div className="w-full flex items-center justify-center my-6">
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => {
-            setShowLogs(!showLogs);
-          }}
-        >
-          {showLogs ? "Hide Logs" : "Show Logs"}
-        </Button>
-      </div>
-
-      <div className={twMerge(showLogs ? "flex w-full" : "hidden")}>
-        <TerminalEvent item={item} />
-      </div>
-    </div>
-  );
-};
+import { canUseWorkspaceService } from "./utils";
 
 const Page = () => {
   const ctx = useContextWorkspace();
+  const fullscreen = useAppSelector((s) => s.settings.terminalFullscreen);
+  const [clearToken, setClearToken] = React.useState(0);
+  const item = ctx.workspace.data;
+
+  if (!item) return null;
+
+  if (!canUseWorkspaceService(item)) {
+    return (
+      <Empty
+        icon={<IconActivity size={22} />}
+        title="No logs to stream"
+        description="Startup and task logs are streamed while the workspace is initialising or running."
+      />
+    );
+  }
+
   return (
-    <PageWrap qry={ctx.workspace}>
-      {ctx.workspace.data && <LogsBar item={ctx.workspace.data} />}
-    </PageWrap>
+    <ConsoleShell
+      height={fullscreen ? undefined : 560}
+      tabs={
+        <Text size="xs" fw={600} className="px-2 text-slate-400">
+          Startup and task logs · live
+        </Text>
+      }
+      actions={
+        <Tooltip label="Clear">
+          <ActionIcon
+            size={26}
+            variant="subtle"
+            color="gray"
+            aria-label="Clear logs"
+            onClick={() => setClearToken((v) => v + 1)}
+          >
+            <IconEraser size={14} />
+          </ActionIcon>
+        </Tooltip>
+      }
+    >
+      <LogConsole
+        key={item.metadata!.uid}
+        item={item}
+        clearToken={clearToken}
+      />
+    </ConsoleShell>
   );
 };
 

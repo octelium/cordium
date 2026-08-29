@@ -1,154 +1,163 @@
-import { getClientWorkspace } from "@/utils/client";
-import * as WsPB from "@octelium/apis/main/cordiumv1";
-import {
-  ListSecretOptions,
-  Secret,
-  SecretList,
-} from "@octelium/apis/main/cordiumv1";
-import * as React from "react";
-
-import DeleteResource from "@/components/DeleteResource";
-import EmptyList from "@/components/EmptyList";
-import Meta from "@/components/Meta";
-import PageWrap from "@/components/PageWrap";
+import ConfirmAction from "@/components/ConfirmAction";
+import Empty from "@/components/Empty";
 import Paginator from "@/components/Paginator";
-import {
-  ResourceListCreateItem,
-  ResourceListItem,
-  ResourceListItemMetadata,
-  ResourceListWrapper,
-} from "@/components/ResourceList";
+import QueryBoundary from "@/components/QueryBoundary";
+import { CardList, CardTitle, ClickableCard } from "@/components/ResourceCards";
+import TimeAgo from "@/components/TimeAgo";
 import { useContextSpace } from "@/pages/Spaces/utils";
 import { onError } from "@/utils";
-import { getPathSpace } from "@/utils/octelium";
-import { getResourceRef, isMemberAdmin } from "@/utils/pb";
+import { getClientWorkspace } from "@/utils/client";
+import { useAppSelector } from "@/utils/hooks";
+import { getPathSpace, invalidateSecrets } from "@/utils/octelium";
+import { getResourceRef, getShortName } from "@/utils/pb";
+import { Alert, Button, Stack, Text } from "@mantine/core";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
 import * as MetaPB from "@octelium/apis/main/metav1";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { IconKey, IconPlus, IconTrash } from "@tabler/icons-react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import * as React from "react";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
-const Item = (props: { item: Secret }) => {
-  return (
-    <div className="font-semibold w-full">
-      <div className="flex items-center">
-        <div className="flex flex-col flex-1">
-          <ResourceListItemMetadata resource={props.item} />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const SecretListC = (props: {
-  itemsList: SecretList;
-  space: WsPB.Space;
-  isAdmin?: boolean;
-}) => {
-  const queryClient = useQueryClient();
-
+const SecretRow = (props: { item: WsPB.Secret; canManage: boolean }) => {
+  const { item } = props;
   const client = getClientWorkspace();
 
   const mutationDelete = useMutation({
-    mutationFn: async (spaceRef: MetaPB.ObjectReference) => {
-      const { response } = await client.deleteSecret(
-        MetaPB.DeleteOptions.create({
-          uid: spaceRef.uid,
-          name: spaceRef.name,
-        }),
+    mutationFn: async () => {
+      await client.deleteSecret(
+        MetaPB.DeleteOptions.create({ uid: item.metadata!.uid }),
       );
-
-      return response;
     },
     onSuccess: () => {
-      queryClient.refetchQueries({
-        queryKey: [
-          "workspace/listSecret",
-          props.space?.metadata?.uid,
-          props.itemsList.listResponseMeta?.page,
-        ],
-      });
+      invalidateSecrets();
+      toast.success("Secret deleted");
     },
-    onError: onError,
+    onError,
   });
 
   return (
-    <div>
-      <ResourceListWrapper>
-        {props.itemsList.items.length === 0 && (
-          <EmptyList title="No Secrets found"></EmptyList>
+    <ClickableCard>
+      <div className="flex items-center gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+          <IconKey size={17} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <CardTitle
+            name={getShortName(item)}
+            displayName={item.metadata?.displayName}
+            meta={
+              <>
+                Created <TimeAgo rfc3339={item.metadata?.createdAt} />
+              </>
+            }
+          />
+        </div>
+        {props.canManage && (
+          <ConfirmAction
+            triggerLabel="Delete"
+            triggerIcon={<IconTrash size={13} />}
+            title="Delete this Secret?"
+            confirmLabel="Delete Secret"
+            description="Templates or Workspaces referencing it will fail to start until they are updated."
+            loading={mutationDelete.isPending}
+            onConfirm={() => mutationDelete.mutate()}
+          />
         )}
-        {props.itemsList.items.map((item) => (
-          <ResourceListItem key={item.metadata!.uid}>
-            <Item item={item} />
-
-            {props.isAdmin && (
-              <div className="flex justify-end">
-                <DeleteResource
-                  btnSize="xs"
-                  onDelete={() => {
-                    mutationDelete.mutate(getResourceRef(item));
-                  }}
-                />
-              </div>
-            )}
-          </ResourceListItem>
-        ))}
-      </ResourceListWrapper>
-    </div>
-  );
-};
-
-export const ListSecret = (props: { item: WsPB.Space }) => {
-  const { item } = props;
-  let [page, setPage] = React.useState(0);
-  const client = getClientWorkspace();
-
-  const { isLoading, isSuccess, data } = useQuery({
-    queryKey: ["workspace/listSecret", item?.metadata?.uid, page],
-    queryFn: () => {
-      const { response } = client.listSecret(
-        ListSecretOptions.create({
-          spaceRef: getResourceRef(item),
-        }),
-      );
-      return response;
-    },
-  });
-
-  const ctx = useContextSpace();
-
-  if (!isSuccess || !data || !ctx.membership.isSuccess) {
-    return <></>;
-  }
-
-  const isAdmin = isMemberAdmin(ctx.membership.data);
-
-  return (
-    <>
-      <Meta title="Secrets - Space" />
-      <ResourceListCreateItem
-        title="Create a Secret"
-        path={`${getPathSpace(item)}/secrets/create`}
-      />
-      <SecretListC itemsList={data} space={item} isAdmin={isAdmin} />
-
-      <div className="mt-4">
-        <Paginator
-          meta={data.listResponseMeta!}
-          onPageChange={(i) => {
-            setPage(i);
-          }}
-        />
       </div>
-    </>
+    </ClickableCard>
   );
 };
 
 const Page = () => {
   const ctx = useContextSpace();
+  const navigate = useNavigate();
+  const itemsPerPage = useAppSelector((s) => s.settings.itemsPerPage);
+  const [page, setPage] = React.useState(0);
+  const space = ctx.space.data;
+
+  const qry = useQuery({
+    queryKey: ["workspace/listSecret", space?.metadata?.uid, page, itemsPerPage],
+    queryFn: () => {
+      const { response } = getClientWorkspace().listSecret(
+        WsPB.ListSecretOptions.create({
+          spaceRef: getResourceRef(space!),
+          common: { page, itemsPerPage },
+        }),
+      );
+      return response;
+    },
+    enabled: !!space,
+  });
+
+  if (!space) return null;
 
   return (
-    <PageWrap qry={ctx.space}>
-      {ctx.space.data && <ListSecret item={ctx.space.data} />}
-    </PageWrap>
+    <Stack gap="lg">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <Text size="sm" fw={700}>
+            Secrets in {getShortName(space)}
+          </Text>
+          <Text size="xs" c="dimmed">
+            Referenced by name from Templates and Workspaces in this Space.
+            Values are write-only and never returned by the API.
+          </Text>
+        </div>
+        {ctx.isAdmin && (
+          <Button
+            size="xs"
+            leftSection={<IconPlus size={14} />}
+            onClick={() => navigate(`${getPathSpace(space)}/secrets/create`)}
+          >
+            New Secret
+          </Button>
+        )}
+      </div>
+
+      {!ctx.isAdmin && (
+        <Alert color="gray" variant="light">
+          Only Space admins can create or delete Secrets.
+        </Alert>
+      )}
+
+      <QueryBoundary query={qry}>
+        {qry.data && (
+          <Stack gap="md">
+            {qry.data.items.length === 0 ? (
+              <Empty
+                icon={<IconKey size={22} />}
+                title="No Secrets in this Space"
+                description="Store registry credentials, tokens and other sensitive values here."
+                action={
+                  ctx.isAdmin ? (
+                    <Button
+                      leftSection={<IconPlus size={15} />}
+                      onClick={() =>
+                        navigate(`${getPathSpace(space)}/secrets/create`)
+                      }
+                    >
+                      New Secret
+                    </Button>
+                  ) : undefined
+                }
+              />
+            ) : (
+              <CardList>
+                {qry.data.items.map((x) => (
+                  <SecretRow
+                    key={x.metadata?.uid}
+                    item={x}
+                    canManage={ctx.isAdmin}
+                  />
+                ))}
+              </CardList>
+            )}
+            <Paginator meta={qry.data.listResponseMeta!} onPageChange={setPage} />
+          </Stack>
+        )}
+      </QueryBoundary>
+    </Stack>
   );
 };
 

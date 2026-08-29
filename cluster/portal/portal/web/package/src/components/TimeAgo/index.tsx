@@ -1,43 +1,34 @@
-import React from "react";
+import * as React from "react";
 
 import { Timestamp } from "@octelium/apis/google/protobuf/timestamp";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import utc from "dayjs/plugin/utc";
+
 dayjs.extend(relativeTime);
 dayjs.extend(utc);
 
 import { Tooltip } from "@mantine/core";
 
 const TimeAgo = (props: { rfc3339?: Timestamp }) => {
-  if (!props.rfc3339) {
-    return <></>;
-  }
+  const at = props.rfc3339;
+  const millis = at ? Timestamp.toDate(at).getTime() : 0;
 
-  const t = Timestamp.toDate(props.rfc3339);
-  let [time, setTime] = React.useState(dayjs(t).fromNow());
+  const [, setTick] = React.useState(0);
 
   React.useEffect(() => {
-    setTime(dayjs(t).fromNow());
+    if (!millis) return;
+    const interval = setInterval(() => setTick((t) => t + 1), 10000);
+    return () => clearInterval(interval);
+  }, [millis]);
 
-    const interval = setInterval(() => setTime(dayjs(t).fromNow()), 10000);
-    return () => {
-      clearInterval(interval);
-    };
-  }, [props.rfc3339]);
+  if (!millis) return null;
+
+  const label = dayjs(millis).fromNow();
+
   return (
-    <Tooltip
-      label={
-        <p className="font-bold shadow-md text-xs rounded-sm">
-          {dayjs(t).local().format("hh:mm:ss A, ddd MMM D, YYYY")}
-        </p>
-      }
-      transitionProps={{
-        transition: "fade",
-        duration: 340,
-      }}
-    >
-      <span>{time}</span>
+    <Tooltip label={dayjs(millis).local().format("HH:mm:ss, ddd MMM D, YYYY")}>
+      <span className="whitespace-nowrap">{label}</span>
     </Tooltip>
   );
 };

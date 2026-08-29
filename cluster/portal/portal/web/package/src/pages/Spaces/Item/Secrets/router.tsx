@@ -1,26 +1,17 @@
 import { RouteObject } from "react-router-dom";
 import Create from "./Create";
-import Root from "./index";
-import Item from "./Item";
 import List from "./List";
+import Root from "./index";
 
-export default (): RouteObject => {
+const routerSpacesItemSecrets = (): RouteObject => {
   return {
     path: "secrets",
     element: <Root />,
     children: [
-      {
-        path: "",
-        element: <List />,
-      },
-      {
-        path: "create",
-        element: <Create />,
-      },
-      {
-        path: "uid/:uid",
-        element: <Item />,
-      },
+      { path: "", element: <List /> },
+      { path: "create", element: <Create /> },
     ],
   };
 };
+
+export default routerSpacesItemSecrets;

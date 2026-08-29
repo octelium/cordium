@@ -1,67 +1,45 @@
-import { Tooltip } from "@mantine/core";
-import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
-import { FaCheckDouble } from "react-icons/fa6";
-import { MdOutlineContentCopy } from "react-icons/md";
+import { ActionIcon, Tooltip } from "@mantine/core";
+import { useClipboard } from "@mantine/hooks";
+import { IconCheck, IconCopy } from "@tabler/icons-react";
+import { twMerge } from "tailwind-merge";
 import truncate from "truncate-utf8-bytes";
 
-const CopyText = (props: { value?: string; truncate?: number }) => {
-  const [copied, setCopied] = useState(false);
+const CopyText = (props: {
+  value?: string;
+  truncate?: number;
+  mono?: boolean;
+  className?: string;
+}) => {
+  const clipboard = useClipboard({ timeout: 1500 });
   const { value } = props;
 
   if (!value) return null;
 
   const display =
     props.truncate && props.truncate < value.length
-      ? `${truncate(value, props.truncate)}...`
+      ? `${truncate(value, props.truncate)}…`
       : value;
 
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-      <span style={{ fontFamily: "monospace", fontSize: "0.85em" }}>
+    <span className={twMerge("inline-flex items-center gap-1", props.className)}>
+      <span
+        className={twMerge(
+          "break-all",
+          props.mono !== false && "font-mono text-[0.82em]",
+        )}
+      >
         {display}
       </span>
-      <Tooltip label={copied ? "Copied!" : "Copy"} withArrow position="top">
-        <button
+      <Tooltip label={clipboard.copied ? "Copied" : "Copy"}>
+        <ActionIcon
+          size="xs"
+          variant="subtle"
+          color={clipboard.copied ? "teal" : "gray"}
           aria-label="Copy to clipboard"
-          onClick={() => {
-            navigator.clipboard.writeText(value);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1500);
-          }}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: 2,
-            color: copied
-              ? "var(--mantine-color-teal-6)"
-              : "var(--mantine-color-dimmed)",
-            transition: "color 200ms ease",
-            borderRadius: 4,
-            lineHeight: 1,
-          }}
+          onClick={() => clipboard.copy(value)}
         >
-          <AnimatePresence initial={false} mode="popLayout">
-            <motion.div
-              key={copied ? "1" : "2"}
-              initial={{ y: 6, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -6, opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              style={{ display: "flex" }}
-            >
-              {copied ? (
-                <FaCheckDouble size={11} />
-              ) : (
-                <MdOutlineContentCopy size={12} />
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </button>
+          {clipboard.copied ? <IconCheck size={12} /> : <IconCopy size={12} />}
+        </ActionIcon>
       </Tooltip>
     </span>
   );

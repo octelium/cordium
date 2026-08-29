@@ -2,7 +2,7 @@ import { RouteObject } from "react-router-dom";
 import Root from "./index";
 import List from "./List";
 
-export default (): RouteObject => {
+const routerServices = (): RouteObject => {
   return {
     path: "services",
     element: <Root />,
@@ -14,3 +14,5 @@ export default (): RouteObject => {
     ],
   };
 };
+
+export default routerServices;

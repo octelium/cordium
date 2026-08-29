@@ -1,30 +1,31 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface State {}
+type State = Record<string, never>;
+
+const noop = () => {};
 
 export const slice = createSlice({
   name: "conn",
   initialState: {} as State,
   reducers: {
     sendTerminalData: (
-      state,
-      action: PayloadAction<{ uid: string; data: string }>,
-    ) => {},
+      _state,
+      _action: PayloadAction<{ uid: string; data: string }>,
+    ) => noop(),
     sendCreateTerminal: (
-      state,
-      action: PayloadAction<{
-        userID: string;
-        workspaceUID: string;
-      }>,
-    ) => {},
+      _state,
+      _action: PayloadAction<{ userID: string; workspaceUID: string }>,
+    ) => noop(),
     sendSetTerminalSize: (
-      state,
-      action: PayloadAction<{ uid: string; rows: number; cols: number }>,
-    ) => {},
-    sendCloseTerminal: (state, action: PayloadAction<{ uid: string }>) => {},
-
-    sendListenTerminal: (state, action: PayloadAction<{ id: string }>) => {},
-    sendListenTerminalEnd: (state, action: PayloadAction<{ id: string }>) => {},
+      _state,
+      _action: PayloadAction<{ uid: string; rows: number; cols: number }>,
+    ) => noop(),
+    sendCloseTerminal: (_state, _action: PayloadAction<{ uid: string }>) =>
+      noop(),
+    sendListenTerminal: (_state, _action: PayloadAction<{ id: string }>) =>
+      noop(),
+    sendListenTerminalEnd: (_state, _action: PayloadAction<{ id: string }>) =>
+      noop(),
   },
 });
 

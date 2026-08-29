@@ -7,21 +7,19 @@ import routerUserSecret from "./UserSecrets/router";
 import routerWorkspaces from "./Workspaces/router";
 import Root from "./index";
 
-export default (): RouteObject => {
+const routerRoot = (): RouteObject => {
   return {
     path: "/",
     element: <Root />,
     children: [
-      {
-        path: "",
-        element: <Home />,
-      },
+      { path: "", element: <Home /> },
       routerWorkspaces(),
       routerSpaces(),
       routerServices(),
-
-      routerSettings(),
       routerUserSecret(),
+      routerSettings(),
     ],
   };
 };
+
+export default routerRoot;

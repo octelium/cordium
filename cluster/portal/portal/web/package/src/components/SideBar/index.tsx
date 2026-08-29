@@ -1,71 +1,86 @@
-import { Link, useLocation } from "react-router-dom";
+import {
+  IconLayoutDashboard,
+  IconKey,
+  IconServer2,
+  IconSettings,
+  IconStack2,
+  IconTerminal2,
+} from "@tabler/icons-react";
+import * as React from "react";
+import { NavLink as RouterNavLink } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
 
-import { FaLayerGroup } from "react-icons/fa6";
+interface NavItem {
+  label: string;
+  to: string;
+  icon: React.ReactNode;
+  end?: boolean;
+}
 
-import { FaTerminal } from "react-icons/fa";
-import { MdOutlineSettings } from "react-icons/md";
-
-const items = [
+const primary: NavItem[] = [
   {
-    title: "Spaces",
-    url: "/spaces",
-    icon: FaLayerGroup,
+    label: "Overview",
+    to: "/",
+    icon: <IconLayoutDashboard size={17} />,
+    end: true,
   },
-  {
-    title: "Workspaces",
-    url: "/workspaces",
-    icon: FaTerminal,
-  },
+  { label: "Spaces", to: "/spaces", icon: <IconStack2 size={17} /> },
+  { label: "Workspaces", to: "/workspaces", icon: <IconTerminal2 size={17} /> },
 ];
 
-export default function () {
-  const loc = useLocation();
+const secondary: NavItem[] = [
+  { label: "Services", to: "/services", icon: <IconServer2 size={17} /> },
+  { label: "Your Secrets", to: "/usersecrets", icon: <IconKey size={17} /> },
+];
 
-  return (
-    <div className="min-h-full w-full">
-      <div className="flex flex-col h-full w-full">
-        <div>
-          {items.map((item) => (
-            <div key={item.title}>
-              <div>
-                <Link
-                  className={twMerge(
-                    "transition-all duration-500 hover:bg-slate-200 font-extrabold",
-                    "flex w-full items-center justify-center",
-                    "py-2 px-2 rounded-md my-1",
-                    "text-sm",
-                    loc.pathname.startsWith(item.url)
-                      ? `!text-white bg-zinc-800 hover:bg-black shadow`
-                      : `text-zinc-600 hover:text-zinc-800`,
-                  )}
-                  to={item.url}
-                >
-                  <item.icon />
-                  <span className="flex-1 ml-2">{item.title}</span>
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="flex">
-          <Link
-            className={twMerge(
-              "transition-all duration-500 hover:bg-slate-200 font-extrabold",
-              "flex w-full items-center justify-center",
-              "py-2 px-2 rounded-md my-1",
-              "text-sm",
-              loc.pathname.startsWith(`/settings`)
-                ? `!text-white bg-zinc-800 hover:bg-black`
-                : `text-zinc-600 hover:text-zinc-800`,
-            )}
-            to={`/settings`}
-          >
-            <MdOutlineSettings />
-            <span className="flex-1 ml-2">Settings</span>
-          </Link>
-        </div>
-      </div>
+const Item = (props: { item: NavItem; onNavigate?: () => void }) => (
+  <RouterNavLink
+    to={props.item.to}
+    end={props.item.end}
+    onClick={props.onNavigate}
+    className={({ isActive }) =>
+      twMerge(
+        "flex items-center gap-2.5 rounded-lg px-3 py-2 text-[0.84rem] font-semibold",
+        "transition-colors duration-150",
+        isActive
+          ? "bg-slate-900 text-white shadow-sm"
+          : "text-slate-600 hover:bg-slate-200/70 hover:text-slate-900",
+      )
+    }
+  >
+    {props.item.icon}
+    <span className="truncate">{props.item.label}</span>
+  </RouterNavLink>
+);
+
+const SectionLabel = (props: { children: React.ReactNode }) => (
+  <div className="px-3 pb-1.5 pt-4 text-[0.66rem] font-bold uppercase tracking-[0.09em] text-slate-400">
+    {props.children}
+  </div>
+);
+
+const SideBar = (props: { onNavigate?: () => void }) => (
+  <nav className="flex h-full flex-col gap-1">
+    {primary.map((item) => (
+      <Item key={item.to} item={item} onNavigate={props.onNavigate} />
+    ))}
+
+    <SectionLabel>Account</SectionLabel>
+    {secondary.map((item) => (
+      <Item key={item.to} item={item} onNavigate={props.onNavigate} />
+    ))}
+
+    <div className="mt-auto pt-4">
+      <Item
+        item={{
+          label: "Settings",
+          to: "/settings",
+          icon: <IconSettings size={17} />,
+        }}
+        onNavigate={props.onNavigate}
+      />
     </div>
-  );
-}
+  </nav>
+);
+
+export default SideBar;

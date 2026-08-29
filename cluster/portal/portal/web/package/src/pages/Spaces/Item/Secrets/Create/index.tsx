@@ -1,35 +1,26 @@
-import * as WsPB from "@octelium/apis/main/cordiumv1";
-import * as React from "react";
-
-import { getClientWorkspace } from "@/utils/client";
-
+import Meta from "@/components/Meta";
 import MetadataEdit from "@/components/MetadataEdit";
-import PageWrap from "@/components/PageWrap";
+import PageHeader from "@/components/PageHeader";
+import Panel, { PanelBody, PanelFooter, PanelHeader } from "@/components/Panel";
+import SecretValueInput from "@/components/SecretValueInput";
 import { useContextSpace } from "@/pages/Spaces/utils";
 import { onError } from "@/utils";
-import { getPathSpace } from "@/utils/octelium";
-import { getResourceRef } from "@/utils/pb";
-import {
-  ActionIcon,
-  Button,
-  Divider,
-  Group,
-  PasswordInput,
-  SegmentedControl,
-  Stack,
-  Text,
-  Textarea,
-  ThemeIcon,
-} from "@mantine/core";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Eye, EyeOff, FileText, KeyRound, Upload } from "lucide-react";
-import { toast } from "react-hot-toast";
+import { getClientWorkspace } from "@/utils/client";
+import { getPathSpace, invalidateSecrets } from "@/utils/octelium";
+import { getResourceRef, getShortName } from "@/utils/pb";
+import { Button, Stack } from "@mantine/core";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
+import { IconKey, IconLock } from "@tabler/icons-react";
+import { useMutation } from "@tanstack/react-query";
+import * as React from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-
-type InputMode = "value" | "file";
 
 const CreateSecret = () => {
   const ctx = useContextSpace();
+  const client = getClientWorkspace();
+  const navigate = useNavigate();
+  const space = ctx.space.data;
 
   const [req, setReq] = React.useState(
     WsPB.Secret.create({
@@ -42,233 +33,92 @@ const CreateSecret = () => {
     }),
   );
 
-  const [inputMode, setInputMode] = React.useState<InputMode>("value");
-  const [revealed, setRevealed] = React.useState(false);
-  const [fileName, setFileName] = React.useState<string | null>(null);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  const client = getClientWorkspace();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  if (!ctx.space.isSuccess) return null;
-  const data = ctx.space.data;
+  const value = req.data?.type.oneofKind === "value" ? req.data.type.value : "";
 
   const mutation = useMutation({
     mutationFn: async () => {
-      req.status!.spaceRef = getResourceRef(data!);
-      const { response } = await client.createSecret(req);
+      const payload = WsPB.Secret.clone(req);
+      payload.status!.spaceRef = getResourceRef(space!);
+      const { response } = await client.createSecret(payload);
       return response;
     },
     onSuccess: () => {
-      queryClient.refetchQueries({
-        queryKey: ["workspace/listSecret", data?.metadata?.uid, 0],
-      });
+      invalidateSecrets();
       toast.success("Secret created");
-      navigate(getPathSpace(data));
+      navigate(`${getPathSpace(space!)}/secrets`);
     },
     onError,
   });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setFileName(file.name);
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const text = ev.target?.result as string;
-      req.data!.type = { oneofKind: "value", value: text };
-      setReq(WsPB.Secret.clone(req));
-    };
-    reader.readAsText(file);
-  };
-
-  const currentValue =
-    req.data?.type.oneofKind === "value" ? req.data.type.value : "";
+  if (!space) return null;
 
   return (
-    <PageWrap qry={ctx.space} title="Create a Secret">
-      <Stack gap="xl">
-        <div
-          style={{
-            background: "#f8fafc",
-            border: "1px solid #e2e8f0",
-            borderRadius: 10,
-            padding: "16px 20px",
-          }}
-        >
-          <Group gap="xs" mb="md">
-            <ThemeIcon size="sm" variant="light" color="blue" radius="md">
-              <KeyRound size={13} />
-            </ThemeIcon>
-            <Text
-              size="xs"
-              fw={600}
-              tt="uppercase"
-              style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
-            >
-              Metadata
-            </Text>
-          </Group>
-          <MetadataEdit
-            metadata={req.metadata!}
-            onUpdate={(itm) => {
-              req.metadata = itm;
-              setReq(WsPB.Secret.clone(req));
-            }}
-            parentName={data.metadata?.name}
-          />
-        </div>
+    <>
+      <Meta title="New Secret" />
+      <PageHeader
+        title="New Secret"
+        crumbs={[
+          { label: "Spaces", to: "/spaces" },
+          { label: getShortName(space), to: getPathSpace(space) },
+          { label: "Secrets", to: `${getPathSpace(space)}/secrets` },
+          { label: "New" },
+        ]}
+        description={`Available to every Template and Workspace in ${getShortName(space)}.`}
+      />
 
-        <div
-          style={{
-            background: "#f8fafc",
-            border: "1px solid #e2e8f0",
-            borderRadius: 10,
-            padding: "16px 20px",
-          }}
-        >
-          <Group gap="xs" mb="md">
-            <ThemeIcon size="sm" variant="light" color="violet" radius="md">
-              <FileText size={13} />
-            </ThemeIcon>
-            <Text
-              size="xs"
-              fw={600}
-              tt="uppercase"
-              style={{ letterSpacing: "0.06em", color: "#94a3b8" }}
-            >
-              Secret value
-            </Text>
-          </Group>
-
-          <Stack gap="md">
-            <SegmentedControl
-              size="xs"
-              value={inputMode}
-              onChange={(v) => {
-                setInputMode(v as InputMode);
-                setFileName(null);
-                req.data!.type = { oneofKind: "value", value: "" };
-                setReq(WsPB.Secret.clone(req));
-              }}
-              data={[
-                { label: "Enter value", value: "value" },
-                { label: "Upload from file", value: "file" },
-              ]}
-              style={{ width: "fit-content" }}
+      <div className="max-w-3xl">
+        <Stack gap="lg">
+          <Panel>
+            <PanelHeader
+              icon={<IconKey size={16} />}
+              title="Identity"
+              description="Referenced by this name from specs, e.g. as an env var source."
             />
+            <PanelBody>
+              <MetadataEdit
+                metadata={req.metadata!}
+                parentName={space.metadata?.name}
+                onChange={(md) => {
+                  const next = WsPB.Secret.clone(req);
+                  next.metadata = md;
+                  setReq(next);
+                }}
+              />
+            </PanelBody>
+          </Panel>
 
-            {inputMode === "value" && (
-              <div style={{ position: "relative" }}>
-                {revealed ? (
-                  <Textarea
-                    placeholder="Enter secret value…"
-                    required
-                    autosize
-                    minRows={3}
-                    maxRows={8}
-                    value={currentValue}
-                    onChange={(e) => {
-                      req.data!.type = {
-                        oneofKind: "value",
-                        value: e.currentTarget.value,
-                      };
-                      setReq(WsPB.Secret.clone(req));
-                    }}
-                    rightSection={
-                      <ActionIcon
-                        variant="subtle"
-                        color="gray"
-                        onClick={() => setRevealed(false)}
-                        style={{ alignSelf: "flex-start", marginTop: 6 }}
-                      >
-                        <EyeOff size={14} />
-                      </ActionIcon>
-                    }
-                    rightSectionProps={{
-                      style: { alignItems: "flex-start", paddingTop: 6 },
-                    }}
-                  />
-                ) : (
-                  <PasswordInput
-                    placeholder="Enter secret value…"
-                    required
-                    value={currentValue}
-                    onChange={(e) => {
-                      req.data!.type = {
-                        oneofKind: "value",
-                        value: e.currentTarget.value,
-                      };
-                      setReq(WsPB.Secret.clone(req));
-                    }}
-                    visibilityToggleIcon={({ reveal }) =>
-                      reveal ? <EyeOff size={14} /> : <Eye size={14} />
-                    }
-                    onVisibilityChange={setRevealed}
-                  />
-                )}
-                <Text size="xs" c="dimmed" mt={6}>
-                  Value is masked by default. Click the eye icon to reveal.
-                </Text>
-              </div>
-            )}
-
-            {inputMode === "file" && (
-              <Stack gap="xs">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  style={{ display: "none" }}
-                  onChange={handleFileChange}
-                />
-                <Button
-                  variant="default"
-                  size="sm"
-                  leftSection={<Upload size={14} />}
-                  onClick={() => fileInputRef.current?.click()}
-                  style={{ width: "fit-content" }}
-                >
-                  {fileName ? "Replace file" : "Choose file"}
-                </Button>
-                {fileName && (
-                  <Group gap="xs">
-                    <FileText size={13} style={{ color: "#64748b" }} />
-                    <Text size="xs" c="dimmed">
-                      {fileName}
-                    </Text>
-                    {currentValue && (
-                      <Text size="xs" c="teal.6" fw={500}>
-                        ✓ Loaded ({currentValue.length} bytes)
-                      </Text>
-                    )}
-                  </Group>
-                )}
-                <Text size="xs" c="dimmed">
-                  File contents will be stored as the secret value.
-                </Text>
-              </Stack>
-            )}
-          </Stack>
-        </div>
-
-        <Divider />
-
-        <Group justify="flex-end" gap="sm">
-          <Button variant="default" size="sm" onClick={() => navigate(-1)}>
-            Cancel
-          </Button>
-          <Button
-            size="sm"
-            loading={mutation.isPending}
-            disabled={!currentValue}
-            onClick={() => mutation.mutate()}
-          >
-            Create secret
-          </Button>
-        </Group>
-      </Stack>
-    </PageWrap>
+          <Panel>
+            <PanelHeader
+              icon={<IconLock size={16} />}
+              title="Value"
+              description="Write-only. You can replace it later but never read it back."
+            />
+            <PanelBody>
+              <SecretValueInput
+                value={value}
+                onChange={(v) => {
+                  const next = WsPB.Secret.clone(req);
+                  next.data!.type = { oneofKind: "value", value: v };
+                  setReq(next);
+                }}
+              />
+            </PanelBody>
+            <PanelFooter>
+              <Button variant="default" onClick={() => navigate(-1)}>
+                Cancel
+              </Button>
+              <Button
+                loading={mutation.isPending}
+                disabled={!value || !req.metadata?.name}
+                onClick={() => mutation.mutate()}
+              >
+                Create Secret
+              </Button>
+            </PanelFooter>
+          </Panel>
+        </Stack>
+      </div>
+    </>
   );
 };
 

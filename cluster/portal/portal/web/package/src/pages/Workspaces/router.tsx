@@ -1,23 +1,19 @@
 import { RouteObject } from "react-router-dom";
-import Root from "./index";
-import CreateWorkspace from "./Create";
-import List from "./List";
+import Create from "./Create";
 import routerItem from "./Item/router";
+import List from "./List";
+import Root from "./index";
 
-export default (): RouteObject => {
+const routerWorkspaces = (): RouteObject => {
   return {
     path: "workspaces",
     element: <Root />,
     children: [
-      {
-        path: "",
-        element: <List />,
-      },
-      {
-        path: "create",
-        element: <CreateWorkspace />,
-      },
+      { path: "", element: <List /> },
+      { path: "create", element: <Create /> },
       routerItem(),
     ],
   };
 };
+
+export default routerWorkspaces;

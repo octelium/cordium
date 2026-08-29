@@ -8,34 +8,39 @@ export type Resource =
   | WsPB.Template
   | WsPB.Secret
   | WsPB.Space
-  | WsPB.Secret
   | WsPB.GitProvider
   | WsPB.UserSecret
   | UserPB.Service
   | UserPB.Namespace;
-export type ResourceList =
-  | WsPB.WorkspaceList
-  | WsPB.TemplateList
-  | WsPB.SecretList
-  | WsPB.SpaceList
-  | WsPB.SecretList
-  | WsPB.GitProviderList
-  | WsPB.UserSecretList
-  | UserPB.ServiceList
-  | UserPB.NamespaceList;
-export type ResourceName = "Workspace" | "Template" | "Secret" | "Space";
 
-export const cloneResource = (arg: Resource): Resource => {
-  return WsPB[arg.kind as ResourceName].clone(arg as any) as Resource;
+export type ResourceName =
+  | "Workspace"
+  | "Template"
+  | "Secret"
+  | "Space"
+  | "GitProvider"
+  | "UserSecret";
+
+interface ResourceCodec {
+  clone(arg: object): object;
+  toJsonString(arg: object): string;
+  fromJsonString(arg: string): object;
+}
+
+const codecFor = (kind: string): ResourceCodec =>
+  WsPB[kind as ResourceName] as unknown as ResourceCodec;
+
+export const cloneResource = <T extends Resource>(arg: T): T => {
+  return codecFor(arg.kind).clone(arg) as T;
 };
 
 export const resourceToJSON = (arg: Resource): string => {
-  return WsPB[arg.kind as ResourceName].toJsonString(arg as any);
+  return codecFor(arg.kind).toJsonString(arg);
 };
+
 export const resourceSpecToJSON = (arg: Resource): string => {
-  return JSON.stringify(
-    JSON.parse(WsPB[arg.kind as ResourceName].toJsonString(arg as any))["spec"],
-  );
+  const parsed = JSON.parse(resourceToJSON(arg)) as Record<string, unknown>;
+  return JSON.stringify(parsed["spec"] ?? {});
 };
 
 export const resourceToYAML = (arg: Resource): string => {
@@ -47,9 +52,12 @@ export const resourceSpecToYAML = (arg: Resource): string => {
 };
 
 export const resourceFromYAML = (arg: string): Resource | undefined => {
-  const yamlObj = loadYaml(arg) as any;
-  const kind = yamlObj["kind"] as ResourceName;
-  return WsPB[kind].fromJsonString(JSON.stringify(yamlObj));
+  const yamlObj = loadYaml(arg) as Record<string, unknown> | undefined;
+  const kind = yamlObj?.["kind"];
+  if (typeof kind !== "string" || !(kind in WsPB)) {
+    return undefined;
+  }
+  return codecFor(kind).fromJsonString(JSON.stringify(yamlObj)) as Resource;
 };
 
 export const getResourceRef = (arg: Resource): MetaPB.ObjectReference => {
@@ -61,6 +69,10 @@ export const getResourceRef = (arg: Resource): MetaPB.ObjectReference => {
   });
 };
 
+export const getShortNameFromStr = (arg: string): string => {
+  return arg.split(".").at(0) ?? "";
+};
+
 export const getShortName = (arg: Resource): string => {
   return getShortNameFromStr(arg.metadata!.name);
 };
@@ -69,8 +81,8 @@ export const getShortNameFromRef = (arg: MetaPB.ObjectReference): string => {
   return getShortNameFromStr(arg.name);
 };
 
-export const getShortNameFromStr = (arg: string): string => {
-  return arg.split(".").at(0) ?? "";
+export const getDisplayName = (arg: Resource): string => {
+  return arg.metadata?.displayName || getShortName(arg);
 };
 
 export const canStopWorkspace = (arg: WsPB.Workspace): boolean => {
@@ -84,9 +96,42 @@ export const canStopWorkspace = (arg: WsPB.Workspace): boolean => {
   }
 };
 
+export const isWorkspaceStopped = (arg: WsPB.Workspace): boolean => {
+  return arg.status?.state === WsPB.Workspace_Status_State.STOPPED;
+};
+
+export const isWorkspaceRunning = (arg: WsPB.Workspace): boolean => {
+  return arg.status?.state === WsPB.Workspace_Status_State.RUNNING;
+};
+
 export const isMemberAdmin = (arg: WsPB.Membership): boolean => {
   return (
     arg.spec?.role === WsPB.Membership_Spec_Role.ADMIN ||
     arg.spec?.role === WsPB.Membership_Spec_Role.OWNER
   );
+};
+
+export const isMemberOwner = (arg: WsPB.Membership): boolean => {
+  return arg.spec?.role === WsPB.Membership_Spec_Role.OWNER;
+};
+
+export const isOrgSpace = (arg: WsPB.Space): boolean => {
+  return arg.status?.type === WsPB.Space_Status_Type.ORGANIZATION;
+};
+
+export const getSpaceTypeLabel = (arg: WsPB.Space): string => {
+  return isOrgSpace(arg) ? "Organization" : "Personal";
+};
+
+export const getRoleLabel = (role: WsPB.Membership_Spec_Role): string => {
+  switch (role) {
+    case WsPB.Membership_Spec_Role.OWNER:
+      return "Owner";
+    case WsPB.Membership_Spec_Role.ADMIN:
+      return "Admin";
+    case WsPB.Membership_Spec_Role.USER:
+      return "Member";
+    default:
+      return "Unknown";
+  }
 };

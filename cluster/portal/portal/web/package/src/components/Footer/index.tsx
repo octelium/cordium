@@ -1,18 +1,15 @@
-export default () => {
-  return (
-    <>
-      <div className="w-full mb-6 pt-8">
-        <div className="w-full px-2">
-          <div className="w-full flex items-center justify-center">
-            <a href="https://octelium.com" target="_blank noreferrer noopener">
-              <span className="text-sm font-semibold transition-all duration-300 text-gray-400 sm:text-center hover:text-gray-600">
-                © {new Date().getFullYear()}{" "}
-                <span className="ml-1">octelium.com</span>
-              </span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-};
+const Footer = () => (
+  <footer className="mt-10 flex items-center justify-center gap-1 pb-8 pt-4 text-[0.75rem] font-medium text-slate-400">
+    <span>© {new Date().getFullYear()}</span>
+    <a
+      href="https://octelium.com"
+      target="_blank"
+      rel="noreferrer noopener"
+      className="transition-colors duration-150 hover:text-slate-600"
+    >
+      octelium.com
+    </a>
+  </footer>
+);
+
+export default Footer;

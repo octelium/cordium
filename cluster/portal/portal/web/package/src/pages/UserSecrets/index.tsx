@@ -1,13 +1,5 @@
 import { Outlet } from "react-router-dom";
 
-const UserSecrets = () => {
-  return (
-    <>
-      <div className="w-full">
-        <Outlet />
-      </div>
-    </>
-  );
-};
+const Page = () => <Outlet />;
 
-export default UserSecrets;
+export default Page;

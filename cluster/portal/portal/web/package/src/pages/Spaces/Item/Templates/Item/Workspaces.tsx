@@ -1,73 +1,88 @@
+import Empty from "@/components/Empty";
+import LaunchWorkspace from "@/components/LaunchWorkspace";
+import Paginator from "@/components/Paginator";
+import QueryBoundary from "@/components/QueryBoundary";
+import { CardList } from "@/components/ResourceCards";
+import WorkspaceRow from "@/components/WorkspaceRow";
+import { useContextSpace } from "@/pages/Spaces/utils";
+import { getClientWorkspace } from "@/utils/client";
+import { useAppSelector } from "@/utils/hooks";
+import { getResourceRef, getShortName } from "@/utils/pb";
+import { Stack, Text } from "@mantine/core";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
+import { IconTerminal2 } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
 import * as React from "react";
 
-import { getClientWorkspace } from "@/utils/client";
+const Page = () => {
+  const ctx = useContextSpace();
+  const itemsPerPage = useAppSelector((s) => s.settings.itemsPerPage);
+  const [page, setPage] = React.useState(0);
 
-import { useContextSpace } from "@/pages/Spaces/utils";
-import { useAppSelector } from "@/utils/hooks";
-import { useQuery } from "@tanstack/react-query";
-
-import Meta from "@/components/Meta";
-import PageWrap from "@/components/PageWrap";
-import Paginator from "@/components/Paginator";
-import WorkspaceListC from "@/components/ScopeResourceList/WorkspaceList";
-import { getResourceRef } from "@/utils/pb";
-import * as WsPB from "@octelium/apis/main/cordiumv1";
-
-const ListWorkspace = (props: { item: WsPB.Template }) => {
-  const { item } = props;
-
-  const settings = useAppSelector((state) => state.settings);
-  const itemsPerPage = settings.itemsPerPage;
-  let [page, setPage] = React.useState(0);
-  const client = getClientWorkspace();
+  const template = ctx.template.data;
+  const space = ctx.space.data;
 
   const qry = useQuery({
-    queryKey: ["workspace/listWorkspace", item.metadata?.uid, page],
+    queryKey: [
+      "workspace/listWorkspace",
+      template?.metadata?.uid,
+      page,
+      itemsPerPage,
+    ],
     queryFn: () => {
-      const { response } = client.listWorkspace(
+      const { response } = getClientWorkspace().listWorkspace(
         WsPB.ListWorkspaceOptions.create({
           filter: {
             oneofKind: "templateRef",
-            templateRef: getResourceRef(item),
+            templateRef: getResourceRef(template!),
           },
-          common: {
-            page,
-            itemsPerPage,
-          },
+          common: { page, itemsPerPage },
         }),
       );
       return response;
     },
+    enabled: !!template,
   });
 
-  return (
-    <PageWrap qry={qry}>
-      <Meta title="Template Workspaces" />
-      {qry.data && (
-        <div>
-          <WorkspaceListC itemList={qry.data} />
-
-          <div className="mt-4">
-            <Paginator
-              meta={qry.data.listResponseMeta!}
-              onPageChange={(val) => {
-                setPage(val);
-              }}
-            />
-          </div>
-        </div>
-      )}
-    </PageWrap>
-  );
-};
-
-const Page = () => {
-  const ctx = useContextSpace();
+  if (!template || !space) return null;
 
   return (
-    <PageWrap qry={ctx.template}>
-      {ctx.template.data && <ListWorkspace item={ctx.template.data} />}
-    </PageWrap>
+    <Stack gap="lg">
+      <div>
+        <Text size="sm" fw={700}>
+          Your workspaces from {getShortName(template)}
+        </Text>
+        <Text size="xs" c="dimmed">
+          Only Workspaces you own are listed.
+        </Text>
+      </div>
+
+      <QueryBoundary query={qry}>
+        {qry.data && (
+          <Stack gap="md">
+            {qry.data.items.length === 0 ? (
+              <Empty
+                icon={<IconTerminal2 size={22} />}
+                title="No workspaces from this Template"
+                description="Launch one with the form below."
+              />
+            ) : (
+              <CardList>
+                {qry.data.items.map((x) => (
+                  <WorkspaceRow key={x.metadata?.uid} item={x} />
+                ))}
+              </CardList>
+            )}
+            <Paginator meta={qry.data.listResponseMeta!} onPageChange={setPage} />
+          </Stack>
+        )}
+      </QueryBoundary>
+
+      <LaunchWorkspace
+        spaceRef={getResourceRef(space)}
+        templateRef={getResourceRef(template)}
+      />
+    </Stack>
   );
 };
 

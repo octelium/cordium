@@ -1,39 +1,38 @@
+import CopyText from "@/components/CopyText";
+import Empty from "@/components/Empty";
+import Facts, { Fact } from "@/components/Facts";
 import Meta from "@/components/Meta";
+import PageHeader from "@/components/PageHeader";
+import Paginator from "@/components/Paginator";
+import QueryBoundary from "@/components/QueryBoundary";
+import { CardList, ClickableCard } from "@/components/ResourceCards";
+import Tag from "@/components/Tag";
+import { getDomain } from "@/utils";
 import { getClientUser } from "@/utils/client";
 import { useAppSelector } from "@/utils/hooks";
-import * as React from "react";
-
-import {
-  ListNamespaceOptions,
-  ListServiceOptions,
-  Service_Spec_Type,
-} from "@octelium/apis/main/userv1";
-import { useQuery } from "@tanstack/react-query";
-
-import CopyText from "@/components/CopyText";
-import EmptyList from "@/components/EmptyList";
-import InfoItem from "@/components/InfoItem";
-import Paginator from "@/components/Paginator";
-import {
-  ResourceListItem,
-  ResourceListWrapper,
-} from "@/components/ResourceList";
-import { getDomain, toNumOrZero } from "@/utils";
-import { Service, ServiceList } from "@octelium/apis/main/userv1";
-import { BiLinkExternal } from "react-icons/bi";
-import { useSearchParams } from "react-router-dom";
-import { twMerge } from "tailwind-merge";
-import { match } from "ts-pattern";
-
 import {
   getServiceHostname,
   getServicePrivateFQDN,
   getServicePublicFQDN,
 } from "@/utils/octelium";
-import { Collapse } from "@mantine/core";
+import { Button, Collapse, Stack } from "@mantine/core";
+import {
+  ListServiceOptions,
+  Service,
+  Service_Spec_Type,
+} from "@octelium/apis/main/userv1";
+import {
+  IconChevronDown,
+  IconChevronUp,
+  IconExternalLink,
+  IconServer2,
+} from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
+import * as React from "react";
+import { match } from "ts-pattern";
 
-const getType = (svc: Service): string => {
-  return match(svc.spec?.type)
+const getType = (svc: Service): string =>
+  match(svc.spec?.type)
     .with(Service_Spec_Type.GRPC, () => "gRPC")
     .with(Service_Spec_Type.HTTP, () => "HTTP")
     .with(Service_Spec_Type.KUBERNETES, () => "Kubernetes")
@@ -42,181 +41,151 @@ const getType = (svc: Service): string => {
     .with(Service_Spec_Type.SSH, () => "SSH")
     .with(Service_Spec_Type.TCP, () => "TCP")
     .with(Service_Spec_Type.UDP, () => "UDP")
-    .with(Service_Spec_Type.WEB, () => "Web App")
-    .otherwise(() => "");
-};
+    .with(Service_Spec_Type.WEB, () => "Web app")
+    .otherwise(() => "Service");
 
-const SvcLabel = (props: { children?: React.ReactNode; label?: string }) => {
-  return (
-    <span
-      className={twMerge(
-        "p-0 rounded-full font-bold text-xs flex-none mx-1 my-1 flex flex-row flex-shrink",
-        "border-[1px] border-gray-400 shadow-md",
-      )}
-    >
-      {props.label && (
-        <span
-          className={twMerge(
-            `bg-gray-800 text-white shadow-lg px-2 py-1 rounded-s-full`,
-          )}
-        >
-          {props.label}
-        </span>
-      )}
-      <span className={twMerge(`px-2 py-1 flex-none flex`)}>
-        {props.children}
-      </span>
-    </span>
-  );
-};
-
-const ItemDetails = (props: { item: Service; domain: string }) => {
-  const { item } = props;
-  const md = item.metadata!;
+const ServiceRow = (props: { item: Service; domain: string }) => {
+  const { item, domain } = props;
+  const [expanded, setExpanded] = React.useState(false);
+  const isWeb =
+    item.spec?.isPublic && item.spec.type === Service_Spec_Type.WEB;
 
   return (
-    <div>
-      {md.description && (
-        <InfoItem title="Description">{md.description}</InfoItem>
-      )}
-      <InfoItem title="Private FQDN">
-        <CopyText value={getServicePrivateFQDN(item, props.domain)} />
-      </InfoItem>
-      {item.spec?.isPublic && (
-        <InfoItem title="Public FQDN">
-          <CopyText value={getServicePublicFQDN(item, props.domain)} />
-        </InfoItem>
-      )}
-      {item.status?.addresses && item.status.addresses.length > 0 && (
-        <InfoItem title="Private Addresses">
-          <div className="flex flex-col">
-            {item.status?.addresses.map((x) => (
-              <span className="w-full">
-                <CopyText value={x} />
-              </span>
-            ))}
-          </div>
-        </InfoItem>
-      )}
-    </div>
-  );
-};
-
-const Item = (props: { item: Service; domain: string }) => {
-  const { item } = props;
-
-  const md = item.metadata!;
-
-  let [showDetails, setShowDetails] = React.useState(false);
-
-  return (
-    <div
-      className="font-semibold w-full"
-      onMouseEnter={() => {
-        setShowDetails(true);
-      }}
-      onMouseLeave={() => {
-        setShowDetails(false);
-      }}
-    >
-      <div className="flex">
-        <div className="flex flex-col flex-1">
-          <div className="flex items-center font-bold">
-            <span className="text-gray-800 mr-2 flex flex-row">
-              <CopyText value={getServiceHostname(item)} />
+    <ClickableCard>
+      <div className="flex flex-col gap-3 md:flex-row md:items-start">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-baseline gap-x-2">
+            <span className="truncate text-sm font-bold text-slate-800">
+              {getServiceHostname(item)}
             </span>
-            {md.displayName && (
-              <span className="text-gray-600">{md.displayName}</span>
+            {item.metadata?.displayName && (
+              <span className="truncate text-[0.78rem] font-medium text-slate-500">
+                {item.metadata.displayName}
+              </span>
             )}
           </div>
-          <div className="w-full mt-1 flex flex-row">
-            <SvcLabel label="Type">{getType(item)}</SvcLabel>
-            <SvcLabel label="Namespace"> {item.status?.namespace}</SvcLabel>
-            <SvcLabel label="Port">{item.spec?.port}</SvcLabel>
-            {/*
-            <SvcLabel label="Namespace"> {item.metadata?.namespace}</SvcLabel>
-            <SvcLabel label="Hostname">{getHostName(item)}</SvcLabel>
-            */}
-            {item.spec?.isTLS && <SvcLabel>TLS</SvcLabel>}
+
+          {item.metadata?.description && (
+            <p className="mt-0.5 text-[0.78rem] font-medium text-slate-500">
+              {item.metadata.description}
+            </p>
+          )}
+
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            <Tag label="Type">{getType(item)}</Tag>
+            <Tag label="Namespace">{item.status?.namespace}</Tag>
+            {item.spec?.port ? <Tag label="Port">{item.spec.port}</Tag> : null}
+            {item.spec?.isTLS && <Tag tone="success">TLS</Tag>}
+            {item.spec?.isPublic && <Tag tone="info">Public</Tag>}
           </div>
 
-          <Collapse expanded={showDetails}>
-            <ItemDetails item={item} domain={props.domain} />
+          <Collapse expanded={expanded}>
+            <div className="mt-3 border-t border-slate-100 pt-1">
+              <Facts>
+                <Fact label="Private FQDN">
+                  <CopyText value={getServicePrivateFQDN(item, domain)} />
+                </Fact>
+                {item.spec?.isPublic && (
+                  <Fact label="Public FQDN">
+                    <CopyText value={getServicePublicFQDN(item, domain)} />
+                  </Fact>
+                )}
+                {(item.status?.addresses?.length ?? 0) > 0 && (
+                  <Fact label="Addresses">
+                    <span className="flex flex-col gap-0.5">
+                      {item.status!.addresses.map((a) => (
+                        <CopyText key={a} value={a} />
+                      ))}
+                    </span>
+                  </Fact>
+                )}
+              </Facts>
+            </div>
           </Collapse>
         </div>
-        <div className="flex items-start justify-center">
-          {item.spec?.isPublic && item.spec.type === Service_Spec_Type.WEB && (
-            <a
-              className={twMerge(
-                "bg-gray-800 text-white py-2 px-4 ml-2 font-bold shadow-lg text-sm rounded-lg",
-                "hover:bg-black transition-all duration-200 shadow-xl",
-                "flex flex-row items-center justify-center",
-              )}
-              href={`https://${getServicePublicFQDN(item, props.domain)}`}
+
+        <div className="flex shrink-0 items-center gap-2">
+          {isWeb && (
+            <Button
+              size="xs"
+              variant="default"
+              component="a"
+              href={`https://${getServicePublicFQDN(item, domain)}`}
               target="_blank"
+              rel="noreferrer"
+              leftSection={<IconExternalLink size={13} />}
             >
-              <span className="px-1">Visit</span>
-              <BiLinkExternal />
-            </a>
+              Visit
+            </Button>
           )}
+          <Button
+            size="xs"
+            variant="subtle"
+            color="gray"
+            rightSection={
+              expanded ? (
+                <IconChevronUp size={13} />
+              ) : (
+                <IconChevronDown size={13} />
+              )
+            }
+            onClick={() => setExpanded((v) => !v)}
+          >
+            {expanded ? "Less" : "Details"}
+          </Button>
         </div>
       </div>
-    </div>
-  );
-};
-
-const ServiceListC = (props: { itemsList: ServiceList }) => {
-  const domain = getDomain();
-
-  return (
-    <div>
-      <ResourceListWrapper>
-        {props.itemsList.items.length === 0 && (
-          <EmptyList title="No Services found"></EmptyList>
-        )}
-        {props.itemsList.items.map((item) => (
-          <ResourceListItem key={item.metadata!.uid}>
-            <Item item={item} domain={domain} />
-          </ResourceListItem>
-        ))}
-      </ResourceListWrapper>
-      <Paginator meta={props.itemsList.listResponseMeta!} path="/services" />
-    </div>
+    </ClickableCard>
   );
 };
 
 const Page = () => {
-  const settings = useAppSelector((state) => state.settings);
+  const itemsPerPage = useAppSelector((s) => s.settings.itemsPerPage);
+  const [page, setPage] = React.useState(0);
+  const domain = getDomain();
 
-  let [searchParams, _] = useSearchParams();
-  const page = toNumOrZero(searchParams.get("page"));
-
-  const { isLoading, isSuccess, data } = useQuery({
-    queryKey: ["user/main.listService", page],
+  const qry = useQuery({
+    queryKey: ["user/listService", page, itemsPerPage],
     queryFn: async () => {
-      const svcResp = await getClientUser().listService(
-        ListServiceOptions.create({
-          common: {
-            page,
-            itemsPerPage: settings.itemsPerPage,
-          },
-        }),
+      const { response } = await getClientUser().listService(
+        ListServiceOptions.create({ common: { page, itemsPerPage } }),
       );
-
-      const nsResp = await getClientUser().listNamespace(
-        ListNamespaceOptions.create(),
-      );
-      return {
-        serviceList: svcResp.response,
-        namespaceList: nsResp.response,
-      };
+      return response;
     },
   });
 
   return (
     <>
       <Meta title="Services" />
-      {isSuccess && <ServiceListC itemsList={data.serviceList} />}
+      <PageHeader
+        title="Services"
+        description="Octelium Services assigned to you. Workspaces can reach them privately, and serve them with the runtime's Octelium integration."
+      />
+
+      <QueryBoundary query={qry}>
+        {qry.data && (
+          <Stack gap="md">
+            {qry.data.items.length === 0 ? (
+              <Empty
+                icon={<IconServer2 size={22} />}
+                title="No Services assigned"
+                description="Ask a Cluster administrator to grant you access to a Service."
+              />
+            ) : (
+              <CardList>
+                {qry.data.items.map((x) => (
+                  <ServiceRow
+                    key={x.metadata?.uid}
+                    item={x}
+                    domain={domain}
+                  />
+                ))}
+              </CardList>
+            )}
+            <Paginator meta={qry.data.listResponseMeta!} onPageChange={setPage} />
+          </Stack>
+        )}
+      </QueryBoundary>
     </>
   );
 };

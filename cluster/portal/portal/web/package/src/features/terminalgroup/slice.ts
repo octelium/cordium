@@ -14,8 +14,7 @@ export const slice = createSlice({
     terminals: [],
   } as State,
   reducers: {
-    clearTerminalGroup: (state, action: PayloadAction<{}>) => {
-      // state.activeTerminal = undefined;
+    clearTerminalGroup: (state, _action: PayloadAction<Record<string, never>>) => {
       state.lastArray = [];
       state.terminals = [];
     },

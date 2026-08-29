@@ -1,34 +1,39 @@
-import * as React from "react";
-
-import { getClientWorkspace } from "@/utils/client";
-
-import { useContextSpace } from "@/pages/Spaces/utils";
-import { useAppSelector } from "@/utils/hooks";
-
 import BuildTemplate from "@/components/BuildTemplate";
-import * as WsPB from "@octelium/apis/main/cordiumv1";
-import * as MetaPB from "@octelium/apis/main/metav1";
-
-import EmptyList from "@/components/EmptyList";
-import Label from "@/components/Label";
-import PageWrap from "@/components/PageWrap";
+import ConfirmAction from "@/components/ConfirmAction";
+import Empty from "@/components/Empty";
+import Panel, { PanelBody, PanelHeader } from "@/components/Panel";
 import Paginator from "@/components/Paginator";
-import { ResourceListItem } from "@/components/ResourceList";
+import Tag from "@/components/Tag";
 import TimeAgo from "@/components/TimeAgo";
+import { useContextSpace } from "@/pages/Spaces/utils";
 import { onError } from "@/utils";
+import { getClientWorkspace } from "@/utils/client";
+import { useAppSelector } from "@/utils/hooks";
 import { invalidateTemplate } from "@/utils/octelium";
 import { getResourceRef } from "@/utils/pb";
-import { Button } from "@mantine/core";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader, Stack, Text } from "@mantine/core";
+import * as WsPB from "@octelium/apis/main/cordiumv1";
+import * as MetaPB from "@octelium/apis/main/metav1";
+import {
+  IconCircleCheck,
+  IconCircleX,
+  IconHammer,
+  IconPlayerStop,
+} from "@tabler/icons-react";
+import { useMutation } from "@tanstack/react-query";
+import * as React from "react";
 import toast from "react-hot-toast";
-import ClipLoader from "react-spinners/ClipLoader";
-const Item = (props: {
+
+const BuildState = WsPB.Template_Status_BuildInfo_Build_State;
+
+const BuildRow = (props: {
   item: WsPB.Template_Status_BuildInfo_Build;
   template: WsPB.Template;
+  isCurrent: boolean;
 }) => {
   const { item, template } = props;
   const client = getClientWorkspace();
-  const queryClient = useQueryClient();
+
   const mutationCancel = useMutation({
     mutationFn: async () => {
       const { response } = await client.cancelBuildTemplate(
@@ -36,170 +41,144 @@ const Item = (props: {
           templateRef: getResourceRef(template),
         }),
       );
-
-      return { response };
+      return response;
     },
-    onSuccess: ({ response }) => {
+    onSuccess: () => {
       invalidateTemplate(template);
       toast.success("Build canceled");
     },
     onError,
   });
 
+  const running =
+    !item.isCanceled && item.state === BuildState.RUNNING;
+
   return (
-    <ResourceListItem key={item.id}>
-      <div className="flex flex-row items-center justify-center">
-        <div className="flex-1">
-          {/*
-          <InfoItem title="ID">
-            <div className="flex flex-row items-center">
-              <div className="text-gray-500">{item.id}</div>
-            </div>
-          </InfoItem>
-          */}
-
-          <div className="font-bold text-sm">
-            <div className="flex flex-row items-center">
-              <div className="text-gray-600 mr-2">{item.id}</div>
-              {item.isCanceled && (
-                <div className="flex flex-row items-center">
-                  <div
-                    style={{
-                      backgroundColor: `#999`,
-                    }}
-                    className={`rounded-full w-[20px] h-[20px]`}
-                  ></div>
-                  <span className="mx-2">Cancelled</span>
-
-                  <span className="text-slate-500">
-                    <TimeAgo rfc3339={item.doneAt} />
-                  </span>
-                </div>
-              )}
-
-              {item.state ===
-                WsPB.Template_Status_BuildInfo_Build_State.READY && (
-                <div className="flex flex-row items-center">
-                  <div
-                    style={{
-                      backgroundColor: `#1cc02a`,
-                    }}
-                    className={`rounded-full w-[20px] h-[20px]`}
-                  ></div>
-                  <span className="mx-2">Ready</span>
-
-                  <span className="text-slate-500">
-                    <TimeAgo rfc3339={item.doneAt} />
-                  </span>
-                </div>
-              )}
-
-              {!item.isCanceled &&
-                item.state ==
-                  WsPB.Template_Status_BuildInfo_Build_State.RUNNING && (
-                  <div className="flex flex-row items-center">
-                    <ClipLoader color={`#777`} loading={true} size={20} />
-                    <span className="mx-2">Running</span>
-
-                    {item.startedAt && (
-                      <span className="text-slate-500">
-                        <TimeAgo rfc3339={item.startedAt} />
-                      </span>
-                    )}
-
-                    <div className="ml-4">
-                      <Button
-                        size="xs"
-                        variant="outline"
-                        onClick={() => {
-                          mutationCancel.mutate();
-                        }}
-                      >
-                        Cancel Build
-                      </Button>
-                    </div>
-                  </div>
-                )}
-            </div>
-          </div>
-
-          {item.tags.length > 0 && (
-            <div>
-              {item.tags.map((x) => (
-                <Label>{x}</Label>
-              ))}
-            </div>
+    <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 md:flex-row md:items-center">
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-mono text-[0.8rem] font-semibold text-slate-700">
+            {item.id}
+          </span>
+          {props.isCurrent && <Tag tone="success">Current</Tag>}
+          {item.tags.map((t) => (
+            <Tag key={t} mono>
+              {t}
+            </Tag>
+          ))}
+        </div>
+        <div className="mt-1 text-[0.75rem] font-medium text-slate-400">
+          {item.startedAt && (
+            <>
+              Started <TimeAgo rfc3339={item.startedAt} />
+            </>
+          )}
+          {item.doneAt && (
+            <>
+              {" · Finished "}
+              <TimeAgo rfc3339={item.doneAt} />
+            </>
           )}
         </div>
+        {item.failure?.message && (
+          <p className="mt-1 text-[0.78rem] font-medium text-rose-600">
+            {item.failure.message}
+          </p>
+        )}
       </div>
-    </ResourceListItem>
-  );
-};
 
-const ListBuild = (props: { item: WsPB.Template }) => {
-  const { item } = props;
-
-  const settings = useAppSelector((state) => state.settings);
-  const itemsPerPage = settings.itemsPerPage ?? 10;
-  let [page, setPage] = React.useState(0);
-  const client = getClientWorkspace();
-
-  const bldArr = item.status?.buildInfo?.builds;
-  if (!bldArr || bldArr.length < 1) {
-    return <EmptyList title="No Builds Found" />;
-  }
-
-  return (
-    <div>
-      {
-        <div>
-          <div className="font-bold text-lg mb-8 flex items-center justify-center">
-            <span>Template Builds</span>
-            <Label>Total: {bldArr.length}</Label>
-          </div>
-
-          <div className="mt-4">
-            {bldArr
-              .slice(page * itemsPerPage, (page + 1) * itemsPerPage)
-              .map((x) => (
-                <Item item={x} template={item} />
-              ))}
-          </div>
-
-          <div>
-            <Paginator
-              meta={MetaPB.ListResponseMeta.create({
-                totalCount: bldArr.length,
-                itemsPerPage,
-                page,
-              })}
-              onPageChange={(i) => {
-                setPage(i);
-              }}
+      <div className="flex shrink-0 items-center gap-3">
+        {item.isCanceled && <Tag tone="neutral">Canceled</Tag>}
+        {!item.isCanceled && item.state === BuildState.READY && (
+          <Tag tone="success" icon={<IconCircleCheck size={11} />}>
+            Ready
+          </Tag>
+        )}
+        {!item.isCanceled && item.state === BuildState.FAILED && (
+          <Tag tone="danger" icon={<IconCircleX size={11} />}>
+            Failed
+          </Tag>
+        )}
+        {running && (
+          <>
+            <span className="inline-flex items-center gap-1.5 text-[0.75rem] font-semibold text-blue-700">
+              <Loader size={12} color="blue" />
+              Building
+            </span>
+            <ConfirmAction
+              triggerLabel="Cancel"
+              triggerIcon={<IconPlayerStop size={13} />}
+              color="orange"
+              title="Cancel this build?"
+              confirmLabel="Cancel build"
+              description="The running build is stopped. The previous ready image stays in use."
+              loading={mutationCancel.isPending}
+              onConfirm={() => mutationCancel.mutate()}
             />
-          </div>
-        </div>
-      }
+          </>
+        )}
+      </div>
     </div>
   );
 };
 
 const Page = () => {
   const ctx = useContextSpace();
+  const itemsPerPage = useAppSelector((s) => s.settings.itemsPerPage);
+  const [page, setPage] = React.useState(0);
+
+  const template = ctx.template.data;
+  if (!template) return null;
+
+  const buildInfo = template.status?.buildInfo;
+  const builds = [...(buildInfo?.builds ?? [])].reverse();
 
   return (
-    <PageWrap qry={ctx.template}>
-      <div>
-        {ctx.template.data && (
-          <div>
-            <div className="my-8 flex items-center justify-center">
-              <BuildTemplate item={ctx.template.data} />
-            </div>
-            <ListBuild item={ctx.template.data} />
-          </div>
+    <Panel>
+      <PanelHeader
+        icon={<IconHammer size={16} />}
+        title="Builds"
+        description="Prebuilding produces an image so Workspaces skip the build step on first run."
+        actions={<BuildTemplate item={template} />}
+      />
+      <PanelBody className="p-3">
+        {builds.length === 0 ? (
+          <Empty
+            compact
+            icon={<IconHammer size={22} />}
+            title="No builds yet"
+            description="Start a build to produce a prebuilt image for this Template."
+            action={<BuildTemplate item={template} size="sm" />}
+          />
+        ) : (
+          <Stack gap="sm">
+            {buildInfo?.currentRunningBuildID && (
+              <Text size="xs" c="dimmed" px="xs">
+                A build is currently running.
+              </Text>
+            )}
+            {builds
+              .slice(page * itemsPerPage, (page + 1) * itemsPerPage)
+              .map((x) => (
+                <BuildRow
+                  key={x.id}
+                  item={x}
+                  template={template}
+                  isCurrent={x.id === buildInfo?.currentReadyBuildID}
+                />
+              ))}
+            <Paginator
+              meta={MetaPB.ListResponseMeta.create({
+                totalCount: builds.length,
+                itemsPerPage,
+                page,
+              })}
+              onPageChange={setPage}
+            />
+          </Stack>
         )}
-      </div>
-    </PageWrap>
+      </PanelBody>
+    </Panel>
   );
 };
 

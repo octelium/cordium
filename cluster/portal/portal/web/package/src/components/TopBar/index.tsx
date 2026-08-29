@@ -1,78 +1,64 @@
 /// <reference types="vite-plugin-svgr/client" />
 
 import { useAppSelector } from "@/utils/hooks";
-import { Avatar, Menu } from "@mantine/core";
-import { User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Avatar, Button, Menu, Text } from "@mantine/core";
+import {
+  IconKey,
+  IconPlus,
+  IconSettings,
+  IconStack2,
+} from "@tabler/icons-react";
+import { Link, useNavigate } from "react-router-dom";
 
 import Logo from "@/assets/main.svg?react";
 
 const TopBar = () => {
   const navigate = useNavigate();
-  const settings = useAppSelector((state) => state.settings);
+  const status = useAppSelector((state) => state.settings.status);
 
   const picURL =
-    settings.status?.session?.metadata?.picURL ??
-    settings.status?.user?.metadata?.picURL;
+    status?.session?.metadata?.picURL ?? status?.user?.metadata?.picURL;
 
   const displayName =
-    settings.status?.user?.metadata?.displayName ??
-    settings.status?.user?.metadata?.name ??
-    "";
+    status?.user?.metadata?.displayName ?? status?.user?.metadata?.name ?? "";
 
   const shortName = displayName.split(".").at(0) ?? displayName;
   const initials = shortName.slice(0, 2).toUpperCase();
+  const email = status?.user?.spec?.email;
 
   return (
-    <nav
-      style={{
-        width: "100%",
-        height: 60,
-        display: "flex",
-        alignItems: "center",
-        padding: "0 16px",
-        borderBottom: "1px solid #e2e8f0",
-      }}
-    >
-      <button
-        aria-label="Go to home"
-        onClick={() => navigate("/")}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: "4px 8px",
-          borderRadius: 6,
-        }}
+    <div className="flex h-full w-full items-center gap-3 px-4">
+      <Link
+        to="/"
+        aria-label="Cordium home"
+        className="flex items-center rounded-md px-1 py-1 transition-opacity duration-150 hover:opacity-80"
       >
-        <Logo className="w-[120px] md:w-[160px] h-auto" />
-      </button>
+        <Logo className="h-auto w-[112px] md:w-[140px]" />
+      </Link>
 
-      <div style={{ flex: 1 }} />
+      <div className="flex-1" />
+
+      <Button
+        size="xs"
+        visibleFrom="xs"
+        leftSection={<IconPlus size={14} />}
+        onClick={() => navigate("/workspaces/create")}
+      >
+        New workspace
+      </Button>
 
       <Menu position="bottom-end" offset={8} withArrow arrowPosition="center">
         <Menu.Target>
           <button
-            aria-label="User menu"
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: 0,
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-            }}
+            aria-label="Account menu"
+            className="flex items-center rounded-full transition-opacity duration-150 hover:opacity-85"
           >
             <Avatar
-              src={picURL ?? undefined}
+              src={picURL || undefined}
               radius="xl"
-              size={36}
-              color="blue"
-              style={{ border: "2px solid #e2e8f0" }}
+              size={34}
+              color="dark"
+              className="border-2 border-slate-200"
             >
               {!picURL && initials}
             </Avatar>
@@ -80,21 +66,39 @@ const TopBar = () => {
         </Menu.Target>
 
         <Menu.Dropdown>
-          {shortName && (
-            <>
-              <Menu.Label>{shortName}</Menu.Label>
-              <Menu.Divider />
-            </>
-          )}
+          <div className="px-3 py-2">
+            <Text size="sm" fw={700} truncate>
+              {shortName || "Account"}
+            </Text>
+            {email && (
+              <Text size="xs" c="dimmed" truncate>
+                {email}
+              </Text>
+            )}
+          </div>
+          <Menu.Divider />
           <Menu.Item
-            leftSection={<User size={14} />}
+            leftSection={<IconStack2 size={14} />}
+            onClick={() => navigate("/spaces")}
+          >
+            Your Spaces
+          </Menu.Item>
+          <Menu.Item
+            leftSection={<IconKey size={14} />}
+            onClick={() => navigate("/usersecrets")}
+          >
+            Your Secrets
+          </Menu.Item>
+          <Menu.Divider />
+          <Menu.Item
+            leftSection={<IconSettings size={14} />}
             onClick={() => navigate("/settings")}
           >
             Settings
           </Menu.Item>
         </Menu.Dropdown>
       </Menu>
-    </nav>
+    </div>
   );
 };
 

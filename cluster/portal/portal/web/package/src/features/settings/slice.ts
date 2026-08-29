@@ -3,19 +3,35 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 import * as UserPB from "@octelium/apis/main/userv1";
 
+export const TERMINAL_FONT_SIZE_MIN = 10;
+export const TERMINAL_FONT_SIZE_MAX = 26;
+
+const clampFontSize = (v: number) =>
+  Math.min(TERMINAL_FONT_SIZE_MAX, Math.max(TERMINAL_FONT_SIZE_MIN, v));
+
 export const slice = createSlice({
   name: "settings",
   initialState: {
-    wideTerminal: false,
+    terminalWide: false,
+    terminalFullscreen: false,
+    terminalFontSize: 15,
     itemsPerPage: 10,
-    // itemsPerPageNavigator: 5,
+    navCollapsed: false,
   } as Settings,
   reducers: {
-    setWideTerminal: (
+    setTerminalWide: (state, action: PayloadAction<{ value: boolean }>) => {
+      state.terminalWide = action.payload.value;
+    },
+
+    setTerminalFullscreen: (
       state,
-      action: PayloadAction<{ wideTerminal: boolean }>,
+      action: PayloadAction<{ value: boolean }>,
     ) => {
-      state.wideTerminal = action.payload.wideTerminal;
+      state.terminalFullscreen = action.payload.value;
+    },
+
+    setTerminalFontSize: (state, action: PayloadAction<{ value: number }>) => {
+      state.terminalFontSize = clampFontSize(action.payload.value);
     },
 
     setItemsPerPage: (
@@ -25,24 +41,26 @@ export const slice = createSlice({
       state.itemsPerPage = action.payload.itemsPerPage;
     },
 
+    setNavCollapsed: (state, action: PayloadAction<{ value: boolean }>) => {
+      state.navCollapsed = action.payload.value;
+    },
+
     setStatus: (
       state,
       action: PayloadAction<{ status: UserPB.GetStatusResponse }>,
     ) => {
       state.status = action.payload.status;
     },
-
-    setPersonalSpaceUID: (state, action: PayloadAction<{ uid: string }>) => {
-      state.personalSpaceUID = action.payload.uid;
-    },
   },
 });
 
 export const {
-  setWideTerminal,
+  setTerminalWide,
+  setTerminalFullscreen,
+  setTerminalFontSize,
   setItemsPerPage,
+  setNavCollapsed,
   setStatus,
-  setPersonalSpaceUID,
 } = slice.actions;
 
 export default slice.reducer;

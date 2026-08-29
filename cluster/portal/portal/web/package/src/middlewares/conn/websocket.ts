@@ -20,8 +20,6 @@ export class WebSocketCtl {
   ws: ReconnectingWebSocket;
   state: State;
   emitter: Emitter;
-  // curCreatedTerminalUserID?: string;
-  // isCreatingTerminal!: boolean;
 
   constructor() {
     this.state = State.OPENING;

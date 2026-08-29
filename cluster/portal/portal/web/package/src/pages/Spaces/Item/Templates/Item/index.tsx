@@ -1,109 +1,84 @@
-import { useContextSpace } from "@/pages/Spaces/utils";
+import BuildTemplate from "@/components/BuildTemplate";
+import Meta from "@/components/Meta";
+import PageHeader from "@/components/PageHeader";
+import QueryBoundary from "@/components/QueryBoundary";
+import TabNav from "@/components/TabNav";
+import Tag from "@/components/Tag";
+import YamlDrawer from "@/components/YamlDrawer";
+import { getPathSpace, getPathTemplate } from "@/utils/octelium";
 import { getShortName } from "@/utils/pb";
-import { Tabs, Text } from "@mantine/core";
 import {
-  IconBolt,
-  IconDeviceDesktop,
+  IconHammer,
   IconLayoutGrid,
   IconSettings,
+  IconTerminal2,
 } from "@tabler/icons-react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { match } from "ts-pattern";
+import { Outlet } from "react-router-dom";
+import { useContextSpace } from "@/pages/Spaces/utils";
 
 const Page = () => {
   const ctx = useContextSpace();
-  const navigate = useNavigate();
-  const loc = useLocation();
-
-  if (!ctx.template.isSuccess) return null;
-
   const data = ctx.template.data;
-
-  const activeTab = match(loc.pathname.split("/").reverse().at(0))
-    .with("edit", (v) => v)
-    .with("workspaces", (v) => v)
-    .with("actions", (v) => v)
-    .otherwise(() => "main");
-
-  const tabs = [
-    {
-      value: "main",
-      label: "Overview",
-      icon: <IconLayoutGrid size={14} />,
-      path: "./",
-    },
-    {
-      value: "edit",
-      label: "Config",
-      icon: <IconSettings size={14} />,
-      path: "./edit",
-    },
-    {
-      value: "workspaces",
-      label: "Your workspaces",
-      icon: <IconDeviceDesktop size={14} />,
-      path: "./workspaces",
-    },
-    {
-      value: "actions",
-      label: "Actions",
-      icon: <IconBolt size={14} />,
-      path: "./actions",
-    },
-  ];
+  const space = ctx.space.data;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-      <Tabs value={activeTab}>
-        <Tabs.List
-          style={{
-            background: "white",
-            borderRadius: "10px 10px 0 0",
-            border: "1px solid #e2e8f0",
-            borderBottom: "none",
-            padding: "0 8px",
-          }}
-        >
-          {tabs.map((t) => (
-            <Tabs.Tab
-              key={t.value}
-              value={t.value}
-              leftSection={t.icon}
-              onClick={() => navigate(t.path)}
-              style={{ fontSize: 13 }}
-            >
-              {t.label}
-            </Tabs.Tab>
-          ))}
+    <QueryBoundary query={[ctx.space, ctx.template]}>
+      {data && space && (
+        <>
+          <Meta title={`${getShortName(data)} · Template`} />
+          <PageHeader
+            title={data.metadata?.displayName || getShortName(data)}
+            crumbs={[
+              { label: "Spaces", to: "/spaces" },
+              { label: getShortName(space), to: getPathSpace(space) },
+              { label: "Templates", to: `${getPathSpace(space)}/templates` },
+              { label: getShortName(data) },
+            ]}
+            description={data.metadata?.description || undefined}
+            badges={
+              data.status?.buildInfo?.currentReadyBuildID ? (
+                <Tag tone="success">Prebuilt image ready</Tag>
+              ) : undefined
+            }
+            actions={
+              <>
+                <YamlDrawer item={data} />
+                <BuildTemplate item={data} size="sm" />
+              </>
+            }
+          />
 
-          <div
-            style={{
-              marginLeft: "auto",
-              display: "flex",
-              alignItems: "center",
-              paddingRight: 12,
-            }}
-          >
-            <Text size="xs" c="dimmed" fw={`bold`}>
-              {getShortName(data)}
-            </Text>
-          </div>
-        </Tabs.List>
+          <TabNav
+            items={[
+              {
+                label: "Overview",
+                to: getPathTemplate(data),
+                end: true,
+                icon: <IconLayoutGrid size={14} />,
+              },
+              {
+                label: "Workspaces",
+                to: `${getPathTemplate(data)}/workspaces`,
+                icon: <IconTerminal2 size={14} />,
+              },
+              {
+                label: "Builds",
+                to: `${getPathTemplate(data)}/builds`,
+                icon: <IconHammer size={14} />,
+                count: data.status?.buildInfo?.builds.length,
+              },
+              {
+                label: "Config",
+                to: `${getPathTemplate(data)}/settings`,
+                icon: <IconSettings size={14} />,
+              },
+            ]}
+          />
 
-        <div
-          style={{
-            background: "white",
-            border: "1px solid #e2e8f0",
-            borderTop: "none",
-            borderRadius: "0 0 10px 10px",
-            padding: "20px",
-            minHeight: 200,
-          }}
-        >
           <Outlet />
-        </div>
-      </Tabs>
-    </div>
+        </>
+      )}
+    </QueryBoundary>
   );
 };
 

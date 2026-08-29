@@ -3,7 +3,7 @@ import Create from "./Create";
 import Root from "./index";
 import List from "./List";
 
-export default (): RouteObject => {
+const routerUsersecrets = (): RouteObject => {
   return {
     path: "usersecrets",
     element: <Root />,
@@ -19,3 +19,5 @@ export default (): RouteObject => {
     ],
   };
 };
+
+export default routerUsersecrets;

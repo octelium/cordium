@@ -26,7 +26,6 @@ const isWebgl2SupportedFn = (() => {
 export const isWebgl2Supported = isWebgl2SupportedFn();
 
 export const onError = (err: RpcError) => {
-  console.log("NEW ERR", err);
   toast.error(err.message);
 };
 
@@ -34,6 +33,7 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 30000,
+      retry: 1,
     },
   },
 });
@@ -103,4 +103,26 @@ export const truncateUtf8 = (
   }
 
   return out;
+};
+
+export const formatMegabytes = (megabytes: number): string => {
+  if (megabytes <= 0) return "—";
+  if (megabytes >= 1000) {
+    const gb = megabytes / 1000;
+    return `${Number.isInteger(gb) ? gb : gb.toFixed(1)} GB`;
+  }
+  return `${megabytes} MB`;
+};
+
+export const formatMillicores = (millicores: number): string => {
+  if (millicores <= 0) return "—";
+  if (millicores >= 1000) {
+    const cores = millicores / 1000;
+    return `${Number.isInteger(cores) ? cores : cores.toFixed(1)} vCPU`;
+  }
+  return `${millicores}m vCPU`;
+};
+
+export const pluralize = (count: number, singular: string, plural?: string) => {
+  return count === 1 ? singular : (plural ?? `${singular}s`);
 };
