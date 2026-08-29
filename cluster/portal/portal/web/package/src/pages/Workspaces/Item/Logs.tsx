@@ -1,5 +1,6 @@
 import ConsoleShell, {
   consoleToolbarButtonClass,
+  consoleToolbarButtonVars,
 } from "@/components/ConsoleShell";
 import Empty from "@/components/Empty";
 import LogConsole from "@/components/LogConsole";
@@ -43,6 +44,7 @@ const Page = () => {
             variant="transparent"
             aria-label="Clear logs"
             className={consoleToolbarButtonClass}
+            vars={consoleToolbarButtonVars}
             onClick={() => setClearToken((v) => v + 1)}
           >
             <IconEraser size={14} />

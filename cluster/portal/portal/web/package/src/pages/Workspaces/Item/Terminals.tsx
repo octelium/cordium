@@ -1,5 +1,6 @@
 import ConsoleShell, {
   consoleToolbarButtonClass,
+  consoleToolbarButtonVars,
 } from "@/components/ConsoleShell";
 import Empty from "@/components/Empty";
 import Terminal from "@/components/Terminal";
@@ -9,7 +10,7 @@ import {
   removeTerminal,
   setActiveTerminal,
 } from "@/features/terminalgroup/slice";
-import { onError, truncateUtf8 } from "@/utils";
+import { isDev, onError, truncateUtf8 } from "@/utils";
 import { getClientWorkspaceSvc } from "@/utils/client";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks";
 import { getResourceRef } from "@/utils/pb";
@@ -27,6 +28,7 @@ const TabStrip = (props: {
   workspace: WsPB.Workspace;
   onCreate: () => void;
   creating: boolean;
+  devMode: boolean;
 }) => {
   const dispatch = useAppDispatch();
   const tg = useAppSelector((state) => state.terminalGroup);
@@ -34,7 +36,9 @@ const TabStrip = (props: {
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
   const handleRemove = async (id: string) => {
-    await wsC.removeTerminal(WsPB.RemoveTerminalRequest.create({ id }));
+    if (!props.devMode) {
+      await wsC.removeTerminal(WsPB.RemoveTerminalRequest.create({ id }));
+    }
     dispatch(removeTerminal({ id }));
   };
 
@@ -98,6 +102,7 @@ const TabStrip = (props: {
           variant="transparent"
           aria-label="New terminal"
           className={consoleToolbarButtonClass}
+          vars={consoleToolbarButtonVars}
           loading={props.creating}
           onClick={props.onCreate}
         >
@@ -115,11 +120,26 @@ const TerminalGroup = (props: { workspace: WsPB.Workspace }) => {
   const fullscreen = useAppSelector((s) => s.settings.terminalFullscreen);
   const dispatch = useAppDispatch();
   const ready = canUseTerminals(item);
+  const devMode = isDev();
 
   const qryListTerm = useQuery({
     queryKey: ["workspace/ws/listTerminal", item.metadata!.uid],
     gcTime: 0,
     queryFn: async () => {
+      if (devMode) {
+        const response = WsPB.ListTerminalResponse.create({
+          items: [{ id: "dev-terminal-1" }],
+        });
+        dispatch(
+          initTerminalGroup({
+            termList: response.items.map(
+              (x) => ({ id: x.id, title: "Dev terminal" }) as TerminalT,
+            ),
+          }),
+        );
+        return response;
+      }
+
       const { response } = await wsC.listTerminal(
         WsPB.ListTerminalRequest.create({ workspaceRef: getResourceRef(item) }),
       );
@@ -132,11 +152,17 @@ const TerminalGroup = (props: { workspace: WsPB.Workspace }) => {
       );
       return response;
     },
-    enabled: ready,
+    enabled: ready || devMode,
   });
 
   const mutationCreate = useMutation({
     mutationFn: async () => {
+      if (devMode) {
+        return WsPB.CreateTerminalResponse.create({
+          id: `dev-terminal-${Date.now()}`,
+        });
+      }
+
       const { response } = await wsC.createTerminal(
         WsPB.CreateTerminalRequest.create({
           workspaceRef: getResourceRef(item),
@@ -190,6 +216,7 @@ const TerminalGroup = (props: { workspace: WsPB.Workspace }) => {
           workspace={item}
           creating={mutationCreate.isPending}
           onCreate={() => mutationCreate.mutate()}
+          devMode={devMode}
         />
       }
     >

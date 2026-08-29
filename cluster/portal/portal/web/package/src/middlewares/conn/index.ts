@@ -5,10 +5,15 @@ import {
   sendSetTerminalSize,
   sendTerminalData,
 } from "../../features/conn/slice";
+import { isDev } from "../../utils";
 
 import WebSocketCtl from "./websocket";
 
 export default (): Middleware => {
+  if (isDev()) {
+    return () => (next) => (action) => next(action);
+  }
+
   const ws = new WebSocketCtl();
 
   return () => (next) => (action) => {

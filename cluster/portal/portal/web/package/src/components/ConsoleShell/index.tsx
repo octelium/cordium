@@ -26,6 +26,26 @@ const ToolbarDivider = () => (
 export const consoleToolbarButtonClass =
   "border border-slate-600/80 bg-slate-800/90 text-slate-300 shadow-sm transition-all duration-150 hover:border-slate-500 hover:bg-slate-700 hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--console-chrome)] disabled:border-slate-700 disabled:bg-slate-800/50 disabled:text-slate-600 disabled:shadow-none";
 
+export const consoleToolbarButtonVars = () => ({
+  root: {
+    "--ai-bg": "rgb(30 41 59 / 0.95)",
+    "--ai-hover": "rgb(51 65 85)",
+    "--ai-color": "rgb(203 213 225)",
+    "--ai-hover-color": "rgb(248 250 252)",
+    "--ai-bd": "1px solid rgb(71 85 105 / 0.8)",
+  },
+});
+
+const consoleToolbarActiveButtonVars = () => ({
+  root: {
+    "--ai-bg": "rgb(16 185 129 / 0.12)",
+    "--ai-hover": "rgb(16 185 129 / 0.2)",
+    "--ai-color": "rgb(167 243 208)",
+    "--ai-hover-color": "rgb(209 250 229)",
+    "--ai-bd": "1px solid rgb(52 211 153 / 0.5)",
+  },
+});
+
 const ConsoleShell = (props: {
   tabs?: React.ReactNode;
   actions?: React.ReactNode;
@@ -66,6 +86,7 @@ const ConsoleShell = (props: {
                   variant="transparent"
                   aria-label="Decrease font size"
                   className={consoleToolbarButtonClass}
+                  vars={consoleToolbarButtonVars}
                   disabled={fontSize <= TERMINAL_FONT_SIZE_MIN}
                   onClick={() =>
                     dispatch(setTerminalFontSize({ value: fontSize - 1 }))
@@ -83,6 +104,7 @@ const ConsoleShell = (props: {
                   variant="transparent"
                   aria-label="Increase font size"
                   className={consoleToolbarButtonClass}
+                  vars={consoleToolbarButtonVars}
                   disabled={fontSize >= TERMINAL_FONT_SIZE_MAX}
                   onClick={() =>
                     dispatch(setTerminalFontSize({ value: fontSize + 1 }))
@@ -104,6 +126,7 @@ const ConsoleShell = (props: {
                 size={27}
                 variant="transparent"
                 aria-label="Toggle wide mode"
+                vars={wide ? consoleToolbarActiveButtonVars : consoleToolbarButtonVars}
                 className={twMerge(
                   consoleToolbarButtonClass,
                   wide &&
@@ -127,6 +150,11 @@ const ConsoleShell = (props: {
               size={27}
               variant="transparent"
               aria-label="Toggle full screen"
+              vars={
+                fullscreen
+                  ? consoleToolbarActiveButtonVars
+                  : consoleToolbarButtonVars
+              }
               className={twMerge(
                 consoleToolbarButtonClass,
                 fullscreen &&

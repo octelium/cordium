@@ -151,6 +151,12 @@ class Terminal extends React.Component<Props> {
       this.t.focus();
     }
 
+    if (isDev()) {
+      this.t.writeln("Cordium development terminal");
+      this.t.writeln("Terminal I/O is simulated locally in npm run dev.");
+      this.t.write("$ ");
+    }
+
     this.t.onData((data) => this.handleOnData(data));
 
     this.t.onTitleChange((title) => {

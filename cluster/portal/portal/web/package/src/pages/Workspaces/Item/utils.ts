@@ -1,5 +1,6 @@
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { match } from "ts-pattern";
+import { isDev } from "@/utils";
 
 export const canUseWorkspaceService = (item: WsPB.Workspace) =>
   match(item.status!.state)
@@ -11,5 +12,6 @@ export const canUseWorkspaceService = (item: WsPB.Workspace) =>
     .otherwise(() => false);
 
 export const canUseTerminals = (item: WsPB.Workspace) =>
+  isDev() ||
   item.status!.state === WsPB.Workspace_Status_State.RUNNING ||
   item.status!.state === WsPB.Workspace_Status_State.PREPARING;
