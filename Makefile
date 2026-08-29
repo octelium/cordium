@@ -132,10 +132,7 @@ gen-go-client:
 cp-pb:
 	cp -r ../pb/apis/protobuf ./apis
 
-gen-api-portal:
-	cd ./cluster/portal/portal/web/package; npm run protoc
-
-gen-api: cp-pb gen-go-main gen-go-cluster gen-go-client gen-go-rsc gen-api-portal
+gen-api: cp-pb gen-go-main gen-go-cluster gen-go-client gen-go-rsc
 	rm -rf ./apis/protobuf
 	go run unsorted/licenser/main.go
 

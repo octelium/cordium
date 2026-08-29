@@ -7,10 +7,10 @@ require (
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/cluster/apiserver v0.0.0-20260719082108-b9c16b89a300
-	github.com/octelium/octelium/cluster/common v0.0.0-20260719082108-b9c16b89a300
-	github.com/octelium/octelium/cluster/vigil v0.0.0-20260719082108-b9c16b89a300
-	github.com/octelium/octelium/pkg v0.0.0-20260719082108-b9c16b89a300
+	github.com/octelium/octelium/cluster/apiserver v0.0.0-20260827123954-3f40a83d3521
+	github.com/octelium/octelium/cluster/common v0.0.0-20260827123954-3f40a83d3521
+	github.com/octelium/octelium/cluster/vigil v0.0.0-20260827123954-3f40a83d3521
+	github.com/octelium/octelium/pkg v0.0.0-20260827123954-3f40a83d3521
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.11.1
@@ -85,8 +85,8 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/octelium/octelium/cluster/octovigil v0.0.0-20260719082108-b9c16b89a300 // indirect
-	github.com/octelium/octelium/cluster/rscserver v0.0.0-20260719082108-b9c16b89a300 // indirect
+	github.com/octelium/octelium/cluster/octovigil v0.0.0-20260827123954-3f40a83d3521 // indirect
+	github.com/octelium/octelium/cluster/rscserver v0.0.0-20260827123954-3f40a83d3521 // indirect
 	github.com/open-policy-agent/opa v1.14.0 // indirect
 	github.com/oschwald/geoip2-golang/v2 v2.1.0 // indirect
 	github.com/oschwald/maxminddb-golang/v2 v2.1.1 // indirect
@@ -108,7 +108,7 @@ require (
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/yashtewari/glob-intersection v0.2.0 // indirect
-	github.com/yuin/gopher-lua v1.1.1 // indirect
+	github.com/yuin/gopher-lua v1.1.2 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel v1.43.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc v0.19.0 // indirect
@@ -138,7 +138,7 @@ require (
 	golang.zx2c4.com/wireguard/wgctrl v0.0.0-20241231184526-a9ab2273dd10 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260414002931-afd174a4e478 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260414002931-afd174a4e478 // indirect
-	google.golang.org/grpc v1.82.0 // indirect
+	google.golang.org/grpc v1.82.1 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect

@@ -26,7 +26,7 @@ import (
 
 	"github.com/octelium/octelium/apis/cluster/ccordiumv1"
 	"github.com/octelium/octelium/apis/main/authv1"
-	"github.com/octelium/octelium/octelium-go/authc"
+	"github.com/octelium/octelium/client/common/authc"
 	"github.com/octelium/octelium/pkg/grpcerr"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"

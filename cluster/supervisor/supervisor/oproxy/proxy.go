@@ -27,7 +27,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/octelium/octelium/octelium-go/authc"
+	"github.com/octelium/octelium/client/common/authc"
 	"github.com/octelium/octelium/pkg/utils/ldflags"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
