@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/ghodss/yaml"
 	"github.com/go-resty/resty/v2"
@@ -125,10 +126,20 @@ func doCheckClient(ctx context.Context) error {
 }
 
 func getLatestVersion(ctx context.Context) (*version.Version, error) {
+	return getLatestVersionFromURL(ctx, "https://api.github.com/repos/octelium/cordium/releases/latest")
+}
+
+type githubRelease struct {
+	TagName string `json:"tag_name"`
+}
+
+func getLatestVersionFromURL(ctx context.Context, url string) (*version.Version, error) {
 	resp, err := resty.New().SetDebug(ldflags.IsDev()).
 		R().
 		SetContext(ctx).
-		Get("https://raw.githubusercontent.com/octelium/cordium/refs/heads/main/unsorted/latest_release")
+		SetHeader("Accept", "application/vnd.github+json").
+		SetHeader("X-GitHub-Api-Version", "2022-11-28").
+		Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -137,5 +148,14 @@ func getLatestVersion(ctx context.Context) (*version.Version, error) {
 		return nil, errors.Errorf("Could not get latest Cordium version release")
 	}
 
-	return version.NewSemver(string(resp.Body()))
+	var release githubRelease
+	if err := json.Unmarshal(resp.Body(), &release); err != nil {
+		return nil, err
+	}
+
+	return version.NewSemver(normalizeVersionTag(release.TagName))
+}
+
+func normalizeVersionTag(tag string) string {
+	return strings.TrimPrefix(strings.TrimSpace(tag), "v")
 }
