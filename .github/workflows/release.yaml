@@ -1,6 +1,6 @@
 name: release
-permissions:
-  contents: read
+
+permissions: {}
 
 on:
   push:
@@ -11,78 +11,104 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     strategy:
       matrix:
         arch: [amd64, arm64]
         os: [linux, darwin, windows]
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - name: GitHub vars
-        uses: rlespinasse/github-slug-action@v4
+      - name: Load workflow environment
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          while IFS= read -r line || [[ -n "$line" ]]; do
+            line="${line%$'\r'}"
+            [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+
+            if [[ ! "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*=.*$ ]]; then
+              echo "::error file=.github/workflows/env::Invalid environment assignment"
+              exit 1
+            fi
+
+            printf '%s\n' "$line" >> "$GITHUB_ENV"
+          done < .github/workflows/env
 
       - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "${{env.GO_VERSION}}"
         id: go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: "${{ env.GO_VERSION }}"
 
       - name: Build
         env:
-          GOARCH: ${{matrix.arch}}
-          GOOS: ${{matrix.os}}
+          GOARCH: ${{ matrix.arch }}
+          GOOS: ${{ matrix.os }}
         run: make build-cli
 
       - name: Tarball
-        if: ${{ matrix.os != 'windows' }}
+        if: matrix.os != 'windows'
+        shell: bash
         run: |
+          set -euo pipefail
           cd bin
-          tar -czvf cordium-${{matrix.os}}-${{matrix.arch}}.tar.gz cordium
+          tar -czvf "cordium-${{ matrix.os }}-${{ matrix.arch }}.tar.gz" cordium
 
       - name: Generate checksums (Unix)
-        if: ${{ matrix.os != 'windows' }}
+        if: matrix.os != 'windows'
+        shell: bash
         run: |
+          set -euo pipefail
           cd bin
-          sha256sum *.tar.gz > checksums-${{matrix.os}}-${{matrix.arch}}.txt
+          sha256sum *.tar.gz > "checksums-${{ matrix.os }}-${{ matrix.arch }}.txt"
 
       - name: Save artifacts
-        if: ${{ matrix.os != 'windows' }}
-        uses: actions/upload-artifact@v4
+        if: matrix.os != 'windows'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: release-artifact-${{matrix.os}}-${{matrix.arch}}-${{ env.GITHUB_REF_SLUG }}
+          name: release-artifact-${{ matrix.os }}-${{ matrix.arch }}-${{ github.ref_name }}
           path: |
             bin/*.tar.gz
-            bin/checksums-${{matrix.os}}-${{matrix.arch}}.txt
+            bin/checksums-${{ matrix.os }}-${{ matrix.arch }}.txt
           retention-days: 1
 
       - name: Zip for Windows
-        if: ${{ matrix.os == 'windows' }}
+        if: matrix.os == 'windows'
+        shell: bash
         run: |
+          set -euo pipefail
           cd bin
-          zip cordium-${{matrix.os}}-${{matrix.arch}}.zip cordium.exe
+          zip "cordium-${{ matrix.os }}-${{ matrix.arch }}.zip" cordium.exe
 
       - name: Generate checksums (Windows)
-        if: ${{ matrix.os == 'windows' }}
+        if: matrix.os == 'windows'
+        shell: bash
         run: |
+          set -euo pipefail
           cd bin
-          sha256sum *.zip > checksums-${{matrix.os}}-${{matrix.arch}}.txt
+          sha256sum *.zip > "checksums-${{ matrix.os }}-${{ matrix.arch }}.txt"
 
       - name: Save Windows artifacts
-        if: ${{ matrix.os == 'windows' }}
-        uses: actions/upload-artifact@v4
+        if: matrix.os == 'windows'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: release-artifact-${{matrix.os}}-${{matrix.arch}}-${{ env.GITHUB_REF_SLUG }}
+          name: release-artifact-${{ matrix.os }}-${{ matrix.arch }}-${{ github.ref_name }}
           path: |
             bin/*.zip
-            bin/checksums-${{matrix.os}}-${{matrix.arch}}.txt
+            bin/checksums-${{ matrix.os }}-${{ matrix.arch }}.txt
           retention-days: 1
 
       - name: Save Windows binaries for MSI
-        if: ${{ matrix.os == 'windows' }}
-        uses: actions/upload-artifact@v4
+        if: matrix.os == 'windows'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: windows-binaries-${{matrix.arch}}-${{ env.GITHUB_REF_SLUG }}
+          name: windows-binaries-${{ matrix.arch }}-${{ github.ref_name }}
           path: bin/*.exe
           retention-days: 1
 
@@ -90,67 +116,75 @@ jobs:
     name: Package Linux
     runs-on: ubuntu-24.04
     needs: build
+    permissions:
+      contents: read
     strategy:
       matrix:
         arch: [amd64, arm64]
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: GitHub vars
-        uses: rlespinasse/github-slug-action@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: release-artifact-linux-${{matrix.arch}}-${{ env.GITHUB_REF_SLUG }}
+          name: release-artifact-linux-${{ matrix.arch }}-${{ github.ref_name }}
           path: artifacts
 
       - name: Extract binaries
+        shell: bash
         run: |
+          set -euo pipefail
           mkdir -p bin
-          cd artifacts
-          tar -xzf cordium-linux-${{matrix.arch}}.tar.gz -C ../bin
-          cd ..
+          tar -xzf "artifacts/cordium-linux-${{ matrix.arch }}.tar.gz" -C bin
           chmod +x bin/*
 
       - name: Install packaging tools
+        shell: bash
         run: |
+          set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y rpm
 
       - name: Get version
         id: version
+        shell: bash
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "release=1" >> $GITHUB_OUTPUT
+          set -euo pipefail
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "release=1" >> "$GITHUB_OUTPUT"
 
       - name: Create DEB packages
+        shell: bash
         env:
           VERSION: ${{ steps.version.outputs.version }}
           RELEASE: ${{ steps.version.outputs.release }}
           ARCH: ${{ matrix.arch }}
         run: |
-          DEB_ARCH=$ARCH
-          if [ "$ARCH" = "amd64" ]; then
+          set -euo pipefail
+
+          DEB_ARCH="$ARCH"
+          if [[ "$ARCH" == "amd64" ]]; then
             DEB_ARCH="amd64"
-          elif [ "$ARCH" = "arm64" ]; then
+          elif [[ "$ARCH" == "arm64" ]]; then
             DEB_ARCH="arm64"
           fi
 
           create_deb() {
-            local PKG_NAME=$1
+            local PKG_NAME="$1"
             local PKG_DIR="packaging/deb/${PKG_NAME}_${VERSION}-${RELEASE}_${DEB_ARCH}"
-            
-            mkdir -p ${PKG_DIR}/usr/bin
-            mkdir -p ${PKG_DIR}/usr/share/doc/${PKG_NAME}
-            mkdir -p ${PKG_DIR}/DEBIAN
-            
-            cp bin/${PKG_NAME} ${PKG_DIR}/usr/bin/
-            cp LICENSE ${PKG_DIR}/usr/share/doc/${PKG_NAME}/copyright
-            
-            cat > ${PKG_DIR}/DEBIAN/control <<EOF
+
+            mkdir -p "${PKG_DIR}/usr/bin"
+            mkdir -p "${PKG_DIR}/usr/share/doc/${PKG_NAME}"
+            mkdir -p "${PKG_DIR}/DEBIAN"
+
+            cp "bin/${PKG_NAME}" "${PKG_DIR}/usr/bin/"
+            cp LICENSE "${PKG_DIR}/usr/share/doc/${PKG_NAME}/copyright"
+
+            cat > "${PKG_DIR}/DEBIAN/control" <<CONTROL
           Package: ${PKG_NAME}
           Version: ${VERSION}-${RELEASE}
           Section: net
@@ -160,38 +194,41 @@ jobs:
           Description: ${PKG_NAME} - A modern, free and open source, identity-based sandbox platform for humans and AI agents.
           Homepage: https://octelium.com
           License: Apache-2.0
-          EOF
-            
-            dpkg-deb --build ${PKG_DIR}
-            mv ${PKG_DIR}.deb packaging/
+          CONTROL
+
+            dpkg-deb --build "$PKG_DIR"
+            mv "${PKG_DIR}.deb" packaging/
           }
 
           mkdir -p packaging/deb
           create_deb "cordium"
 
       - name: Create RPM packages
+        shell: bash
         env:
           VERSION: ${{ steps.version.outputs.version }}
           RELEASE: ${{ steps.version.outputs.release }}
           ARCH: ${{ matrix.arch }}
         run: |
-          RPM_ARCH=$ARCH
-          if [ "$ARCH" = "amd64" ]; then
+          set -euo pipefail
+
+          RPM_ARCH="$ARCH"
+          if [[ "$ARCH" == "amd64" ]]; then
             RPM_ARCH="x86_64"
-          elif [ "$ARCH" = "arm64" ]; then
+          elif [[ "$ARCH" == "arm64" ]]; then
             RPM_ARCH="aarch64"
           fi
 
           create_rpm() {
-            local PKG_NAME=$1
+            local PKG_NAME="$1"
             local BASE_DIR="packaging/rpm/build/${PKG_NAME}"
-            
-            mkdir -p ${BASE_DIR}/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-            
-            cp bin/${PKG_NAME} ${BASE_DIR}/SOURCES/
-            cp LICENSE ${BASE_DIR}/SOURCES/LICENSE
-            
-            cat > ${BASE_DIR}/SPECS/${PKG_NAME}.spec <<EOF
+
+            mkdir -p "${BASE_DIR}"/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+
+            cp "bin/${PKG_NAME}" "${BASE_DIR}/SOURCES/"
+            cp LICENSE "${BASE_DIR}/SOURCES/LICENSE"
+
+            cat > "${BASE_DIR}/SPECS/${PKG_NAME}.spec" <<SPEC
           Name:           ${PKG_NAME}
           Version:        ${VERSION}
           Release:        ${RELEASE}%{?dist}
@@ -222,29 +259,31 @@ jobs:
           %changelog
           * $(date '+%a %b %d %Y') George Badawi <contact@octelium.com> - ${VERSION}-${RELEASE}
           - Release ${VERSION}-${RELEASE}
-          EOF
-            
-            rpmbuild --target ${RPM_ARCH} \
+          SPEC
+
+            rpmbuild --target "$RPM_ARCH" \
               --define "_topdir $(pwd)/${BASE_DIR}" \
               --define "_rpmdir $(pwd)/packaging/rpm" \
-              -bb ${BASE_DIR}/SPECS/${PKG_NAME}.spec
+              -bb "${BASE_DIR}/SPECS/${PKG_NAME}.spec"
           }
 
           mkdir -p packaging/rpm
           create_rpm "cordium"
 
-          # Move RPMs to flat structure
+          # Move RPMs to flat structure.
           find packaging/rpm -type f -name "*.rpm" -exec mv {} packaging/ \;
 
       - name: List created packages
+        shell: bash
         run: |
+          set -euo pipefail
           echo "Contents of packaging directory:"
           ls -la packaging/
 
       - name: Upload DEB/RPM artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: packages-linux-${{matrix.arch}}-${{ env.GITHUB_REF_SLUG }}
+          name: packages-linux-${{ matrix.arch }}-${{ github.ref_name }}
           path: |
             packaging/*.deb
             packaging/*.rpm
@@ -254,31 +293,35 @@ jobs:
     name: Package Windows
     runs-on: windows-2022
     needs: build
+    permissions:
+      contents: read
     strategy:
       matrix:
         arch: [amd64, arm64]
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: GitHub vars
-        uses: rlespinasse/github-slug-action@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Download binaries
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: windows-binaries-${{matrix.arch}}-${{ env.GITHUB_REF_SLUG }}
+          name: windows-binaries-${{ matrix.arch }}-${{ github.ref_name }}
           path: bin
 
       - name: Get version
         id: version
         shell: bash
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          set -euo pipefail
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Install WiX Toolset
+        shell: pwsh
         run: |
+          $ErrorActionPreference = 'Stop'
           dotnet tool install --global wix --version 5.0.2
           wix --version
 
@@ -288,19 +331,22 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
           ARCH: ${{ matrix.arch }}
         run: |
+          $ErrorActionPreference = 'Stop'
           .github/scripts/windows/build-msi.ps1 `
             -Version $env:VERSION `
             -Arch $env:ARCH
 
       - name: List created packages
+        shell: pwsh
         run: |
+          $ErrorActionPreference = 'Stop'
           Write-Host "Contents of packaging directory:"
           Get-ChildItem -Path packaging -Recurse
 
       - name: Upload MSI artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: packages-windows-${{matrix.arch}}-${{ env.GITHUB_REF_SLUG }}
+          name: packages-windows-${{ matrix.arch }}-${{ github.ref_name }}
           path: packaging/*.msi
           retention-days: 1
 
@@ -308,58 +354,66 @@ jobs:
     name: Package macOS
     runs-on: macos-14
     needs: build
+    permissions:
+      contents: read
     strategy:
       matrix:
         arch: [amd64, arm64]
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: GitHub vars
-        uses: rlespinasse/github-slug-action@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: release-artifact-darwin-${{matrix.arch}}-${{ env.GITHUB_REF_SLUG }}
+          name: release-artifact-darwin-${{ matrix.arch }}-${{ github.ref_name }}
           path: artifacts
 
       - name: Extract binaries
+        shell: bash
         run: |
+          set -euo pipefail
           mkdir -p bin
-          cd artifacts
-          tar -xzf cordium-darwin-${{matrix.arch}}.tar.gz -C ../bin
-          cd ..
+          tar -xzf "artifacts/cordium-darwin-${{ matrix.arch }}.tar.gz" -C bin
           chmod +x bin/*
 
       - name: Make build script executable
+        shell: bash
         run: chmod +x .github/scripts/macos/build-pkg.sh
 
       - name: Get version
         id: version
+        shell: bash
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          set -euo pipefail
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Create PKG for cordium
+        shell: bash
         env:
           VERSION: ${{ steps.version.outputs.version }}
           ARCH: ${{ matrix.arch }}
         run: |
+          set -euo pipefail
           .github/scripts/macos/build-pkg.sh \
             --package-name cordium \
-            --version $VERSION \
-            --arch $ARCH
+            --version "$VERSION" \
+            --arch "$ARCH"
 
       - name: List created packages
+        shell: bash
         run: |
+          set -euo pipefail
           echo "Contents of packaging directory:"
           ls -la packaging/
 
       - name: Upload PKG artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: packages-macos-${{matrix.arch}}-${{ env.GITHUB_REF_SLUG }}
+          name: packages-macos-${{ matrix.arch }}-${{ github.ref_name }}
           path: packaging/*.pkg
           retention-days: 1
 
@@ -369,45 +423,49 @@ jobs:
     needs: [build, package-linux, package-macos, package-windows]
     permissions:
       contents: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: GitHub vars
-        uses: rlespinasse/github-slug-action@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: release-artifact-*
           path: artifacts
 
       - name: Download Linux packages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: packages-linux-*
           path: artifacts
 
       - name: Download macOS packages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: packages-macos-*
           path: artifacts
 
       - name: Download Windows packages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: packages-windows-*
           path: artifacts
 
       - name: Organize files for release
+        shell: bash
         run: |
+          set -euo pipefail
           mkdir -p release-files
 
-          # Copy all release artifacts (tarballs and zips)
+          # Copy all release artifacts (tarballs and zips).
           find artifacts -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec cp {} release-files/ \;
 
-          # Copy all package files (avoiding duplicates by using -n flag)
+          # Copy all package files, avoiding duplicates.
           find artifacts -type f -name "*.deb" -exec cp -n {} release-files/ \;
           find artifacts -type f -name "*.rpm" -exec cp -n {} release-files/ \;
           find artifacts -type f -name "*.pkg" -exec cp -n {} release-files/ \;
@@ -418,7 +476,9 @@ jobs:
           echo "files ready"
 
       - name: Generate checksums
+        shell: bash
         run: |
+          set -euo pipefail
           cd release-files
           sha256sum * > ../SHA256SUMS
           cd ..
@@ -426,22 +486,39 @@ jobs:
           echo "=== SHA256SUMS content ==="
           cat SHA256SUMS
 
-          # Move SHA256SUMS to release-files
           mv SHA256SUMS release-files/
 
-      - name: Generate and Download SBOM from GitHub
+      - name: Generate and download SBOM from GitHub
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           echo "Fetching SBOM from GitHub Dependency Graph API..."
           gh api \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ github.repository }}/dependency-graph/sbom | jq -r '.sbom' > sbom.json
-          mv sbom.json release-files/
+            "/repos/${{ github.repository }}/dependency-graph/sbom" \
+            | jq -e '.sbom' > release-files/sbom.json
+
+      - name: Generate release provenance attestation
+        id: attest
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-checksums: release-files/SHA256SUMS
+
+      - name: Add attestation bundle to release assets
+        shell: bash
+        env:
+          ATTESTATION_BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+        run: |
+          set -euo pipefail
+          cp -- "$ATTESTATION_BUNDLE" release-files/release-attestation.json
 
       - name: Verify release files
+        shell: bash
         run: |
+          set -euo pipefail
           echo "=== Final release file count ==="
           ls -1 release-files/ | wc -l
           echo ""
@@ -449,7 +526,7 @@ jobs:
           ls -lh release-files/
 
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           files: release-files/*
           fail_on_unmatched_files: true
