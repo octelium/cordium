@@ -60,6 +60,29 @@ var (
 	streamedPods = map[string]bool{}
 )
 
+var (
+	firstLogMu sync.Mutex
+	firstLogs  = map[string]string{}
+)
+
+func recordFirstLog(pod string, lines []string) {
+	firstLogMu.Lock()
+	defer firstLogMu.Unlock()
+
+	if _, ok := firstLogs[pod]; ok || len(lines) == 0 {
+		return
+	}
+
+	firstLogs[pod] = strings.Join(lines, "\n")
+}
+
+func firstLog(pod string) string {
+	firstLogMu.Lock()
+	defer firstLogMu.Unlock()
+
+	return firstLogs[pod]
+}
+
 func markStreamed(seen map[string]bool, key string) bool {
 	streamMu.Lock()
 	defer streamMu.Unlock()
@@ -171,11 +194,22 @@ func (h *H) followPodLogs(ctx context.Context, ns, pod, container, prefix string
 	writeLine("--- [%s] streaming the logs of the pod %s ---\n%s",
 		prefix, pod, KubectlHints(ns, pod, container))
 
+	var tailed []string
+
 	scanner := bufio.NewScanner(strm)
 	scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
 	for scanner.Scan() {
-		writeLine("[%s] %s", prefix, scanner.Text())
+		line := scanner.Text()
+
+		tailed = append(tailed, line)
+		if len(tailed) > logTailLines {
+			tailed = tailed[1:]
+		}
+
+		writeLine("[%s] %s", prefix, line)
 	}
+
+	recordFirstLog(pod, tailed)
 
 	writeLine("--- [%s] the log stream of the pod %s ended ---", prefix, pod)
 }
@@ -281,6 +315,7 @@ func (h *H) WorkspaceDiagnostics(ctx context.Context, ws *cordiumv1.Workspace) s
 	default:
 		for i := range pods {
 			b.WriteString(describePod(&pods[i]))
+			b.WriteString(firstLogTail(&pods[i]))
 			b.WriteString(h.previousLogTail(ctx, &pods[i]))
 		}
 	}
@@ -335,6 +370,21 @@ func describePod(pod *k8scorev1.Pod) string {
 	fmt.Fprintf(&b, "%s\n", KubectlHints(pod.Namespace, pod.Name, workspaceContainer))
 
 	return b.String()
+}
+
+func firstLogTail(pod *k8scorev1.Pod) string {
+	cs := containerStatus(pod, workspaceContainer)
+	if cs == nil || cs.RestartCount == 0 {
+		return ""
+	}
+
+	out := firstLog(pod.Name)
+	if out == "" {
+		return ""
+	}
+
+	return fmt.Sprintf("--- the first instance of the pod %s, which is the one that "+
+		"explains why the container keeps restarting ---\n%s\n", pod.Name, out)
 }
 
 func (h *H) previousLogTail(ctx context.Context, pod *k8scorev1.Pod) string {
