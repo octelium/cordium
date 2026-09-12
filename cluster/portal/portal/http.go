@@ -17,8 +17,10 @@
 package portal
 
 import (
+	"bytes"
 	"embed"
 	"encoding/json"
+	"fmt"
 	"io/fs"
 	"mime"
 	"net/http"
@@ -26,8 +28,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gorilla/websocket"
 	"github.com/octelium/cordium/cluster/portal/portal/middlewares"
+	"github.com/octelium/octelium/pkg/utils/utilrand"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -51,10 +56,51 @@ func (s *Server) handleManifest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("Cache-Control", "no-store")
 	json.NewEncoder(w).Encode(ret)
 }
 
-func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
+func (s *Server) getCSPConnectSrc() string {
+	ret := []string{
+		"'self'",
+		fmt.Sprintf("https://octelium-api.%s", s.clusterDomain),
+		fmt.Sprintf("https://*.octelium-api.%s", s.clusterDomain),
+	}
+
+	if host := strings.TrimPrefix(s.rootURL, "https://"); host != "" && host != s.rootURL {
+		ret = append(ret, fmt.Sprintf("wss://%s", host))
+	}
+
+	return fmt.Sprintf("connect-src %s", strings.Join(ret, " "))
+}
+
+func (s *Server) setSecurityHeaders(w http.ResponseWriter, nonce string) {
+	csp := strings.Join([]string{
+		"default-src 'none'",
+		fmt.Sprintf("script-src 'self' 'nonce-%s'", nonce),
+		"style-src 'self' 'unsafe-inline'",
+		"img-src 'self' data: https:",
+		"font-src 'self'",
+		s.getCSPConnectSrc(),
+		"frame-src 'none'",
+		"frame-ancestors 'none'",
+		"object-src 'none'",
+		"base-uri 'none'",
+		"form-action 'self'",
+		"manifest-src 'self'",
+	}, "; ")
+
+	w.Header().Set("Content-Security-Policy", csp)
+	w.Header().Set("X-Frame-Options", "DENY")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+	w.Header().Set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()")
+	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+}
+
+func (s *Server) setDomainCookie(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "octelium_domain",
 		Value:    s.clusterDomain,
@@ -63,6 +109,10 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
+}
+
+func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
+	nonce := utilrand.GetRandomStringCanonical(24)
 
 	blob, err := fs.ReadFile(fsWeb, "web/index.html")
 	if err != nil {
@@ -71,9 +121,44 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	out, err := setIndexNonce(blob, nonce)
+	if err != nil {
+		zap.L().Error("Could not set the index.html nonce", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
-	w.Write(blob)
+	s.setDomainCookie(w)
+	s.setSecurityHeaders(w, nonce)
+
+	w.Write(out)
+}
+
+func setIndexNonce(blob []byte, nonce string) ([]byte, error) {
+	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(blob))
+	if err != nil {
+		return nil, err
+	}
+
+	head := doc.Find("head").First()
+	if head.Length() == 0 {
+		return nil, errors.Errorf("Could not find head in index.html")
+	}
+
+	doc.Find("script").Each(func(_ int, sel *goquery.Selection) {
+		sel.SetAttr("nonce", nonce)
+	})
+	doc.Find("link[rel='modulepreload']").Each(func(_ int, sel *goquery.Selection) {
+		sel.SetAttr("nonce", nonce)
+	})
+
+	var ret bytes.Buffer
+	ret.WriteString("<!DOCTYPE html>")
+	if err := goquery.Render(&ret, head.Parent()); err != nil {
+		return nil, err
+	}
+
+	return ret.Bytes(), nil
 }
 
 func (s *Server) handleConnect(w http.ResponseWriter, r *http.Request) {
@@ -82,6 +167,10 @@ func (s *Server) handleConnect(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	reqCtx := middlewares.GetCtxRequestContext(ctx)
+	if reqCtx == nil || reqCtx.Session == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 
 	sess := reqCtx.Session
 
@@ -134,11 +223,19 @@ func (s *Server) initWebSocketConn(w http.ResponseWriter, r *http.Request) (*web
 			if err != nil {
 				return false
 			}
-			return strings.HasSuffix(u.Hostname(), s.clusterDomain)
+			return isClusterDomain(u.Hostname(), s.clusterDomain)
 		},
 	}
 
 	return upgrader.Upgrade(w, r, nil)
+}
+
+func isClusterDomain(host, domain string) bool {
+	if host == "" || domain == "" {
+		return false
+	}
+
+	return host == domain || strings.HasSuffix(host, fmt.Sprintf(".%s", domain))
 }
 
 func (s *Server) handleAsset(w http.ResponseWriter, r *http.Request) {
@@ -151,6 +248,8 @@ func (s *Server) handleAsset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", mime.TypeByExtension(filepath.Ext(r.URL.Path)))
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 
 	w.Write(blob)
 }

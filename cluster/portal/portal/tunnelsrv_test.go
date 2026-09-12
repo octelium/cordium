@@ -318,5 +318,89 @@ func TestTunnelServer(t *testing.T) {
 	resp := w.Result()
 	assert.Equal(t, resp.StatusCode, http.StatusOK)
 
+	t.Run("the tunCtx and its proxies are reused", func(t *testing.T) {
+		tunCtx := tunSrv.getTunCtx(ws)
+		assert.NotNil(t, tunCtx)
+
+		proxy, err := tunSrv.getProxy(tunCtx, 3000)
+		assert.Nil(t, err)
+
+		proxyAgain, err := tunSrv.getProxy(tunCtx, 3000)
+		assert.Nil(t, err)
+		assert.Same(t, proxy, proxyAgain)
+
+		proxyOther, err := tunSrv.getProxy(tunCtx, 3001)
+		assert.Nil(t, err)
+		assert.NotSame(t, proxy, proxyOther)
+
+		tunCtxAgain, err := tunSrv.getOrInitTunCtx(ws)
+		assert.Nil(t, err)
+		assert.Same(t, tunCtx, tunCtxAgain)
+
+		tunCtxInit, err := tunSrv.initTunCtx(ws)
+		assert.Nil(t, err)
+		assert.Same(t, tunCtx, tunCtxInit)
+	})
+
+	t.Run("a shared Application is reachable by another User", func(t *testing.T) {
+		usrOther, err := tstuser.NewUserWithType(fakeC.OcteliumC, adminSrv,
+			nil, nil, corev1.User_Spec_HUMAN, corev1.Session_Status_CLIENTLESS)
+		assert.Nil(t, err)
+
+		appName := utilrand.GetRandomStringCanonical(6)
+
+		wsShared := &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{
+				Name: utilrand.GetRandomStringCanonical(8),
+				Uid:  uuid.New().String(),
+			},
+			Spec: &cordiumv1.Workspace_Spec{
+				Applications: []*cordiumv1.Workspace_Spec_Application{
+					{
+						Name: appName,
+						Port: 3000,
+					},
+				},
+			},
+			Status: &cordiumv1.Workspace_Status{
+				UserRef:    umetav1.GetObjectReference(usr.Usr),
+				SessionRef: umetav1.GetObjectReference(usr.Session),
+				State:      cordiumv1.Workspace_Status_RUNNING,
+				RegionRef:  umetav1.GetObjectReference(region),
+				SharedPorts: []*cordiumv1.Workspace_Status_SharedPort{
+					{
+						ApplicationName: appName,
+						Mode:            cordiumv1.Workspace_Status_SharedPort_ALL,
+					},
+				},
+			},
+		}
+
+		wsShared, err = fakeC.OcteliumC.CordiumC().CreateWorkspace(ctx, wsShared)
+		assert.Nil(t, err)
+
+		err = acache.SetWorkspace(wsShared)
+		assert.Nil(t, err)
+
+		doReq := func(sess *corev1.Session, host string) int {
+			req := httptest.NewRequest("GET", "http://localhost/", nil)
+			req.Header.Set("X-Forwarded-Host", host)
+			req = req.WithContext(context.WithValue(ctx, middlewares.CtxRequestContext,
+				&middlewares.RequestContext{
+					Session: sess,
+				}))
+
+			w := httptest.NewRecorder()
+			tunSrv.ServeHTTP(w, req)
+			return w.Result().StatusCode
+		}
+
+		assert.Equal(t, http.StatusOK, doReq(usrOther.Session,
+			fmt.Sprintf("%s_%s.%s.example.com", appName, wsShared.Metadata.Name, "svc")))
+
+		assert.Equal(t, http.StatusUnauthorized, doReq(usrOther.Session,
+			fmt.Sprintf("port_3000_%s.%s.example.com", wsShared.Metadata.Name, "svc")))
+	})
+
 	time.Sleep(2 * time.Second)
 }

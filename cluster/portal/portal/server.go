@@ -19,7 +19,6 @@ package portal
 import (
 	"context"
 	"fmt"
-	"net"
 	"net/http"
 	"os"
 	"regexp"
@@ -33,7 +32,6 @@ import (
 	"github.com/octelium/cordium/cluster/common/wsutils"
 	"github.com/octelium/cordium/cluster/portal/portal/acache"
 	wscontroller "github.com/octelium/cordium/cluster/portal/portal/controllers/workspaces"
-	"github.com/octelium/cordium/cluster/portal/portal/middlewares"
 	"github.com/octelium/cordium/cluster/portal/portal/middlewares/auth"
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/apis/rsc/rmetav1"
@@ -59,6 +57,8 @@ type Server struct {
 	aCache        *acache.Cache
 
 	activityCtl *wsutils.ActivityCtl
+
+	srvErr chan error
 
 	dctxMap struct {
 		dctxMap map[string]*dctx
@@ -88,6 +88,7 @@ func newServer(ctx context.Context, octeliumC octeliumc.ClientInterface) (*Serve
 	}
 
 	ret.dctxMap.dctxMap = make(map[string]*dctx)
+	ret.srvErr = make(chan error, 1)
 
 	cc, err := octeliumC.CoreV1Utils().GetClusterConfig(ctx)
 	if err != nil {
@@ -172,8 +173,6 @@ func (s *Server) Run(ctx context.Context) error {
 		return err
 	}
 
-	srvErr := make(chan error)
-
 	handler, err := s.getHTTPHandler(ctx)
 	if err != nil {
 		return err
@@ -185,15 +184,16 @@ func (s *Server) Run(ctx context.Context) error {
 			Addr:              vutils.ManagedServiceAddr,
 			WriteTimeout:      15 * time.Second,
 			ReadHeaderTimeout: 15 * time.Second,
-			ConnContext: func(ctx context.Context, c net.Conn) context.Context {
-				reqCtx := &middlewares.RequestContext{}
-
-				return context.WithValue(ctx, middlewares.CtxRequestContext, reqCtx)
-			},
+			IdleTimeout:       60 * time.Second,
+			MaxHeaderBytes:    32 * 1024,
 		}
 
-		if err := srv.ListenAndServe(); err != nil {
-			srvErr <- err
+		err := srv.ListenAndServe()
+		zap.L().Warn("Portal HTTP server exited", zap.Error(err))
+
+		select {
+		case s.srvErr <- err:
+		default:
 		}
 	}()
 
@@ -250,7 +250,11 @@ func Run(ctx context.Context) error {
 	healthcheck.Run(vutils.HealthCheckPortManagedService)
 	zap.S().Infof("Workspace Portal is running...")
 
-	<-ctx.Done()
+	select {
+	case <-ctx.Done():
+	case err := <-s.srvErr:
+		return errors.Errorf("The Portal HTTP server exited: %+v", err)
+	}
 
 	return nil
 }

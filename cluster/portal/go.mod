@@ -28,7 +28,10 @@ require (
 	gvisor.dev/gvisor v0.0.0-20250503011706-39ed1f5ac29c
 )
 
-require github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
+require (
+	github.com/PuerkitoBio/goquery v1.11.0
+	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
+)
 
 require (
 	cel.dev/expr v0.25.1 // indirect
@@ -37,6 +40,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/agnivade/levenshtein v1.2.1 // indirect
+	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect

@@ -55,7 +55,51 @@ func TestServer(t *testing.T) {
 	err = acache.SetWorkspace(ws)
 	assert.Nil(t, err)
 
-	res, err := acache.GetWorkspace(ws.Status.UserRef.Uid, ws.Metadata.Name)
+	res, err := acache.GetWorkspace(ws.Metadata.Name)
 	assert.Nil(t, err)
 	assert.Equal(t, res.Metadata.Uid, ws.Metadata.Uid)
+
+	t.Run("a Workspace of another User is found by name", func(t *testing.T) {
+		shared := &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{
+				Name: utilrand.GetRandomStringCanonical(8),
+				Uid:  uuid.New().String(),
+			},
+			Spec: &cordiumv1.Workspace_Spec{},
+			Status: &cordiumv1.Workspace_Status{
+				UserRef: &metav1.ObjectReference{
+					Name: utilrand.GetRandomStringCanonical(8),
+					Uid:  uuid.New().String(),
+				},
+			},
+		}
+
+		err := acache.SetWorkspace(shared)
+		assert.Nil(t, err)
+
+		res, err := acache.GetWorkspace(shared.Metadata.Name)
+		assert.Nil(t, err)
+		assert.Equal(t, shared.Metadata.Uid, res.Metadata.Uid)
+	})
+
+	t.Run("a Workspace without a UserRef does not panic", func(t *testing.T) {
+		noUsr := &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{
+				Name: utilrand.GetRandomStringCanonical(8),
+				Uid:  uuid.New().String(),
+			},
+			Spec:   &cordiumv1.Workspace_Spec{},
+			Status: &cordiumv1.Workspace_Status{},
+		}
+
+		err := acache.SetWorkspace(noUsr)
+		assert.Nil(t, err)
+
+		res, err := acache.GetWorkspace(noUsr.Metadata.Name)
+		assert.Nil(t, err)
+		assert.Equal(t, noUsr.Metadata.Uid, res.Metadata.Uid)
+
+		err = acache.DeleteWorkspace(noUsr)
+		assert.Nil(t, err)
+	})
 }

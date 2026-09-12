@@ -59,8 +59,7 @@ func (m *middleware) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	rCtx := middlewares.GetCtxRequestContext(req.Context())
-	rCtx.Session = reqCtx.Session
+	req = req.WithContext(context.WithValue(req.Context(), middlewares.CtxRequestContext, reqCtx))
 
 	m.next.ServeHTTP(w, req)
 }

@@ -33,5 +33,9 @@ const (
 )
 
 func GetCtxRequestContext(ctx context.Context) *RequestContext {
-	return ctx.Value(CtxRequestContext).(*RequestContext)
+	ret, ok := ctx.Value(CtxRequestContext).(*RequestContext)
+	if !ok {
+		return nil
+	}
+	return ret
 }

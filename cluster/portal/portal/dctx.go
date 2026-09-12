@@ -319,23 +319,38 @@ func (c *dctx) handleClientMsg(ctx context.Context, msg *cordiumv1.ClientMessage
 		c.activityCtl.Set(supC.GetUID())
 	case *cordiumv1.ClientMessage_ListenTerminalRequest:
 		req := msg.GetListenTerminalRequest()
-		c.terminalMap.mu.Lock()
-		if _, ok := c.terminalMap.terminalMap[req.Id]; ok {
-			zap.L().Debug("Already listening to terminal. Nothing to be done...", zap.String("id", req.Id))
-			c.terminalMap.mu.Unlock()
-			return nil
-		}
-		supC, err := c.getSupCFromTerminalID(ctx, req.Id)
+
+		supC, err := func() (*suputils.WorkspaceSupClient, error) {
+			c.terminalMap.mu.Lock()
+			defer c.terminalMap.mu.Unlock()
+
+			if _, ok := c.terminalMap.terminalMap[req.Id]; ok {
+				zap.L().Debug("Already listening to terminal. Nothing to be done...", zap.String("id", req.Id))
+				return nil, nil
+			}
+
+			supC, err := c.getSupCFromTerminalID(ctx, req.Id)
+			if err != nil {
+				return nil, err
+			}
+
+			term := newTerminal(req.Id, supC, c.msgSrvCh)
+			if err := term.run(ctx); err != nil {
+				return nil, err
+			}
+
+			c.terminalMap.terminalMap[req.Id] = term
+
+			return supC, nil
+		}()
 		if err != nil {
 			return err
 		}
-		term := newTerminal(req.Id, supC, c.msgSrvCh)
-		if err := term.run(ctx); err != nil {
-			c.terminalMap.mu.Unlock()
-			return err
+
+		if supC == nil {
+			return nil
 		}
-		c.terminalMap.terminalMap[req.Id] = term
-		c.terminalMap.mu.Unlock()
+
 		c.activityCtl.Set(supC.GetUID())
 	case *cordiumv1.ClientMessage_ListenTerminalEndRequest_:
 		req := msg.GetListenTerminalEndRequest()

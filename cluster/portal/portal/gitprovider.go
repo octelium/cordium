@@ -54,6 +54,10 @@ func (s *Server) handleAuthGitProviderBegin(w http.ResponseWriter, r *http.Reque
 	zap.S().Debugf("Starting handleAuthGitProviderBegin")
 	ctx := r.Context()
 	reqCtx := middlewares.GetCtxRequestContext(ctx)
+	if reqCtx == nil || reqCtx.Session == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 
 	if !rgxGitProviderBegin.MatchString(r.URL.Path) {
 		w.WriteHeader(http.StatusBadRequest)
@@ -257,6 +261,9 @@ func (s *Server) handleAuthGitProviderCallback(w http.ResponseWriter, r *http.Re
 
 func (s *Server) doHandleAuthGitProviderCallback(ctx context.Context, state, code string) error {
 	reqCtx := middlewares.GetCtxRequestContext(ctx)
+	if reqCtx == nil || reqCtx.Session == nil {
+		return errors.Errorf("No Session in the request context")
+	}
 
 	zap.S().Debugf("Starting doHandleAuthGitProviderCallback")
 

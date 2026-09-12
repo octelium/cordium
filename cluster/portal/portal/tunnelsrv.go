@@ -40,7 +40,6 @@ import (
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
 	"github.com/octelium/octelium/apis/cluster/ccordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
-	"github.com/octelium/octelium/apis/main/corev1"
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/apis/rsc/rmetav1"
 	"github.com/octelium/octelium/pkg/utils/ldflags"
@@ -132,6 +131,11 @@ type tunCtx struct {
 	wsUID  string
 	tundev *netTun
 	dev    *device.Device
+
+	proxyMap struct {
+		mu sync.Mutex
+		mp map[int]http.Handler
+	}
 
 	isClosed bool
 	mu       sync.Mutex
@@ -278,6 +282,11 @@ func (s *tunnelSrv) startActivityCheck(ctx context.Context, wsUID string) {
 func (s *tunnelSrv) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	reqCtx := middlewares.GetCtxRequestContext(r.Context())
+	if reqCtx == nil || reqCtx.Session == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	sess := reqCtx.Session
 
 	// zap.L().Debug("new tun request", zap.String("host", r.Header.Get("X-Forwarded-Host")))
@@ -292,7 +301,7 @@ func (s *tunnelSrv) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// zap.L().Debug("Getting workspace",
 	// 	zap.String("wsName", reqInfo.workspace), zap.String("sessUID", sess.Metadata.Uid))
 
-	ws, err := s.getWorkspace(reqInfo, sess)
+	ws, err := s.getWorkspace(reqInfo)
 	if err != nil {
 		zap.L().Debug("Could not get workspace", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -398,6 +407,10 @@ func (s *tunnelSrv) initTunCtx(ws *cordiumv1.Workspace) (*tunCtx, error) {
 	s.tunMap.mu.Lock()
 	defer s.tunMap.mu.Unlock()
 
+	if ret, ok := s.tunMap.tunMap[ws.Metadata.Uid]; ok {
+		return ret, nil
+	}
+
 	privKey, err := s.getTunnelKey()
 	if err != nil {
 		return nil, err
@@ -434,6 +447,8 @@ func newTunCtx(ctx context.Context, workspace *cordiumv1.Workspace, privKey wgty
 	ret := &tunCtx{
 		wsUID: workspace.Metadata.Uid,
 	}
+
+	ret.proxyMap.mp = make(map[int]http.Handler)
 
 	_, addr, err := net.ParseCIDR("10.100.100.2/32")
 	if err != nil {
@@ -540,11 +555,25 @@ func wgKeyB64ToHex(arg string) string {
 	return hex.EncodeToString(k[:])
 }
 
-func (s *tunnelSrv) getWorkspace(reqInfo *regexResult, sess *corev1.Session) (*cordiumv1.Workspace, error) {
-	return s.cache.GetWorkspace(sess.Status.UserRef.Uid, reqInfo.workspace)
+func (s *tunnelSrv) getWorkspace(reqInfo *regexResult) (*cordiumv1.Workspace, error) {
+	return s.cache.GetWorkspace(reqInfo.workspace)
 }
 
 func (s *tunnelSrv) getProxy(wsCtx *tunCtx, port int) (http.Handler, error) {
+	wsCtx.proxyMap.mu.Lock()
+	defer wsCtx.proxyMap.mu.Unlock()
+
+	if ret, ok := wsCtx.proxyMap.mp[port]; ok {
+		return ret, nil
+	}
+
+	ret := s.newProxy(wsCtx, port)
+	wsCtx.proxyMap.mp[port] = ret
+
+	return ret, nil
+}
+
+func (s *tunnelSrv) newProxy(wsCtx *tunCtx, port int) http.Handler {
 
 	ret := &httputil.ReverseProxy{
 		BufferPool: newBufferPool(),
@@ -608,7 +637,7 @@ func (s *tunnelSrv) getProxy(wsCtx *tunCtx, port int) (http.Handler, error) {
 		},
 	}
 
-	return ret, nil
+	return ret
 }
 
 const bufferPoolSize = 32 * 1024

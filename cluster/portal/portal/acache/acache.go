@@ -17,8 +17,7 @@
 package acache
 
 import (
-	"fmt"
-	"time"
+	"os"
 
 	workspacecommon "github.com/octelium/cordium/cluster/common"
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
@@ -26,21 +25,23 @@ import (
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"github.com/octelium/octelium/pkg/common/pbutils"
-	"github.com/octelium/octelium/pkg/utils/utilrand"
-	"github.com/patrickmn/go-cache"
 	"github.com/pkg/errors"
 	"go.etcd.io/bbolt"
 )
 
 type Cache struct {
 	db *bbolt.DB
-	c  *cache.Cache
 }
+
+const dbPath = "/tmp/octelium-acache.db"
 
 func NewCache() (*Cache, error) {
 
-	filename := fmt.Sprintf("/tmp/acache-%s.db", utilrand.GetRandomStringLowercase(6))
-	db, err := bbolt.Open(filename, 0600, nil)
+	if err := os.Remove(dbPath); err != nil && !os.IsNotExist(err) {
+		return nil, err
+	}
+
+	db, err := bbolt.Open(dbPath, 0600, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +64,6 @@ func NewCache() (*Cache, error) {
 
 	return &Cache{
 		db: db,
-		c:  cache.New(5*cache.NoExpiration, 10*time.Minute),
 	}, nil
 }
 
@@ -133,8 +133,8 @@ func (c *Cache) deleteResource(kind string, key string) error {
 	return nil
 }
 
-func (c *Cache) GetWorkspace(userUID, workspaceName string) (*cordiumv1.Workspace, error) {
-	ret, err := c.getResource(ucordiumv1.KindWorkspace, fmt.Sprintf("%s.%s", userUID, workspaceName))
+func (c *Cache) GetWorkspace(workspaceName string) (*cordiumv1.Workspace, error) {
+	ret, err := c.getResource(ucordiumv1.KindWorkspace, workspaceName)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func (c *Cache) DeleteWorkspace(ws *cordiumv1.Workspace) error {
 }
 
 func getKey(ws *cordiumv1.Workspace) string {
-	return fmt.Sprintf("%s.%s", ws.Status.UserRef.Uid, ws.Metadata.Name)
+	return ws.Metadata.Name
 }
 
 func (c *Cache) GetSpace(uid string) (*cordiumv1.Space, error) {
