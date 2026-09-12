@@ -59,6 +59,9 @@ type Opts struct {
 	Domain string
 
 	ClientInfo *ccordiumv1.InitializeRequest_ClientInfo
+
+	UserUID int
+	UserGID int
 }
 
 func NewOcteliumProxy(opts *Opts) (*OcteliumProxy, error) {
@@ -136,6 +139,19 @@ func (p *OcteliumProxy) doSetInitAccessToken(ctx context.Context) error {
 	return nil
 }
 
+func (p *OcteliumProxy) setSocketPermissions() error {
+	if p.opts.UserUID == 0 {
+		return os.Chmod(SocketPath, 0666)
+	}
+
+	if err := os.Chown(SocketPath, p.opts.UserUID, p.opts.UserGID); err != nil {
+		zap.L().Warn("Could not chown the oProxy socket", zap.Error(err))
+		return os.Chmod(SocketPath, 0666)
+	}
+
+	return os.Chmod(SocketPath, 0600)
+}
+
 func (p *OcteliumProxy) runProxy(ctx context.Context) error {
 	var err error
 
@@ -145,8 +161,8 @@ func (p *OcteliumProxy) runProxy(ctx context.Context) error {
 		return errors.Errorf("Could not listen on unix socket path: %+v", err)
 	}
 
-	if err := os.Chmod(SocketPath, 0600); err != nil {
-		return errors.Errorf("Could not chmod socke path: %+v", err)
+	if err := p.setSocketPermissions(); err != nil {
+		return errors.Errorf("Could not set socket path permissions: %+v", err)
 	}
 
 	p.proxy, err = p.getProxy()

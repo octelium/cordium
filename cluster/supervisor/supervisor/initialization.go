@@ -279,6 +279,8 @@ func (s *Server) runOcteliumProxy() error {
 	s.octeliumProxy, err = oproxy.NewOcteliumProxy(&oproxy.Opts{
 		Domain:     s.initReq.ClientInfo.Domain,
 		ClientInfo: s.initReq.ClientInfo,
+		UserUID:    s.octeliumUID,
+		UserGID:    s.octeliumGID,
 	})
 	if err != nil {
 		return err
@@ -299,6 +301,8 @@ func (s *Server) runSSHAgent() error {
 
 	s.sshAgent, err = sshagent.NewAgent(&sshagent.Opts{
 		UserSecretList: s.initReq.UserSecretList,
+		UserUID:        s.octeliumUID,
+		UserGID:        s.octeliumGID,
 	})
 	if err != nil {
 		return err

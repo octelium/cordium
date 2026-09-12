@@ -155,10 +155,14 @@ func (r *keyring) Extension(extensionType string, contents []byte) ([]byte, erro
 
 type Agent struct {
 	keyring *keyring
+	opts    *Opts
 }
 
 type Opts struct {
 	UserSecretList *cordiumv1.UserSecretList
+
+	UserUID int
+	UserGID int
 }
 
 func NewAgent(opts *Opts) (*Agent, error) {
@@ -166,6 +170,7 @@ func NewAgent(opts *Opts) (*Agent, error) {
 
 	ret := &Agent{
 		keyring: &keyring{},
+		opts:    opts,
 	}
 
 	if opts == nil || opts.UserSecretList == nil || len(opts.UserSecretList.Items) == 0 {
@@ -215,6 +220,19 @@ func (a *Agent) Run(ctx context.Context) error {
 	return nil
 }
 
+func (a *Agent) setSocketPermissions() error {
+	if a.opts == nil || a.opts.UserUID == 0 {
+		return os.Chmod(SocketPath, 0666)
+	}
+
+	if err := os.Chown(SocketPath, a.opts.UserUID, a.opts.UserGID); err != nil {
+		zap.L().Warn("Could not chown the SSH agent socket", zap.Error(err))
+		return os.Chmod(SocketPath, 0666)
+	}
+
+	return os.Chmod(SocketPath, 0600)
+}
+
 func (a *Agent) doRun(ctx context.Context) error {
 	os.Remove(SocketPath)
 	lis, err := net.Listen("unix", SocketPath)
@@ -223,7 +241,7 @@ func (a *Agent) doRun(ctx context.Context) error {
 		return err
 	}
 
-	if err := os.Chmod(SocketPath, 0600); err != nil {
+	if err := a.setSocketPermissions(); err != nil {
 		return err
 	}
 
