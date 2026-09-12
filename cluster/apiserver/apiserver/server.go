@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime/debug"
+	"syscall"
 	"time"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -46,15 +47,13 @@ const maxRecvMsgSize = 8 * 1024 * 1024
 
 func Run(ctx context.Context) error {
 
-	ctx, cancelFn := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx, cancelFn := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 	defer cancelFn()
 
 	if ldflags.IsDev() {
 		os.Setenv("GRPC_GO_LOG_VERBOSITY_LEVEL", "99")
 		os.Setenv("GRPC_GO_LOG_SEVERITY_LEVEL", "info")
 	}
-
-	healthcheck.Run(vutils.HealthCheckPortManagedService)
 
 	octeliumC, err := octeliumc.NewClient(ctx, nil)
 	if err != nil {
@@ -140,10 +139,25 @@ func Run(ctx context.Context) error {
 		}
 	}()
 
+	healthcheck.Run(vutils.HealthCheckPortManagedService)
+
 	zap.L().Info("Cordium API Server is now running")
 	<-ctx.Done()
 	zap.L().Debug("Shutting down gRPC server")
-	s.Stop()
+
+	gracefulShutdownCh := make(chan struct{})
+	go func() {
+		s.GracefulStop()
+		close(gracefulShutdownCh)
+	}()
+
+	select {
+	case <-gracefulShutdownCh:
+		zap.L().Debug("gRPC server gracefully stopped")
+	case <-time.After(15 * time.Second):
+		zap.L().Warn("gRPC server graceful shutdown timeout exceeded")
+		s.Stop()
+	}
 
 	return nil
 }

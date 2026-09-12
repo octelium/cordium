@@ -100,7 +100,11 @@ func (s *Server) CancelBuildTemplate(ctx context.Context, req *cordiumv1.CancelB
 		return nil, err
 	}
 
-	if tmpl.Status.BuildInfo.CurrentRunningBuildID == "" {
+	if err := commonw.CheckIsMemberAdmin(ctx, s.octeliumC, tmpl.Status.SpaceRef); err != nil {
+		return nil, err
+	}
+
+	if tmpl.Status.GetBuildInfo().GetCurrentRunningBuildID() == "" {
 		return tmpl, nil
 	}
 
@@ -117,7 +121,7 @@ func (s *Server) CancelBuildTemplate(ctx context.Context, req *cordiumv1.CancelB
 }
 
 func (s *Server) doCancelBuild(ctx context.Context, tmpl *cordiumv1.Template) error {
-	if tmpl.Status.BuildInfo.CurrentRunningBuildID == "" {
+	if tmpl.Status.GetBuildInfo().GetCurrentRunningBuildID() == "" {
 		return nil
 	}
 

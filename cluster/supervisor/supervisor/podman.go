@@ -98,6 +98,8 @@ func (s *Server) createPod(ctx context.Context) error {
 	args := []string{
 		"pod", "create",
 		"--name", "ws",
+		"--dns", "8.8.8.8",
+		"--dns-search=.",
 		"--hostname", "cordium",
 		"-p", fmt.Sprintf("%d:%d", wsPort, wsPort),
 		"-p", fmt.Sprintf("%d:%d/udp", tunPort, tunPort),
@@ -316,6 +318,8 @@ func (s *Server) podmanRunImage(ctx context.Context) error {
 		// "--cap-add", "mknod,net_admin,sys_admin,net_raw,sys_ptrace",
 		"-d",
 		// "--privileged",
+		"--dns", "8.8.8.8",
+		"--dns-search=.",
 		"--http-proxy=false",
 
 		"--no-hosts",

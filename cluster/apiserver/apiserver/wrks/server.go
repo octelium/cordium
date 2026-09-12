@@ -18,6 +18,7 @@ package wrks
 
 import (
 	"context"
+	"time"
 
 	"github.com/octelium/cordium/cluster/common/octeliumc"
 	"github.com/octelium/cordium/cluster/common/suputils"
@@ -113,6 +114,22 @@ func NewServer(ctx context.Context, octeliumC octeliumc.ClientInterface) (*Serve
 	ret.supClientMap = suputils.NewSupervisorCtxMap(umetav1.GetObjectReference(region))
 
 	return ret, nil
+}
+
+func (s *Server) startActivityCheck(ctx context.Context, wsUID string) {
+	s.activityCtl.Set(wsUID)
+
+	tickerCh := time.NewTicker(30 * time.Second)
+	defer tickerCh.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-tickerCh.C:
+			s.activityCtl.Set(wsUID)
+		}
+	}
 }
 
 func (s *Server) Run(ctx context.Context) error {

@@ -298,6 +298,8 @@ func (s *Server) Exec(srv cordiumv1.WorkspaceService_ExecServer) error {
 		return err
 	}
 
+	go s.startActivityCheck(ctx, wssupClient.GetUID())
+
 	zap.L().Debug("Doing doExec to upstream")
 
 	upstream, err := wssupClient.TermC().Exec(ctx, grpc_retry.Disable())

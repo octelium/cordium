@@ -23,12 +23,14 @@ import (
 	"github.com/octelium/cordium/cluster/apiserver/apiserver/commonw"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
-	"github.com/octelium/octelium/cluster/common/grpcutils"
-	"github.com/octelium/octelium/cluster/common/urscsrv"
+	"github.com/octelium/octelium/cluster/common/apivalidation"
 	"github.com/octelium/octelium/cluster/common/userctx"
 	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"github.com/octelium/octelium/pkg/utils/utilrand"
+	"go.uber.org/zap"
 )
+
+const watchWorkspaceBufferSize = 256
 
 func (s *Server) WatchWorkspace(req *cordiumv1.WatchWorkspaceRequest, stream cordiumv1.MainService_WatchWorkspaceServer) error {
 	ctx := stream.Context()
@@ -38,19 +40,22 @@ func (s *Server) WatchWorkspace(req *cordiumv1.WatchWorkspaceRequest, stream cor
 		return err
 	}
 
-	wsList, err := s.octeliumC.CordiumC().ListWorkspace(ctx, urscsrv.FilterByUser(i.User))
-	if err != nil {
-		return err
+	var wsUID string
+	if req.WorkspaceRef != nil {
+		ws, err := s.GetWorkspace(ctx, apivalidation.ObjectReferenceToGetOptions(req.WorkspaceRef))
+		if err != nil {
+			return err
+		}
+		wsUID = ws.Metadata.Uid
 	}
 
-	if len(wsList.Items) < 1 {
-		return grpcutils.InvalidArg("No Workspaces found for this User")
-	}
-
-	sub := s.wsWatchMan.newSub(i, stream, req)
+	sub := s.wsWatchMan.newSub(i, stream, wsUID)
 	defer s.wsWatchMan.removeSub(sub)
 
-	<-ctx.Done()
+	select {
+	case <-ctx.Done():
+	case <-sub.doneCh:
+	}
 
 	return nil
 }
@@ -61,17 +66,21 @@ type watchWorkspaceSubscriptionManager struct {
 }
 
 func (w *watchWorkspaceSubscriptionManager) newSub(i *userctx.UserCtx,
-	stream cordiumv1.MainService_WatchWorkspaceServer, req *cordiumv1.WatchWorkspaceRequest) *watchWorkspaceSubscription {
+	stream cordiumv1.MainService_WatchWorkspaceServer, wsUID string) *watchWorkspaceSubscription {
 	ret := &watchWorkspaceSubscription{
 		id:      utilrand.GetRandomString(16),
 		userUID: i.User.Metadata.Uid,
+		wsUID:   wsUID,
 		stream:  stream,
-		req:     req,
+		msgCh:   make(chan *cordiumv1.WatchWorkspaceResponse, watchWorkspaceBufferSize),
+		doneCh:  make(chan struct{}),
 	}
 
 	w.mu.Lock()
 	w.mp[ret.id] = ret
 	w.mu.Unlock()
+
+	go ret.startSendLoop()
 
 	return ret
 }
@@ -80,6 +89,14 @@ func (w *watchWorkspaceSubscriptionManager) removeSub(s *watchWorkspaceSubscript
 	w.mu.Lock()
 	delete(w.mp, s.id)
 	w.mu.Unlock()
+
+	s.close()
+}
+
+func (w *watchWorkspaceSubscriptionManager) len() int {
+	w.mu.RLock()
+	defer w.mu.RUnlock()
+	return len(w.mp)
 }
 
 func (w *watchWorkspaceSubscriptionManager) onCreate(ctx context.Context, ws *cordiumv1.Workspace) error {
@@ -132,13 +149,29 @@ func (w *watchWorkspaceSubscriptionManager) publishMsg(msg *cordiumv1.WatchWorks
 	usrRef *metav1.ObjectReference, wsRef *metav1.ObjectReference) error {
 
 	usrUID := usrRef.Uid
+
+	var laggingSubs []*watchWorkspaceSubscription
+
 	w.mu.RLock()
-	defer w.mu.RUnlock()
 	for _, sub := range w.mp {
-		if sub.userUID == usrUID &&
-			(sub.req.WorkspaceRef == nil || sub.req.WorkspaceRef.Uid == wsRef.Uid) {
-			sub.stream.Send(msg)
+		if sub.userUID != usrUID {
+			continue
 		}
+		if sub.wsUID != "" && sub.wsUID != wsRef.Uid {
+			continue
+		}
+
+		select {
+		case sub.msgCh <- msg:
+		default:
+			laggingSubs = append(laggingSubs, sub)
+		}
+	}
+	w.mu.RUnlock()
+
+	for _, sub := range laggingSubs {
+		zap.L().Warn("Dropping a lagging WatchWorkspace subscriber", zap.String("subID", sub.id))
+		w.removeSub(sub)
 	}
 
 	return nil
@@ -147,6 +180,36 @@ func (w *watchWorkspaceSubscriptionManager) publishMsg(msg *cordiumv1.WatchWorks
 type watchWorkspaceSubscription struct {
 	id      string
 	userUID string
+	wsUID   string
 	stream  cordiumv1.MainService_WatchWorkspaceServer
-	req     *cordiumv1.WatchWorkspaceRequest
+
+	msgCh     chan *cordiumv1.WatchWorkspaceResponse
+	doneCh    chan struct{}
+	closeOnce sync.Once
+}
+
+func (s *watchWorkspaceSubscription) close() {
+	s.closeOnce.Do(func() {
+		close(s.doneCh)
+	})
+}
+
+func (s *watchWorkspaceSubscription) startSendLoop() {
+	ctx := s.stream.Context()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-s.doneCh:
+			return
+		case msg := <-s.msgCh:
+			if err := s.stream.Send(msg); err != nil {
+				zap.L().Debug("Could not send WatchWorkspaceResponse",
+					zap.String("subID", s.id), zap.Error(err))
+				s.close()
+				return
+			}
+		}
+	}
 }

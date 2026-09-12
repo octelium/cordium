@@ -53,6 +53,8 @@ func (s *Server) ListenLog(req *cordiumv1.ListenLogRequest, srv cordiumv1.Worksp
 		return grpcutils.InvalidArg("Workspace is not ready")
 	}
 
+	go s.startActivityCheck(ctx, ws.Metadata.Uid)
+
 	streamC, err := supC.C().ListenEvent(ctx, &ccordiumv1.ListenEventRequest{})
 	if err != nil {
 		return grpcutils.InternalWithErr(err)
