@@ -5,9 +5,10 @@ on:
       - v*
     branches:
       # - master
-      # - main
+      - main
       # - dev*
       - t-*
+      - dev-*
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -22,13 +23,6 @@ jobs:
         image: redis
         ports:
           - 6379:6379
-      minio:
-        env:
-          AWS_ACCESS_KEY_ID: minioadmin
-          AWS_SECRET_ACCESS_KEY: minioadmin
-        image: fclairamb/minio-github-actions
-        ports:
-          - 9000:9000
     steps:
       - name: Set up go
         uses: actions/setup-go@v5
