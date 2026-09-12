@@ -7,6 +7,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import { setStatus } from "@/features/settings/slice";
 import { getClientUser, getClientWorkspace } from "@/utils/client";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks";
+import { useThemeColorMeta } from "@/utils/theme/colorScheme";
 
 import { useQuery } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
@@ -28,6 +29,8 @@ const Root = () => {
   const dispatch = useAppDispatch();
   const [navOpened, { toggle: toggleNav, close: closeNav }] = useDisclosure();
   const consoleWide = useAppSelector((s) => s.settings.terminalFullscreen);
+
+  useThemeColorMeta();
 
   useQuery({
     queryKey: ["user/getStatus"],
@@ -65,11 +68,11 @@ const Root = () => {
         collapsed: { mobile: !navOpened },
       }}
       padding={0}
-      className="bg-slate-100"
+      className="bg-canvas"
     >
       <AppShell.Header
-        className="border-b border-slate-200 bg-slate-100"
-        style={{ backgroundColor: "var(--color-slate-100)" }}
+        className="border-b border-line bg-canvas"
+        style={{ backgroundColor: "var(--app-canvas)" }}
       >
         <div className="flex h-full items-center">
           <Burger
@@ -85,13 +88,13 @@ const Root = () => {
       </AppShell.Header>
 
       <AppShell.Navbar
-        className="border-r border-slate-200 bg-slate-100 p-3"
-        style={{ backgroundColor: "var(--color-slate-100)" }}
+        className="border-r border-line bg-canvas p-3"
+        style={{ backgroundColor: "var(--app-canvas)" }}
       >
         <SideBar onNavigate={closeNav} />
       </AppShell.Navbar>
 
-      <AppShell.Main className="bg-slate-100">
+      <AppShell.Main className="bg-canvas">
         <div
           className={
             consoleWide

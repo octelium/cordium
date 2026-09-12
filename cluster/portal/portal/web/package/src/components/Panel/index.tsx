@@ -7,8 +7,8 @@ export const Panel = (props: {
 }) => (
   <section
     className={twMerge(
-      "bg-white border border-slate-200 rounded-xl overflow-hidden",
-      "shadow-[0_1px_3px_rgba(15,23,42,0.05)]",
+      "bg-surface border border-line rounded-xl overflow-hidden",
+      "shadow-panel",
       props.className,
     )}
   >
@@ -22,16 +22,16 @@ export const PanelHeader = (props: {
   actions?: React.ReactNode;
   icon?: React.ReactNode;
 }) => (
-  <header className="flex items-start gap-3 px-5 py-3.5 border-b border-slate-100 bg-slate-50/70">
+  <header className="flex items-start gap-3 px-5 py-3.5 border-b border-line-subtle bg-surface-subtle">
     {props.icon && (
-      <span className="mt-0.5 text-slate-400 shrink-0">{props.icon}</span>
+      <span className="mt-0.5 text-ink-subtle shrink-0">{props.icon}</span>
     )}
     <div className="flex-1 min-w-0">
-      <h2 className="text-[0.72rem] font-bold uppercase tracking-[0.07em] text-slate-500">
+      <h2 className="text-[0.72rem] font-bold uppercase tracking-[0.07em] text-ink-muted">
         {props.title}
       </h2>
       {props.description && (
-        <p className="mt-1 text-[0.78rem] font-medium text-slate-500">
+        <p className="mt-1 text-[0.78rem] font-medium text-ink-muted">
           {props.description}
         </p>
       )}
@@ -50,7 +50,7 @@ export const PanelBody = (props: {
 );
 
 export const PanelFooter = (props: { children?: React.ReactNode }) => (
-  <footer className="flex items-center justify-end gap-2 px-5 py-3 border-t border-slate-100 bg-slate-50/70">
+  <footer className="flex items-center justify-end gap-2 px-5 py-3 border-t border-line-subtle bg-surface-subtle">
     {props.children}
   </footer>
 );

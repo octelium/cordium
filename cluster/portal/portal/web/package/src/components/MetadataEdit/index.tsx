@@ -73,9 +73,9 @@ const MetadataEdit = (props: {
       )}
 
       {props.parentName && shortName.length > 0 && (
-        <p className="-mt-1 text-[0.75rem] font-medium text-slate-400">
+        <p className="-mt-1 text-[0.75rem] font-medium text-ink-subtle">
           Full name:{" "}
-          <span className="font-mono text-slate-500">
+          <span className="font-mono text-ink-muted">
             {shortName}.{props.parentName}
           </span>
         </p>

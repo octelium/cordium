@@ -15,8 +15,8 @@ const OptionalBlock = (props: {
     className={twMerge(
       "rounded-xl border transition-colors duration-150",
       props.enabled
-        ? "border-slate-300 bg-white"
-        : "border-slate-200 bg-slate-50/60",
+        ? "border-line-strong bg-surface"
+        : "border-line bg-surface-subtle",
     )}
   >
     <div className="flex items-start gap-3 px-4 py-3">
@@ -24,7 +24,7 @@ const OptionalBlock = (props: {
         <span
           className={twMerge(
             "mt-0.5 shrink-0",
-            props.enabled ? "text-slate-500" : "text-slate-400",
+            props.enabled ? "text-ink-muted" : "text-ink-subtle",
           )}
         >
           {props.icon}
@@ -34,13 +34,13 @@ const OptionalBlock = (props: {
         <div
           className={twMerge(
             "text-sm font-bold",
-            props.enabled ? "text-slate-800" : "text-slate-600",
+            props.enabled ? "text-ink-strong" : "text-ink-soft",
           )}
         >
           {props.title}
         </div>
         {props.description && (
-          <p className="mt-0.5 text-[0.78rem] font-medium text-slate-500">
+          <p className="mt-0.5 text-[0.78rem] font-medium text-ink-muted">
             {props.description}
           </p>
         )}
@@ -56,7 +56,7 @@ const OptionalBlock = (props: {
     </div>
 
     <Collapse expanded={props.enabled}>
-      <div className="border-t border-slate-100 px-4 py-4">
+      <div className="border-t border-line-subtle px-4 py-4">
         {props.children}
       </div>
     </Collapse>

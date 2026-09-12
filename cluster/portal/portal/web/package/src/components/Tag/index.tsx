@@ -4,12 +4,12 @@ import { twMerge } from "tailwind-merge";
 type Tone = "neutral" | "accent" | "success" | "warning" | "danger" | "info";
 
 const tones: Record<Tone, string> = {
-  neutral: "bg-slate-100 text-slate-600 border-slate-200",
-  accent: "bg-slate-800 text-white border-slate-800",
-  success: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  warning: "bg-amber-50 text-amber-700 border-amber-200",
-  danger: "bg-rose-50 text-rose-700 border-rose-200",
-  info: "bg-sky-50 text-sky-700 border-sky-200",
+  neutral: "bg-surface-muted text-ink-soft border-line",
+  accent: "bg-inverted text-on-inverted border-inverted",
+  success: "bg-hue-emerald-soft text-hue-emerald border-hue-emerald-line",
+  warning: "bg-hue-amber-soft text-hue-amber border-hue-amber-line",
+  danger: "bg-hue-rose-soft text-hue-rose border-hue-rose-line",
+  info: "bg-hue-sky-soft text-hue-sky border-hue-sky-line",
 };
 
 const Tag = (props: {
@@ -30,7 +30,7 @@ const Tag = (props: {
   >
     {props.icon}
     {props.label && (
-      <span className="text-slate-400 font-medium">{props.label}</span>
+      <span className="text-ink-subtle font-medium">{props.label}</span>
     )}
     <span className={props.mono ? "font-mono" : undefined}>
       {props.children}

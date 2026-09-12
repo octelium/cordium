@@ -39,7 +39,7 @@ const SecretRow = (props: { item: WsPB.Secret; canManage: boolean }) => {
   return (
     <ClickableCard>
       <div className="flex items-center gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-ink-muted">
           <IconKey size={17} />
         </span>
         <div className="min-w-0 flex-1">

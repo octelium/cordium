@@ -92,12 +92,12 @@ const SecretValueInput = (props: {
           </Button>
           {fileName && (
             <div className="flex items-center gap-2">
-              <IconFileText size={13} className="shrink-0 text-slate-400" />
+              <IconFileText size={13} className="shrink-0 text-ink-subtle" />
               <Text size="xs" c="dimmed">
                 {fileName}
               </Text>
               {props.value && (
-                <Text size="xs" fw={600} c="teal.7">
+                <Text size="xs" fw={600} className="text-hue-teal">
                   {props.value.length} bytes loaded
                 </Text>
               )}

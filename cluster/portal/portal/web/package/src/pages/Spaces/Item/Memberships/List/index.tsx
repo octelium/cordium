@@ -72,18 +72,18 @@ const MemberRow = (props: {
           src={item.status?.userInfo?.picURL || undefined}
           radius="xl"
           size={36}
-          color="dark"
+          color="primary"
         >
           {(displayName || userName).slice(0, 2).toUpperCase()}
         </Avatar>
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-x-2">
-            <span className="truncate text-sm font-bold text-slate-800">
+            <span className="truncate text-sm font-bold text-ink-strong">
               {displayName || userName}
             </span>
             {displayName && (
-              <span className="truncate font-mono text-[0.72rem] font-medium text-slate-400">
+              <span className="truncate font-mono text-[0.72rem] font-medium text-ink-subtle">
                 {userName}
               </span>
             )}

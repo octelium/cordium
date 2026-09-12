@@ -21,7 +21,7 @@ const ToolbarDivider = () => (
 );
 
 export const consoleToolbarButtonClass =
-  "border border-slate-600/80 bg-slate-800/90 text-slate-300 shadow-sm transition-all duration-150 hover:border-slate-500 hover:bg-slate-700 hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 focus-visible:ring-offset-1 focus-visible:ring-offset-[var(--console-chrome)] disabled:border-slate-700 disabled:bg-slate-800/50 disabled:text-slate-600 disabled:shadow-none";
+  "border border-slate-600/80 bg-slate-800/90 text-slate-300 shadow-sm transition-all duration-150 hover:border-slate-500 hover:bg-slate-700 hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 focus-visible:ring-offset-1 focus-visible:ring-offset-console-chrome disabled:border-slate-700 disabled:bg-slate-800/50 disabled:text-slate-600 disabled:shadow-none";
 
 export const consoleToolbarButtonVars = () => ({
   root: {
@@ -65,7 +65,7 @@ const ConsoleShell = (props: {
   }, [dispatch]);
 
   const toolbar = (
-    <div className="flex items-center gap-2 border-b border-slate-800 bg-[var(--console-chrome)] px-3 py-2">
+    <div className="flex items-center gap-2 border-b border-slate-800 bg-console-chrome px-3 py-2">
       <div className="flex min-w-0 flex-1 items-center">{props.tabs}</div>
 
       <div className="flex shrink-0 items-center gap-1 border-l border-slate-700/80 pl-3">
@@ -151,7 +151,7 @@ const ConsoleShell = (props: {
   if (fullscreen) {
     return (
       <RemoveScroll>
-        <div className="console-surface fixed inset-0 z-[400] flex flex-col bg-[var(--console-bg)]">
+        <div className="console-surface fixed inset-0 z-[400] flex flex-col bg-console">
           {toolbar}
           <div className="min-h-0 flex-1 px-2 py-2">{props.children}</div>
         </div>
@@ -162,8 +162,8 @@ const ConsoleShell = (props: {
   return (
     <div
       className={twMerge(
-        "console-surface overflow-hidden rounded-xl border border-slate-800 bg-[var(--console-bg)]",
-        "shadow-[0_8px_24px_rgba(15,23,42,0.16)]",
+        "console-surface overflow-hidden rounded-xl border border-slate-800 bg-console",
+        "shadow-console",
       )}
     >
       {toolbar}

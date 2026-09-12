@@ -54,10 +54,10 @@ const BuildRow = (props: {
     !item.isCanceled && item.state === BuildState.RUNNING;
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 md:flex-row md:items-center">
+    <div className="flex flex-col gap-3 rounded-xl border border-line bg-surface px-4 py-3 md:flex-row md:items-center">
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-[0.8rem] font-semibold text-slate-700">
+          <span className="font-mono text-[0.8rem] font-semibold text-ink-body">
             {item.id}
           </span>
           {props.isCurrent && <Tag tone="success">Current</Tag>}
@@ -67,7 +67,7 @@ const BuildRow = (props: {
             </Tag>
           ))}
         </div>
-        <div className="mt-1 text-[0.75rem] font-medium text-slate-400">
+        <div className="mt-1 text-[0.75rem] font-medium text-ink-subtle">
           {item.startedAt && (
             <>
               Started <TimeAgo rfc3339={item.startedAt} />
@@ -81,7 +81,7 @@ const BuildRow = (props: {
           )}
         </div>
         {item.failure?.message && (
-          <p className="mt-1 text-[0.78rem] font-medium text-rose-600">
+          <p className="mt-1 text-[0.78rem] font-medium text-hue-rose">
             {item.failure.message}
           </p>
         )}
@@ -101,7 +101,7 @@ const BuildRow = (props: {
         )}
         {running && (
           <>
-            <span className="inline-flex items-center gap-1.5 text-[0.75rem] font-semibold text-blue-700">
+            <span className="inline-flex items-center gap-1.5 text-[0.75rem] font-semibold text-hue-blue">
               <Loader size={12} color="blue" />
               Building
             </span>

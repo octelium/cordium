@@ -228,7 +228,7 @@ const SpecEditor = (props: {
           <div className="flex justify-end">
             <button
               type="button"
-              className="rounded-md bg-slate-800 px-3 py-1.5 text-[0.8rem] font-semibold text-white transition-colors duration-150 hover:bg-slate-900"
+              className="rounded-md bg-inverted px-3 py-1.5 text-[0.8rem] font-semibold text-on-inverted transition-colors duration-150 hover:bg-inverted-hover"
               onClick={() => applyYaml(yamlDraft ?? resourceToYAML(item))}
             >
               Apply to form

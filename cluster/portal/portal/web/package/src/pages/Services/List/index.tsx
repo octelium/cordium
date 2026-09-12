@@ -55,18 +55,18 @@ const ServiceRow = (props: { item: Service; domain: string }) => {
       <div className="flex flex-col gap-3 md:flex-row md:items-start">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-x-2">
-            <span className="truncate text-sm font-bold text-slate-800">
+            <span className="truncate text-sm font-bold text-ink-strong">
               {getServiceHostname(item)}
             </span>
             {item.metadata?.displayName && (
-              <span className="truncate text-[0.78rem] font-medium text-slate-500">
+              <span className="truncate text-[0.78rem] font-medium text-ink-muted">
                 {item.metadata.displayName}
               </span>
             )}
           </div>
 
           {item.metadata?.description && (
-            <p className="mt-0.5 text-[0.78rem] font-medium text-slate-500">
+            <p className="mt-0.5 text-[0.78rem] font-medium text-ink-muted">
               {item.metadata.description}
             </p>
           )}
@@ -80,7 +80,7 @@ const ServiceRow = (props: { item: Service; domain: string }) => {
           </div>
 
           <Collapse expanded={expanded}>
-            <div className="mt-3 border-t border-slate-100 pt-1">
+            <div className="mt-3 border-t border-line-subtle pt-1">
               <Facts>
                 <Fact label="Private FQDN">
                   <CopyText value={getServicePrivateFQDN(item, domain)} />

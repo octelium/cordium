@@ -1,19 +1,223 @@
 @import "tailwindcss";
 
-@theme {
+@custom-variant dark (&:where([data-mantine-color-scheme="dark"], [data-mantine-color-scheme="dark"] *));
+
+:root {
+  color-scheme: light;
+
+  --app-header-height: 60px;
+
+  --app-canvas: oklch(96.8% 0.007 247.896);
+  --app-surface: #ffffff;
+  --app-surface-subtle: oklch(98.4% 0.003 247.858);
+  --app-surface-hover: oklch(98.4% 0.003 247.858);
+  --app-surface-muted: oklch(96.8% 0.007 247.896);
+  --app-surface-strong: oklch(92.9% 0.013 255.508);
+
+  --app-line: oklch(92.9% 0.013 255.508);
+  --app-line-subtle: oklch(96.8% 0.007 247.896);
+  --app-line-strong: oklch(86.9% 0.022 252.894);
+
+  --app-ink: oklch(20.8% 0.042 265.755);
+  --app-ink-strong: oklch(27.9% 0.041 260.031);
+  --app-ink-body: oklch(37.2% 0.044 257.287);
+  --app-ink-soft: oklch(44.6% 0.043 257.281);
+  --app-ink-muted: oklch(55.4% 0.046 257.417);
+  --app-ink-subtle: oklch(70.4% 0.04 256.788);
+  --app-ink-faint: oklch(86.9% 0.022 252.894);
+
+  --app-inverted: oklch(20.8% 0.042 265.755);
+  --app-inverted-hover: oklch(27.9% 0.041 260.031);
+  --app-on-inverted: #ffffff;
+  --app-logo: #000000;
+
+  --app-focus: oklch(70.4% 0.04 256.788);
+  --app-switch-on: var(--mantine-primary-color-filled);
+  --app-scrollbar: oklch(86.9% 0.022 252.894);
+  --app-scrollbar-hover: oklch(70.4% 0.04 256.788);
+
+  --app-shadow-panel: 0 1px 3px rgb(15 23 42 / 0.05);
+  --app-shadow-console: 0 8px 24px rgb(15 23 42 / 0.16);
+
+  --app-hue-emerald: oklch(50.8% 0.118 165.612);
+  --app-hue-emerald-solid: oklch(69.6% 0.17 162.48);
+  --app-hue-emerald-soft: oklch(97.9% 0.021 166.113);
+  --app-hue-emerald-line: oklch(90.5% 0.093 164.15);
+
+  --app-hue-amber: oklch(55.5% 0.163 48.998);
+  --app-hue-amber-solid: oklch(76.9% 0.188 70.08);
+  --app-hue-amber-soft: oklch(98.7% 0.022 95.277);
+  --app-hue-amber-line: oklch(92.4% 0.12 95.746);
+
+  --app-hue-rose: oklch(51.4% 0.222 16.935);
+  --app-hue-rose-solid: oklch(64.5% 0.246 16.439);
+  --app-hue-rose-soft: oklch(96.9% 0.015 12.422);
+  --app-hue-rose-line: oklch(89.2% 0.058 10.001);
+
+  --app-hue-sky: oklch(50% 0.134 242.749);
+  --app-hue-sky-solid: oklch(68.5% 0.169 237.323);
+  --app-hue-sky-soft: oklch(97.7% 0.013 236.62);
+  --app-hue-sky-line: oklch(90.1% 0.058 230.902);
+
+  --app-hue-blue: oklch(48.8% 0.243 264.376);
+  --app-hue-blue-solid: oklch(62.3% 0.214 259.815);
+  --app-hue-blue-soft: oklch(97% 0.014 254.604);
+  --app-hue-blue-line: oklch(88.2% 0.059 254.128);
+
+  --app-hue-violet: oklch(49.1% 0.27 292.581);
+  --app-hue-violet-solid: oklch(60.6% 0.25 292.717);
+  --app-hue-violet-soft: oklch(96.9% 0.016 293.756);
+  --app-hue-violet-line: oklch(89.4% 0.057 293.283);
+
+  --app-hue-teal: oklch(51.1% 0.096 186.391);
+  --app-hue-teal-solid: oklch(70.4% 0.14 182.503);
+  --app-hue-teal-soft: oklch(98.4% 0.014 180.72);
+  --app-hue-teal-line: oklch(91% 0.096 180.426);
+
+  --console-bg: #0b1120;
+  --console-chrome: #111318;
+  --console-scrollbar: #334155;
+  --console-scrollbar-hover: #475569;
+}
+
+:root[data-mantine-color-scheme="dark"] {
+  color-scheme: dark;
+
+  --app-canvas: oklch(21.8% 0.036 262.456);
+  --app-surface: oklch(25.8% 0.032 258.311);
+  --app-surface-subtle: oklch(24.2% 0.032 258.3);
+  --app-surface-hover: oklch(28.3% 0.035 258.919);
+  --app-surface-muted: oklch(29.6% 0.036 260.062);
+  --app-surface-strong: oklch(33.9% 0.043 260.704);
+
+  --app-line: oklch(34.4% 0.044 261.53);
+  --app-line-subtle: oklch(28.8% 0.034 260.82);
+  --app-line-strong: oklch(41.9% 0.049 261.916);
+
+  --app-ink: oklch(94.5% 0.012 259.823);
+  --app-ink-strong: oklch(91.3% 0.017 256.284);
+  --app-ink-body: oklch(84.3% 0.022 259.192);
+  --app-ink-soft: oklch(77.3% 0.029 258.37);
+  --app-ink-muted: oklch(68.6% 0.034 260.007);
+  --app-ink-subtle: oklch(57.6% 0.04 258.847);
+  --app-ink-faint: oklch(45.6% 0.046 263.961);
+
+  --app-inverted: oklch(92.9% 0.013 255.508);
+  --app-inverted-hover: oklch(96.8% 0.007 247.896);
+  --app-on-inverted: oklch(20.8% 0.042 265.755);
+  --app-logo: oklch(94.5% 0.012 259.823);
+
+  --app-focus: oklch(55.4% 0.046 257.417);
+  --app-switch-on: oklch(55.4% 0.046 257.417);
+  --app-scrollbar: oklch(37.2% 0.044 257.287);
+  --app-scrollbar-hover: oklch(44.6% 0.043 257.281);
+
+  --app-shadow-panel: 0 1px 3px rgb(2 6 15 / 0.4);
+  --app-shadow-console: 0 8px 24px rgb(2 6 15 / 0.45);
+
+  --app-hue-emerald: oklch(84.5% 0.143 164.978);
+  --app-hue-emerald-soft: oklch(69.6% 0.17 162.48 / 0.14);
+  --app-hue-emerald-line: oklch(69.6% 0.17 162.48 / 0.32);
+
+  --app-hue-amber: oklch(87.9% 0.169 91.605);
+  --app-hue-amber-soft: oklch(76.9% 0.188 70.08 / 0.14);
+  --app-hue-amber-line: oklch(76.9% 0.188 70.08 / 0.32);
+
+  --app-hue-rose: oklch(81% 0.117 11.638);
+  --app-hue-rose-soft: oklch(64.5% 0.246 16.439 / 0.14);
+  --app-hue-rose-line: oklch(64.5% 0.246 16.439 / 0.32);
+
+  --app-hue-sky: oklch(82.8% 0.111 230.318);
+  --app-hue-sky-soft: oklch(68.5% 0.169 237.323 / 0.14);
+  --app-hue-sky-line: oklch(68.5% 0.169 237.323 / 0.32);
+
+  --app-hue-blue: oklch(80.9% 0.105 251.813);
+  --app-hue-blue-soft: oklch(62.3% 0.214 259.815 / 0.14);
+  --app-hue-blue-line: oklch(62.3% 0.214 259.815 / 0.32);
+
+  --app-hue-violet: oklch(81.1% 0.111 293.571);
+  --app-hue-violet-soft: oklch(60.6% 0.25 292.717 / 0.14);
+  --app-hue-violet-line: oklch(60.6% 0.25 292.717 / 0.32);
+
+  --app-hue-teal: oklch(85.5% 0.138 181.071);
+  --app-hue-teal-soft: oklch(70.4% 0.14 182.503 / 0.14);
+  --app-hue-teal-line: oklch(70.4% 0.14 182.503 / 0.32);
+}
+
+@theme inline {
   --font-sans:
     "Ubuntu", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono:
     "Ubuntu Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
     "Liberation Mono", monospace;
-}
 
-:root {
-  color-scheme: light;
-  --app-header-height: 60px;
-  --console-bg: #0b1120;
-  --console-chrome: #111318;
+  --color-canvas: var(--app-canvas);
+  --color-surface: var(--app-surface);
+  --color-surface-subtle: var(--app-surface-subtle);
+  --color-surface-hover: var(--app-surface-hover);
+  --color-surface-muted: var(--app-surface-muted);
+  --color-surface-strong: var(--app-surface-strong);
+
+  --color-line: var(--app-line);
+  --color-line-subtle: var(--app-line-subtle);
+  --color-line-strong: var(--app-line-strong);
+
+  --color-ink: var(--app-ink);
+  --color-ink-strong: var(--app-ink-strong);
+  --color-ink-body: var(--app-ink-body);
+  --color-ink-soft: var(--app-ink-soft);
+  --color-ink-muted: var(--app-ink-muted);
+  --color-ink-subtle: var(--app-ink-subtle);
+  --color-ink-faint: var(--app-ink-faint);
+
+  --color-inverted: var(--app-inverted);
+  --color-inverted-hover: var(--app-inverted-hover);
+  --color-on-inverted: var(--app-on-inverted);
+  --color-logo: var(--app-logo);
+
+  --color-focus: var(--app-focus);
+
+  --color-hue-emerald: var(--app-hue-emerald);
+  --color-hue-emerald-solid: var(--app-hue-emerald-solid);
+  --color-hue-emerald-soft: var(--app-hue-emerald-soft);
+  --color-hue-emerald-line: var(--app-hue-emerald-line);
+
+  --color-hue-amber: var(--app-hue-amber);
+  --color-hue-amber-solid: var(--app-hue-amber-solid);
+  --color-hue-amber-soft: var(--app-hue-amber-soft);
+  --color-hue-amber-line: var(--app-hue-amber-line);
+
+  --color-hue-rose: var(--app-hue-rose);
+  --color-hue-rose-solid: var(--app-hue-rose-solid);
+  --color-hue-rose-soft: var(--app-hue-rose-soft);
+  --color-hue-rose-line: var(--app-hue-rose-line);
+
+  --color-hue-sky: var(--app-hue-sky);
+  --color-hue-sky-solid: var(--app-hue-sky-solid);
+  --color-hue-sky-soft: var(--app-hue-sky-soft);
+  --color-hue-sky-line: var(--app-hue-sky-line);
+
+  --color-hue-blue: var(--app-hue-blue);
+  --color-hue-blue-solid: var(--app-hue-blue-solid);
+  --color-hue-blue-soft: var(--app-hue-blue-soft);
+  --color-hue-blue-line: var(--app-hue-blue-line);
+
+  --color-hue-violet: var(--app-hue-violet);
+  --color-hue-violet-solid: var(--app-hue-violet-solid);
+  --color-hue-violet-soft: var(--app-hue-violet-soft);
+  --color-hue-violet-line: var(--app-hue-violet-line);
+
+  --color-hue-teal: var(--app-hue-teal);
+  --color-hue-teal-solid: var(--app-hue-teal-solid);
+  --color-hue-teal-soft: var(--app-hue-teal-soft);
+  --color-hue-teal-line: var(--app-hue-teal-line);
+
+  --color-console: var(--console-bg);
+  --color-console-chrome: var(--console-chrome);
+
+  --shadow-panel: var(--app-shadow-panel);
+  --shadow-console: var(--app-shadow-console);
 }
 
 html,
@@ -24,7 +228,7 @@ body,
 
 body {
   margin: 0;
-  background-color: #f1f5f9;
+  background-color: var(--app-canvas);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -40,14 +244,14 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
+  background-color: var(--app-scrollbar);
   border: 3px solid transparent;
   border-radius: 9999px;
   background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8;
+  background-color: var(--app-scrollbar-hover);
   background-clip: content-box;
 }
 
@@ -60,12 +264,12 @@ body {
 }
 
 .console-surface ::-webkit-scrollbar-thumb {
-  background-color: #334155;
+  background-color: var(--console-scrollbar);
   background-clip: content-box;
 }
 
 .console-surface ::-webkit-scrollbar-thumb:hover {
-  background-color: #475569;
+  background-color: var(--console-scrollbar-hover);
   background-clip: content-box;
 }
 

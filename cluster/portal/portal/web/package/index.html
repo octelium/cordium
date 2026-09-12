@@ -10,6 +10,15 @@
       content="Cordium — manage, run and access your sandboxes and workspaces."
     />
     <title>Cordium</title>
+    <script>
+      try {
+        var scheme = window.localStorage.getItem("cordium.colorScheme");
+        document.documentElement.setAttribute(
+          "data-mantine-color-scheme",
+          scheme === "dark" ? "dark" : "light",
+        );
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

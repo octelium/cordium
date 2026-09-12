@@ -43,7 +43,7 @@ const QueryBoundary = (props: {
         className="flex w-full items-center justify-center"
         style={{ minHeight: props.minHeight ?? 220 }}
       >
-        <Loader size="sm" color="dark" />
+        <Loader size="sm" />
       </div>
     );
   }

@@ -8,12 +8,12 @@ export const RepeatItem = (props: {
   onRemove: () => void;
   children?: React.ReactNode;
 }) => (
-  <div className="rounded-lg border border-slate-200 bg-white">
-    <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50/70 px-3 py-2">
-      <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-md bg-slate-200 px-1.5 text-[0.7rem] font-bold text-slate-600">
+  <div className="rounded-lg border border-line bg-surface">
+    <div className="flex items-center gap-2 border-b border-line-subtle bg-surface-subtle px-3 py-2">
+      <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-md bg-surface-strong px-1.5 text-[0.7rem] font-bold text-ink-soft">
         {props.index + 1}
       </span>
-      <span className="flex-1 truncate text-[0.78rem] font-semibold text-slate-500">
+      <span className="flex-1 truncate text-[0.78rem] font-semibold text-ink-muted">
         {props.label}
       </span>
       <Tooltip label="Remove">
@@ -41,21 +41,21 @@ const RepeatBlock = (props: {
   emptyHint?: string;
   children?: React.ReactNode;
 }) => (
-  <div className="rounded-xl border border-slate-200 bg-slate-50/60">
+  <div className="rounded-xl border border-line bg-surface-subtle">
     <div className="flex items-start gap-3 px-4 py-3">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-slate-800">
+          <span className="text-sm font-bold text-ink-strong">
             {props.title}
           </span>
           {props.count > 0 && (
-            <span className="rounded-md bg-slate-200 px-1.5 text-[0.7rem] font-bold text-slate-600">
+            <span className="rounded-md bg-surface-strong px-1.5 text-[0.7rem] font-bold text-ink-soft">
               {props.count}
             </span>
           )}
         </div>
         {props.description && (
-          <p className="mt-0.5 text-[0.78rem] font-medium text-slate-500">
+          <p className="mt-0.5 text-[0.78rem] font-medium text-ink-muted">
             {props.description}
           </p>
         )}
@@ -71,12 +71,12 @@ const RepeatBlock = (props: {
     </div>
 
     {props.count > 0 ? (
-      <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-4">
+      <div className="flex flex-col gap-3 border-t border-line px-4 py-4">
         {props.children}
       </div>
     ) : (
       props.emptyHint && (
-        <p className="border-t border-slate-200 px-4 py-3 text-[0.78rem] font-medium text-slate-400">
+        <p className="border-t border-line px-4 py-3 text-[0.78rem] font-medium text-ink-subtle">
           {props.emptyHint}
         </p>
       )

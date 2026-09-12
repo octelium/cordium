@@ -134,7 +134,7 @@ const TabStrip = (props: {
           }}
         />
 
-        <div className="sticky right-0 z-10 shrink-0 self-stretch bg-[var(--console-chrome)] pl-1">
+        <div className="sticky right-0 z-10 shrink-0 self-stretch bg-console-chrome pl-1">
           <Tooltip label="New terminal">
             <ActionIcon
               size={27}

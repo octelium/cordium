@@ -32,7 +32,7 @@ const RepoLink = (props: { item: Workspace | Template }) => {
 
   return (
     <span className="inline-flex items-center gap-2 min-w-0">
-      <span className="text-slate-400 shrink-0 flex">
+      <span className="text-ink-subtle shrink-0 flex">
         <ProviderIcon url={url} />
       </span>
       <Anchor

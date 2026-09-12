@@ -254,7 +254,7 @@ const LaunchForm = (props: {
 
           <RegionPicker value={region} onChange={setRegion} />
 
-          <div className="flex flex-wrap gap-6 rounded-lg border border-slate-200 bg-slate-50/70 px-4 py-3">
+          <div className="flex flex-wrap gap-6 rounded-lg border border-line bg-surface-subtle px-4 py-3">
             <Switch
               size="sm"
               checked={isEphemeral}
@@ -267,7 +267,7 @@ const LaunchForm = (props: {
                     w={260}
                     label="Storage is discarded when the Workspace stops, and ON_CREATE tasks re-run on every start."
                   >
-                    <IconInfoCircle size={13} className="text-slate-400" />
+                    <IconInfoCircle size={13} className="text-ink-subtle" />
                   </Tooltip>
                 </span>
               }
@@ -292,7 +292,7 @@ const LaunchForm = (props: {
             </Button>
 
             <Collapse expanded={advanced}>
-              <div className="mt-4 rounded-xl border border-slate-200 p-4">
+              <div className="mt-4 rounded-xl border border-line p-4">
                 <SpecEditor
                   kind="Workspace"
                   item={req}

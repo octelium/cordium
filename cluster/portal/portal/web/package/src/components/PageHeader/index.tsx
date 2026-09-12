@@ -18,7 +18,7 @@ const PageHeader = (props: {
   <div className="mb-6">
     {props.crumbs && props.crumbs.length > 0 && (
       <Breadcrumbs
-        separator={<IconChevronRight size={13} className="text-slate-300" />}
+        separator={<IconChevronRight size={13} className="text-ink-faint" />}
         separatorMargin={6}
         className="mb-2"
       >
@@ -29,14 +29,14 @@ const PageHeader = (props: {
               component={Link}
               to={c.to}
               underline="hover"
-              className="text-[0.78rem] font-semibold text-slate-500 hover:text-slate-800"
+              className="text-[0.78rem] font-semibold text-ink-muted hover:text-ink-strong"
             >
               {c.label}
             </Anchor>
           ) : (
             <span
               key={idx}
-              className="text-[0.78rem] font-semibold text-slate-400"
+              className="text-[0.78rem] font-semibold text-ink-subtle"
             >
               {c.label}
             </span>
@@ -48,13 +48,13 @@ const PageHeader = (props: {
     <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 truncate">
+          <h1 className="text-2xl font-bold tracking-tight text-ink truncate">
             {props.title}
           </h1>
           {props.badges}
         </div>
         {props.description && (
-          <p className="mt-1.5 text-sm font-medium text-slate-500 max-w-3xl">
+          <p className="mt-1.5 text-sm font-medium text-ink-muted max-w-3xl">
             {props.description}
           </p>
         )}

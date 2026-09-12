@@ -27,13 +27,13 @@ const TopBar = () => {
   const email = status?.user?.spec?.email;
 
   return (
-    <div className="flex h-full w-full items-center gap-3 bg-slate-100 px-4">
+    <div className="flex h-full w-full items-center gap-3 bg-canvas px-4">
       <Link
         to="/"
         aria-label="Cordium home"
         className="flex items-center rounded-md px-1 py-1 transition-opacity duration-150 hover:opacity-80"
       >
-        <Logo className="h-auto w-[112px] md:w-[140px]" />
+        <Logo className="h-auto w-[112px] md:w-[140px] [&_path]:fill-logo" />
       </Link>
 
       <div className="flex-1" />
@@ -57,8 +57,8 @@ const TopBar = () => {
               src={picURL || undefined}
               radius="xl"
               size={34}
-              color="dark"
-              className="border-2 border-slate-200"
+              color="primary"
+              className="border-2 border-line"
             >
               {!picURL && initials}
             </Avatar>

@@ -17,6 +17,7 @@ import { getClientWorkspace } from "@/utils/client";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks";
 import {
   Button,
+  MantineColorScheme,
   NumberInput,
   SegmentedControl,
   Select,
@@ -24,11 +25,14 @@ import {
   Switch,
   Text,
   TextInput,
+  useMantineColorScheme,
 } from "@mantine/core";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import {
   IconAdjustments,
   IconFileCode,
+  IconMoon,
+  IconSun,
   IconTerminal2,
   IconUser,
 } from "@tabler/icons-react";
@@ -42,16 +46,49 @@ const LocalPreferences = () => {
   const dispatch = useAppDispatch();
   const fontSize = useAppSelector((s) => s.settings.terminalFontSize);
   const itemsPerPage = useAppSelector((s) => s.settings.itemsPerPage);
+  const { colorScheme, setColorScheme } = useMantineColorScheme();
 
   return (
     <Panel>
       <PanelHeader
         icon={<IconAdjustments size={16} />}
         title="Portal preferences"
-        description="Stored in this browser session only."
+        description="Stored in this browser only."
       />
       <PanelBody>
         <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <Text size="sm" fw={500} mb={2}>
+              Appearance
+            </Text>
+            <Text size="xs" c="dimmed" mb={8}>
+              Dark mode is off until you turn it on here.
+            </Text>
+            <SegmentedControl
+              value={colorScheme}
+              onChange={(v) => setColorScheme(v as MantineColorScheme)}
+              data={[
+                {
+                  value: "light",
+                  label: (
+                    <span className="inline-flex items-center gap-1.5">
+                      <IconSun size={14} />
+                      Light
+                    </span>
+                  ),
+                },
+                {
+                  value: "dark",
+                  label: (
+                    <span className="inline-flex items-center gap-1.5">
+                      <IconMoon size={14} />
+                      Dark
+                    </span>
+                  ),
+                },
+              ]}
+            />
+          </div>
           <NumberInput
             label="Terminal font size"
             description="Also adjustable from the terminal toolbar."

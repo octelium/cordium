@@ -45,10 +45,10 @@ export const ClickableCard = (props: {
           : undefined
       }
       className={twMerge(
-        "bg-white border border-slate-200 rounded-xl px-4 py-3.5",
-        "shadow-[0_1px_3px_rgba(15,23,42,0.05)] transition-colors duration-150",
+        "bg-surface border border-line rounded-xl px-4 py-3.5",
+        "shadow-panel transition-colors duration-150",
         to &&
-          "cursor-pointer hover:border-slate-300 hover:bg-slate-50/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400",
+          "cursor-pointer hover:border-line-strong hover:bg-surface-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-focus",
         props.className,
       )}
     >
@@ -64,17 +64,17 @@ export const CardTitle = (props: {
 }) => (
   <div className="min-w-0">
     <div className="flex flex-wrap items-baseline gap-x-2">
-      <span className="truncate text-sm font-bold text-slate-800">
+      <span className="truncate text-sm font-bold text-ink-strong">
         {props.displayName || props.name}
       </span>
       {props.displayName && props.displayName !== props.name && (
-        <span className="truncate font-mono text-[0.72rem] font-medium text-slate-400">
+        <span className="truncate font-mono text-[0.72rem] font-medium text-ink-subtle">
           {props.name}
         </span>
       )}
     </div>
     {props.meta && (
-      <div className="mt-0.5 text-[0.72rem] font-medium text-slate-400">
+      <div className="mt-0.5 text-[0.72rem] font-medium text-ink-subtle">
         {props.meta}
       </div>
     )}

@@ -33,7 +33,7 @@ const SpaceCard = (props: { item: Space }) => {
   return (
     <ClickableCard to={getPathSpace(item)}>
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-ink-muted">
           <IconStack2 size={18} />
         </span>
         <div className="min-w-0 flex-1">

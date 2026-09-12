@@ -64,7 +64,7 @@ const BuildTemplate = (props: {
             prebuilt layer instead of building on first run.
           </Text>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5">
+          <div className="rounded-lg border border-line bg-surface-subtle px-4 py-2.5">
             <Text size="xs" c="dimmed">
               Template
             </Text>

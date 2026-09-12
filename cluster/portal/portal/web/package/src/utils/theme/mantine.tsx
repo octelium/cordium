@@ -4,12 +4,15 @@ import {
   Badge,
   Button,
   Card,
+  CSSVariablesResolver,
   createTheme,
   Drawer,
+  MantineColorsTuple,
   Menu,
   Modal,
   MultiSelect,
   NumberInput,
+  Pagination,
   PasswordInput,
   SegmentedControl,
   Select,
@@ -19,6 +22,7 @@ import {
   Textarea,
   TextInput,
   Tooltip,
+  virtualColor,
 } from "@mantine/core";
 
 const fontFamily = [
@@ -43,15 +47,80 @@ const fontFamilyMonospace = [
   "monospace",
 ].join(",");
 
+const slate: MantineColorsTuple = [
+  "#f8fafc",
+  "#f1f5f9",
+  "#e2e8f0",
+  "#cbd5e1",
+  "#94a3b8",
+  "#64748b",
+  "#475569",
+  "#334155",
+  "#1e293b",
+  "#0f172a",
+];
+
+export const cssVariablesResolver: CSSVariablesResolver = () => ({
+  variables: {},
+  light: {},
+  dark: {
+    "--mantine-color-dark-0": "var(--app-ink)",
+    "--mantine-color-dark-1": "var(--app-ink-strong)",
+    "--mantine-color-dark-2": "var(--app-ink-muted)",
+    "--mantine-color-dark-3": "var(--app-ink-subtle)",
+    "--mantine-color-dark-4": "var(--app-line)",
+    "--mantine-color-dark-5": "var(--app-surface-strong)",
+    "--mantine-color-dark-6": "var(--app-surface)",
+    "--mantine-color-dark-7": "var(--app-canvas)",
+    "--mantine-color-dark-8": "var(--app-canvas)",
+    "--mantine-color-dark-9": "var(--app-canvas)",
+
+    "--mantine-color-body": "var(--app-surface)",
+    "--mantine-color-text": "var(--app-ink)",
+    "--mantine-color-dimmed": "var(--app-ink-muted)",
+    "--mantine-color-placeholder": "var(--app-ink-subtle)",
+    "--mantine-color-anchor": "var(--app-ink)",
+    "--mantine-color-default": "var(--app-surface)",
+    "--mantine-color-default-hover": "var(--app-surface-hover)",
+    "--mantine-color-default-color": "var(--app-ink)",
+    "--mantine-color-default-border": "var(--app-line)",
+    "--mantine-color-disabled": "var(--app-surface-subtle)",
+    "--mantine-color-disabled-color": "var(--app-ink-faint)",
+    "--mantine-color-disabled-border": "var(--app-line-subtle)",
+
+    "--mantine-color-primary-filled": "var(--app-inverted)",
+    "--mantine-color-primary-filled-hover": "var(--app-inverted-hover)",
+    "--mantine-color-primary-contrast": "var(--app-on-inverted)",
+    "--mantine-primary-color-contrast": "var(--app-on-inverted)",
+    "--mantine-color-primary-light": "var(--app-surface-hover)",
+    "--mantine-color-primary-light-hover": "var(--app-surface-strong)",
+    "--mantine-color-primary-light-color": "var(--app-ink)",
+    "--mantine-color-primary-outline": "var(--app-line-strong)",
+    "--mantine-color-primary-outline-hover": "var(--app-surface-hover)",
+    "--mantine-color-primary-text": "var(--app-ink)",
+
+    "--mantine-color-red-light": "var(--app-hue-rose-soft)",
+    "--mantine-color-red-light-hover": "var(--app-hue-rose-line)",
+    "--mantine-color-red-light-color": "var(--app-hue-rose)",
+    "--mantine-color-gray-light": "var(--app-surface-hover)",
+    "--mantine-color-gray-light-hover": "var(--app-surface-strong)",
+    "--mantine-color-gray-light-color": "var(--app-ink-body)",
+  },
+});
+
 const inputClassNames = {
-  label: "text-slate-700",
-  description: "text-slate-500",
+  label: "text-ink-body",
+  description: "text-ink-muted",
 };
 
 const theme = createTheme({
   fontFamily,
   fontFamilyMonospace,
-  primaryColor: "dark",
+  colors: {
+    slate,
+    primary: virtualColor({ name: "primary", light: "dark", dark: "slate" }),
+  },
+  primaryColor: "primary",
   autoContrast: true,
   defaultRadius: "md",
   cursorType: "pointer",
@@ -108,9 +177,10 @@ const theme = createTheme({
       classNames: { ...inputClassNames, option: "font-medium" },
     }),
     Switch: Switch.extend({
+      vars: () => ({ root: { "--switch-color": "var(--app-switch-on)" } }),
       classNames: {
-        label: "font-medium text-slate-700",
-        description: "text-slate-500",
+        label: "font-medium text-ink-body",
+        description: "text-ink-muted",
       },
     }),
     SegmentedControl: SegmentedControl.extend({
@@ -118,7 +188,18 @@ const theme = createTheme({
       classNames: { label: "font-semibold" },
     }),
     Tabs: Tabs.extend({
-      classNames: { tab: "font-semibold" },
+      defaultProps: { autoContrast: false },
+      classNames: {
+        root: "[--tabs-text-color:var(--mantine-primary-color-contrast)]",
+        tab: "font-semibold",
+      },
+    }),
+    Pagination: Pagination.extend({
+      vars: () => ({
+        root: {
+          "--pagination-active-color": "var(--mantine-primary-color-contrast)",
+        },
+      }),
     }),
     Tooltip: Tooltip.extend({
       defaultProps: {
@@ -135,14 +216,14 @@ const theme = createTheme({
         overlayProps: { backgroundOpacity: 0.4, blur: 2 },
         transitionProps: { transition: "pop", duration: 140 },
       },
-      classNames: { title: "font-bold text-slate-800" },
+      classNames: { title: "font-bold text-ink-strong" },
     }),
     Drawer: Drawer.extend({
       defaultProps: {
         position: "right",
         overlayProps: { backgroundOpacity: 0.4, blur: 2 },
       },
-      classNames: { title: "font-bold text-slate-800" },
+      classNames: { title: "font-bold text-ink-strong" },
     }),
     Menu: Menu.extend({
       defaultProps: { shadow: "lg", radius: "md", width: 220 },

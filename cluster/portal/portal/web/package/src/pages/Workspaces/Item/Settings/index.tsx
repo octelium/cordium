@@ -122,7 +122,7 @@ const SettingsForm = (props: { data: WsPB.Workspace }) => {
         </PanelFooter>
       </Panel>
 
-      <Panel className="border-rose-200">
+      <Panel className="border-hue-rose-line">
         <PanelHeader
           icon={<IconAlertTriangle size={16} />}
           title="Danger zone"

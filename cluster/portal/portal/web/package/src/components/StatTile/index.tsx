@@ -12,16 +12,16 @@ const StatTile = (props: {
   const body = (
     <>
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[0.7rem] font-bold uppercase tracking-[0.07em] text-slate-400">
+        <span className="text-[0.7rem] font-bold uppercase tracking-[0.07em] text-ink-subtle">
           {props.label}
         </span>
-        {props.icon && <span className="text-slate-300">{props.icon}</span>}
+        {props.icon && <span className="text-ink-faint">{props.icon}</span>}
       </div>
-      <div className="mt-2 text-2xl font-bold tabular-nums text-slate-900">
+      <div className="mt-2 text-2xl font-bold tabular-nums text-ink">
         {props.value}
       </div>
       {props.hint && (
-        <div className="mt-0.5 text-[0.75rem] font-medium text-slate-400">
+        <div className="mt-0.5 text-[0.75rem] font-medium text-ink-subtle">
           {props.hint}
         </div>
       )}
@@ -29,9 +29,9 @@ const StatTile = (props: {
   );
 
   const className = twMerge(
-    "block bg-white border border-slate-200 rounded-xl px-4 py-3.5",
-    "shadow-[0_1px_3px_rgba(15,23,42,0.05)] transition-colors duration-150",
-    props.to && "hover:border-slate-300 hover:bg-slate-50/60",
+    "block bg-surface border border-line rounded-xl px-4 py-3.5",
+    "shadow-panel transition-colors duration-150",
+    props.to && "hover:border-line-strong hover:bg-surface-hover",
   );
 
   if (props.to) {

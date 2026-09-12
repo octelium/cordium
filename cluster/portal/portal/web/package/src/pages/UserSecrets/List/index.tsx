@@ -43,7 +43,7 @@ const SecretRow = (props: { item: WsPB.UserSecret }) => {
   return (
     <ClickableCard>
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-ink-muted">
           {isSSH ? <IconTerminal2 size={17} /> : <IconKey size={17} />}
         </span>
 
@@ -63,7 +63,7 @@ const SecretRow = (props: { item: WsPB.UserSecret }) => {
             </Tag>
           </div>
           {item.status?.details.oneofKind === "sshKey" && (
-            <div className="mt-2 text-[0.75rem] text-slate-500">
+            <div className="mt-2 text-[0.75rem] text-ink-muted">
               <span className="mr-1 font-semibold">Public key</span>
               <CopyText
                 value={item.status.details.sshKey.publicKey}
