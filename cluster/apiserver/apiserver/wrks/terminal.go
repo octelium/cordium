@@ -22,7 +22,7 @@ import (
 	"io"
 	"strings"
 
-	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
+	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/retry"
 	"github.com/octelium/cordium/cluster/apiserver/apiserver/commonw"
 	"github.com/octelium/cordium/cluster/common/suputils"
 	"github.com/octelium/cordium/cluster/common/wsutils"

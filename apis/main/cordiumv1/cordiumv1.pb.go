@@ -54,13 +54,24 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Type is the point of the Workspace's lifecycle at which the Task is
+// run
 type Workspace_Spec_Runtime_Task_Type int32
 
 const (
-	Workspace_Spec_Runtime_Task_UNKNOWN    Workspace_Spec_Runtime_Task_Type = 0
-	Workspace_Spec_Runtime_Task_ON_CREATE  Workspace_Spec_Runtime_Task_Type = 1
+	// UNKNOWN is not used. The type of a Task must be explicitly set.
+	Workspace_Spec_Runtime_Task_UNKNOWN Workspace_Spec_Runtime_Task_Type = 0
+	// ON_CREATE runs the Task only on a fresh run (i.e. the first start
+	// of a persistent Workspace and every start of an ephemeral one). It
+	// is typically used for one-time setup such as installing
+	// dependencies or running migrations.
+	Workspace_Spec_Runtime_Task_ON_CREATE Workspace_Spec_Runtime_Task_Type = 1
+	// POST_START runs the Task on every start of the Workspace. It is
+	// typically used to start background services and dev servers.
 	Workspace_Spec_Runtime_Task_POST_START Workspace_Spec_Runtime_Task_Type = 2
-	Workspace_Spec_Runtime_Task_PRE_STOP   Workspace_Spec_Runtime_Task_Type = 3
+	// PRE_STOP runs the Task right before the Workspace's container is
+	// stopped. It is typically used for graceful shutdown and cleanup.
+	Workspace_Spec_Runtime_Task_PRE_STOP Workspace_Spec_Runtime_Task_Type = 3
 )
 
 // Enum value maps for Workspace_Spec_Runtime_Task_Type.
@@ -106,11 +117,17 @@ func (Workspace_Spec_Runtime_Task_Type) EnumDescriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 0, 3, 1, 0}
 }
 
+// OnFailure is the behavior of the Cluster when the Task fails
 type Workspace_Spec_Runtime_Task_OnFailure int32
 
 const (
-	Workspace_Spec_Runtime_Task_ON_FAILURE_UNSET    Workspace_Spec_Runtime_Task_OnFailure = 0
-	Workspace_Spec_Runtime_Task_ON_FAILURE_ABORT    Workspace_Spec_Runtime_Task_OnFailure = 1
+	// ON_FAILURE_UNSET falls back to the default behavior.
+	Workspace_Spec_Runtime_Task_ON_FAILURE_UNSET Workspace_Spec_Runtime_Task_OnFailure = 0
+	// ON_FAILURE_ABORT aborts the initialization of the Workspace once
+	// the Task fails.
+	Workspace_Spec_Runtime_Task_ON_FAILURE_ABORT Workspace_Spec_Runtime_Task_OnFailure = 1
+	// ON_FAILURE_CONTINUE logs the Task's failure and continues the
+	// initialization of the Workspace.
 	Workspace_Spec_Runtime_Task_ON_FAILURE_CONTINUE Workspace_Spec_Runtime_Task_OnFailure = 2
 )
 
@@ -155,12 +172,16 @@ func (Workspace_Spec_Runtime_Task_OnFailure) EnumDescriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 0, 3, 1, 1}
 }
 
+// Action is the effect of the Rule when it matches
 type Workspace_Spec_Runtime_Network_Rule_Action int32
 
 const (
+	// ACTION_UNSET falls back to the default action.
 	Workspace_Spec_Runtime_Network_Rule_ACTION_UNSET Workspace_Spec_Runtime_Network_Rule_Action = 0
-	Workspace_Spec_Runtime_Network_Rule_ALLOW        Workspace_Spec_Runtime_Network_Rule_Action = 1
-	Workspace_Spec_Runtime_Network_Rule_DENY         Workspace_Spec_Runtime_Network_Rule_Action = 2
+	// ALLOW allows the matched traffic.
+	Workspace_Spec_Runtime_Network_Rule_ALLOW Workspace_Spec_Runtime_Network_Rule_Action = 1
+	// DENY denies the matched traffic.
+	Workspace_Spec_Runtime_Network_Rule_DENY Workspace_Spec_Runtime_Network_Rule_Action = 2
 )
 
 // Enum value maps for Workspace_Spec_Runtime_Network_Rule_Action.
@@ -204,12 +225,19 @@ func (Workspace_Spec_Runtime_Network_Rule_Action) EnumDescriptor() ([]byte, []in
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 0, 3, 4, 0, 0}
 }
 
+// Mode is the inactivity timeout mode
 type Workspace_Spec_Runtime_Timeout_Mode int32
 
 const (
+	// MODE_UNSET falls back to the default behavior which is to apply
+	// the Cluster's inactivity timeout.
 	Workspace_Spec_Runtime_Timeout_MODE_UNSET Workspace_Spec_Runtime_Timeout_Mode = 0
-	Workspace_Spec_Runtime_Timeout_DEFAULT    Workspace_Spec_Runtime_Timeout_Mode = 1
-	Workspace_Spec_Runtime_Timeout_DISABLED   Workspace_Spec_Runtime_Timeout_Mode = 2
+	// DEFAULT applies the Cluster's inactivity timeout.
+	Workspace_Spec_Runtime_Timeout_DEFAULT Workspace_Spec_Runtime_Timeout_Mode = 1
+	// DISABLED disables the inactivity timeout entirely. It is only
+	// honored when the ClusterConfig allows Workspaces to have no
+	// timeout.
+	Workspace_Spec_Runtime_Timeout_DISABLED Workspace_Spec_Runtime_Timeout_Mode = 2
 )
 
 // Enum value maps for Workspace_Spec_Runtime_Timeout_Mode.
@@ -253,20 +281,42 @@ func (Workspace_Spec_Runtime_Timeout_Mode) EnumDescriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 0, 3, 7, 0}
 }
 
+// State is the current state of the Workspace's lifecycle
 type Workspace_Status_State int32
 
 const (
-	Workspace_Status_UNKNOWN          Workspace_Status_State = 0
-	Workspace_Status_INIT_REQUEST     Workspace_Status_State = 1
-	Workspace_Status_INITIALIZING     Workspace_Status_State = 2
-	Workspace_Status_PULLING_IMAGE    Workspace_Status_State = 3
-	Workspace_Status_BUILDING_IMAGE   Workspace_Status_State = 4
+	// UNKNOWN is not used.
+	Workspace_Status_UNKNOWN Workspace_Status_State = 0
+	// INIT_REQUEST means that a start request has been accepted by the API
+	// server.
+	Workspace_Status_INIT_REQUEST Workspace_Status_State = 1
+	// INITIALIZING means that the Cluster is provisioning the Workspace's
+	// underlying resources and waiting for its supervisor to become ready.
+	Workspace_Status_INITIALIZING Workspace_Status_State = 2
+	// PULLING_IMAGE means that the container image is being pulled from the
+	// registry.
+	Workspace_Status_PULLING_IMAGE Workspace_Status_State = 3
+	// BUILDING_IMAGE means that the container image is being built from a
+	// Dockerfile or a devcontainer spec.
+	Workspace_Status_BUILDING_IMAGE Workspace_Status_State = 4
+	// STARTING_RUNTIME means that the Workspace's container has started and
+	// that the agent is initializing.
 	Workspace_Status_STARTING_RUNTIME Workspace_Status_State = 5
-	Workspace_Status_PREPARING        Workspace_Status_State = 6
-	Workspace_Status_RUNNING          Workspace_Status_State = 7
+	// PREPARING means that the agent is running the lifecycle setup (i.e.
+	// the repository cloning, the ON_CREATE tasks, the dotfiles and the
+	// devcontainer Features).
+	Workspace_Status_PREPARING Workspace_Status_State = 6
+	// RUNNING means that the Workspace is fully initialized and ready to be
+	// used.
+	Workspace_Status_RUNNING Workspace_Status_State = 7
+	// STOPPING_REQUEST means that a stop request has been received.
 	Workspace_Status_STOPPING_REQUEST Workspace_Status_State = 9
-	Workspace_Status_STOPPING         Workspace_Status_State = 10
-	Workspace_Status_STOPPED          Workspace_Status_State = 11
+	// STOPPING means that the Workspace is shutting down gracefully and
+	// running its PRE_STOP tasks.
+	Workspace_Status_STOPPING Workspace_Status_State = 10
+	// STOPPED means that the Workspace is not running. Its storage is
+	// preserved unless the Workspace is ephemeral.
+	Workspace_Status_STOPPED Workspace_Status_State = 11
 )
 
 // Enum value maps for Workspace_Status_State.
@@ -326,12 +376,21 @@ func (Workspace_Status_State) EnumDescriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 1, 0}
 }
 
+// StoppingReason is the reason for which a Workspace was stopped
 type Workspace_Status_StoppingReason int32
 
 const (
-	Workspace_Status_STOPPING_REASON_UNSET   Workspace_Status_StoppingReason = 0
-	Workspace_Status_STOPPING_REASON_API     Workspace_Status_StoppingReason = 1
-	Workspace_Status_STOPPING_REASON_ERROR   Workspace_Status_StoppingReason = 2
+	// STOPPING_REASON_UNSET means that no stoppage reason is set (e.g. the
+	// Workspace has never been stopped yet).
+	Workspace_Status_STOPPING_REASON_UNSET Workspace_Status_StoppingReason = 0
+	// STOPPING_REASON_API means that the Workspace was stopped upon an
+	// explicit API request (e.g. via the StopWorkspace method).
+	Workspace_Status_STOPPING_REASON_API Workspace_Status_StoppingReason = 1
+	// STOPPING_REASON_ERROR means that the Workspace was stopped because of
+	// a failure of the run.
+	Workspace_Status_STOPPING_REASON_ERROR Workspace_Status_StoppingReason = 2
+	// STOPPING_REASON_CLUSTER means that the Workspace was stopped by the
+	// Cluster itself (e.g. once its inactivity timeout was exceeded).
 	Workspace_Status_STOPPING_REASON_CLUSTER Workspace_Status_StoppingReason = 3
 )
 
@@ -378,12 +437,17 @@ func (Workspace_Status_StoppingReason) EnumDescriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 1, 1}
 }
 
+// Mode is the audience with which the Application is shared
 type Workspace_Status_SharedPort_Mode int32
 
 const (
-	Workspace_Status_SharedPort_UNSET   Workspace_Status_SharedPort_Mode = 0
+	// UNSET is not used. A shared Application must have an explicit mode.
+	Workspace_Status_SharedPort_UNSET Workspace_Status_SharedPort_Mode = 0
+	// MEMBERS shares the Application with the Members of the Workspace's
+	// Space.
 	Workspace_Status_SharedPort_MEMBERS Workspace_Status_SharedPort_Mode = 1
-	Workspace_Status_SharedPort_ALL     Workspace_Status_SharedPort_Mode = 2
+	// ALL shares the Application with all the Cluster's Users.
+	Workspace_Status_SharedPort_ALL Workspace_Status_SharedPort_Mode = 2
 )
 
 // Enum value maps for Workspace_Status_SharedPort_Mode.
@@ -427,13 +491,20 @@ func (Workspace_Status_SharedPort_Mode) EnumDescriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 1, 1, 0}
 }
 
+// State is the current state of the pre-build
 type Template_Status_BuildInfo_Build_State int32
 
 const (
+	// STATE_UNKNOWN is not used.
 	Template_Status_BuildInfo_Build_STATE_UNKNOWN Template_Status_BuildInfo_Build_State = 0
+	// STATE_RUNNING means that the pre-build is currently running.
 	Template_Status_BuildInfo_Build_STATE_RUNNING Template_Status_BuildInfo_Build_State = 1
-	Template_Status_BuildInfo_Build_STATE_READY   Template_Status_BuildInfo_Build_State = 2
-	Template_Status_BuildInfo_Build_STATE_FAILED  Template_Status_BuildInfo_Build_State = 3
+	// STATE_READY means that the pre-build successfully completed and
+	// that its storage snapshot can be used by the new Workspaces.
+	Template_Status_BuildInfo_Build_STATE_READY Template_Status_BuildInfo_Build_State = 2
+	// STATE_FAILED means that the pre-build failed or that it was
+	// canceled.
+	Template_Status_BuildInfo_Build_STATE_FAILED Template_Status_BuildInfo_Build_State = 3
 )
 
 // Enum value maps for Template_Status_BuildInfo_Build_State.
@@ -479,12 +550,18 @@ func (Template_Status_BuildInfo_Build_State) EnumDescriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{12, 1, 0, 0, 0}
 }
 
+// Type is the type of the Space
 type Space_Status_Type int32
 
 const (
+	// SPACE_TYPE_UNSET is not used.
 	Space_Status_SPACE_TYPE_UNSET Space_Status_Type = 0
-	Space_Status_USER             Space_Status_Type = 1
-	Space_Status_ORGANIZATION     Space_Status_Type = 2
+	// USER is a Space that is personal to a single Octelium User. Members
+	// cannot currently be added to it and it cannot define resource limits.
+	Space_Status_USER Space_Status_Type = 1
+	// ORGANIZATION is a shared Space that can have several Members with
+	// different roles.
+	Space_Status_ORGANIZATION Space_Status_Type = 2
 )
 
 // Enum value maps for Space_Status_Type.
@@ -528,12 +605,17 @@ func (Space_Status_Type) EnumDescriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{16, 1, 0}
 }
 
+// Mode is the relationship between the calling User and the listed Spaces
 type ListSpaceOptions_Mode int32
 
 const (
-	ListSpaceOptions_MODE_UNSET      ListSpaceOptions_Mode = 0
+	// MODE_UNSET falls back to MODE_CREATED_BY.
+	ListSpaceOptions_MODE_UNSET ListSpaceOptions_Mode = 0
+	// MODE_CREATED_BY lists only the Spaces that were created by the calling
+	// User.
 	ListSpaceOptions_MODE_CREATED_BY ListSpaceOptions_Mode = 1
-	ListSpaceOptions_MODE_MEMBER     ListSpaceOptions_Mode = 2
+	// MODE_MEMBER lists the Spaces in which the calling User has a Membership.
+	ListSpaceOptions_MODE_MEMBER ListSpaceOptions_Mode = 2
 )
 
 // Enum value maps for ListSpaceOptions_Mode.
@@ -577,13 +659,24 @@ func (ListSpaceOptions_Mode) EnumDescriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{18, 0}
 }
 
+// Role is the level of access that the Member has inside the Space
 type Membership_Spec_Role int32
 
 const (
+	// UNKNOWN is not used. It is treated as USER upon the creation of a
+	// Membership.
 	Membership_Spec_UNKNOWN Membership_Spec_Role = 0
-	Membership_Spec_OWNER   Membership_Spec_Role = 1
-	Membership_Spec_ADMIN   Membership_Spec_Role = 2
-	Membership_Spec_USER    Membership_Spec_Role = 3
+	// OWNER has full control over the Space including deleting it and
+	// managing its Owners. Granting this Role requires the caller to be an
+	// OWNER themselves and requires the target User to be authorized to own
+	// Spaces by the ClusterConfig.
+	Membership_Spec_OWNER Membership_Spec_Role = 1
+	// ADMIN can manage the Space's Templates, Secrets, GitProviders and
+	// Memberships.
+	Membership_Spec_ADMIN Membership_Spec_Role = 2
+	// USER can use the Space (e.g. create Workspaces in it) but cannot
+	// manage it.
+	Membership_Spec_USER Membership_Spec_Role = 3
 )
 
 // Enum value maps for Membership_Spec_Role.
@@ -629,13 +722,21 @@ func (Membership_Spec_Role) EnumDescriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{19, 0, 0}
 }
 
+// Role is the level of access that the new Member has inside the Space. It
+// mirrors the Membership's own Role
 type CreateMembershipRequest_Role int32
 
 const (
+	// UNKNOWN is not used. It is treated as USER.
 	CreateMembershipRequest_UNKNOWN CreateMembershipRequest_Role = 0
-	CreateMembershipRequest_OWNER   CreateMembershipRequest_Role = 1
-	CreateMembershipRequest_ADMIN   CreateMembershipRequest_Role = 2
-	CreateMembershipRequest_USER    CreateMembershipRequest_Role = 3
+	// OWNER has full control over the Space. Granting this Role requires the
+	// caller to be an OWNER themselves.
+	CreateMembershipRequest_OWNER CreateMembershipRequest_Role = 1
+	// ADMIN can manage the Space's Templates, Secrets, GitProviders and
+	// Memberships.
+	CreateMembershipRequest_ADMIN CreateMembershipRequest_Role = 2
+	// USER can use the Space but cannot manage it.
+	CreateMembershipRequest_USER CreateMembershipRequest_Role = 3
 )
 
 // Enum value maps for CreateMembershipRequest_Role.
@@ -681,10 +782,16 @@ func (CreateMembershipRequest_Role) EnumDescriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{22, 0}
 }
 
+// Type is the kind of the UserSecret's content
 type UserSecret_Spec_Type int32
 
 const (
+	// DEFAULT is an arbitrary value that is provided by the User.
 	UserSecret_Spec_DEFAULT UserSecret_Spec_Type = 0
+	// SSH_KEY is an ECDSA key pair that is generated by the Cluster. The
+	// private key is stored as the UserSecret's data and it is automatically
+	// loaded into an SSH agent inside every Workspace of the User while the
+	// public key is exposed in the status.
 	UserSecret_Spec_SSH_KEY UserSecret_Spec_Type = 1
 )
 
@@ -727,12 +834,18 @@ func (UserSecret_Spec_Type) EnumDescriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{26, 0, 0}
 }
 
+// Mode is the audience with which the Application is shared. It mirrors the
+// Workspace status' SharedPort mode
 type ShareWorkspacePortRequest_Mode int32
 
 const (
-	ShareWorkspacePortRequest_UNSET   ShareWorkspacePortRequest_Mode = 0
+	// UNSET is not used. A mode must be explicitly provided.
+	ShareWorkspacePortRequest_UNSET ShareWorkspacePortRequest_Mode = 0
+	// MEMBERS shares the Application with the Members of the Workspace's
+	// Space.
 	ShareWorkspacePortRequest_MEMBERS ShareWorkspacePortRequest_Mode = 1
-	ShareWorkspacePortRequest_ALL     ShareWorkspacePortRequest_Mode = 2
+	// ALL shares the Application with all the Cluster's Users.
+	ShareWorkspacePortRequest_ALL ShareWorkspacePortRequest_Mode = 2
 )
 
 // Enum value maps for ShareWorkspacePortRequest_Mode.
@@ -776,12 +889,16 @@ func (ShareWorkspacePortRequest_Mode) EnumDescriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{32, 0}
 }
 
+// Mode is the output stream that the log entry was emitted on
 type ListenLogResponse_Mode int32
 
 const (
+	// MODE_UNKNOWN is not used.
 	ListenLogResponse_MODE_UNKNOWN ListenLogResponse_Mode = 0
-	ListenLogResponse_MODE_STDOUT  ListenLogResponse_Mode = 1
-	ListenLogResponse_MODE_STDERR  ListenLogResponse_Mode = 2
+	// MODE_STDOUT means that the entry was emitted on the standard output.
+	ListenLogResponse_MODE_STDOUT ListenLogResponse_Mode = 1
+	// MODE_STDERR means that the entry was emitted on the standard error.
+	ListenLogResponse_MODE_STDERR ListenLogResponse_Mode = 2
 )
 
 // Enum value maps for ListenLogResponse_Mode.
@@ -825,14 +942,23 @@ func (ListenLogResponse_Mode) EnumDescriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{55, 0}
 }
 
+// Type is the initialization stage that produced the log entry
 type ListenLogResponse_Type int32
 
 const (
-	ListenLogResponse_TYPE_UNKNOWN        ListenLogResponse_Type = 0
-	ListenLogResponse_TYPE_CLONING_REPO   ListenLogResponse_Type = 1
-	ListenLogResponse_TYPE_PULLING_IMAGE  ListenLogResponse_Type = 2
+	// TYPE_UNKNOWN is not used.
+	ListenLogResponse_TYPE_UNKNOWN ListenLogResponse_Type = 0
+	// TYPE_CLONING_REPO means that the entry was produced while cloning a
+	// repository.
+	ListenLogResponse_TYPE_CLONING_REPO ListenLogResponse_Type = 1
+	// TYPE_PULLING_IMAGE means that the entry was produced while pulling the
+	// container image.
+	ListenLogResponse_TYPE_PULLING_IMAGE ListenLogResponse_Type = 2
+	// TYPE_BUILDING_IMAGE means that the entry was produced while building the
+	// container image.
 	ListenLogResponse_TYPE_BUILDING_IMAGE ListenLogResponse_Type = 3
-	ListenLogResponse_TYPE_TASK           ListenLogResponse_Type = 4
+	// TYPE_TASK means that the entry was produced by a lifecycle task.
+	ListenLogResponse_TYPE_TASK ListenLogResponse_Type = 4
 )
 
 // Enum value maps for ListenLogResponse_Type.
@@ -880,6 +1006,7 @@ func (ListenLogResponse_Type) EnumDescriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{55, 1}
 }
 
+// Effect is the effect of the Rule when its Condition matches
 type ClusterConfig_Spec_Space_Ownership_Rule_Effect int32
 
 const (
@@ -934,13 +1061,29 @@ func (ClusterConfig_Spec_Space_Ownership_Rule_Effect) EnumDescriptor() ([]byte, 
 	return file_cordiumv1_proto_rawDescGZIP(), []int{61, 0, 0, 0, 0, 0}
 }
 
+// Workspace, which is synonymous with a sandbox, is the fundamental execution
+// unit of Cordium. It is an isolated, rootless, container-based development
+// environment that can be used interactively or programmatically via the
+// web-based console, the `cordium` CLI, standard SSH and the gRPC-based APIs.
+// Every Workspace belongs to exactly one Template and one Space and it is
+// owned by an Octelium User. A Workspace is assigned a short randomly
+// generated name (i.e. 3 to 6 lowercase alphanumeric characters) by the
+// Cluster. The effective configuration of a Workspace run is the result of
+// merging the Workspace spec with the spec of its Template, the runtime
+// configuration of its Space, the User's UserConfig as well as the Cluster
+// defaults.
 type Workspace struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ApiVersion    string                 `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
-	Kind          string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	Metadata      *metav1.Metadata       `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	Spec          *Workspace_Spec        `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
-	Status        *Workspace_Status      `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// APIVersion is the API version (i.e. "cordium/v1")
+	ApiVersion string `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
+	// Kind is the resource name (i.e. `Workspace`).
+	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	// Metadata is the object's metadata.
+	Metadata *metav1.Metadata `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	// Spec is the Workspace specification.
+	Spec *Workspace_Spec `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
+	// Status is the current status of the Workspace.
+	Status        *Workspace_Status `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1010,11 +1153,15 @@ func (x *Workspace) GetStatus() *Workspace_Status {
 	return nil
 }
 
+// WorkspaceList is the response of the ListWorkspace method.
 type WorkspaceList struct {
-	state      protoimpl.MessageState `protogen:"open.v1"`
-	ApiVersion string                 `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
-	Kind       string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	Items      []*Workspace           `protobuf:"bytes,3,rep,name=items,proto3" json:"items,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// APIVersion is the API version (i.e. "cordium/v1")
+	ApiVersion string `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
+	// Kind is the resource name (i.e. `WorkspaceList`).
+	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	// Items is the list of Workspaces.
+	Items []*Workspace `protobuf:"bytes,3,rep,name=items,proto3" json:"items,omitempty"`
 	// ListResponseMeta is common information about the list.
 	ListResponseMeta *metav1.ListResponseMeta `protobuf:"bytes,4,opt,name=listResponseMeta,proto3" json:"listResponseMeta,omitempty"`
 	unknownFields    protoimpl.UnknownFields
@@ -1079,9 +1226,16 @@ func (x *WorkspaceList) GetListResponseMeta() *metav1.ListResponseMeta {
 	return nil
 }
 
+// ListWorkspaceOptions is the request of the ListWorkspace method. The
+// returned Workspaces are always restricted to the ones that are owned by the
+// calling User.
 type ListWorkspaceOptions struct {
-	state  protoimpl.MessageState    `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Common is the pagination and ordering options that are common to all the
+	// List methods.
 	Common *metav1.CommonListOptions `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
+	// Filter optionally narrows down the returned Workspaces
+	//
 	// Types that are valid to be assigned to Filter:
 	//
 	//	*ListWorkspaceOptions_SpaceRef
@@ -1158,10 +1312,12 @@ type isListWorkspaceOptions_Filter interface {
 }
 
 type ListWorkspaceOptions_SpaceRef struct {
+	// SpaceRef returns only the Workspaces that belong to this Space.
 	SpaceRef *metav1.ObjectReference `protobuf:"bytes,2,opt,name=spaceRef,proto3,oneof"`
 }
 
 type ListWorkspaceOptions_TemplateRef struct {
+	// TemplateRef returns only the Workspaces that belong to this Template.
 	TemplateRef *metav1.ObjectReference `protobuf:"bytes,3,opt,name=templateRef,proto3,oneof"`
 }
 
@@ -1169,6 +1325,12 @@ func (*ListWorkspaceOptions_SpaceRef) isListWorkspaceOptions_Filter() {}
 
 func (*ListWorkspaceOptions_TemplateRef) isListWorkspaceOptions_Filter() {}
 
+// Secret is a sensitive value (e.g. an API key, a token, a password or a
+// certificate) that is stored inside a Space. Secrets are referenced by name
+// from the Workspace and Template specs (e.g. as the source of an environment
+// variable, of a registry password or of a repository password). Their content
+// is resolved by the Cluster at initialization time and it is never returned
+// back by the API once the Secret is created.
 type Secret struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// APIVersion is the API version of the object.
@@ -1259,10 +1421,14 @@ func (x *Secret) GetData() *Secret_Data {
 	return nil
 }
 
+// ListSecretOptions is the request of the ListSecret method.
 type ListSecretOptions struct {
-	state         protoimpl.MessageState    `protogen:"open.v1"`
-	Common        *metav1.CommonListOptions `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
-	SpaceRef      *metav1.ObjectReference   `protobuf:"bytes,2,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Common is the pagination and ordering options that are common to all the
+	// List methods.
+	Common *metav1.CommonListOptions `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
+	// SpaceRef is the reference of the Space whose Secrets are listed.
+	SpaceRef      *metav1.ObjectReference `protobuf:"bytes,2,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1311,11 +1477,16 @@ func (x *ListSecretOptions) GetSpaceRef() *metav1.ObjectReference {
 	return nil
 }
 
+// SecretList is the response of the ListSecret method. The Secrets' data is
+// not included.
 type SecretList struct {
-	state      protoimpl.MessageState `protogen:"open.v1"`
-	ApiVersion string                 `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
-	Kind       string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	Items      []*Secret              `protobuf:"bytes,3,rep,name=items,proto3" json:"items,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// APIVersion is the API version (i.e. "cordium/v1")
+	ApiVersion string `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
+	// Kind is the resource name (i.e. `SecretList`).
+	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	// Items is the list of Secrets.
+	Items []*Secret `protobuf:"bytes,3,rep,name=items,proto3" json:"items,omitempty"`
 	// ListResponseMeta is common information about the list.
 	ListResponseMeta *metav1.ListResponseMeta `protobuf:"bytes,4,opt,name=listResponseMeta,proto3" json:"listResponseMeta,omitempty"`
 	unknownFields    protoimpl.UnknownFields
@@ -1380,8 +1551,13 @@ func (x *SecretList) GetListResponseMeta() *metav1.ListResponseMeta {
 	return nil
 }
 
+// ClientMessage is the envelope of the messages that are sent by the client
+// over the Cordium portal's bidirectional WebSocket connection. It multiplexes
+// the terminal operations of several Workspaces over a single connection.
 type ClientMessage struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the client message's type
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*ClientMessage_WriteTerminalDataRequest
@@ -1471,18 +1647,22 @@ type isClientMessage_Type interface {
 }
 
 type ClientMessage_WriteTerminalDataRequest struct {
+	// WriteTerminalDataRequest writes data (i.e. stdin) to a terminal.
 	WriteTerminalDataRequest *WriteTerminalDataRequest `protobuf:"bytes,1,opt,name=writeTerminalDataRequest,proto3,oneof"`
 }
 
 type ClientMessage_SetTerminalWindowSizeRequest struct {
+	// SetTerminalWindowSizeRequest resizes a terminal's window.
 	SetTerminalWindowSizeRequest *SetTerminalWindowSizeRequest `protobuf:"bytes,2,opt,name=setTerminalWindowSizeRequest,proto3,oneof"`
 }
 
 type ClientMessage_ListenTerminalRequest struct {
+	// ListenTerminalRequest starts listening to a terminal's output.
 	ListenTerminalRequest *ListenTerminalRequest `protobuf:"bytes,3,opt,name=listenTerminalRequest,proto3,oneof"`
 }
 
 type ClientMessage_ListenTerminalEndRequest_ struct {
+	// ListenTerminalEndRequest stops listening to a terminal's output.
 	ListenTerminalEndRequest *ClientMessage_ListenTerminalEndRequest `protobuf:"bytes,4,opt,name=listenTerminalEndRequest,proto3,oneof"`
 }
 
@@ -1494,8 +1674,12 @@ func (*ClientMessage_ListenTerminalRequest) isClientMessage_Type() {}
 
 func (*ClientMessage_ListenTerminalEndRequest_) isClientMessage_Type() {}
 
+// ServerMessage is the envelope of the messages that are sent by the server
+// over the Cordium portal's bidirectional WebSocket connection.
 type ServerMessage struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the server message's type
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*ServerMessage_WorkspaceUpdate_
@@ -1565,10 +1749,12 @@ type isServerMessage_Type interface {
 }
 
 type ServerMessage_WorkspaceUpdate_ struct {
+	// WorkspaceUpdate publishes the current state of a Workspace.
 	WorkspaceUpdate *ServerMessage_WorkspaceUpdate `protobuf:"bytes,1,opt,name=workspaceUpdate,proto3,oneof"`
 }
 
 type ServerMessage_ListenTerminalEvent_ struct {
+	// ListenTerminalEvent publishes an output event of a terminal.
 	ListenTerminalEvent *ServerMessage_ListenTerminalEvent `protobuf:"bytes,2,opt,name=listenTerminalEvent,proto3,oneof"`
 }
 
@@ -1576,9 +1762,12 @@ func (*ServerMessage_WorkspaceUpdate_) isServerMessage_Type() {}
 
 func (*ServerMessage_ListenTerminalEvent_) isServerMessage_Type() {}
 
+// StartWorkspaceRequest is the request of the StartWorkspace method.
 type StartWorkspaceRequest struct {
-	state         protoimpl.MessageState        `protogen:"open.v1"`
-	WorkspaceRef  *metav1.ObjectReference       `protobuf:"bytes,1,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// WorkspaceRef is the reference of the Workspace to be started.
+	WorkspaceRef *metav1.ObjectReference `protobuf:"bytes,1,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
+	// Config is the run-specific configuration of the run being started.
 	Config        *StartWorkspaceRequest_Config `protobuf:"bytes,3,opt,name=config,proto3" json:"config,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1628,6 +1817,8 @@ func (x *StartWorkspaceRequest) GetConfig() *StartWorkspaceRequest_Config {
 	return nil
 }
 
+// StartWorkspaceResponse is the response of the StartWorkspace method. It is
+// intentionally empty since the start itself is asynchronous.
 type StartWorkspaceResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -1664,8 +1855,10 @@ func (*StartWorkspaceResponse) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{9}
 }
 
+// StopWorkspaceRequest is the request of the StopWorkspace method.
 type StopWorkspaceRequest struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// WorkspaceRef is the reference of the Workspace to be stopped.
 	WorkspaceRef  *metav1.ObjectReference `protobuf:"bytes,1,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1708,6 +1901,8 @@ func (x *StopWorkspaceRequest) GetWorkspaceRef() *metav1.ObjectReference {
 	return nil
 }
 
+// StopWorkspaceResponse is the response of the StopWorkspace method. It is
+// intentionally empty since the stoppage itself is asynchronous.
 type StopWorkspaceResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -1744,13 +1939,23 @@ func (*StopWorkspaceResponse) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{11}
 }
 
+// Template is a reusable Workspace configuration inside a Space. Every
+// Workspace is created from a Template and it inherits its spec. Every Space
+// has a `default` Template that is automatically created along with it. A
+// Template can additionally be associated with a GitProvider and it can be
+// pre-built so that its Workspaces start from a ready-made storage snapshot.
 type Template struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ApiVersion    string                 `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
-	Kind          string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	Metadata      *metav1.Metadata       `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	Spec          *Template_Spec         `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
-	Status        *Template_Status       `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// APIVersion is the API version (i.e. "cordium/v1")
+	ApiVersion string `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
+	// Kind is the resource name (i.e. `Template`).
+	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	// Metadata is the object's metadata.
+	Metadata *metav1.Metadata `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	// Spec is the Template specification.
+	Spec *Template_Spec `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
+	// Status is the current status of the Template.
+	Status        *Template_Status `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1820,11 +2025,15 @@ func (x *Template) GetStatus() *Template_Status {
 	return nil
 }
 
+// TemplateList is the response of the ListTemplate method.
 type TemplateList struct {
-	state      protoimpl.MessageState `protogen:"open.v1"`
-	ApiVersion string                 `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
-	Kind       string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	Items      []*Template            `protobuf:"bytes,3,rep,name=items,proto3" json:"items,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// APIVersion is the API version (i.e. "cordium/v1")
+	ApiVersion string `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
+	// Kind is the resource name (i.e. `TemplateList`).
+	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	// Items is the list of Templates.
+	Items []*Template `protobuf:"bytes,3,rep,name=items,proto3" json:"items,omitempty"`
 	// ListResponseMeta is common information about the list.
 	ListResponseMeta *metav1.ListResponseMeta `protobuf:"bytes,4,opt,name=listResponseMeta,proto3" json:"listResponseMeta,omitempty"`
 	unknownFields    protoimpl.UnknownFields
@@ -1889,10 +2098,14 @@ func (x *TemplateList) GetListResponseMeta() *metav1.ListResponseMeta {
 	return nil
 }
 
+// ListTemplateOptions is the request of the ListTemplate method.
 type ListTemplateOptions struct {
-	state         protoimpl.MessageState    `protogen:"open.v1"`
-	Common        *metav1.CommonListOptions `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
-	SpaceRef      *metav1.ObjectReference   `protobuf:"bytes,2,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Common is the pagination and ordering options that are common to all the
+	// List methods.
+	Common *metav1.CommonListOptions `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
+	// SpaceRef is the reference of the Space whose Templates are listed.
+	SpaceRef      *metav1.ObjectReference `protobuf:"bytes,2,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1941,10 +2154,14 @@ func (x *ListTemplateOptions) GetSpaceRef() *metav1.ObjectReference {
 	return nil
 }
 
+// BuildTemplateRequest is the request of the BuildTemplate method.
 type BuildTemplateRequest struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
-	TemplateRef   *metav1.ObjectReference `protobuf:"bytes,1,opt,name=templateRef,proto3" json:"templateRef,omitempty"`
-	Tags          []string                `protobuf:"bytes,2,rep,name=tags,proto3" json:"tags,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// TemplateRef is the reference of the Template to be pre-built.
+	TemplateRef *metav1.ObjectReference `protobuf:"bytes,1,opt,name=templateRef,proto3" json:"templateRef,omitempty"`
+	// Tags is the list of the tags that are assigned to the pre-build. It
+	// defaults to `latest`.
+	Tags          []string `protobuf:"bytes,2,rep,name=tags,proto3" json:"tags,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1993,13 +2210,24 @@ func (x *BuildTemplateRequest) GetTags() []string {
 	return nil
 }
 
+// Space is the top-level namespace of Cordium. It groups the Templates,
+// Workspaces, Secrets, GitProviders and Memberships under a single
+// organizational unit. A `default` Space is automatically created for a User
+// upon the creation of their first Workspace. A Space can define runtime
+// configuration that cascades down to all of its Workspaces as well as the
+// default and the maximum resource limits of its Workspaces.
 type Space struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ApiVersion    string                 `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
-	Kind          string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	Metadata      *metav1.Metadata       `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	Spec          *Space_Spec            `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
-	Status        *Space_Status          `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// APIVersion is the API version (i.e. "cordium/v1")
+	ApiVersion string `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
+	// Kind is the resource name (i.e. `Space`).
+	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	// Metadata is the object's metadata.
+	Metadata *metav1.Metadata `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	// Spec is the Space specification.
+	Spec *Space_Spec `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
+	// Status is the current status of the Space.
+	Status        *Space_Status `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2069,11 +2297,15 @@ func (x *Space) GetStatus() *Space_Status {
 	return nil
 }
 
+// SpaceList is the response of the ListSpace method.
 type SpaceList struct {
-	state      protoimpl.MessageState `protogen:"open.v1"`
-	ApiVersion string                 `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
-	Kind       string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	Items      []*Space               `protobuf:"bytes,3,rep,name=items,proto3" json:"items,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// APIVersion is the API version (i.e. "cordium/v1")
+	ApiVersion string `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
+	// Kind is the resource name (i.e. `SpaceList`).
+	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	// Items is the list of Spaces.
+	Items []*Space `protobuf:"bytes,3,rep,name=items,proto3" json:"items,omitempty"`
 	// ListResponseMeta is common information about the list.
 	ListResponseMeta *metav1.ListResponseMeta `protobuf:"bytes,4,opt,name=listResponseMeta,proto3" json:"listResponseMeta,omitempty"`
 	unknownFields    protoimpl.UnknownFields
@@ -2138,11 +2370,16 @@ func (x *SpaceList) GetListResponseMeta() *metav1.ListResponseMeta {
 	return nil
 }
 
+// ListSpaceOptions is the request of the ListSpace method.
 type ListSpaceOptions struct {
-	state         protoimpl.MessageState    `protogen:"open.v1"`
-	Common        *metav1.CommonListOptions `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
-	Type          Space_Status_Type         `protobuf:"varint,2,opt,name=type,proto3,enum=octelium.api.main.cordium.v1.Space_Status_Type" json:"type,omitempty"`
-	Mode          ListSpaceOptions_Mode     `protobuf:"varint,3,opt,name=mode,proto3,enum=octelium.api.main.cordium.v1.ListSpaceOptions_Mode" json:"mode,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Common is the pagination and ordering options that are common to all the
+	// List methods.
+	Common *metav1.CommonListOptions `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
+	// Type optionally lists only the Spaces of this type.
+	Type Space_Status_Type `protobuf:"varint,2,opt,name=type,proto3,enum=octelium.api.main.cordium.v1.Space_Status_Type" json:"type,omitempty"`
+	// Mode is the relationship between the calling User and the listed Spaces.
+	Mode          ListSpaceOptions_Mode `protobuf:"varint,3,opt,name=mode,proto3,enum=octelium.api.main.cordium.v1.ListSpaceOptions_Mode" json:"mode,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2198,13 +2435,22 @@ func (x *ListSpaceOptions) GetMode() ListSpaceOptions_Mode {
 	return ListSpaceOptions_MODE_UNSET
 }
 
+// Membership binds an Octelium User to a Space with a specific Role. It is the
+// resource that grants a User access to the Space's Templates, Workspaces,
+// Secrets and GitProviders. A Membership with the OWNER Role is automatically
+// created for the User who creates a Space.
 type Membership struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ApiVersion    string                 `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
-	Kind          string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	Metadata      *metav1.Metadata       `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	Spec          *Membership_Spec       `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
-	Status        *Membership_Status     `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// APIVersion is the API version (i.e. "cordium/v1")
+	ApiVersion string `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
+	// Kind is the resource name (i.e. `Membership`).
+	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	// Metadata is the object's metadata.
+	Metadata *metav1.Metadata `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	// Spec is the Membership specification.
+	Spec *Membership_Spec `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
+	// Status is the current status of the Membership.
+	Status        *Membership_Status `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2274,11 +2520,15 @@ func (x *Membership) GetStatus() *Membership_Status {
 	return nil
 }
 
+// MembershipList is the response of the ListMembership method.
 type MembershipList struct {
-	state      protoimpl.MessageState `protogen:"open.v1"`
-	ApiVersion string                 `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
-	Kind       string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	Items      []*Membership          `protobuf:"bytes,3,rep,name=items,proto3" json:"items,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// APIVersion is the API version (i.e. "cordium/v1")
+	ApiVersion string `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
+	// Kind is the resource name (i.e. `MembershipList`).
+	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	// Items is the list of Memberships.
+	Items []*Membership `protobuf:"bytes,3,rep,name=items,proto3" json:"items,omitempty"`
 	// ListResponseMeta is common information about the list.
 	ListResponseMeta *metav1.ListResponseMeta `protobuf:"bytes,4,opt,name=listResponseMeta,proto3" json:"listResponseMeta,omitempty"`
 	unknownFields    protoimpl.UnknownFields
@@ -2343,10 +2593,14 @@ func (x *MembershipList) GetListResponseMeta() *metav1.ListResponseMeta {
 	return nil
 }
 
+// ListMembershipOptions is the request of the ListMembership method.
 type ListMembershipOptions struct {
-	state         protoimpl.MessageState    `protogen:"open.v1"`
-	Common        *metav1.CommonListOptions `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
-	SpaceRef      *metav1.ObjectReference   `protobuf:"bytes,2,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Common is the pagination and ordering options that are common to all the
+	// List methods.
+	Common *metav1.CommonListOptions `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
+	// SpaceRef is the reference of the Space whose Memberships are listed.
+	SpaceRef      *metav1.ObjectReference `protobuf:"bytes,2,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2395,10 +2649,16 @@ func (x *ListMembershipOptions) GetSpaceRef() *metav1.ObjectReference {
 	return nil
 }
 
+// CreateMembershipRequest is the request of the CreateMembership method.
 type CreateMembershipRequest struct {
-	state    protoimpl.MessageState       `protogen:"open.v1"`
-	Role     CreateMembershipRequest_Role `protobuf:"varint,1,opt,name=role,proto3,enum=octelium.api.main.cordium.v1.CreateMembershipRequest_Role" json:"role,omitempty"`
-	SpaceRef *metav1.ObjectReference      `protobuf:"bytes,2,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Role is the level of access that the new Member has inside the Space. It
+	// defaults to USER.
+	Role CreateMembershipRequest_Role `protobuf:"varint,1,opt,name=role,proto3,enum=octelium.api.main.cordium.v1.CreateMembershipRequest_Role" json:"role,omitempty"`
+	// SpaceRef is the reference of the Space to add the Member to.
+	SpaceRef *metav1.ObjectReference `protobuf:"bytes,2,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
+	// UserType identifies the Octelium User to be added as a Member
+	//
 	// Types that are valid to be assigned to UserType:
 	//
 	//	*CreateMembershipRequest_UserRef
@@ -2482,10 +2742,13 @@ type isCreateMembershipRequest_UserType interface {
 }
 
 type CreateMembershipRequest_UserRef struct {
+	// UserRef is the reference of the Octelium User to be added.
 	UserRef *metav1.ObjectReference `protobuf:"bytes,3,opt,name=userRef,proto3,oneof"`
 }
 
 type CreateMembershipRequest_Email struct {
+	// Email is the email address of the Octelium User to be added. The User
+	// must already exist in the Cluster.
 	Email string `protobuf:"bytes,4,opt,name=email,proto3,oneof"`
 }
 
@@ -2493,13 +2756,24 @@ func (*CreateMembershipRequest_UserRef) isCreateMembershipRequest_UserType() {}
 
 func (*CreateMembershipRequest_Email) isCreateMembershipRequest_UserType() {}
 
+// GitProvider configures OAuth2 authentication against a git hosting service
+// (i.e. GitHub, GitLab or a generic OAuth2 provider) inside a Space. Once a
+// GitProvider is attached to a Template, the User's stored OAuth2 token is
+// automatically injected into the Workspaces of that Template which enables
+// `git clone`, `git push` and the other authenticated operations without any
+// manual credential configuration.
 type GitProvider struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ApiVersion    string                 `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
-	Kind          string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	Metadata      *metav1.Metadata       `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	Spec          *GitProvider_Spec      `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
-	Status        *GitProvider_Status    `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// APIVersion is the API version (i.e. "cordium/v1")
+	ApiVersion string `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
+	// Kind is the resource name (i.e. `GitProvider`).
+	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	// Metadata is the object's metadata.
+	Metadata *metav1.Metadata `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	// Spec is the GitProvider specification.
+	Spec *GitProvider_Spec `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
+	// Status is the current status of the GitProvider.
+	Status        *GitProvider_Status `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2569,11 +2843,15 @@ func (x *GitProvider) GetStatus() *GitProvider_Status {
 	return nil
 }
 
+// GitProviderList is the response of the ListGitProvider method.
 type GitProviderList struct {
-	state      protoimpl.MessageState `protogen:"open.v1"`
-	ApiVersion string                 `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
-	Kind       string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	Items      []*GitProvider         `protobuf:"bytes,3,rep,name=items,proto3" json:"items,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// APIVersion is the API version (i.e. "cordium/v1")
+	ApiVersion string `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
+	// Kind is the resource name (i.e. `GitProviderList`).
+	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	// Items is the list of GitProviders.
+	Items []*GitProvider `protobuf:"bytes,3,rep,name=items,proto3" json:"items,omitempty"`
 	// ListResponseMeta is common information about the list.
 	ListResponseMeta *metav1.ListResponseMeta `protobuf:"bytes,4,opt,name=listResponseMeta,proto3" json:"listResponseMeta,omitempty"`
 	unknownFields    protoimpl.UnknownFields
@@ -2638,10 +2916,14 @@ func (x *GitProviderList) GetListResponseMeta() *metav1.ListResponseMeta {
 	return nil
 }
 
+// ListGitProviderOptions is the request of the ListGitProvider method.
 type ListGitProviderOptions struct {
-	state         protoimpl.MessageState    `protogen:"open.v1"`
-	Common        *metav1.CommonListOptions `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
-	SpaceRef      *metav1.ObjectReference   `protobuf:"bytes,2,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Common is the pagination and ordering options that are common to all the
+	// List methods.
+	Common *metav1.CommonListOptions `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
+	// SpaceRef is the reference of the Space whose GitProviders are listed.
+	SpaceRef      *metav1.ObjectReference `protobuf:"bytes,2,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2690,19 +2972,23 @@ func (x *ListGitProviderOptions) GetSpaceRef() *metav1.ObjectReference {
 	return nil
 }
 
+// UserSecret is a sensitive value that is scoped to its owner Octelium User
+// rather than to a Space. UserSecrets are used as the value source of the
+// UserConfig environment variables as well as for the dotfiles repository
+// authentication. Their content is never returned back by the API.
 type UserSecret struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// APIVersion is the API version of the object.
 	ApiVersion string `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
-	// Kind is the resource name (i.e. `Secret`).
+	// Kind is the resource name (i.e. `UserSecret`).
 	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
 	// octelium.api.main.meta.v1.Metadata is the object's metadata.
 	Metadata *metav1.Metadata `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	// Spec is the Secret specification.
+	// Spec is the UserSecret specification.
 	Spec *UserSecret_Spec `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
-	// Status is the current status of the Secret.
+	// Status is the current status of the UserSecret.
 	Status *UserSecret_Status `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
-	// Data is the Secret data content.
+	// Data is the UserSecret data content.
 	Data          *UserSecret_Data `protobuf:"bytes,6,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -2780,8 +3066,12 @@ func (x *UserSecret) GetData() *UserSecret_Data {
 	return nil
 }
 
+// ListUserSecretOptions is the request of the ListUserSecret method. Only the
+// UserSecrets that are owned by the calling User are returned.
 type ListUserSecretOptions struct {
-	state         protoimpl.MessageState    `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Common is the pagination and ordering options that are common to all the
+	// List methods.
 	Common        *metav1.CommonListOptions `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -2824,11 +3114,16 @@ func (x *ListUserSecretOptions) GetCommon() *metav1.CommonListOptions {
 	return nil
 }
 
+// UserSecretList is the response of the ListUserSecret method. The
+// UserSecrets' data is not included.
 type UserSecretList struct {
-	state      protoimpl.MessageState `protogen:"open.v1"`
-	ApiVersion string                 `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
-	Kind       string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	Items      []*UserSecret          `protobuf:"bytes,3,rep,name=items,proto3" json:"items,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// APIVersion is the API version (i.e. "cordium/v1")
+	ApiVersion string `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
+	// Kind is the resource name (i.e. `UserSecretList`).
+	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	// Items is the list of UserSecrets.
+	Items []*UserSecret `protobuf:"bytes,3,rep,name=items,proto3" json:"items,omitempty"`
 	// ListResponseMeta is common information about the list.
 	ListResponseMeta *metav1.ListResponseMeta `protobuf:"bytes,4,opt,name=listResponseMeta,proto3" json:"listResponseMeta,omitempty"`
 	unknownFields    protoimpl.UnknownFields
@@ -2893,8 +3188,11 @@ func (x *UserSecretList) GetListResponseMeta() *metav1.ListResponseMeta {
 	return nil
 }
 
+// GetSpaceMembershipRequest is the request of the GetSpaceMembership method.
 type GetSpaceMembershipRequest struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// SpaceRef is the reference of the Space whose Membership of the calling
+	// User is retrieved.
 	SpaceRef      *metav1.ObjectReference `protobuf:"bytes,1,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -2937,13 +3235,22 @@ func (x *GetSpaceMembershipRequest) GetSpaceRef() *metav1.ObjectReference {
 	return nil
 }
 
+// UserConfig is the per-User configuration that is applied to all of the
+// User's Workspaces regardless of their Space or Template. There is exactly
+// one UserConfig per Octelium User and it is automatically created by the
+// Cluster upon its first use.
 type UserConfig struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ApiVersion    string                 `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
-	Kind          string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	Metadata      *metav1.Metadata       `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	Spec          *UserConfig_Spec       `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
-	Status        *UserConfig_Status     `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// APIVersion is the API version (i.e. "cordium/v1")
+	ApiVersion string `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
+	// Kind is the resource name (i.e. `UserConfig`).
+	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	// Metadata is the object's metadata.
+	Metadata *metav1.Metadata `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	// Spec is the UserConfig specification.
+	Spec *UserConfig_Spec `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
+	// Status is the current status of the UserConfig.
+	Status        *UserConfig_Status `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3013,6 +3320,9 @@ func (x *UserConfig) GetStatus() *UserConfig_Status {
 	return nil
 }
 
+// GetUserConfigRequest is the request of the GetUserConfig method. It is
+// intentionally empty since the UserConfig of the calling User is always the
+// one that is returned.
 type GetUserConfigRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -3049,11 +3359,16 @@ func (*GetUserConfigRequest) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{31}
 }
 
+// ShareWorkspacePortRequest is the request of the ShareWorkspacePort method.
 type ShareWorkspacePortRequest struct {
-	state           protoimpl.MessageState         `protogen:"open.v1"`
-	WorkspaceRef    *metav1.ObjectReference        `protobuf:"bytes,1,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
-	Mode            ShareWorkspacePortRequest_Mode `protobuf:"varint,2,opt,name=mode,proto3,enum=octelium.api.main.cordium.v1.ShareWorkspacePortRequest_Mode" json:"mode,omitempty"`
-	ApplicationName string                         `protobuf:"bytes,3,opt,name=applicationName,proto3" json:"applicationName,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// WorkspaceRef is the reference of the Workspace that owns the Application.
+	WorkspaceRef *metav1.ObjectReference `protobuf:"bytes,1,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
+	// Mode is the audience with which the Application is shared.
+	Mode ShareWorkspacePortRequest_Mode `protobuf:"varint,2,opt,name=mode,proto3,enum=octelium.api.main.cordium.v1.ShareWorkspacePortRequest_Mode" json:"mode,omitempty"`
+	// ApplicationName is the name of the Application to be shared as it is
+	// defined in the Workspace's spec.
+	ApplicationName string `protobuf:"bytes,3,opt,name=applicationName,proto3" json:"applicationName,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -3109,6 +3424,8 @@ func (x *ShareWorkspacePortRequest) GetApplicationName() string {
 	return ""
 }
 
+// ShareWorkspacePortResponse is the response of the ShareWorkspacePort method.
+// It is intentionally empty.
 type ShareWorkspacePortResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -3145,10 +3462,14 @@ func (*ShareWorkspacePortResponse) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{33}
 }
 
+// UnshareWorkspacePortRequest is the request of the UnshareWorkspacePort
+// method.
 type UnshareWorkspacePortRequest struct {
-	state           protoimpl.MessageState  `protogen:"open.v1"`
-	WorkspaceRef    *metav1.ObjectReference `protobuf:"bytes,1,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
-	ApplicationName string                  `protobuf:"bytes,2,opt,name=applicationName,proto3" json:"applicationName,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// WorkspaceRef is the reference of the Workspace that owns the Application.
+	WorkspaceRef *metav1.ObjectReference `protobuf:"bytes,1,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
+	// ApplicationName is the name of the Application to stop sharing.
+	ApplicationName string `protobuf:"bytes,2,opt,name=applicationName,proto3" json:"applicationName,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -3197,6 +3518,8 @@ func (x *UnshareWorkspacePortRequest) GetApplicationName() string {
 	return ""
 }
 
+// UnshareWorkspacePortResponse is the response of the UnshareWorkspacePort
+// method. It is intentionally empty.
 type UnshareWorkspacePortResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -3233,8 +3556,10 @@ func (*UnshareWorkspacePortResponse) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{35}
 }
 
+// LeaveSpaceRequest is the request of the LeaveSpace method.
 type LeaveSpaceRequest struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// SpaceRef is the reference of the Space to be left.
 	SpaceRef      *metav1.ObjectReference `protobuf:"bytes,1,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -3277,6 +3602,8 @@ func (x *LeaveSpaceRequest) GetSpaceRef() *metav1.ObjectReference {
 	return nil
 }
 
+// LeaveSpaceResponse is the response of the LeaveSpace method. It is
+// intentionally empty.
 type LeaveSpaceResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -3313,10 +3640,16 @@ func (*LeaveSpaceResponse) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{37}
 }
 
+// Region is an Octelium Region of the Cluster that is enabled to host
+// Workspaces. Regions are managed by the Cluster administrators and they are
+// read-only for the Users who can only choose among them when starting a
+// Workspace or when setting their preferred Region in their UserConfig.
 type Region struct {
-	state      protoimpl.MessageState `protogen:"open.v1"`
-	ApiVersion string                 `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
-	Kind       string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// APIVersion is the API version (i.e. "cordium/v1")
+	ApiVersion string `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
+	// Kind is the resource name (i.e. `Region`).
+	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
 	// Metadata is the object's metadata.
 	Metadata *metav1.Metadata `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	// Spec is the Region specification.
@@ -3392,6 +3725,7 @@ func (x *Region) GetStatus() *Region_Status {
 	return nil
 }
 
+// RegionList is the response of the ListRegion method.
 type RegionList struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// APIVersion is the API version of the object.
@@ -3464,8 +3798,11 @@ func (x *RegionList) GetListResponseMeta() *metav1.ListResponseMeta {
 	return nil
 }
 
+// ListRegionOptions is the request of the ListRegion method.
 type ListRegionOptions struct {
-	state         protoimpl.MessageState    `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Common is the pagination and ordering options that are common to all the
+	// List methods.
 	Common        *metav1.CommonListOptions `protobuf:"bytes,1,opt,name=common,proto3" json:"common,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -3508,11 +3845,16 @@ func (x *ListRegionOptions) GetCommon() *metav1.CommonListOptions {
 	return nil
 }
 
+// CreateTerminalRequest is the request of the CreateTerminal method.
 type CreateTerminalRequest struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
-	WorkspaceRef  *metav1.ObjectReference `protobuf:"bytes,1,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
-	Cols          uint32                  `protobuf:"varint,2,opt,name=cols,proto3" json:"cols,omitempty"`
-	Rows          uint32                  `protobuf:"varint,3,opt,name=rows,proto3" json:"rows,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// WorkspaceRef is the reference of the Workspace in which the terminal is
+	// created.
+	WorkspaceRef *metav1.ObjectReference `protobuf:"bytes,1,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
+	// Cols is the initial number of the columns of the terminal's window.
+	Cols uint32 `protobuf:"varint,2,opt,name=cols,proto3" json:"cols,omitempty"`
+	// Rows is the initial number of the rows of the terminal's window.
+	Rows          uint32 `protobuf:"varint,3,opt,name=rows,proto3" json:"rows,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3568,9 +3910,12 @@ func (x *CreateTerminalRequest) GetRows() uint32 {
 	return 0
 }
 
+// Terminal is an interactive terminal that is running inside a Workspace.
 type Terminal struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ID is the terminal's identifier. It is prefixed by the name of the
+	// Workspace that owns the terminal (i.e. `<workspace>-<id>`).
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3612,9 +3957,11 @@ func (x *Terminal) GetId() string {
 	return ""
 }
 
+// CreateTerminalResponse is the response of the CreateTerminal method.
 type CreateTerminalResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ID is the identifier of the newly created terminal.
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3656,9 +4003,11 @@ func (x *CreateTerminalResponse) GetId() string {
 	return ""
 }
 
+// RemoveTerminalRequest is the request of the RemoveTerminal method.
 type RemoveTerminalRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ID is the identifier of the terminal to be terminated.
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3700,6 +4049,8 @@ func (x *RemoveTerminalRequest) GetId() string {
 	return ""
 }
 
+// RemoveTerminalResponse is the response of the RemoveTerminal method. It is
+// intentionally empty.
 type RemoveTerminalResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -3736,8 +4087,10 @@ func (*RemoveTerminalResponse) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{45}
 }
 
+// ListTerminalRequest is the request of the ListTerminal method.
 type ListTerminalRequest struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// WorkspaceRef is the reference of the Workspace whose terminals are listed.
 	WorkspaceRef  *metav1.ObjectReference `protobuf:"bytes,1,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -3780,9 +4133,11 @@ func (x *ListTerminalRequest) GetWorkspaceRef() *metav1.ObjectReference {
 	return nil
 }
 
+// ListTerminalResponse is the response of the ListTerminal method.
 type ListTerminalResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Items         []*Terminal            `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Items is the list of the currently open terminals of the Workspace.
+	Items         []*Terminal `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3824,6 +4179,8 @@ func (x *ListTerminalResponse) GetItems() []*Terminal {
 	return nil
 }
 
+// WriteTerminalDataResponse is the response of the WriteTerminalData method.
+// It is intentionally empty.
 type WriteTerminalDataResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -3860,11 +4217,16 @@ func (*WriteTerminalDataResponse) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{48}
 }
 
+// SetTerminalWindowSizeRequest is the request of the SetTerminalWindowSize
+// method.
 type SetTerminalWindowSizeRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Cols          uint32                 `protobuf:"varint,2,opt,name=cols,proto3" json:"cols,omitempty"`
-	Rows          uint32                 `protobuf:"varint,3,opt,name=rows,proto3" json:"rows,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ID is the identifier of the terminal to be resized.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Cols is the new number of the columns of the terminal's window.
+	Cols uint32 `protobuf:"varint,2,opt,name=cols,proto3" json:"cols,omitempty"`
+	// Rows is the new number of the rows of the terminal's window.
+	Rows          uint32 `protobuf:"varint,3,opt,name=rows,proto3" json:"rows,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3920,6 +4282,8 @@ func (x *SetTerminalWindowSizeRequest) GetRows() uint32 {
 	return 0
 }
 
+// SetTerminalWindowSizeResponse is the response of the SetTerminalWindowSize
+// method. It is intentionally empty.
 type SetTerminalWindowSizeResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -3956,10 +4320,13 @@ func (*SetTerminalWindowSizeResponse) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{50}
 }
 
+// WriteTerminalDataRequest is the request of the WriteTerminalData method.
 type WriteTerminalDataRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Data          []byte                 `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ID is the identifier of the terminal to write to.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Data is the raw data (i.e. stdin) that is written to the terminal.
+	Data          []byte `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -4008,9 +4375,11 @@ func (x *WriteTerminalDataRequest) GetData() []byte {
 	return nil
 }
 
+// ListenTerminalRequest is the request of the ListenTerminal method.
 type ListenTerminalRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ID is the identifier of the terminal to listen to.
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -4052,8 +4421,11 @@ func (x *ListenTerminalRequest) GetId() string {
 	return ""
 }
 
+// ListenTerminalResponse is a single event of the ListenTerminal stream.
 type ListenTerminalResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the terminal event's type
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*ListenTerminalResponse_Stdout_
@@ -4133,14 +4505,17 @@ type isListenTerminalResponse_Type interface {
 }
 
 type ListenTerminalResponse_Stdout_ struct {
+	// Stdout is a chunk of the terminal's output.
 	Stdout *ListenTerminalResponse_Stdout `protobuf:"bytes,1,opt,name=stdout,proto3,oneof"`
 }
 
 type ListenTerminalResponse_WindowSize_ struct {
+	// WindowSize is a resize event of the terminal's window.
 	WindowSize *ListenTerminalResponse_WindowSize `protobuf:"bytes,2,opt,name=windowSize,proto3,oneof"`
 }
 
 type ListenTerminalResponse_Close_ struct {
+	// Close means that the terminal was closed.
 	Close *ListenTerminalResponse_Close `protobuf:"bytes,3,opt,name=close,proto3,oneof"`
 }
 
@@ -4150,8 +4525,10 @@ func (*ListenTerminalResponse_WindowSize_) isListenTerminalResponse_Type() {}
 
 func (*ListenTerminalResponse_Close_) isListenTerminalResponse_Type() {}
 
+// ListenLogRequest is the request of the ListenLog method.
 type ListenLogRequest struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// WorkspaceRef is the reference of the Workspace whose logs are streamed.
 	WorkspaceRef  *metav1.ObjectReference `protobuf:"bytes,1,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4194,12 +4571,17 @@ func (x *ListenLogRequest) GetWorkspaceRef() *metav1.ObjectReference {
 	return nil
 }
 
+// ListenLogResponse is a single log entry of the ListenLog stream.
 type ListenLogResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=createdAt,proto3" json:"createdAt,omitempty"`
-	Type          ListenLogResponse_Type `protobuf:"varint,2,opt,name=type,proto3,enum=octelium.api.main.cordium.v1.ListenLogResponse_Type" json:"type,omitempty"`
-	Mode          ListenLogResponse_Mode `protobuf:"varint,3,opt,name=mode,proto3,enum=octelium.api.main.cordium.v1.ListenLogResponse_Mode" json:"mode,omitempty"`
-	Data          []byte                 `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// CreatedAt is the timestamp at which the log entry was produced.
+	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=createdAt,proto3" json:"createdAt,omitempty"`
+	// Type is the initialization stage that produced the log entry.
+	Type ListenLogResponse_Type `protobuf:"varint,2,opt,name=type,proto3,enum=octelium.api.main.cordium.v1.ListenLogResponse_Type" json:"type,omitempty"`
+	// Mode is the output stream that the log entry was emitted on.
+	Mode ListenLogResponse_Mode `protobuf:"varint,3,opt,name=mode,proto3,enum=octelium.api.main.cordium.v1.ListenLogResponse_Mode" json:"mode,omitempty"`
+	// Data is the raw content of the log entry.
+	Data          []byte `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -4262,8 +4644,12 @@ func (x *ListenLogResponse) GetData() []byte {
 	return nil
 }
 
+// WatchWorkspaceRequest is the request of the WatchWorkspace method.
 type WatchWorkspaceRequest struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// WorkspaceRef optionally restricts the stream to the events of a single
+	// Workspace. If it is unset, the events of all the Workspaces that are owned
+	// by the calling User are published.
 	WorkspaceRef  *metav1.ObjectReference `protobuf:"bytes,1,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4306,8 +4692,11 @@ func (x *WatchWorkspaceRequest) GetWorkspaceRef() *metav1.ObjectReference {
 	return nil
 }
 
+// WatchWorkspaceResponse is a single event of the WatchWorkspace stream.
 type WatchWorkspaceResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the Workspace event's type
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*WatchWorkspaceResponse_Create_
@@ -4387,14 +4776,17 @@ type isWatchWorkspaceResponse_Type interface {
 }
 
 type WatchWorkspaceResponse_Create_ struct {
+	// Create means that a Workspace was created.
 	Create *WatchWorkspaceResponse_Create `protobuf:"bytes,3,opt,name=create,proto3,oneof"`
 }
 
 type WatchWorkspaceResponse_Update_ struct {
+	// Update means that a Workspace was updated.
 	Update *WatchWorkspaceResponse_Update `protobuf:"bytes,4,opt,name=update,proto3,oneof"`
 }
 
 type WatchWorkspaceResponse_Delete_ struct {
+	// Delete means that a Workspace was deleted.
 	Delete *WatchWorkspaceResponse_Delete `protobuf:"bytes,5,opt,name=delete,proto3,oneof"`
 }
 
@@ -4404,8 +4796,11 @@ func (*WatchWorkspaceResponse_Update_) isWatchWorkspaceResponse_Type() {}
 
 func (*WatchWorkspaceResponse_Delete_) isWatchWorkspaceResponse_Type() {}
 
+// CancelBuildTemplateRequest is the request of the CancelBuildTemplate method.
 type CancelBuildTemplateRequest struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// TemplateRef is the reference of the Template whose running pre-build is
+	// canceled.
 	TemplateRef   *metav1.ObjectReference `protobuf:"bytes,1,opt,name=templateRef,proto3" json:"templateRef,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4448,8 +4843,12 @@ func (x *CancelBuildTemplateRequest) GetTemplateRef() *metav1.ObjectReference {
 	return nil
 }
 
+// ExecRequest is a client message of the Exec bidirectional stream. The first
+// message of the stream must carry a `request`.
 type ExecRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the client message's type
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*ExecRequest_Request_
@@ -4529,14 +4928,18 @@ type isExecRequest_Type interface {
 }
 
 type ExecRequest_Request_ struct {
+	// Request initializes the execution. It must be the first message of the
+	// stream.
 	Request *ExecRequest_Request `protobuf:"bytes,1,opt,name=request,proto3,oneof"`
 }
 
 type ExecRequest_WriteData_ struct {
+	// WriteData writes data to the command's standard input.
 	WriteData *ExecRequest_WriteData `protobuf:"bytes,2,opt,name=writeData,proto3,oneof"`
 }
 
 type ExecRequest_Kill_ struct {
+	// Kill terminates the running command.
 	Kill *ExecRequest_Kill `protobuf:"bytes,3,opt,name=kill,proto3,oneof"`
 }
 
@@ -4546,8 +4949,11 @@ func (*ExecRequest_WriteData_) isExecRequest_Type() {}
 
 func (*ExecRequest_Kill_) isExecRequest_Type() {}
 
+// ExecResponse is a server message of the Exec bidirectional stream.
 type ExecResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the server message's type
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*ExecResponse_Stdout_
@@ -4627,14 +5033,17 @@ type isExecResponse_Type interface {
 }
 
 type ExecResponse_Stdout_ struct {
+	// Stdout is a chunk of the command's standard output.
 	Stdout *ExecResponse_Stdout `protobuf:"bytes,1,opt,name=stdout,proto3,oneof"`
 }
 
 type ExecResponse_Stderr_ struct {
+	// Stderr is a chunk of the command's standard error.
 	Stderr *ExecResponse_Stderr `protobuf:"bytes,2,opt,name=stderr,proto3,oneof"`
 }
 
 type ExecResponse_Exit_ struct {
+	// Exit means that the command exited.
 	Exit *ExecResponse_Exit `protobuf:"bytes,3,opt,name=exit,proto3,oneof"`
 }
 
@@ -4644,13 +5053,24 @@ func (*ExecResponse_Stderr_) isExecResponse_Type() {}
 
 func (*ExecResponse_Exit_) isExecResponse_Type() {}
 
+// ClusterConfig is the sole source of truth for all the global configurations
+// and settings of the Cordium Cluster. It controls the Space ownership policy,
+// the Workspace storage class selection, the Cluster-wide resource limits as
+// well as the Workspace timeouts. There is exactly one ClusterConfig per
+// Cordium Cluster. It is created automatically at installation time and it is
+// managed by the Cluster administrators via the ManagementService.
 type ClusterConfig struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ApiVersion    string                 `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
-	Kind          string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	Metadata      *metav1.Metadata       `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	Spec          *ClusterConfig_Spec    `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
-	Status        *ClusterConfig_Status  `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// APIVersion is the API version (i.e. "cordium/v1")
+	ApiVersion string `protobuf:"bytes,1,opt,name=apiVersion,proto3" json:"apiVersion,omitempty"`
+	// Kind is the resource name (i.e. `ClusterConfig`).
+	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	// Metadata is the object's metadata.
+	Metadata *metav1.Metadata `protobuf:"bytes,3,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	// Spec is the ClusterConfig specification.
+	Spec *ClusterConfig_Spec `protobuf:"bytes,4,opt,name=spec,proto3" json:"spec,omitempty"`
+	// Status is the current status of the ClusterConfig.
+	Status        *ClusterConfig_Status `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -4720,8 +5140,13 @@ func (x *ClusterConfig) GetStatus() *ClusterConfig_Status {
 	return nil
 }
 
+// Condition is a boolean expression that is evaluated by the Cluster against a
+// request context. It is used by the ClusterConfig rules (e.g. the Space
+// ownership rules and the storage class selection rules).
 type Condition struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the kind of the Condition
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*Condition_MatchAny
@@ -4890,6 +5315,8 @@ func (*Condition_None_) isCondition_Type() {}
 
 func (*Condition_Opa) isCondition_Type() {}
 
+// GetClusterConfigRequest is the request of the GetClusterConfig method. It is
+// intentionally empty since there is exactly one ClusterConfig per Cluster.
 type GetClusterConfigRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -4926,12 +5353,22 @@ func (*GetClusterConfigRequest) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{63}
 }
 
+// SessionExtInfo is the Cordium-specific information that is attached to the
+// dedicated Octelium Session that is created for a Workspace run. It lets the
+// rest of the Octelium Cluster identify which Workspace, Space and Template a
+// given Session belongs to.
 type SessionExtInfo struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
-	WorkspaceRef  *metav1.ObjectReference `protobuf:"bytes,1,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
-	SpaceRef      *metav1.ObjectReference `protobuf:"bytes,2,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
-	TemplateRef   *metav1.ObjectReference `protobuf:"bytes,3,opt,name=templateRef,proto3" json:"templateRef,omitempty"`
-	SpaceType     Space_Status_Type       `protobuf:"varint,4,opt,name=spaceType,proto3,enum=octelium.api.main.cordium.v1.Space_Status_Type" json:"spaceType,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// WorkspaceRef is the reference of the Workspace that the Session was
+	// created for.
+	WorkspaceRef *metav1.ObjectReference `protobuf:"bytes,1,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
+	// SpaceRef is the reference of the Space that the Workspace belongs to.
+	SpaceRef *metav1.ObjectReference `protobuf:"bytes,2,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
+	// TemplateRef is the reference of the Template that the Workspace was
+	// created from.
+	TemplateRef *metav1.ObjectReference `protobuf:"bytes,3,opt,name=templateRef,proto3" json:"templateRef,omitempty"`
+	// SpaceType is the type of the Space that the Workspace belongs to.
+	SpaceType     Space_Status_Type `protobuf:"varint,4,opt,name=spaceType,proto3,enum=octelium.api.main.cordium.v1.Space_Status_Type" json:"spaceType,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -4994,9 +5431,13 @@ func (x *SessionExtInfo) GetSpaceType() Space_Status_Type {
 	return Space_Status_SPACE_TYPE_UNSET
 }
 
+// RegionExtInfo is the Cordium-specific information that is attached to an
+// Octelium Region. It is what marks a Region as being able to host Cordium
+// Workspaces.
 type RegionExtInfo struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	IsEnabled     bool                   `protobuf:"varint,1,opt,name=isEnabled,proto3" json:"isEnabled,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// IsEnabled means that the Region is enabled to host Workspaces.
+	IsEnabled     bool `protobuf:"varint,1,opt,name=isEnabled,proto3" json:"isEnabled,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -5038,18 +5479,33 @@ func (x *RegionExtInfo) GetIsEnabled() bool {
 	return false
 }
 
+// Spec is the Workspace specification
 type Workspace_Spec struct {
-	state                  protoimpl.MessageState                 `protogen:"open.v1"`
-	Image                  *Workspace_Spec_Image                  `protobuf:"bytes,1,opt,name=image,proto3" json:"image,omitempty"`
-	Runtime                *Workspace_Spec_Runtime                `protobuf:"bytes,2,opt,name=runtime,proto3" json:"runtime,omitempty"`
-	Repository             *Workspace_Spec_Repository             `protobuf:"bytes,3,opt,name=repository,proto3" json:"repository,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Image defines how the Workspace's container image is obtained.
+	Image *Workspace_Spec_Image `protobuf:"bytes,1,opt,name=image,proto3" json:"image,omitempty"`
+	// Runtime controls the behavior of the Workspace's container.
+	Runtime *Workspace_Spec_Runtime `protobuf:"bytes,2,opt,name=runtime,proto3" json:"runtime,omitempty"`
+	// Repository is the primary git repository which is cloned into
+	// `/workspace/repo`.
+	Repository *Workspace_Spec_Repository `protobuf:"bytes,3,opt,name=repository,proto3" json:"repository,omitempty"`
+	// AdditionalRepositories is the list of the secondary repositories that
+	// are cloned alongside the primary one.
 	AdditionalRepositories []*Workspace_Spec_AdditionalRepository `protobuf:"bytes,4,rep,name=additionalRepositories,proto3" json:"additionalRepositories,omitempty"`
-	Applications           []*Workspace_Spec_Application          `protobuf:"bytes,5,rep,name=applications,proto3" json:"applications,omitempty"`
-	Limit                  *Workspace_Spec_Limit                  `protobuf:"bytes,6,opt,name=limit,proto3" json:"limit,omitempty"`
-	Vars                   []*Workspace_Spec_Var                  `protobuf:"bytes,7,rep,name=vars,proto3" json:"vars,omitempty"`
-	IsEphemeral            bool                                   `protobuf:"varint,8,opt,name=isEphemeral,proto3" json:"isEphemeral,omitempty"`
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	// Applications is the list of the named ports that are exposed via the
+	// Cordium portal.
+	Applications []*Workspace_Spec_Application `protobuf:"bytes,5,rep,name=applications,proto3" json:"applications,omitempty"`
+	// Limit is the compute resources that are allocated for the Workspace.
+	Limit *Workspace_Spec_Limit `protobuf:"bytes,6,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Vars is the list of the variables that are substituted inside the spec.
+	Vars []*Workspace_Spec_Var `protobuf:"bytes,7,rep,name=vars,proto3" json:"vars,omitempty"`
+	// IsEphemeral deletes the Workspace's storage once it is stopped so that
+	// every start provisions a fresh volume and runs the full initialization
+	// from scratch. A persistent (i.e. non-ephemeral) Workspace instead
+	// preserves its filesystem across stops and restarts.
+	IsEphemeral   bool `protobuf:"varint,8,opt,name=isEphemeral,proto3" json:"isEphemeral,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Workspace_Spec) Reset() {
@@ -5138,35 +5594,83 @@ func (x *Workspace_Spec) GetIsEphemeral() bool {
 	return false
 }
 
+// Status is the current status of the Workspace. It is entirely managed by
+// the Cluster and it is read-only.
 type Workspace_Status struct {
-	state                 protoimpl.MessageState          `protogen:"open.v1"`
-	State                 Workspace_Status_State          `protobuf:"varint,1,opt,name=state,proto3,enum=octelium.api.main.cordium.v1.Workspace_Status_State" json:"state,omitempty"`
-	UserRef               *metav1.ObjectReference         `protobuf:"bytes,2,opt,name=userRef,proto3" json:"userRef,omitempty"`
-	SessionRef            *metav1.ObjectReference         `protobuf:"bytes,3,opt,name=sessionRef,proto3" json:"sessionRef,omitempty"`
-	RegionRef             *metav1.ObjectReference         `protobuf:"bytes,4,opt,name=regionRef,proto3" json:"regionRef,omitempty"`
-	Hostname              string                          `protobuf:"bytes,5,opt,name=hostname,proto3" json:"hostname,omitempty"`
-	LastInitializedAt     *timestamppb.Timestamp          `protobuf:"bytes,6,opt,name=lastInitializedAt,proto3" json:"lastInitializedAt,omitempty"`
-	LastActivityAt        *timestamppb.Timestamp          `protobuf:"bytes,7,opt,name=lastActivityAt,proto3" json:"lastActivityAt,omitempty"`
-	LastStoppedAt         *timestamppb.Timestamp          `protobuf:"bytes,8,opt,name=lastStoppedAt,proto3" json:"lastStoppedAt,omitempty"`
-	SuccessfulRuns        uint32                          `protobuf:"varint,9,opt,name=successfulRuns,proto3" json:"successfulRuns,omitempty"`
-	IsBuild               bool                            `protobuf:"varint,10,opt,name=isBuild,proto3" json:"isBuild,omitempty"`
-	TemplateRef           *metav1.ObjectReference         `protobuf:"bytes,11,opt,name=templateRef,proto3" json:"templateRef,omitempty"`
-	SpaceRef              *metav1.ObjectReference         `protobuf:"bytes,12,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
-	TotalLastRunsDuration *metav1.Duration                `protobuf:"bytes,13,opt,name=totalLastRunsDuration,proto3" json:"totalLastRunsDuration,omitempty"`
-	LastState             Workspace_Status_State          `protobuf:"varint,14,opt,name=lastState,proto3,enum=octelium.api.main.cordium.v1.Workspace_Status_State" json:"lastState,omitempty"`
-	CurrentStateSetAt     *timestamppb.Timestamp          `protobuf:"bytes,15,opt,name=currentStateSetAt,proto3" json:"currentStateSetAt,omitempty"`
-	LastStateSetAt        *timestamppb.Timestamp          `protobuf:"bytes,16,opt,name=lastStateSetAt,proto3" json:"lastStateSetAt,omitempty"`
-	LastRunningAt         *timestamppb.Timestamp          `protobuf:"bytes,17,opt,name=lastRunningAt,proto3" json:"lastRunningAt,omitempty"`
-	Failure               *Workspace_Status_Failure       `protobuf:"bytes,18,opt,name=failure,proto3" json:"failure,omitempty"`
-	Limit                 *Workspace_Spec_Limit           `protobuf:"bytes,19,opt,name=limit,proto3" json:"limit,omitempty"`
-	SharedPorts           []*Workspace_Status_SharedPort  `protobuf:"bytes,20,rep,name=sharedPorts,proto3" json:"sharedPorts,omitempty"`
-	SpaceType             Space_Status_Type               `protobuf:"varint,21,opt,name=spaceType,proto3,enum=octelium.api.main.cordium.v1.Space_Status_Type" json:"spaceType,omitempty"`
-	StoppingReason        Workspace_Status_StoppingReason `protobuf:"varint,22,opt,name=stoppingReason,proto3,enum=octelium.api.main.cordium.v1.Workspace_Status_StoppingReason" json:"stoppingReason,omitempty"`
-	LastStoppingReason    Workspace_Status_StoppingReason `protobuf:"varint,23,opt,name=lastStoppingReason,proto3,enum=octelium.api.main.cordium.v1.Workspace_Status_StoppingReason" json:"lastStoppingReason,omitempty"`
-	Run                   *Workspace_Status_Run           `protobuf:"bytes,24,opt,name=run,proto3" json:"run,omitempty"`
-	LastRuns              []*Workspace_Status_Run         `protobuf:"bytes,25,rep,name=lastRuns,proto3" json:"lastRuns,omitempty"`
-	unknownFields         protoimpl.UnknownFields
-	sizeCache             protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// State is the current state of the Workspace's lifecycle.
+	State Workspace_Status_State `protobuf:"varint,1,opt,name=state,proto3,enum=octelium.api.main.cordium.v1.Workspace_Status_State" json:"state,omitempty"`
+	// UserRef is the reference of the Octelium User who owns the Workspace.
+	UserRef *metav1.ObjectReference `protobuf:"bytes,2,opt,name=userRef,proto3" json:"userRef,omitempty"`
+	// SessionRef is the reference of the dedicated Octelium Session that is
+	// created for the current run. It is the Workspace's identity for
+	// secretless access to the Cluster's Services and it is deleted once the
+	// Workspace is stopped.
+	SessionRef *metav1.ObjectReference `protobuf:"bytes,3,opt,name=sessionRef,proto3" json:"sessionRef,omitempty"`
+	// RegionRef is the reference of the Octelium Region that currently hosts
+	// the Workspace.
+	RegionRef *metav1.ObjectReference `protobuf:"bytes,4,opt,name=regionRef,proto3" json:"regionRef,omitempty"`
+	// Hostname is the publicly resolvable hostname of the running Workspace
+	// (e.g. `abc.cordium.example.com`). It is unset while the Workspace is
+	// stopped.
+	Hostname string `protobuf:"bytes,5,opt,name=hostname,proto3" json:"hostname,omitempty"`
+	// LastInitializedAt is the timestamp of the last start request of the
+	// Workspace.
+	LastInitializedAt *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=lastInitializedAt,proto3" json:"lastInitializedAt,omitempty"`
+	// LastActivityAt is the timestamp of the last recorded activity of the
+	// Workspace. It is what the inactivity timeout is calculated against.
+	LastActivityAt *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=lastActivityAt,proto3" json:"lastActivityAt,omitempty"`
+	// LastStoppedAt is the timestamp at which the Workspace was last stopped.
+	LastStoppedAt *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=lastStoppedAt,proto3" json:"lastStoppedAt,omitempty"`
+	// SuccessfulRuns is the total number of the runs that successfully reached
+	// the RUNNING state.
+	SuccessfulRuns uint32 `protobuf:"varint,9,opt,name=successfulRuns,proto3" json:"successfulRuns,omitempty"`
+	// IsBuild means that the Workspace is an internal Workspace that is
+	// created by the Cluster in order to carry out a Template pre-build. Such
+	// Workspaces are hidden from the Users and they are deleted once the
+	// pre-build completes.
+	IsBuild bool `protobuf:"varint,10,opt,name=isBuild,proto3" json:"isBuild,omitempty"`
+	// TemplateRef is the reference of the Template that the Workspace was
+	// created from.
+	TemplateRef *metav1.ObjectReference `protobuf:"bytes,11,opt,name=templateRef,proto3" json:"templateRef,omitempty"`
+	// SpaceRef is the reference of the Space that the Workspace belongs to.
+	SpaceRef *metav1.ObjectReference `protobuf:"bytes,12,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
+	// TotalLastRunsDuration is the accumulated running duration of all of the
+	// Workspace's runs.
+	TotalLastRunsDuration *metav1.Duration `protobuf:"bytes,13,opt,name=totalLastRunsDuration,proto3" json:"totalLastRunsDuration,omitempty"`
+	// LastState is the state that the Workspace was in right before the
+	// current one.
+	LastState Workspace_Status_State `protobuf:"varint,14,opt,name=lastState,proto3,enum=octelium.api.main.cordium.v1.Workspace_Status_State" json:"lastState,omitempty"`
+	// CurrentStateSetAt is the timestamp at which the current state was set.
+	CurrentStateSetAt *timestamppb.Timestamp `protobuf:"bytes,15,opt,name=currentStateSetAt,proto3" json:"currentStateSetAt,omitempty"`
+	// LastStateSetAt is the timestamp at which the previous state was set.
+	LastStateSetAt *timestamppb.Timestamp `protobuf:"bytes,16,opt,name=lastStateSetAt,proto3" json:"lastStateSetAt,omitempty"`
+	// LastRunningAt is the timestamp at which the Workspace last reached the
+	// RUNNING state.
+	LastRunningAt *timestamppb.Timestamp `protobuf:"bytes,17,opt,name=lastRunningAt,proto3" json:"lastRunningAt,omitempty"`
+	// Failure is the failure of the Workspace, if any.
+	Failure *Workspace_Status_Failure `protobuf:"bytes,18,opt,name=failure,proto3" json:"failure,omitempty"`
+	// Limit is the effective compute resource limits that the Cluster resolved
+	// for the Workspace after merging and capping all the configuration
+	// levels.
+	Limit *Workspace_Spec_Limit `protobuf:"bytes,19,opt,name=limit,proto3" json:"limit,omitempty"`
+	// SharedPorts is the list of the Workspace's Applications that are
+	// currently shared with other Users.
+	SharedPorts []*Workspace_Status_SharedPort `protobuf:"bytes,20,rep,name=sharedPorts,proto3" json:"sharedPorts,omitempty"`
+	// SpaceType is the type of the Space that the Workspace belongs to.
+	SpaceType Space_Status_Type `protobuf:"varint,21,opt,name=spaceType,proto3,enum=octelium.api.main.cordium.v1.Space_Status_Type" json:"spaceType,omitempty"`
+	// StoppingReason is the reason of the current or the latest stoppage.
+	StoppingReason Workspace_Status_StoppingReason `protobuf:"varint,22,opt,name=stoppingReason,proto3,enum=octelium.api.main.cordium.v1.Workspace_Status_StoppingReason" json:"stoppingReason,omitempty"`
+	// LastStoppingReason is the reason of the stoppage that preceded the
+	// current run.
+	LastStoppingReason Workspace_Status_StoppingReason `protobuf:"varint,23,opt,name=lastStoppingReason,proto3,enum=octelium.api.main.cordium.v1.Workspace_Status_StoppingReason" json:"lastStoppingReason,omitempty"`
+	// Run is the current or the latest run of the Workspace.
+	Run *Workspace_Status_Run `protobuf:"bytes,24,opt,name=run,proto3" json:"run,omitempty"`
+	// LastRuns is the history of the Workspace's previous runs ordered from
+	// the most to the least recent one.
+	LastRuns      []*Workspace_Status_Run `protobuf:"bytes,25,rep,name=lastRuns,proto3" json:"lastRuns,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Workspace_Status) Reset() {
@@ -5374,8 +5878,13 @@ func (x *Workspace_Status) GetLastRuns() []*Workspace_Status_Run {
 	return nil
 }
 
+// Image defines how the container image that is used as the Workspace's
+// root filesystem is obtained. If it is unset, the Cluster's default base
+// image is used.
 type Workspace_Spec_Image struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the source of the Workspace's container image
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*Workspace_Spec_Image_Dockerfile_
@@ -5465,18 +5974,24 @@ type isWorkspace_Spec_Image_Type interface {
 }
 
 type Workspace_Spec_Image_Dockerfile_ struct {
+	// Dockerfile builds the image from an inline or a downloaded
+	// Dockerfile.
 	Dockerfile *Workspace_Spec_Image_Dockerfile `protobuf:"bytes,1,opt,name=dockerfile,proto3,oneof"`
 }
 
 type Workspace_Spec_Image_Registry_ struct {
+	// Registry pulls a pre-built image from a container registry.
 	Registry *Workspace_Spec_Image_Registry `protobuf:"bytes,2,opt,name=registry,proto3,oneof"`
 }
 
 type Workspace_Spec_Image_Git_ struct {
+	// Git builds the image from a dedicated git repository.
 	Git *Workspace_Spec_Image_Git `protobuf:"bytes,3,opt,name=git,proto3,oneof"`
 }
 
 type Workspace_Spec_Image_Repository_ struct {
+	// Repository builds the image from the Workspace's own primary
+	// repository.
 	Repository *Workspace_Spec_Image_Repository `protobuf:"bytes,4,opt,name=repository,proto3,oneof"`
 }
 
@@ -5488,10 +6003,18 @@ func (*Workspace_Spec_Image_Git_) isWorkspace_Spec_Image_Type() {}
 
 func (*Workspace_Spec_Image_Repository_) isWorkspace_Spec_Image_Type() {}
 
+// Repository is a git repository that is cloned into the Workspace at
+// initialization time.
 type Workspace_Spec_Repository struct {
-	state          protoimpl.MessageState                    `protogen:"open.v1"`
-	Url            string                                    `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
-	CloneOptions   *Workspace_Spec_Repository_CloneOptions   `protobuf:"bytes,2,opt,name=cloneOptions,proto3" json:"cloneOptions,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// URL is the HTTPS URL of the git repository (e.g.
+	// `https://github.com/myorg/my-project`). Only the `https` scheme is
+	// supported.
+	Url string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	// CloneOptions controls how the repository is cloned.
+	CloneOptions *Workspace_Spec_Repository_CloneOptions `protobuf:"bytes,2,opt,name=cloneOptions,proto3" json:"cloneOptions,omitempty"`
+	// Authentication is set for the private repositories that require
+	// authentication.
 	Authentication *Workspace_Spec_Repository_Authentication `protobuf:"bytes,3,opt,name=authentication,proto3" json:"authentication,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
@@ -5548,10 +6071,18 @@ func (x *Workspace_Spec_Repository) GetAuthentication() *Workspace_Spec_Reposito
 	return nil
 }
 
+// AdditionalRepository is a secondary repository that is cloned alongside
+// the Workspace's primary repository.
 type Workspace_Spec_AdditionalRepository struct {
-	state         protoimpl.MessageState     `protogen:"open.v1"`
-	Name          string                     `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	ClonePath     string                     `protobuf:"bytes,2,opt,name=clonePath,proto3" json:"clonePath,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Name is the name of the additional repository. It must be unique
+	// within the spec.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// ClonePath is the absolute path inside the Workspace where the
+	// repository is cloned (e.g.
+	// `/workspace/additional-repos/shared-libs`).
+	ClonePath string `protobuf:"bytes,2,opt,name=clonePath,proto3" json:"clonePath,omitempty"`
+	// Repository is the repository's URL, clone options and authentication.
 	Repository    *Workspace_Spec_Repository `protobuf:"bytes,3,opt,name=repository,proto3" json:"repository,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -5608,20 +6139,40 @@ func (x *Workspace_Spec_AdditionalRepository) GetRepository() *Workspace_Spec_Re
 	return nil
 }
 
+// Runtime controls the behavior of the Workspace's container (i.e. its
+// environment variables, lifecycle tasks, capabilities, timeout, etc...).
 type Workspace_Spec_Runtime struct {
-	state         protoimpl.MessageState                `protogen:"open.v1"`
-	EnvVars       []*Workspace_Spec_Runtime_EnvVar      `protobuf:"bytes,1,rep,name=envVars,proto3" json:"envVars,omitempty"`
-	Tasks         []*Workspace_Spec_Runtime_Task        `protobuf:"bytes,2,rep,name=tasks,proto3" json:"tasks,omitempty"`
-	DisableInit   bool                                  `protobuf:"varint,3,opt,name=disableInit,proto3" json:"disableInit,omitempty"`
-	Cmd           string                                `protobuf:"bytes,4,opt,name=cmd,proto3" json:"cmd,omitempty"`
-	Entrypoint    string                                `protobuf:"bytes,5,opt,name=entrypoint,proto3" json:"entrypoint,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// EnvVars is the list of the environment variables that are injected
+	// into the Workspace container.
+	EnvVars []*Workspace_Spec_Runtime_EnvVar `protobuf:"bytes,1,rep,name=envVars,proto3" json:"envVars,omitempty"`
+	// Tasks is the list of the lifecycle tasks of the Workspace.
+	Tasks []*Workspace_Spec_Runtime_Task `protobuf:"bytes,2,rep,name=tasks,proto3" json:"tasks,omitempty"`
+	// DisableInit disables the minimal init process that Cordium runs as PID
+	// 1 in order to reap the zombie processes. It should only be set when
+	// the image already contains its own init system.
+	DisableInit bool `protobuf:"varint,3,opt,name=disableInit,proto3" json:"disableInit,omitempty"`
+	// Cmd overrides the container image's default command.
+	Cmd string `protobuf:"bytes,4,opt,name=cmd,proto3" json:"cmd,omitempty"`
+	// Entrypoint overrides the container image's default entrypoint.
+	Entrypoint string `protobuf:"bytes,5,opt,name=entrypoint,proto3" json:"entrypoint,omitempty"`
+	// Devcontainers is the Development Container-related configuration.
 	Devcontainers *Workspace_Spec_Runtime_Devcontainers `protobuf:"bytes,6,opt,name=devcontainers,proto3" json:"devcontainers,omitempty"`
-	Octelium      *Workspace_Spec_Runtime_Octelium      `protobuf:"bytes,7,opt,name=octelium,proto3" json:"octelium,omitempty"`
-	Network       *Workspace_Spec_Runtime_Network       `protobuf:"bytes,8,opt,name=network,proto3" json:"network,omitempty"`
-	Filesystem    *Workspace_Spec_Runtime_Filesystem    `protobuf:"bytes,9,opt,name=filesystem,proto3" json:"filesystem,omitempty"`
-	Capabilities  *Workspace_Spec_Runtime_Capabilities  `protobuf:"bytes,10,opt,name=capabilities,proto3" json:"capabilities,omitempty"`
-	Timeout       *Workspace_Spec_Runtime_Timeout       `protobuf:"bytes,11,opt,name=timeout,proto3" json:"timeout,omitempty"`
-	AutoStop      bool                                  `protobuf:"varint,12,opt,name=autoStop,proto3" json:"autoStop,omitempty"`
+	// Octelium controls the Octelium Services that are served inside the
+	// Workspace.
+	Octelium *Workspace_Spec_Runtime_Octelium `protobuf:"bytes,7,opt,name=octelium,proto3" json:"octelium,omitempty"`
+	// Network is the network-related configuration of the Workspace.
+	Network *Workspace_Spec_Runtime_Network `protobuf:"bytes,8,opt,name=network,proto3" json:"network,omitempty"`
+	// Filesystem is the container filesystem configuration.
+	Filesystem *Workspace_Spec_Runtime_Filesystem `protobuf:"bytes,9,opt,name=filesystem,proto3" json:"filesystem,omitempty"`
+	// Capabilities is the Linux capabilities of the Workspace's container.
+	Capabilities *Workspace_Spec_Runtime_Capabilities `protobuf:"bytes,10,opt,name=capabilities,proto3" json:"capabilities,omitempty"`
+	// Timeout controls the inactivity timeout of the Workspace.
+	Timeout *Workspace_Spec_Runtime_Timeout `protobuf:"bytes,11,opt,name=timeout,proto3" json:"timeout,omitempty"`
+	// AutoStop automatically stops the Workspace once all of its
+	// non-background lifecycle tasks complete. It is mostly useful for CI/CD
+	// and automated workloads where no human interaction is expected.
+	AutoStop      bool `protobuf:"varint,12,opt,name=autoStop,proto3" json:"autoStop,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -5740,12 +6291,21 @@ func (x *Workspace_Spec_Runtime) GetAutoStop() bool {
 	return false
 }
 
+// Application is a named port inside the Workspace that is exposed via the
+// Cordium portal's reverse proxy.
 type Workspace_Spec_Application struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	DisplayName   string                 `protobuf:"bytes,2,opt,name=displayName,proto3" json:"displayName,omitempty"`
-	Port          int32                  `protobuf:"varint,3,opt,name=port,proto3" json:"port,omitempty"`
-	IsDefault     bool                   `protobuf:"varint,4,opt,name=isDefault,proto3" json:"isDefault,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Name is the name of the Application. It must be unique within the spec
+	// and it is used as a subdomain prefix of the Workspace's hostname.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// DisplayName is a human-readable name for the Application.
+	DisplayName string `protobuf:"bytes,2,opt,name=displayName,proto3" json:"displayName,omitempty"`
+	// Port is the TCP port that the Application listens on inside the
+	// Workspace.
+	Port int32 `protobuf:"varint,3,opt,name=port,proto3" json:"port,omitempty"`
+	// IsDefault serves the Application at the Workspace's root hostname.
+	// At most one Application can be the default one.
+	IsDefault     bool `protobuf:"varint,4,opt,name=isDefault,proto3" json:"isDefault,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -5808,10 +6368,17 @@ func (x *Workspace_Spec_Application) GetIsDefault() bool {
 	return false
 }
 
+// Limit is the compute resources that are allocated for the Workspace. The
+// effective limits are resolved by precedence (i.e. Workspace, Template,
+// Space default and then the Cluster default) and are then capped by the
+// Space and the Cluster maximums.
 type Workspace_Spec_Limit struct {
-	state         protoimpl.MessageState        `protogen:"open.v1"`
-	Cpu           *Workspace_Spec_Limit_CPU     `protobuf:"bytes,1,opt,name=cpu,proto3" json:"cpu,omitempty"`
-	Memory        *Workspace_Spec_Limit_Memory  `protobuf:"bytes,2,opt,name=memory,proto3" json:"memory,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// CPU is the CPU allocation.
+	Cpu *Workspace_Spec_Limit_CPU `protobuf:"bytes,1,opt,name=cpu,proto3" json:"cpu,omitempty"`
+	// Memory is the memory allocation.
+	Memory *Workspace_Spec_Limit_Memory `protobuf:"bytes,2,opt,name=memory,proto3" json:"memory,omitempty"`
+	// Storage is the storage allocation.
 	Storage       *Workspace_Spec_Limit_Storage `protobuf:"bytes,3,opt,name=storage,proto3" json:"storage,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -5868,10 +6435,15 @@ func (x *Workspace_Spec_Limit) GetStorage() *Workspace_Spec_Limit_Storage {
 	return nil
 }
 
+// Var is a variable that can be referenced from within the spec's string
+// fields using the `${{ vars.NAME }}` syntax. The substitution is
+// performed after all the configuration levels are merged.
 type Workspace_Spec_Var struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Value         string                 `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Name is the variable's name.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Value is the variable's value.
+	Value         string `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -5920,8 +6492,12 @@ func (x *Workspace_Spec_Var) GetValue() string {
 	return ""
 }
 
+// Dockerfile builds the image from a Dockerfile that is provided
+// directly instead of being read from a repository.
 type Workspace_Spec_Image_Dockerfile struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the source of the Dockerfile
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*Workspace_Spec_Image_Dockerfile_Inline
@@ -5991,10 +6567,12 @@ type isWorkspace_Spec_Image_Dockerfile_Type interface {
 }
 
 type Workspace_Spec_Image_Dockerfile_Inline struct {
+	// Inline is the content of the Dockerfile provided as a string.
 	Inline string `protobuf:"bytes,1,opt,name=inline,proto3,oneof"`
 }
 
 type Workspace_Spec_Image_Dockerfile_Url struct {
+	// URL is a URL from which the Dockerfile content is downloaded.
 	Url string `protobuf:"bytes,2,opt,name=url,proto3,oneof"`
 }
 
@@ -6002,12 +6580,24 @@ func (*Workspace_Spec_Image_Dockerfile_Inline) isWorkspace_Spec_Image_Dockerfile
 
 func (*Workspace_Spec_Image_Dockerfile_Url) isWorkspace_Spec_Image_Dockerfile_Type() {}
 
+// Git builds the image from a dedicated git repository which is separate
+// from the Workspace's own repository.
 type Workspace_Spec_Image_Git struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
-	Checkout      string                 `protobuf:"bytes,2,opt,name=checkout,proto3" json:"checkout,omitempty"`
-	Dockerfile    string                 `protobuf:"bytes,3,opt,name=dockerfile,proto3" json:"dockerfile,omitempty"`
-	Context       string                 `protobuf:"bytes,4,opt,name=context,proto3" json:"context,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// URL is the HTTPS URL of the git repository (e.g.
+	// `https://github.com/myorg/dev-images`).
+	Url string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	// Checkout is an optional branch, tag or commit to check out after
+	// cloning the repository.
+	Checkout string `protobuf:"bytes,2,opt,name=checkout,proto3" json:"checkout,omitempty"`
+	// Dockerfile is the path of the Dockerfile inside the repository. If
+	// it is unset, Cordium looks for a devcontainer spec (i.e.
+	// `.devcontainer/devcontainer.json` or `.devcontainer.json`) in the
+	// repository instead.
+	Dockerfile string `protobuf:"bytes,3,opt,name=dockerfile,proto3" json:"dockerfile,omitempty"`
+	// Context is the build context directory inside the repository. It
+	// defaults to the repository root.
+	Context       string `protobuf:"bytes,4,opt,name=context,proto3" json:"context,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -6070,9 +6660,14 @@ func (x *Workspace_Spec_Image_Git) GetContext() string {
 	return ""
 }
 
+// Registry pulls a pre-built image from a container registry.
 type Workspace_Spec_Image_Registry struct {
-	state          protoimpl.MessageState                        `protogen:"open.v1"`
-	Url            string                                        `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// URL is the image reference (e.g. `ubuntu:24.04` or
+	// `registry.example.com/dev/base:latest`).
+	Url string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	// Authentication is set for the private registries that require
+	// authentication.
 	Authentication *Workspace_Spec_Image_Registry_Authentication `protobuf:"bytes,2,opt,name=authentication,proto3" json:"authentication,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
@@ -6122,8 +6717,12 @@ func (x *Workspace_Spec_Image_Registry) GetAuthentication() *Workspace_Spec_Imag
 	return nil
 }
 
+// Repository builds the image out of the Workspace's own primary
+// repository (i.e. the `repository` field of the spec).
 type Workspace_Spec_Image_Repository struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the source of the image inside the repository
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*Workspace_Spec_Image_Repository_Devcontainer_
@@ -6193,10 +6792,14 @@ type isWorkspace_Spec_Image_Repository_Type interface {
 }
 
 type Workspace_Spec_Image_Repository_Devcontainer_ struct {
+	// Devcontainer builds the image from the repository's devcontainer
+	// spec.
 	Devcontainer *Workspace_Spec_Image_Repository_Devcontainer `protobuf:"bytes,1,opt,name=devcontainer,proto3,oneof"`
 }
 
 type Workspace_Spec_Image_Repository_Dockerfile_ struct {
+	// Dockerfile builds the image from a Dockerfile inside the
+	// repository.
 	Dockerfile *Workspace_Spec_Image_Repository_Dockerfile `protobuf:"bytes,2,opt,name=dockerfile,proto3,oneof"`
 }
 
@@ -6204,9 +6807,13 @@ func (*Workspace_Spec_Image_Repository_Devcontainer_) isWorkspace_Spec_Image_Rep
 
 func (*Workspace_Spec_Image_Repository_Dockerfile_) isWorkspace_Spec_Image_Repository_Type() {}
 
+// Authentication is the credentials that are used to pull the image
+// from a private registry.
 type Workspace_Spec_Image_Registry_Authentication struct {
-	state         protoimpl.MessageState                                 `protogen:"open.v1"`
-	Username      string                                                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Username is the registry username.
+	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	// Password is the registry password.
 	Password      *Workspace_Spec_Image_Registry_Authentication_Password `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -6256,8 +6863,11 @@ func (x *Workspace_Spec_Image_Registry_Authentication) GetPassword() *Workspace_
 	return nil
 }
 
+// Password is the registry password or token.
 type Workspace_Spec_Image_Registry_Authentication_Password struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the source of the password
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*Workspace_Spec_Image_Registry_Authentication_Password_FromSecret
@@ -6317,15 +6927,22 @@ type isWorkspace_Spec_Image_Registry_Authentication_Password_Type interface {
 }
 
 type Workspace_Spec_Image_Registry_Authentication_Password_FromSecret struct {
+	// FromSecret is the name of a Secret in the same Space whose
+	// content is used as the password. It is resolved by the Cluster
+	// at initialization time.
 	FromSecret string `protobuf:"bytes,1,opt,name=fromSecret,proto3,oneof"`
 }
 
 func (*Workspace_Spec_Image_Registry_Authentication_Password_FromSecret) isWorkspace_Spec_Image_Registry_Authentication_Password_Type() {
 }
 
+// Devcontainer builds the image from the Development Container spec
+// that is contained in the repository.
 type Workspace_Spec_Image_Repository_Devcontainer struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	DirPath       string                 `protobuf:"bytes,1,opt,name=dirPath,proto3" json:"dirPath,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// DirPath is the directory of the devcontainer spec inside the
+	// repository (e.g. `.devcontainer`).
+	DirPath       string `protobuf:"bytes,1,opt,name=dirPath,proto3" json:"dirPath,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -6367,10 +6984,16 @@ func (x *Workspace_Spec_Image_Repository_Devcontainer) GetDirPath() string {
 	return ""
 }
 
+// Dockerfile builds the image from a Dockerfile that is contained in
+// the repository.
 type Workspace_Spec_Image_Repository_Dockerfile struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Path          string                 `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
-	Context       string                 `protobuf:"bytes,2,opt,name=context,proto3" json:"context,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Path is the path of the Dockerfile inside the repository (e.g.
+	// `docker/Dockerfile.dev`).
+	Path string `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
+	// Context is the build context directory inside the repository. It
+	// defaults to the repository root.
+	Context       string `protobuf:"bytes,2,opt,name=context,proto3" json:"context,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -6419,8 +7042,14 @@ func (x *Workspace_Spec_Image_Repository_Dockerfile) GetContext() string {
 	return ""
 }
 
+// Authentication is the credentials that are used to clone private
+// repositories. It is not needed when a GitProvider is associated with
+// the Template since, in that case, the User's OAuth2 token is
+// automatically injected instead.
 type Workspace_Spec_Repository_Authentication struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the authentication method
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*Workspace_Spec_Repository_Authentication_Http
@@ -6480,20 +7109,33 @@ type isWorkspace_Spec_Repository_Authentication_Type interface {
 }
 
 type Workspace_Spec_Repository_Authentication_Http struct {
+	// HTTP is the HTTP basic authentication.
 	Http *Workspace_Spec_Repository_Authentication_HTTP `protobuf:"bytes,1,opt,name=http,proto3,oneof"`
 }
 
 func (*Workspace_Spec_Repository_Authentication_Http) isWorkspace_Spec_Repository_Authentication_Type() {
 }
 
+// CloneOptions controls how the repository is cloned.
 type Workspace_Spec_Repository_CloneOptions struct {
-	state                protoimpl.MessageState `protogen:"open.v1"`
-	Branch               string                 `protobuf:"bytes,1,opt,name=branch,proto3" json:"branch,omitempty"`
-	Depth                uint32                 `protobuf:"varint,2,opt,name=depth,proto3" json:"depth,omitempty"`
-	SingleBranch         bool                   `protobuf:"varint,3,opt,name=singleBranch,proto3" json:"singleBranch,omitempty"`
-	ShallowSubmodules    bool                   `protobuf:"varint,4,opt,name=shallowSubmodules,proto3" json:"shallowSubmodules,omitempty"`
-	Checkout             string                 `protobuf:"bytes,5,opt,name=checkout,proto3" json:"checkout,omitempty"`
-	DisableLazyUnshallow bool                   `protobuf:"varint,6,opt,name=disableLazyUnshallow,proto3" json:"disableLazyUnshallow,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Branch is the branch to be cloned. It defaults to the repository's
+	// default branch.
+	Branch string `protobuf:"bytes,1,opt,name=branch,proto3" json:"branch,omitempty"`
+	// Depth is the number of commits to be fetched. It is only effective
+	// when disableLazyUnshallow is set.
+	Depth uint32 `protobuf:"varint,2,opt,name=depth,proto3" json:"depth,omitempty"`
+	// SingleBranch fetches only the chosen branch instead of every branch.
+	SingleBranch bool `protobuf:"varint,3,opt,name=singleBranch,proto3" json:"singleBranch,omitempty"`
+	// ShallowSubmodules clones the repository's submodules with a depth of
+	// 1.
+	ShallowSubmodules bool `protobuf:"varint,4,opt,name=shallowSubmodules,proto3" json:"shallowSubmodules,omitempty"`
+	// Checkout is an optional commit or tag to check out after cloning.
+	Checkout string `protobuf:"bytes,5,opt,name=checkout,proto3" json:"checkout,omitempty"`
+	// DisableLazyUnshallow disables Cordium's default behavior of
+	// performing a shallow clone for a faster startup and then fetching
+	// the full history asynchronously in the background.
+	DisableLazyUnshallow bool `protobuf:"varint,6,opt,name=disableLazyUnshallow,proto3" json:"disableLazyUnshallow,omitempty"`
 	unknownFields        protoimpl.UnknownFields
 	sizeCache            protoimpl.SizeCache
 }
@@ -6570,9 +7212,12 @@ func (x *Workspace_Spec_Repository_CloneOptions) GetDisableLazyUnshallow() bool 
 	return false
 }
 
+// HTTP is the HTTP basic authentication credentials.
 type Workspace_Spec_Repository_Authentication_HTTP struct {
-	state         protoimpl.MessageState                                  `protogen:"open.v1"`
-	Username      string                                                  `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Username is the basic authentication username (e.g. `oauth2`).
+	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	// Password is the basic authentication password.
 	Password      *Workspace_Spec_Repository_Authentication_HTTP_Password `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -6622,8 +7267,11 @@ func (x *Workspace_Spec_Repository_Authentication_HTTP) GetPassword() *Workspace
 	return nil
 }
 
+// Password is the password, token or personal access token.
 type Workspace_Spec_Repository_Authentication_HTTP_Password struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the source of the password
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*Workspace_Spec_Repository_Authentication_HTTP_Password_FromSecret
@@ -6683,15 +7331,23 @@ type isWorkspace_Spec_Repository_Authentication_HTTP_Password_Type interface {
 }
 
 type Workspace_Spec_Repository_Authentication_HTTP_Password_FromSecret struct {
+	// FromSecret is the name of a Secret in the same Space whose
+	// content is used as the password. It is resolved by the Cluster
+	// at initialization time.
 	FromSecret string `protobuf:"bytes,1,opt,name=fromSecret,proto3,oneof"`
 }
 
 func (*Workspace_Spec_Repository_Authentication_HTTP_Password_FromSecret) isWorkspace_Spec_Repository_Authentication_HTTP_Password_Type() {
 }
 
+// EnvVar is an environment variable that is injected into the Workspace
+// container as well as into all of its lifecycle tasks.
 type Workspace_Spec_Runtime_EnvVar struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	Key   string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	// Key is the environment variable's name.
+	Key string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	// Type is the source of the environment variable's value
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*Workspace_Spec_Runtime_EnvVar_Value
@@ -6768,10 +7424,14 @@ type isWorkspace_Spec_Runtime_EnvVar_Type interface {
 }
 
 type Workspace_Spec_Runtime_EnvVar_Value struct {
+	// Value is the value provided directly as a string.
 	Value string `protobuf:"bytes,2,opt,name=value,proto3,oneof"`
 }
 
 type Workspace_Spec_Runtime_EnvVar_FromSecret struct {
+	// FromSecret is the name of a Secret in the same Space whose content
+	// is used as the value. It is resolved by the Cluster at
+	// initialization time.
 	FromSecret string `protobuf:"bytes,3,opt,name=fromSecret,proto3,oneof"`
 }
 
@@ -6779,16 +7439,31 @@ func (*Workspace_Spec_Runtime_EnvVar_Value) isWorkspace_Spec_Runtime_EnvVar_Type
 
 func (*Workspace_Spec_Runtime_EnvVar_FromSecret) isWorkspace_Spec_Runtime_EnvVar_Type() {}
 
+// Task is a command that is run at a defined point of the Workspace's
+// lifecycle.
 type Workspace_Spec_Runtime_Task struct {
-	state         protoimpl.MessageState                `protogen:"open.v1"`
-	Name          string                                `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Run           string                                `protobuf:"bytes,2,opt,name=run,proto3" json:"run,omitempty"`
-	Type          Workspace_Spec_Runtime_Task_Type      `protobuf:"varint,3,opt,name=type,proto3,enum=octelium.api.main.cordium.v1.Workspace_Spec_Runtime_Task_Type" json:"type,omitempty"`
-	EnvVars       []*Workspace_Spec_Runtime_Task_EnvVar `protobuf:"bytes,4,rep,name=envVars,proto3" json:"envVars,omitempty"`
-	WorkingDir    string                                `protobuf:"bytes,5,opt,name=workingDir,proto3" json:"workingDir,omitempty"`
-	IsBackground  bool                                  `protobuf:"varint,6,opt,name=isBackground,proto3" json:"isBackground,omitempty"`
-	OnFailure     Workspace_Spec_Runtime_Task_OnFailure `protobuf:"varint,7,opt,name=onFailure,proto3,enum=octelium.api.main.cordium.v1.Workspace_Spec_Runtime_Task_OnFailure" json:"onFailure,omitempty"`
-	RunAsRoot     bool                                  `protobuf:"varint,8,opt,name=runAsRoot,proto3" json:"runAsRoot,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Name is a unique name for the Task. It is used in the logs and in
+	// the failure reporting.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Run is the shell command that is executed by the Task.
+	Run string `protobuf:"bytes,2,opt,name=run,proto3" json:"run,omitempty"`
+	// Type is the point of the lifecycle at which the Task is run. It must
+	// be set.
+	Type Workspace_Spec_Runtime_Task_Type `protobuf:"varint,3,opt,name=type,proto3,enum=octelium.api.main.cordium.v1.Workspace_Spec_Runtime_Task_Type" json:"type,omitempty"`
+	// EnvVars is the list of per-task environment variables.
+	EnvVars []*Workspace_Spec_Runtime_Task_EnvVar `protobuf:"bytes,4,rep,name=envVars,proto3" json:"envVars,omitempty"`
+	// WorkingDir is the working directory of the Task. It defaults to the
+	// Workspace User's home directory.
+	WorkingDir string `protobuf:"bytes,5,opt,name=workingDir,proto3" json:"workingDir,omitempty"`
+	// IsBackground starts the Task and lets the Workspace's initialization
+	// proceed without waiting for the Task to complete.
+	IsBackground bool `protobuf:"varint,6,opt,name=isBackground,proto3" json:"isBackground,omitempty"`
+	// OnFailure controls whether a failure of the Task aborts the
+	// initialization of the Workspace.
+	OnFailure Workspace_Spec_Runtime_Task_OnFailure `protobuf:"varint,7,opt,name=onFailure,proto3,enum=octelium.api.main.cordium.v1.Workspace_Spec_Runtime_Task_OnFailure" json:"onFailure,omitempty"`
+	// RunAsRoot runs the Task as `root` instead of as the Workspace User.
+	RunAsRoot     bool `protobuf:"varint,8,opt,name=runAsRoot,proto3" json:"runAsRoot,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -6879,8 +7554,12 @@ func (x *Workspace_Spec_Runtime_Task) GetRunAsRoot() bool {
 	return false
 }
 
+// Devcontainers is the Development Container-related configuration.
 type Workspace_Spec_Runtime_Devcontainers struct {
-	state         protoimpl.MessageState                          `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Features is the list of the Development Container Features that are
+	// installed inside the Workspace. They are merged with the Features
+	// that are declared by the repository's own devcontainer spec, if any.
 	Features      []*Workspace_Spec_Runtime_Devcontainers_Feature `protobuf:"bytes,1,rep,name=features,proto3" json:"features,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -6923,10 +7602,19 @@ func (x *Workspace_Spec_Runtime_Devcontainers) GetFeatures() []*Workspace_Spec_R
 	return nil
 }
 
+// Octelium controls the `octelium connect` process that runs inside the
+// Workspace using the Workspace's own dedicated Octelium Session. It is
+// what enables secretless access from inside the Workspace to the
+// Octelium Services that its owner User is authorized to access.
 type Workspace_Spec_Runtime_Octelium struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ServeServices []string               `protobuf:"bytes,1,rep,name=serveServices,proto3" json:"serveServices,omitempty"`
-	ServeAll      bool                   `protobuf:"varint,2,opt,name=serveAll,proto3" json:"serveAll,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ServeServices is the list of the names of the Octelium Services,
+	// among the ones assigned to the owner User, that are served inside
+	// the Workspace.
+	ServeServices []string `protobuf:"bytes,1,rep,name=serveServices,proto3" json:"serveServices,omitempty"`
+	// ServeAll serves every Octelium Service that is assigned to the owner
+	// User inside the Workspace.
+	ServeAll      bool `protobuf:"varint,2,opt,name=serveAll,proto3" json:"serveAll,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -6975,6 +7663,7 @@ func (x *Workspace_Spec_Runtime_Octelium) GetServeAll() bool {
 	return false
 }
 
+// Network is the network-related configuration of the Workspace.
 type Workspace_Spec_Runtime_Network struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -7011,9 +7700,11 @@ func (*Workspace_Spec_Runtime_Network) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 0, 3, 4}
 }
 
+// Filesystem is the container filesystem configuration.
 type Workspace_Spec_Runtime_Filesystem struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ReadOnly      bool                   `protobuf:"varint,1,opt,name=readOnly,proto3" json:"readOnly,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ReadOnly makes the container's root filesystem read-only.
+	ReadOnly      bool `protobuf:"varint,1,opt,name=readOnly,proto3" json:"readOnly,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7055,10 +7746,17 @@ func (x *Workspace_Spec_Runtime_Filesystem) GetReadOnly() bool {
 	return false
 }
 
+// Capabilities is the Linux capabilities of the Workspace's container.
+// It is merged with the Space-level and the ClusterConfig-level
+// capabilities.
 type Workspace_Spec_Runtime_Capabilities struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Add           []string               `protobuf:"bytes,1,rep,name=add,proto3" json:"add,omitempty"`
-	Drop          []string               `protobuf:"bytes,2,rep,name=drop,proto3" json:"drop,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Add is the list of the Linux capabilities that are added (e.g.
+	// `NET_ADMIN`).
+	Add []string `protobuf:"bytes,1,rep,name=add,proto3" json:"add,omitempty"`
+	// Drop is the list of the Linux capabilities that are dropped (e.g.
+	// `NET_RAW`).
+	Drop          []string `protobuf:"bytes,2,rep,name=drop,proto3" json:"drop,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7107,8 +7805,11 @@ func (x *Workspace_Spec_Runtime_Capabilities) GetDrop() []string {
 	return nil
 }
 
+// Timeout controls the inactivity timeout after which a running
+// Workspace is automatically stopped by the Cluster.
 type Workspace_Spec_Runtime_Timeout struct {
-	state         protoimpl.MessageState              `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Mode is the inactivity timeout mode.
 	Mode          Workspace_Spec_Runtime_Timeout_Mode `protobuf:"varint,1,opt,name=mode,proto3,enum=octelium.api.main.cordium.v1.Workspace_Spec_Runtime_Timeout_Mode" json:"mode,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -7151,10 +7852,14 @@ func (x *Workspace_Spec_Runtime_Timeout) GetMode() Workspace_Spec_Runtime_Timeou
 	return Workspace_Spec_Runtime_Timeout_MODE_UNSET
 }
 
+// EnvVar is a per-task environment variable which is merged with the
+// Workspace-level environment variables.
 type Workspace_Spec_Runtime_Task_EnvVar struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
-	Value         string                 `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Key is the environment variable's name.
+	Key string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	// Value is the environment variable's value.
+	Value         string `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7203,9 +7908,14 @@ func (x *Workspace_Spec_Runtime_Task_EnvVar) GetValue() string {
 	return ""
 }
 
+// Feature is a Development Container Feature that is installed inside
+// the Workspace.
 type Workspace_Spec_Runtime_Devcontainers_Feature struct {
-	state         protoimpl.MessageState                                 `protogen:"open.v1"`
-	Reference     string                                                 `protobuf:"bytes,1,opt,name=reference,proto3" json:"reference,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Reference is the OCI reference of the Feature (e.g.
+	// `ghcr.io/devcontainers/features/docker-in-docker:2`).
+	Reference string `protobuf:"bytes,1,opt,name=reference,proto3" json:"reference,omitempty"`
+	// Options is the list of the Feature's installation options.
 	Options       []*Workspace_Spec_Runtime_Devcontainers_Feature_Option `protobuf:"bytes,2,rep,name=options,proto3" json:"options,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -7255,10 +7965,13 @@ func (x *Workspace_Spec_Runtime_Devcontainers_Feature) GetOptions() []*Workspace
 	return nil
 }
 
+// Option is a Feature-specific installation option.
 type Workspace_Spec_Runtime_Devcontainers_Feature_Option struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
-	Value         string                 `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Key is the option's name.
+	Key string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	// Value is the option's value.
+	Value         string `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7307,9 +8020,12 @@ func (x *Workspace_Spec_Runtime_Devcontainers_Feature_Option) GetValue() string 
 	return ""
 }
 
+// Rule is a network rule that matches a set of network ranges.
 type Workspace_Spec_Runtime_Network_Rule struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Cidrs         []string               `protobuf:"bytes,1,rep,name=cidrs,proto3" json:"cidrs,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// CIDRs is the list of the network ranges, in CIDR notation, that
+	// are matched by the Rule.
+	Cidrs         []string `protobuf:"bytes,1,rep,name=cidrs,proto3" json:"cidrs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7351,9 +8067,12 @@ func (x *Workspace_Spec_Runtime_Network_Rule) GetCidrs() []string {
 	return nil
 }
 
+// Egress is the egress (i.e. outbound) traffic configuration.
 type Workspace_Spec_Runtime_Network_Egress struct {
-	state         protoimpl.MessageState                     `protogen:"open.v1"`
-	Rules         []*Workspace_Spec_Runtime_Network_Rule     `protobuf:"bytes,1,rep,name=rules,proto3" json:"rules,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Rules is the list of the egress rules that are evaluated in order.
+	Rules []*Workspace_Spec_Runtime_Network_Rule `protobuf:"bytes,1,rep,name=rules,proto3" json:"rules,omitempty"`
+	// DefaultAction is the action that is applied when no Rule matches.
 	DefaultAction Workspace_Spec_Runtime_Network_Rule_Action `protobuf:"varint,2,opt,name=defaultAction,proto3,enum=octelium.api.main.cordium.v1.Workspace_Spec_Runtime_Network_Rule_Action" json:"defaultAction,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -7403,9 +8122,12 @@ func (x *Workspace_Spec_Runtime_Network_Egress) GetDefaultAction() Workspace_Spe
 	return Workspace_Spec_Runtime_Network_Rule_ACTION_UNSET
 }
 
+// CPU is the CPU allocation.
 type Workspace_Spec_Limit_CPU struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Millicores    uint32                 `protobuf:"varint,1,opt,name=millicores,proto3" json:"millicores,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Millicores is the number of CPU millicores (i.e. 1 core equals 1000
+	// millicores).
+	Millicores    uint32 `protobuf:"varint,1,opt,name=millicores,proto3" json:"millicores,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7447,9 +8169,11 @@ func (x *Workspace_Spec_Limit_CPU) GetMillicores() uint32 {
 	return 0
 }
 
+// Memory is the memory allocation.
 type Workspace_Spec_Limit_Memory struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Megabytes     uint32                 `protobuf:"varint,1,opt,name=megabytes,proto3" json:"megabytes,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Megabytes is the amount of memory in megabytes.
+	Megabytes     uint32 `protobuf:"varint,1,opt,name=megabytes,proto3" json:"megabytes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7491,9 +8215,11 @@ func (x *Workspace_Spec_Limit_Memory) GetMegabytes() uint32 {
 	return 0
 }
 
+// Storage is the storage allocation.
 type Workspace_Spec_Limit_Storage struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Megabytes     uint32                 `protobuf:"varint,2,opt,name=megabytes,proto3" json:"megabytes,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Megabytes is the amount of disk storage in megabytes.
+	Megabytes     uint32 `protobuf:"varint,2,opt,name=megabytes,proto3" json:"megabytes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -7535,9 +8261,13 @@ func (x *Workspace_Spec_Limit_Storage) GetMegabytes() uint32 {
 	return 0
 }
 
+// Failure describes the reason of the failure of a Workspace run.
 type Workspace_Status_Failure struct {
-	state   protoimpl.MessageState `protogen:"open.v1"`
-	Message string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Message is a human-readable description of the failure.
+	Message string `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	// Type is the specific reason of the failure
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*Workspace_Status_Failure_ImageBuild_
@@ -7734,58 +8464,77 @@ type isWorkspace_Status_Failure_Type interface {
 }
 
 type Workspace_Status_Failure_ImageBuild_ struct {
+	// ImageBuild means that building the container image failed.
 	ImageBuild *Workspace_Status_Failure_ImageBuild `protobuf:"bytes,2,opt,name=imageBuild,proto3,oneof"`
 }
 
 type Workspace_Status_Failure_ImagePull_ struct {
+	// ImagePull means that pulling the container image failed.
 	ImagePull *Workspace_Status_Failure_ImagePull `protobuf:"bytes,3,opt,name=imagePull,proto3,oneof"`
 }
 
 type Workspace_Status_Failure_RepoClone_ struct {
+	// RepoClone means that cloning the primary repository failed.
 	RepoClone *Workspace_Status_Failure_RepoClone `protobuf:"bytes,4,opt,name=repoClone,proto3,oneof"`
 }
 
 type Workspace_Status_Failure_BuildTimeoutExceeded_ struct {
+	// BuildTimeoutExceeded means that the image build did not complete
+	// within the allowed duration.
 	BuildTimeoutExceeded *Workspace_Status_Failure_BuildTimeoutExceeded `protobuf:"bytes,5,opt,name=buildTimeoutExceeded,proto3,oneof"`
 }
 
 type Workspace_Status_Failure_Task_ struct {
+	// Task means that a lifecycle task failed.
 	Task *Workspace_Status_Failure_Task `protobuf:"bytes,6,opt,name=task,proto3,oneof"`
 }
 
 type Workspace_Status_Failure_StartupUnknown_ struct {
+	// StartupUnknown means that the Workspace failed to start for an
+	// undetermined reason.
 	StartupUnknown *Workspace_Status_Failure_StartupUnknown `protobuf:"bytes,7,opt,name=startupUnknown,proto3,oneof"`
 }
 
 type Workspace_Status_Failure_StartupTimeoutExceeded_ struct {
+	// StartupTimeoutExceeded means that the Workspace did not become ready
+	// within the allowed duration.
 	StartupTimeoutExceeded *Workspace_Status_Failure_StartupTimeoutExceeded `protobuf:"bytes,8,opt,name=startupTimeoutExceeded,proto3,oneof"`
 }
 
 type Workspace_Status_Failure_LoadStorage_ struct {
+	// LoadStorage means that loading the persistent storage failed.
 	LoadStorage *Workspace_Status_Failure_LoadStorage `protobuf:"bytes,9,opt,name=loadStorage,proto3,oneof"`
 }
 
 type Workspace_Status_Failure_SaveStorage_ struct {
+	// SaveStorage means that saving the persistent storage failed.
 	SaveStorage *Workspace_Status_Failure_SaveStorage `protobuf:"bytes,10,opt,name=saveStorage,proto3,oneof"`
 }
 
 type Workspace_Status_Failure_StoppageTimeoutExceeded_ struct {
+	// StoppageTimeoutExceeded means that the Workspace did not stop
+	// gracefully within the allowed duration.
 	StoppageTimeoutExceeded *Workspace_Status_Failure_StoppageTimeoutExceeded `protobuf:"bytes,11,opt,name=stoppageTimeoutExceeded,proto3,oneof"`
 }
 
 type Workspace_Status_Failure_RunContainer_ struct {
+	// RunContainer means that running the Workspace's container failed.
 	RunContainer *Workspace_Status_Failure_RunContainer `protobuf:"bytes,12,opt,name=runContainer,proto3,oneof"`
 }
 
 type Workspace_Status_Failure_HealthCheck_ struct {
+	// HealthCheck means that the Workspace failed its health checks.
 	HealthCheck *Workspace_Status_Failure_HealthCheck `protobuf:"bytes,13,opt,name=healthCheck,proto3,oneof"`
 }
 
 type Workspace_Status_Failure_Unknown_ struct {
+	// Unknown means that the run failed for an unclassified reason.
 	Unknown *Workspace_Status_Failure_Unknown `protobuf:"bytes,14,opt,name=unknown,proto3,oneof"`
 }
 
 type Workspace_Status_Failure_AdditionalRepoClone_ struct {
+	// AdditionalRepoClone means that cloning one of the additional
+	// repositories failed.
 	AdditionalRepoClone *Workspace_Status_Failure_AdditionalRepoClone `protobuf:"bytes,15,opt,name=additionalRepoClone,proto3,oneof"`
 }
 
@@ -7817,10 +8566,15 @@ func (*Workspace_Status_Failure_Unknown_) isWorkspace_Status_Failure_Type() {}
 
 func (*Workspace_Status_Failure_AdditionalRepoClone_) isWorkspace_Status_Failure_Type() {}
 
+// SharedPort is a named Application of the Workspace that is shared with
+// other Users. It is set via the ShareWorkspacePort method.
 type Workspace_Status_SharedPort struct {
-	state           protoimpl.MessageState           `protogen:"open.v1"`
-	Mode            Workspace_Status_SharedPort_Mode `protobuf:"varint,1,opt,name=mode,proto3,enum=octelium.api.main.cordium.v1.Workspace_Status_SharedPort_Mode" json:"mode,omitempty"`
-	ApplicationName string                           `protobuf:"bytes,2,opt,name=applicationName,proto3" json:"applicationName,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Mode is the audience with which the Application is shared.
+	Mode Workspace_Status_SharedPort_Mode `protobuf:"varint,1,opt,name=mode,proto3,enum=octelium.api.main.cordium.v1.Workspace_Status_SharedPort_Mode" json:"mode,omitempty"`
+	// ApplicationName is the name of the shared Application as it is defined
+	// in the Workspace's spec.
+	ApplicationName string `protobuf:"bytes,2,opt,name=applicationName,proto3" json:"applicationName,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -7869,12 +8623,20 @@ func (x *Workspace_Status_SharedPort) GetApplicationName() string {
 	return ""
 }
 
+// Run is a single run of the Workspace (i.e. the period spanning from a
+// start request until the Workspace is stopped).
 type Workspace_Status_Run struct {
-	state         protoimpl.MessageState        `protogen:"open.v1"`
-	Id            string                        `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	InitializedAt *timestamppb.Timestamp        `protobuf:"bytes,2,opt,name=initializedAt,proto3" json:"initializedAt,omitempty"`
-	StoppedAt     *timestamppb.Timestamp        `protobuf:"bytes,3,opt,name=stoppedAt,proto3" json:"stoppedAt,omitempty"`
-	Failure       *Workspace_Status_Failure     `protobuf:"bytes,4,opt,name=failure,proto3" json:"failure,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ID is a randomly generated identifier of the run.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// InitializedAt is the timestamp at which the run was initialized.
+	InitializedAt *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=initializedAt,proto3" json:"initializedAt,omitempty"`
+	// StoppedAt is the timestamp at which the run was stopped.
+	StoppedAt *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=stoppedAt,proto3" json:"stoppedAt,omitempty"`
+	// Failure is set when the run failed.
+	Failure *Workspace_Status_Failure `protobuf:"bytes,4,opt,name=failure,proto3" json:"failure,omitempty"`
+	// Config is the run-specific configuration that was supplied with the
+	// start request.
 	Config        *StartWorkspaceRequest_Config `protobuf:"bytes,5,opt,name=config,proto3" json:"config,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -7945,6 +8707,7 @@ func (x *Workspace_Status_Run) GetConfig() *StartWorkspaceRequest_Config {
 	return nil
 }
 
+// ImageBuild means that building the container image failed.
 type Workspace_Status_Failure_ImageBuild struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -7981,6 +8744,7 @@ func (*Workspace_Status_Failure_ImageBuild) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 1, 0, 0}
 }
 
+// ImagePull means that pulling the container image failed.
 type Workspace_Status_Failure_ImagePull struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -8017,6 +8781,7 @@ func (*Workspace_Status_Failure_ImagePull) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 1, 0, 1}
 }
 
+// RepoClone means that cloning the primary repository failed.
 type Workspace_Status_Failure_RepoClone struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -8053,6 +8818,8 @@ func (*Workspace_Status_Failure_RepoClone) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 1, 0, 2}
 }
 
+// RepoCheckout means that checking out the requested branch, tag or
+// commit of the primary repository failed.
 type Workspace_Status_Failure_RepoCheckout struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -8089,6 +8856,8 @@ func (*Workspace_Status_Failure_RepoCheckout) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 1, 0, 3}
 }
 
+// BuildTimeoutExceeded means that the image build did not complete
+// within the allowed duration.
 type Workspace_Status_Failure_BuildTimeoutExceeded struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -8125,10 +8894,14 @@ func (*Workspace_Status_Failure_BuildTimeoutExceeded) Descriptor() ([]byte, []in
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 1, 0, 4}
 }
 
+// Task means that a lifecycle task failed while its onFailure was set to
+// abort the initialization.
 type Workspace_Status_Failure_Task struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	ExitCode      int32                  `protobuf:"varint,2,opt,name=exitCode,proto3" json:"exitCode,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Name is the name of the failed Task.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// ExitCode is the exit code with which the Task's command exited.
+	ExitCode      int32 `protobuf:"varint,2,opt,name=exitCode,proto3" json:"exitCode,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -8177,6 +8950,8 @@ func (x *Workspace_Status_Failure_Task) GetExitCode() int32 {
 	return 0
 }
 
+// StartupUnknown means that the Workspace failed to start for an
+// undetermined reason.
 type Workspace_Status_Failure_StartupUnknown struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -8213,6 +8988,8 @@ func (*Workspace_Status_Failure_StartupUnknown) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 1, 0, 6}
 }
 
+// StartupTimeoutExceeded means that the Workspace did not become ready
+// within the allowed duration.
 type Workspace_Status_Failure_StartupTimeoutExceeded struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -8249,6 +9026,8 @@ func (*Workspace_Status_Failure_StartupTimeoutExceeded) Descriptor() ([]byte, []
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 1, 0, 7}
 }
 
+// LoadStorage means that loading the Workspace's persistent storage
+// failed.
 type Workspace_Status_Failure_LoadStorage struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -8285,6 +9064,8 @@ func (*Workspace_Status_Failure_LoadStorage) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 1, 0, 8}
 }
 
+// SaveStorage means that saving the Workspace's persistent storage
+// failed.
 type Workspace_Status_Failure_SaveStorage struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -8321,6 +9102,8 @@ func (*Workspace_Status_Failure_SaveStorage) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 1, 0, 9}
 }
 
+// StoppageTimeoutExceeded means that the Workspace did not stop
+// gracefully within the allowed duration.
 type Workspace_Status_Failure_StoppageTimeoutExceeded struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -8357,6 +9140,7 @@ func (*Workspace_Status_Failure_StoppageTimeoutExceeded) Descriptor() ([]byte, [
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 1, 0, 10}
 }
 
+// RunContainer means that running the Workspace's container failed.
 type Workspace_Status_Failure_RunContainer struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -8393,6 +9177,7 @@ func (*Workspace_Status_Failure_RunContainer) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 1, 0, 11}
 }
 
+// HealthCheck means that the Workspace failed its health checks.
 type Workspace_Status_Failure_HealthCheck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -8429,6 +9214,7 @@ func (*Workspace_Status_Failure_HealthCheck) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 1, 0, 12}
 }
 
+// Unknown means that the run failed for an unclassified reason.
 type Workspace_Status_Failure_Unknown struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -8465,9 +9251,13 @@ func (*Workspace_Status_Failure_Unknown) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{0, 1, 0, 13}
 }
 
+// AdditionalRepoClone means that cloning one of the additional
+// repositories failed.
 type Workspace_Status_Failure_AdditionalRepoClone struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Name is the name of the additional repository that failed to be
+	// cloned.
+	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -8509,6 +9299,7 @@ func (x *Workspace_Status_Failure_AdditionalRepoClone) GetName() string {
 	return ""
 }
 
+// Spec is the Secret specification. It is intentionally empty.
 type Secret_Spec struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -8545,9 +9336,13 @@ func (*Secret_Spec) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{3, 0}
 }
 
+// Status is the current status of the Secret. It is managed by the Cluster
+// and it is read-only.
 type Secret_Status struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
-	SpaceRef      *metav1.ObjectReference `protobuf:"bytes,1,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// SpaceRef is the reference of the Space that owns the Secret.
+	SpaceRef *metav1.ObjectReference `protobuf:"bytes,1,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
+	// UserRef is the reference of the Octelium User who created the Secret.
 	UserRef       *metav1.ObjectReference `protobuf:"bytes,2,opt,name=userRef,proto3" json:"userRef,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -8597,8 +9392,12 @@ func (x *Secret_Status) GetUserRef() *metav1.ObjectReference {
 	return nil
 }
 
+// Data is the Secret's sensitive content. It is write-only (i.e. it can only
+// be set at creation time and it is never returned back by the API).
 type Secret_Data struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the format of the Secret's content
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*Secret_Data_Value
@@ -8678,14 +9477,17 @@ type isSecret_Data_Type interface {
 }
 
 type Secret_Data_Value struct {
+	// Value is the content provided as a string.
 	Value string `protobuf:"bytes,1,opt,name=value,proto3,oneof"`
 }
 
 type Secret_Data_ValueBytes struct {
+	// ValueBytes is the content provided as raw bytes.
 	ValueBytes []byte `protobuf:"bytes,2,opt,name=valueBytes,proto3,oneof"`
 }
 
 type Secret_Data_Attrs struct {
+	// Attrs is the content provided as a structured map of attributes.
 	Attrs *structpb.Struct `protobuf:"bytes,3,opt,name=attrs,proto3,oneof"`
 }
 
@@ -8695,9 +9497,12 @@ func (*Secret_Data_ValueBytes) isSecret_Data_Type() {}
 
 func (*Secret_Data_Attrs) isSecret_Data_Type() {}
 
+// ListenTerminalEndRequest stops listening to a terminal's output without
+// terminating the terminal itself.
 type ClientMessage_ListenTerminalEndRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ID is the ID of the terminal to stop listening to.
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -8739,9 +9544,12 @@ func (x *ClientMessage_ListenTerminalEndRequest) GetId() string {
 	return ""
 }
 
+// WorkspaceUpdate publishes the current state of one of the User's
+// Workspaces.
 type ServerMessage_WorkspaceUpdate struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Workspace     *Workspace             `protobuf:"bytes,1,opt,name=workspace,proto3" json:"workspace,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Workspace is the updated Workspace.
+	Workspace     *Workspace `protobuf:"bytes,1,opt,name=workspace,proto3" json:"workspace,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -8783,9 +9591,13 @@ func (x *ServerMessage_WorkspaceUpdate) GetWorkspace() *Workspace {
 	return nil
 }
 
+// ListenTerminalEvent publishes an output event of a terminal that the
+// client is listening to.
 type ServerMessage_ListenTerminalEvent struct {
-	state                  protoimpl.MessageState  `protogen:"open.v1"`
-	Id                     string                  `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ID is the ID of the terminal that the event belongs to.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// ListenTerminalResponse is the terminal's output event.
 	ListenTerminalResponse *ListenTerminalResponse `protobuf:"bytes,2,opt,name=listenTerminalResponse,proto3" json:"listenTerminalResponse,omitempty"`
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
@@ -8835,9 +9647,16 @@ func (x *ServerMessage_ListenTerminalEvent) GetListenTerminalResponse() *ListenT
 	return nil
 }
 
+// Config is the run-specific configuration that only applies to the run
+// being started.
 type StartWorkspaceRequest_Config struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
-	Vars          []*Workspace_Spec_Var   `protobuf:"bytes,1,rep,name=vars,proto3" json:"vars,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Vars is the list of the variables that override the Workspace's own
+	// variables for this run.
+	Vars []*Workspace_Spec_Var `protobuf:"bytes,1,rep,name=vars,proto3" json:"vars,omitempty"`
+	// RegionRef is the reference of the Region that is chosen to host the run.
+	// If it is unset, the Cluster picks a Region on its own, preferring the
+	// User's preferred Region if it is set in their UserConfig.
 	RegionRef     *metav1.ObjectReference `protobuf:"bytes,2,opt,name=regionRef,proto3" json:"regionRef,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -8887,17 +9706,33 @@ func (x *StartWorkspaceRequest_Config) GetRegionRef() *metav1.ObjectReference {
 	return nil
 }
 
+// Spec is the Template specification. It shares most of the Workspace spec.
 type Template_Spec struct {
-	state                  protoimpl.MessageState                 `protogen:"open.v1"`
-	Image                  *Workspace_Spec_Image                  `protobuf:"bytes,1,opt,name=image,proto3" json:"image,omitempty"`
-	Runtime                *Workspace_Spec_Runtime                `protobuf:"bytes,2,opt,name=runtime,proto3" json:"runtime,omitempty"`
-	Repository             *Workspace_Spec_Repository             `protobuf:"bytes,3,opt,name=repository,proto3" json:"repository,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Image defines how the container image of the Template's Workspaces is
+	// obtained.
+	Image *Workspace_Spec_Image `protobuf:"bytes,1,opt,name=image,proto3" json:"image,omitempty"`
+	// Runtime controls the behavior of the container of the Template's
+	// Workspaces.
+	Runtime *Workspace_Spec_Runtime `protobuf:"bytes,2,opt,name=runtime,proto3" json:"runtime,omitempty"`
+	// Repository is the primary git repository which is cloned into the
+	// Template's Workspaces.
+	Repository *Workspace_Spec_Repository `protobuf:"bytes,3,opt,name=repository,proto3" json:"repository,omitempty"`
+	// AdditionalRepositories is the list of the secondary repositories that
+	// are cloned alongside the primary one.
 	AdditionalRepositories []*Workspace_Spec_AdditionalRepository `protobuf:"bytes,4,rep,name=additionalRepositories,proto3" json:"additionalRepositories,omitempty"`
-	Limit                  *Workspace_Spec_Limit                  `protobuf:"bytes,5,opt,name=limit,proto3" json:"limit,omitempty"`
-	GitProvider            string                                 `protobuf:"bytes,6,opt,name=gitProvider,proto3" json:"gitProvider,omitempty"`
-	Vars                   []*Workspace_Spec_Var                  `protobuf:"bytes,7,rep,name=vars,proto3" json:"vars,omitempty"`
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	// Limit is the default compute resources that are allocated for the
+	// Template's Workspaces.
+	Limit *Workspace_Spec_Limit `protobuf:"bytes,5,opt,name=limit,proto3" json:"limit,omitempty"`
+	// GitProvider is the name of a GitProvider in the same Space. Once it is
+	// set, the User's stored OAuth2 token is automatically injected into the
+	// Template's Workspaces which enables authenticated git operations without
+	// any manual credential configuration.
+	GitProvider string `protobuf:"bytes,6,opt,name=gitProvider,proto3" json:"gitProvider,omitempty"`
+	// Vars is the list of the variables that are substituted inside the spec.
+	Vars          []*Workspace_Spec_Var `protobuf:"bytes,7,rep,name=vars,proto3" json:"vars,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Template_Spec) Reset() {
@@ -8979,14 +9814,21 @@ func (x *Template_Spec) GetVars() []*Workspace_Spec_Var {
 	return nil
 }
 
+// Status is the current status of the Template. It is managed by the Cluster
+// and it is read-only.
 type Template_Status struct {
-	state          protoimpl.MessageState     `protogen:"open.v1"`
-	SpaceRef       *metav1.ObjectReference    `protobuf:"bytes,1,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
-	UserRef        *metav1.ObjectReference    `protobuf:"bytes,2,opt,name=userRef,proto3" json:"userRef,omitempty"`
-	GitProviderRef *metav1.ObjectReference    `protobuf:"bytes,3,opt,name=gitProviderRef,proto3" json:"gitProviderRef,omitempty"`
-	BuildInfo      *Template_Status_BuildInfo `protobuf:"bytes,4,opt,name=buildInfo,proto3" json:"buildInfo,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// SpaceRef is the reference of the Space that owns the Template.
+	SpaceRef *metav1.ObjectReference `protobuf:"bytes,1,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
+	// UserRef is the reference of the Octelium User who created the Template.
+	UserRef *metav1.ObjectReference `protobuf:"bytes,2,opt,name=userRef,proto3" json:"userRef,omitempty"`
+	// GitProviderRef is the reference of the GitProvider that is associated
+	// with the Template via the spec's gitProvider field.
+	GitProviderRef *metav1.ObjectReference `protobuf:"bytes,3,opt,name=gitProviderRef,proto3" json:"gitProviderRef,omitempty"`
+	// BuildInfo is the state of the Template's pre-builds.
+	BuildInfo     *Template_Status_BuildInfo `protobuf:"bytes,4,opt,name=buildInfo,proto3" json:"buildInfo,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Template_Status) Reset() {
@@ -9047,11 +9889,18 @@ func (x *Template_Status) GetBuildInfo() *Template_Status_BuildInfo {
 	return nil
 }
 
+// BuildInfo is the state of the Template's pre-builds.
 type Template_Status_BuildInfo struct {
-	state                 protoimpl.MessageState             `protogen:"open.v1"`
-	Builds                []*Template_Status_BuildInfo_Build `protobuf:"bytes,1,rep,name=builds,proto3" json:"builds,omitempty"`
-	CurrentReadyBuildID   string                             `protobuf:"bytes,2,opt,name=currentReadyBuildID,proto3" json:"currentReadyBuildID,omitempty"`
-	CurrentRunningBuildID string                             `protobuf:"bytes,3,opt,name=currentRunningBuildID,proto3" json:"currentRunningBuildID,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Builds is the history of the Template's pre-builds ordered from the
+	// most to the least recent one.
+	Builds []*Template_Status_BuildInfo_Build `protobuf:"bytes,1,rep,name=builds,proto3" json:"builds,omitempty"`
+	// CurrentReadyBuildID is the ID of the pre-build whose storage snapshot
+	// the new Workspaces of the Template are currently restored from.
+	CurrentReadyBuildID string `protobuf:"bytes,2,opt,name=currentReadyBuildID,proto3" json:"currentReadyBuildID,omitempty"`
+	// CurrentRunningBuildID is the ID of the pre-build that is currently
+	// running, if any.
+	CurrentRunningBuildID string `protobuf:"bytes,3,opt,name=currentRunningBuildID,proto3" json:"currentRunningBuildID,omitempty"`
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }
@@ -9107,14 +9956,25 @@ func (x *Template_Status_BuildInfo) GetCurrentRunningBuildID() string {
 	return ""
 }
 
+// Build is a single pre-build of the Template.
 type Template_Status_BuildInfo_Build struct {
-	state         protoimpl.MessageState                `protogen:"open.v1"`
-	Id            string                                `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Tags          []string                              `protobuf:"bytes,2,rep,name=tags,proto3" json:"tags,omitempty"`
-	StartedAt     *timestamppb.Timestamp                `protobuf:"bytes,3,opt,name=startedAt,proto3" json:"startedAt,omitempty"`
-	DoneAt        *timestamppb.Timestamp                `protobuf:"bytes,4,opt,name=doneAt,proto3" json:"doneAt,omitempty"`
-	IsCanceled    bool                                  `protobuf:"varint,5,opt,name=isCanceled,proto3" json:"isCanceled,omitempty"`
-	Failure       *Workspace_Status_Failure             `protobuf:"bytes,6,opt,name=failure,proto3" json:"failure,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ID is a randomly generated identifier of the pre-build.
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Tags is the list of the tags that the pre-build was started with. It
+	// defaults to `latest`.
+	Tags []string `protobuf:"bytes,2,rep,name=tags,proto3" json:"tags,omitempty"`
+	// StartedAt is the timestamp at which the pre-build started.
+	StartedAt *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=startedAt,proto3" json:"startedAt,omitempty"`
+	// DoneAt is the timestamp at which the pre-build completed, failed or
+	// was canceled.
+	DoneAt *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=doneAt,proto3" json:"doneAt,omitempty"`
+	// IsCanceled means that the pre-build was explicitly canceled (e.g.
+	// via the CancelBuildTemplate method or by starting a new pre-build).
+	IsCanceled bool `protobuf:"varint,5,opt,name=isCanceled,proto3" json:"isCanceled,omitempty"`
+	// Failure is the reason of the failure of the pre-build, if any.
+	Failure *Workspace_Status_Failure `protobuf:"bytes,6,opt,name=failure,proto3" json:"failure,omitempty"`
+	// State is the current state of the pre-build.
 	State         Template_Status_BuildInfo_Build_State `protobuf:"varint,7,opt,name=state,proto3,enum=octelium.api.main.cordium.v1.Template_Status_BuildInfo_Build_State" json:"state,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -9199,10 +10059,17 @@ func (x *Template_Status_BuildInfo_Build) GetState() Template_Status_BuildInfo_B
 	return Template_Status_BuildInfo_Build_STATE_UNKNOWN
 }
 
+// Spec is the Space specification
 type Space_Spec struct {
-	state         protoimpl.MessageState    `protogen:"open.v1"`
-	Limit         *Space_Spec_Limit         `protobuf:"bytes,1,opt,name=limit,proto3" json:"limit,omitempty"`
-	Runtime       *Space_Spec_Runtime       `protobuf:"bytes,2,opt,name=runtime,proto3" json:"runtime,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Limit is the default and the maximum compute resources of the Space's
+	// Workspaces.
+	Limit *Space_Spec_Limit `protobuf:"bytes,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Runtime is the runtime configuration that cascades down to every
+	// Workspace of the Space.
+	Runtime *Space_Spec_Runtime `protobuf:"bytes,2,opt,name=runtime,proto3" json:"runtime,omitempty"`
+	// Authorization is the access control configuration of the Space's
+	// Workspaces.
 	Authorization *Space_Spec_Authorization `protobuf:"bytes,3,opt,name=authorization,proto3" json:"authorization,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -9259,10 +10126,14 @@ func (x *Space_Spec) GetAuthorization() *Space_Spec_Authorization {
 	return nil
 }
 
+// Status is the current status of the Space. It is managed by the Cluster
+// and it is read-only.
 type Space_Status struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
-	UserRef       *metav1.ObjectReference `protobuf:"bytes,1,opt,name=userRef,proto3" json:"userRef,omitempty"`
-	Type          Space_Status_Type       `protobuf:"varint,2,opt,name=type,proto3,enum=octelium.api.main.cordium.v1.Space_Status_Type" json:"type,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// UserRef is the reference of the Octelium User who created the Space.
+	UserRef *metav1.ObjectReference `protobuf:"bytes,1,opt,name=userRef,proto3" json:"userRef,omitempty"`
+	// Type is the type of the Space.
+	Type          Space_Status_Type `protobuf:"varint,2,opt,name=type,proto3,enum=octelium.api.main.cordium.v1.Space_Status_Type" json:"type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -9311,10 +10182,15 @@ func (x *Space_Status) GetType() Space_Status_Type {
 	return Space_Status_SPACE_TYPE_UNSET
 }
 
+// Limit is the default and the maximum compute resources of the Space's
+// Workspaces. It can only be set for ORGANIZATION Spaces.
 type Space_Spec_Limit struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	DefaultLimit  *Workspace_Spec_Limit  `protobuf:"bytes,1,opt,name=defaultLimit,proto3" json:"defaultLimit,omitempty"`
-	MaxLimit      *Workspace_Spec_Limit  `protobuf:"bytes,2,opt,name=maxLimit,proto3" json:"maxLimit,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// DefaultLimit is the limits that are applied to the Workspaces of the
+	// Space that do not define their own limits.
+	DefaultLimit *Workspace_Spec_Limit `protobuf:"bytes,1,opt,name=defaultLimit,proto3" json:"defaultLimit,omitempty"`
+	// MaxLimit is a hard cap that no Workspace of the Space can exceed.
+	MaxLimit      *Workspace_Spec_Limit `protobuf:"bytes,2,opt,name=maxLimit,proto3" json:"maxLimit,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -9363,10 +10239,19 @@ func (x *Space_Spec_Limit) GetMaxLimit() *Workspace_Spec_Limit {
 	return nil
 }
 
+// Runtime is the runtime configuration that cascades down to every
+// Workspace of the Space regardless of its Template.
 type Space_Spec_Runtime struct {
-	state         protoimpl.MessageState               `protogen:"open.v1"`
-	EnvVars       []*Workspace_Spec_Runtime_EnvVar     `protobuf:"bytes,1,rep,name=envVars,proto3" json:"envVars,omitempty"`
-	Tasks         []*Workspace_Spec_Runtime_Task       `protobuf:"bytes,2,rep,name=tasks,proto3" json:"tasks,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// EnvVars is the list of the environment variables that are injected
+	// into every Workspace of the Space. Secret-sourced environment
+	// variables can only be used in ORGANIZATION Spaces.
+	EnvVars []*Workspace_Spec_Runtime_EnvVar `protobuf:"bytes,1,rep,name=envVars,proto3" json:"envVars,omitempty"`
+	// Tasks is the list of the lifecycle tasks that are run in every
+	// Workspace of the Space.
+	Tasks []*Workspace_Spec_Runtime_Task `protobuf:"bytes,2,rep,name=tasks,proto3" json:"tasks,omitempty"`
+	// Capabilities is the Linux capabilities that are merged into every
+	// Workspace of the Space.
 	Capabilities  *Workspace_Spec_Runtime_Capabilities `protobuf:"bytes,3,opt,name=capabilities,proto3" json:"capabilities,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -9423,9 +10308,12 @@ func (x *Space_Spec_Runtime) GetCapabilities() *Workspace_Spec_Runtime_Capabilit
 	return nil
 }
 
+// Authorization is the access control configuration of the Space's
+// Workspaces.
 type Space_Spec_Authorization struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	DisableSSH    bool                   `protobuf:"varint,1,opt,name=disableSSH,proto3" json:"disableSSH,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// DisableSSH denies SSH access to the Workspaces of the Space.
+	DisableSSH    bool `protobuf:"varint,1,opt,name=disableSSH,proto3" json:"disableSSH,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -9467,9 +10355,11 @@ func (x *Space_Spec_Authorization) GetDisableSSH() bool {
 	return false
 }
 
+// Spec is the Membership specification
 type Membership_Spec struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Role          Membership_Spec_Role   `protobuf:"varint,1,opt,name=role,proto3,enum=octelium.api.main.cordium.v1.Membership_Spec_Role" json:"role,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Role is the level of access that the Member has inside the Space.
+	Role          Membership_Spec_Role `protobuf:"varint,1,opt,name=role,proto3,enum=octelium.api.main.cordium.v1.Membership_Spec_Role" json:"role,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -9511,11 +10401,21 @@ func (x *Membership_Spec) GetRole() Membership_Spec_Role {
 	return Membership_Spec_UNKNOWN
 }
 
+// Status is the current status of the Membership. It is managed by the
+// Cluster and it is read-only.
 type Membership_Status struct {
-	state               protoimpl.MessageState                         `protogen:"open.v1"`
-	UserRef             *metav1.ObjectReference                        `protobuf:"bytes,1,opt,name=userRef,proto3" json:"userRef,omitempty"`
-	SpaceRef            *metav1.ObjectReference                        `protobuf:"bytes,2,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
-	UserInfo            *Membership_Status_UserInfo                    `protobuf:"bytes,3,opt,name=userInfo,proto3" json:"userInfo,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// UserRef is the reference of the Octelium User that the Membership
+	// belongs to.
+	UserRef *metav1.ObjectReference `protobuf:"bytes,1,opt,name=userRef,proto3" json:"userRef,omitempty"`
+	// SpaceRef is the reference of the Space that the Membership belongs to.
+	SpaceRef *metav1.ObjectReference `protobuf:"bytes,2,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
+	// UserInfo is the human-readable information about the Member.
+	UserInfo *Membership_Status_UserInfo `protobuf:"bytes,3,opt,name=userInfo,proto3" json:"userInfo,omitempty"`
+	// GitProviderStateMap is the map of the in-flight GitProvider OAuth2
+	// authorization flows of the Member keyed by the UID of the Workspace that
+	// each flow was initiated for. It is internal to the Cluster and it is
+	// never exposed by the Membership methods.
 	GitProviderStateMap map[string]*Membership_Status_GitProviderState `protobuf:"bytes,4,rep,name=gitProviderStateMap,proto3" json:"gitProviderStateMap,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
@@ -9579,14 +10479,24 @@ func (x *Membership_Status) GetGitProviderStateMap() map[string]*Membership_Stat
 	return nil
 }
 
+// GitProviderState is the state of an in-flight GitProvider OAuth2
+// authorization flow that was initiated for a specific Workspace.
 type Membership_Status_GitProviderState struct {
-	state          protoimpl.MessageState  `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// GitProviderRef is the reference of the GitProvider that the flow
+	// authenticates against.
 	GitProviderRef *metav1.ObjectReference `protobuf:"bytes,1,opt,name=gitProviderRef,proto3" json:"gitProviderRef,omitempty"`
-	WorkspaceRef   *metav1.ObjectReference `protobuf:"bytes,2,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
-	CreatedAt      *timestamppb.Timestamp  `protobuf:"bytes,3,opt,name=createdAt,proto3" json:"createdAt,omitempty"`
-	StateID        string                  `protobuf:"bytes,4,opt,name=stateID,proto3" json:"stateID,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	// WorkspaceRef is the reference of the Workspace that the flow was
+	// initiated for.
+	WorkspaceRef *metav1.ObjectReference `protobuf:"bytes,2,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
+	// CreatedAt is the timestamp at which the flow was initiated. The state
+	// is short-lived and it is discarded once it expires.
+	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=createdAt,proto3" json:"createdAt,omitempty"`
+	// StateID is the randomly generated value that is used as the OAuth2
+	// `state` parameter in order to protect the flow against CSRF.
+	StateID       string `protobuf:"bytes,4,opt,name=stateID,proto3" json:"stateID,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Membership_Status_GitProviderState) Reset() {
@@ -9647,10 +10557,15 @@ func (x *Membership_Status_GitProviderState) GetStateID() string {
 	return ""
 }
 
+// UserInfo is the human-readable information about the Member which is
+// copied from the Octelium User in order to be displayed alongside the
+// Membership.
 type Membership_Status_UserInfo struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	DisplayName   string                 `protobuf:"bytes,1,opt,name=displayName,proto3" json:"displayName,omitempty"`
-	PicURL        string                 `protobuf:"bytes,2,opt,name=picURL,proto3" json:"picURL,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// DisplayName is the Member's display name.
+	DisplayName string `protobuf:"bytes,1,opt,name=displayName,proto3" json:"displayName,omitempty"`
+	// PicURL is the URL of the Member's picture.
+	PicURL        string `protobuf:"bytes,2,opt,name=picURL,proto3" json:"picURL,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -9699,8 +10614,12 @@ func (x *Membership_Status_UserInfo) GetPicURL() string {
 	return ""
 }
 
+// Spec is the GitProvider specification
 type GitProvider_Spec struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the git hosting service that the GitProvider authenticates
+	// against
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*GitProvider_Spec_Github_
@@ -9780,14 +10699,17 @@ type isGitProvider_Spec_Type interface {
 }
 
 type GitProvider_Spec_Github_ struct {
+	// Github is the GitHub OAuth2 provider.
 	Github *GitProvider_Spec_Github `protobuf:"bytes,2,opt,name=github,proto3,oneof"`
 }
 
 type GitProvider_Spec_Gitlab_ struct {
+	// Gitlab is the GitLab OAuth2 provider.
 	Gitlab *GitProvider_Spec_Gitlab `protobuf:"bytes,3,opt,name=gitlab,proto3,oneof"`
 }
 
 type GitProvider_Spec_Oauth2 struct {
+	// OAuth2 is a generic OAuth2 provider.
 	Oauth2 *GitProvider_Spec_OAuth2 `protobuf:"bytes,4,opt,name=oauth2,proto3,oneof"`
 }
 
@@ -9797,9 +10719,14 @@ func (*GitProvider_Spec_Gitlab_) isGitProvider_Spec_Type() {}
 
 func (*GitProvider_Spec_Oauth2) isGitProvider_Spec_Type() {}
 
+// Status is the current status of the GitProvider. It is managed by the
+// Cluster and it is read-only.
 type GitProvider_Status struct {
-	state         protoimpl.MessageState  `protogen:"open.v1"`
-	UserRef       *metav1.ObjectReference `protobuf:"bytes,1,opt,name=userRef,proto3" json:"userRef,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// UserRef is the reference of the Octelium User who created the
+	// GitProvider.
+	UserRef *metav1.ObjectReference `protobuf:"bytes,1,opt,name=userRef,proto3" json:"userRef,omitempty"`
+	// SpaceRef is the reference of the Space that owns the GitProvider.
 	SpaceRef      *metav1.ObjectReference `protobuf:"bytes,2,opt,name=spaceRef,proto3" json:"spaceRef,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -9849,11 +10776,16 @@ func (x *GitProvider_Status) GetSpaceRef() *metav1.ObjectReference {
 	return nil
 }
 
+// Github is the GitHub OAuth2 provider.
 type GitProvider_Spec_Github struct {
-	state         protoimpl.MessageState                `protogen:"open.v1"`
-	ClientID      string                                `protobuf:"bytes,1,opt,name=clientID,proto3" json:"clientID,omitempty"`
-	ClientSecret  *GitProvider_Spec_Github_ClientSecret `protobuf:"bytes,2,opt,name=clientSecret,proto3" json:"clientSecret,omitempty"`
-	Scopes        []string                              `protobuf:"bytes,3,rep,name=scopes,proto3" json:"scopes,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ClientID is the OAuth2 application's client ID.
+	ClientID string `protobuf:"bytes,1,opt,name=clientID,proto3" json:"clientID,omitempty"`
+	// ClientSecret is the OAuth2 application's client secret.
+	ClientSecret *GitProvider_Spec_Github_ClientSecret `protobuf:"bytes,2,opt,name=clientSecret,proto3" json:"clientSecret,omitempty"`
+	// Scopes is the list of the OAuth2 scopes that are requested from the
+	// provider (e.g. `repo`).
+	Scopes        []string `protobuf:"bytes,3,rep,name=scopes,proto3" json:"scopes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -9909,11 +10841,16 @@ func (x *GitProvider_Spec_Github) GetScopes() []string {
 	return nil
 }
 
+// Gitlab is the GitLab OAuth2 provider.
 type GitProvider_Spec_Gitlab struct {
-	state         protoimpl.MessageState                `protogen:"open.v1"`
-	ClientID      string                                `protobuf:"bytes,1,opt,name=clientID,proto3" json:"clientID,omitempty"`
-	ClientSecret  *GitProvider_Spec_Gitlab_ClientSecret `protobuf:"bytes,2,opt,name=clientSecret,proto3" json:"clientSecret,omitempty"`
-	Scopes        []string                              `protobuf:"bytes,3,rep,name=scopes,proto3" json:"scopes,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ClientID is the OAuth2 application's client ID.
+	ClientID string `protobuf:"bytes,1,opt,name=clientID,proto3" json:"clientID,omitempty"`
+	// ClientSecret is the OAuth2 application's client secret.
+	ClientSecret *GitProvider_Spec_Gitlab_ClientSecret `protobuf:"bytes,2,opt,name=clientSecret,proto3" json:"clientSecret,omitempty"`
+	// Scopes is the list of the OAuth2 scopes that are requested from the
+	// provider (e.g. `read_repository`).
+	Scopes        []string `protobuf:"bytes,3,rep,name=scopes,proto3" json:"scopes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -9969,13 +10906,21 @@ func (x *GitProvider_Spec_Gitlab) GetScopes() []string {
 	return nil
 }
 
+// OAuth2 is a generic OAuth2 provider for the self-hosted and the other
+// git hosting services.
 type GitProvider_Spec_OAuth2 struct {
-	state         protoimpl.MessageState                `protogen:"open.v1"`
-	ClientID      string                                `protobuf:"bytes,1,opt,name=clientID,proto3" json:"clientID,omitempty"`
-	ClientSecret  *GitProvider_Spec_OAuth2_ClientSecret `protobuf:"bytes,2,opt,name=clientSecret,proto3" json:"clientSecret,omitempty"`
-	AuthURL       string                                `protobuf:"bytes,3,opt,name=authURL,proto3" json:"authURL,omitempty"`
-	TokenURL      string                                `protobuf:"bytes,4,opt,name=tokenURL,proto3" json:"tokenURL,omitempty"`
-	Scopes        []string                              `protobuf:"bytes,5,rep,name=scopes,proto3" json:"scopes,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ClientID is the OAuth2 application's client ID.
+	ClientID string `protobuf:"bytes,1,opt,name=clientID,proto3" json:"clientID,omitempty"`
+	// ClientSecret is the OAuth2 application's client secret.
+	ClientSecret *GitProvider_Spec_OAuth2_ClientSecret `protobuf:"bytes,2,opt,name=clientSecret,proto3" json:"clientSecret,omitempty"`
+	// AuthURL is the provider's authorization endpoint URL.
+	AuthURL string `protobuf:"bytes,3,opt,name=authURL,proto3" json:"authURL,omitempty"`
+	// TokenURL is the provider's token endpoint URL.
+	TokenURL string `protobuf:"bytes,4,opt,name=tokenURL,proto3" json:"tokenURL,omitempty"`
+	// Scopes is the list of the OAuth2 scopes that are requested from the
+	// provider. At least one scope must be provided.
+	Scopes        []string `protobuf:"bytes,5,rep,name=scopes,proto3" json:"scopes,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -10045,8 +10990,11 @@ func (x *GitProvider_Spec_OAuth2) GetScopes() []string {
 	return nil
 }
 
+// ClientSecret is the OAuth2 application's client secret.
 type GitProvider_Spec_Github_ClientSecret struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the source of the client secret
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*GitProvider_Spec_Github_ClientSecret_FromSecret
@@ -10106,14 +11054,19 @@ type isGitProvider_Spec_Github_ClientSecret_Type interface {
 }
 
 type GitProvider_Spec_Github_ClientSecret_FromSecret struct {
+	// FromSecret is the name of a Secret in the same Space whose content
+	// is used as the client secret.
 	FromSecret string `protobuf:"bytes,1,opt,name=fromSecret,proto3,oneof"`
 }
 
 func (*GitProvider_Spec_Github_ClientSecret_FromSecret) isGitProvider_Spec_Github_ClientSecret_Type() {
 }
 
+// ClientSecret is the OAuth2 application's client secret.
 type GitProvider_Spec_Gitlab_ClientSecret struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the source of the client secret
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*GitProvider_Spec_Gitlab_ClientSecret_FromSecret
@@ -10173,14 +11126,19 @@ type isGitProvider_Spec_Gitlab_ClientSecret_Type interface {
 }
 
 type GitProvider_Spec_Gitlab_ClientSecret_FromSecret struct {
+	// FromSecret is the name of a Secret in the same Space whose content
+	// is used as the client secret.
 	FromSecret string `protobuf:"bytes,1,opt,name=fromSecret,proto3,oneof"`
 }
 
 func (*GitProvider_Spec_Gitlab_ClientSecret_FromSecret) isGitProvider_Spec_Gitlab_ClientSecret_Type() {
 }
 
+// ClientSecret is the OAuth2 application's client secret.
 type GitProvider_Spec_OAuth2_ClientSecret struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the source of the client secret
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*GitProvider_Spec_OAuth2_ClientSecret_FromSecret
@@ -10240,15 +11198,19 @@ type isGitProvider_Spec_OAuth2_ClientSecret_Type interface {
 }
 
 type GitProvider_Spec_OAuth2_ClientSecret_FromSecret struct {
+	// FromSecret is the name of a Secret in the same Space whose content
+	// is used as the client secret.
 	FromSecret string `protobuf:"bytes,1,opt,name=fromSecret,proto3,oneof"`
 }
 
 func (*GitProvider_Spec_OAuth2_ClientSecret_FromSecret) isGitProvider_Spec_OAuth2_ClientSecret_Type() {
 }
 
+// Spec is the UserSecret specification
 type UserSecret_Spec struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Type          UserSecret_Spec_Type   `protobuf:"varint,1,opt,name=type,proto3,enum=octelium.api.main.cordium.v1.UserSecret_Spec_Type" json:"type,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the kind of the UserSecret's content.
+	Type          UserSecret_Spec_Type `protobuf:"varint,1,opt,name=type,proto3,enum=octelium.api.main.cordium.v1.UserSecret_Spec_Type" json:"type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -10290,9 +11252,14 @@ func (x *UserSecret_Spec) GetType() UserSecret_Spec_Type {
 	return UserSecret_Spec_DEFAULT
 }
 
+// Status is the current status of the UserSecret. It is managed by the
+// Cluster and it is read-only.
 type UserSecret_Status struct {
-	state   protoimpl.MessageState  `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// UserRef is the reference of the Octelium User who owns the UserSecret.
 	UserRef *metav1.ObjectReference `protobuf:"bytes,1,opt,name=userRef,proto3" json:"userRef,omitempty"`
+	// Details is the type-specific status information
+	//
 	// Types that are valid to be assigned to Details:
 	//
 	//	*UserSecret_Status_SshKey
@@ -10359,13 +11326,19 @@ type isUserSecret_Status_Details interface {
 }
 
 type UserSecret_Status_SshKey struct {
+	// SSHKey is set for the UserSecrets of the SSH_KEY type.
 	SshKey *UserSecret_Status_SSHKey `protobuf:"bytes,3,opt,name=sshKey,proto3,oneof"`
 }
 
 func (*UserSecret_Status_SshKey) isUserSecret_Status_Details() {}
 
+// Data is the UserSecret's sensitive content. It is write-only (i.e. it can
+// only be set at creation time and it is never returned back by the API).
+// For the UserSecrets of the SSH_KEY type it is generated by the Cluster.
 type UserSecret_Data struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the format of the UserSecret's content
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*UserSecret_Data_Value
@@ -10445,14 +11418,17 @@ type isUserSecret_Data_Type interface {
 }
 
 type UserSecret_Data_Value struct {
+	// Value is the content provided as a string.
 	Value string `protobuf:"bytes,1,opt,name=value,proto3,oneof"`
 }
 
 type UserSecret_Data_ValueBytes struct {
+	// ValueBytes is the content provided as raw bytes.
 	ValueBytes []byte `protobuf:"bytes,2,opt,name=valueBytes,proto3,oneof"`
 }
 
 type UserSecret_Data_Attrs struct {
+	// Attrs is the content provided as a structured map of attributes.
 	Attrs *structpb.Struct `protobuf:"bytes,3,opt,name=attrs,proto3,oneof"`
 }
 
@@ -10462,9 +11438,11 @@ func (*UserSecret_Data_ValueBytes) isUserSecret_Data_Type() {}
 
 func (*UserSecret_Data_Attrs) isUserSecret_Data_Type() {}
 
+// SSHKey is the public part of a generated SSH_KEY UserSecret.
 type UserSecret_Status_SSHKey struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PublicKey     string                 `protobuf:"bytes,1,opt,name=publicKey,proto3" json:"publicKey,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// PublicKey is the OpenSSH-formatted public key.
+	PublicKey     string `protobuf:"bytes,1,opt,name=publicKey,proto3" json:"publicKey,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -10506,12 +11484,22 @@ func (x *UserSecret_Status_SSHKey) GetPublicKey() string {
 	return ""
 }
 
+// Spec is the UserConfig specification
 type UserConfig_Spec struct {
-	state           protoimpl.MessageState         `protogen:"open.v1"`
-	Dotfiles        *UserConfig_Spec_Dotfiles      `protobuf:"bytes,1,opt,name=dotfiles,proto3" json:"dotfiles,omitempty"`
-	EnvVars         []*UserConfig_Spec_EnvVar      `protobuf:"bytes,2,rep,name=envVars,proto3" json:"envVars,omitempty"`
-	Tasks           []*Workspace_Spec_Runtime_Task `protobuf:"bytes,3,rep,name=tasks,proto3" json:"tasks,omitempty"`
-	PreferredRegion string                         `protobuf:"bytes,4,opt,name=preferredRegion,proto3" json:"preferredRegion,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Dotfiles is the User's personal dotfiles repository.
+	Dotfiles *UserConfig_Spec_Dotfiles `protobuf:"bytes,1,opt,name=dotfiles,proto3" json:"dotfiles,omitempty"`
+	// EnvVars is the list of the environment variables that are injected into
+	// every Workspace of the User.
+	EnvVars []*UserConfig_Spec_EnvVar `protobuf:"bytes,2,rep,name=envVars,proto3" json:"envVars,omitempty"`
+	// Tasks is the list of the personal lifecycle tasks that are run in every
+	// Workspace of the User. They are run after the Template-level and the
+	// Space-level tasks.
+	Tasks []*Workspace_Spec_Runtime_Task `protobuf:"bytes,3,rep,name=tasks,proto3" json:"tasks,omitempty"`
+	// PreferredRegion is the name of the Octelium Region in which the User's
+	// Workspaces are preferably run. The Region must be enabled to host
+	// Workspaces.
+	PreferredRegion string `protobuf:"bytes,4,opt,name=preferredRegion,proto3" json:"preferredRegion,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -10574,9 +11562,14 @@ func (x *UserConfig_Spec) GetPreferredRegion() string {
 	return ""
 }
 
+// Status is the current status of the UserConfig. It is managed by the
+// Cluster and it is read-only.
 type UserConfig_Status struct {
-	state              protoimpl.MessageState  `protogen:"open.v1"`
-	UserRef            *metav1.ObjectReference `protobuf:"bytes,1,opt,name=userRef,proto3" json:"userRef,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// UserRef is the reference of the Octelium User who owns the UserConfig.
+	UserRef *metav1.ObjectReference `protobuf:"bytes,1,opt,name=userRef,proto3" json:"userRef,omitempty"`
+	// PreferredRegionRef is the reference of the Region that the spec's
+	// preferredRegion resolves to.
 	PreferredRegionRef *metav1.ObjectReference `protobuf:"bytes,2,opt,name=preferredRegionRef,proto3" json:"preferredRegionRef,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
@@ -10626,13 +11619,20 @@ func (x *UserConfig_Status) GetPreferredRegionRef() *metav1.ObjectReference {
 	return nil
 }
 
+// Dotfiles is a git repository containing the User's personal dotfiles. It
+// is cloned into the Workspace at the beginning of the PREPARING phase and
+// the first install script that is found in it is executed.
 type UserConfig_Spec_Dotfiles struct {
-	state          protoimpl.MessageState                   `protogen:"open.v1"`
-	Url            string                                   `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// URL is the HTTPS URL of the dotfiles git repository.
+	Url string `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	// Authentication is set for the private dotfiles repositories.
 	Authentication *UserConfig_Spec_Dotfiles_Authentication `protobuf:"bytes,2,opt,name=authentication,proto3" json:"authentication,omitempty"`
-	Branch         string                                   `protobuf:"bytes,3,opt,name=branch,proto3" json:"branch,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	// Branch is the branch of the dotfiles repository to be cloned. It
+	// defaults to the repository's default branch.
+	Branch        string `protobuf:"bytes,3,opt,name=branch,proto3" json:"branch,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UserConfig_Spec_Dotfiles) Reset() {
@@ -10686,9 +11686,14 @@ func (x *UserConfig_Spec_Dotfiles) GetBranch() string {
 	return ""
 }
 
+// EnvVar is an environment variable that is injected into every Workspace
+// of the User.
 type UserConfig_Spec_EnvVar struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	Key   string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	// Key is the environment variable's name.
+	Key string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	// Type is the source of the environment variable's value
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*UserConfig_Spec_EnvVar_Value
@@ -10765,10 +11770,13 @@ type isUserConfig_Spec_EnvVar_Type interface {
 }
 
 type UserConfig_Spec_EnvVar_Value struct {
+	// Value is the value provided directly as a string.
 	Value string `protobuf:"bytes,2,opt,name=value,proto3,oneof"`
 }
 
 type UserConfig_Spec_EnvVar_FromUserSecret struct {
+	// FromUserSecret is the name of a UserSecret of the same User whose
+	// content is used as the value.
 	FromUserSecret string `protobuf:"bytes,3,opt,name=fromUserSecret,proto3,oneof"`
 }
 
@@ -10776,8 +11784,12 @@ func (*UserConfig_Spec_EnvVar_Value) isUserConfig_Spec_EnvVar_Type() {}
 
 func (*UserConfig_Spec_EnvVar_FromUserSecret) isUserConfig_Spec_EnvVar_Type() {}
 
+// Authentication is the credentials that are used to clone a private
+// dotfiles repository.
 type UserConfig_Spec_Dotfiles_Authentication struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the authentication method
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*UserConfig_Spec_Dotfiles_Authentication_Http
@@ -10837,15 +11849,19 @@ type isUserConfig_Spec_Dotfiles_Authentication_Type interface {
 }
 
 type UserConfig_Spec_Dotfiles_Authentication_Http struct {
+	// HTTP is the HTTP basic authentication.
 	Http *UserConfig_Spec_Dotfiles_Authentication_HTTP `protobuf:"bytes,1,opt,name=http,proto3,oneof"`
 }
 
 func (*UserConfig_Spec_Dotfiles_Authentication_Http) isUserConfig_Spec_Dotfiles_Authentication_Type() {
 }
 
+// HTTP is the HTTP basic authentication credentials.
 type UserConfig_Spec_Dotfiles_Authentication_HTTP struct {
-	state         protoimpl.MessageState                                 `protogen:"open.v1"`
-	Username      string                                                 `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Username is the basic authentication username.
+	Username string `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	// Password is the basic authentication password.
 	Password      *UserConfig_Spec_Dotfiles_Authentication_HTTP_Password `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -10895,8 +11911,11 @@ func (x *UserConfig_Spec_Dotfiles_Authentication_HTTP) GetPassword() *UserConfig
 	return nil
 }
 
+// Password is the password, token or personal access token.
 type UserConfig_Spec_Dotfiles_Authentication_HTTP_Password struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the source of the password
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*UserConfig_Spec_Dotfiles_Authentication_HTTP_Password_FromUserSecret
@@ -10956,12 +11975,15 @@ type isUserConfig_Spec_Dotfiles_Authentication_HTTP_Password_Type interface {
 }
 
 type UserConfig_Spec_Dotfiles_Authentication_HTTP_Password_FromUserSecret struct {
+	// FromUserSecret is the name of a UserSecret of the same User
+	// whose content is used as the password.
 	FromUserSecret string `protobuf:"bytes,1,opt,name=fromUserSecret,proto3,oneof"`
 }
 
 func (*UserConfig_Spec_Dotfiles_Authentication_HTTP_Password_FromUserSecret) isUserConfig_Spec_Dotfiles_Authentication_HTTP_Password_Type() {
 }
 
+// Spec is the Region specification. It is intentionally empty.
 type Region_Spec struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -10998,10 +12020,14 @@ func (*Region_Spec) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{38, 0}
 }
 
+// Status is the current status of the Region. It is managed by the Cluster
+// and it is read-only.
 type Region_Status struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Country       string                 `protobuf:"bytes,1,opt,name=country,proto3" json:"country,omitempty"`
-	City          string                 `protobuf:"bytes,2,opt,name=city,proto3" json:"city,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Country is the country in which the Region is located.
+	Country string `protobuf:"bytes,1,opt,name=country,proto3" json:"country,omitempty"`
+	// City is the city in which the Region is located.
+	City          string `protobuf:"bytes,2,opt,name=city,proto3" json:"city,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -11050,9 +12076,11 @@ func (x *Region_Status) GetCity() string {
 	return ""
 }
 
+// Stdout is a chunk of the terminal's output.
 type ListenTerminalResponse_Stdout struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Data is the raw output data.
+	Data          []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -11094,10 +12122,13 @@ func (x *ListenTerminalResponse_Stdout) GetData() []byte {
 	return nil
 }
 
+// WindowSize is a resize event of the terminal's window.
 type ListenTerminalResponse_WindowSize struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Cols          uint32                 `protobuf:"varint,1,opt,name=cols,proto3" json:"cols,omitempty"`
-	Rows          uint32                 `protobuf:"varint,2,opt,name=rows,proto3" json:"rows,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Cols is the number of the columns of the terminal's window.
+	Cols uint32 `protobuf:"varint,1,opt,name=cols,proto3" json:"cols,omitempty"`
+	// Rows is the number of the rows of the terminal's window.
+	Rows          uint32 `protobuf:"varint,2,opt,name=rows,proto3" json:"rows,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -11146,6 +12177,7 @@ func (x *ListenTerminalResponse_WindowSize) GetRows() uint32 {
 	return 0
 }
 
+// Close means that the terminal was closed.
 type ListenTerminalResponse_Close struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -11182,9 +12214,11 @@ func (*ListenTerminalResponse_Close) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{53, 2}
 }
 
+// Create means that a Workspace was created.
 type WatchWorkspaceResponse_Create struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Item          *Workspace             `protobuf:"bytes,1,opt,name=item,proto3" json:"item,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Item is the created Workspace.
+	Item          *Workspace `protobuf:"bytes,1,opt,name=item,proto3" json:"item,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -11226,10 +12260,14 @@ func (x *WatchWorkspaceResponse_Create) GetItem() *Workspace {
 	return nil
 }
 
+// Update means that a Workspace was updated (e.g. its state changed).
 type WatchWorkspaceResponse_Update struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	NewItem       *Workspace             `protobuf:"bytes,1,opt,name=newItem,proto3" json:"newItem,omitempty"`
-	OldItem       *Workspace             `protobuf:"bytes,2,opt,name=oldItem,proto3" json:"oldItem,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// NewItem is the Workspace after the update.
+	NewItem *Workspace `protobuf:"bytes,1,opt,name=newItem,proto3" json:"newItem,omitempty"`
+	// OldItem is the Workspace before the update. Comparing it against the
+	// newItem is the recommended way to detect the actual state transitions.
+	OldItem       *Workspace `protobuf:"bytes,2,opt,name=oldItem,proto3" json:"oldItem,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -11278,9 +12316,11 @@ func (x *WatchWorkspaceResponse_Update) GetOldItem() *Workspace {
 	return nil
 }
 
+// Delete means that a Workspace was deleted.
 type WatchWorkspaceResponse_Delete struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Item          *Workspace             `protobuf:"bytes,1,opt,name=item,proto3" json:"item,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Item is the deleted Workspace.
+	Item          *Workspace `protobuf:"bytes,1,opt,name=item,proto3" json:"item,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -11322,14 +12362,25 @@ func (x *WatchWorkspaceResponse_Delete) GetItem() *Workspace {
 	return nil
 }
 
+// Request initializes the execution. It must be the first message that is
+// sent by the client.
 type ExecRequest_Request struct {
-	state         protoimpl.MessageState        `protogen:"open.v1"`
-	WorkspaceRef  *metav1.ObjectReference       `protobuf:"bytes,1,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
-	Command       string                        `protobuf:"bytes,2,opt,name=command,proto3" json:"command,omitempty"`
-	WorkingDir    string                        `protobuf:"bytes,3,opt,name=workingDir,proto3" json:"workingDir,omitempty"`
-	EnvVars       []*ExecRequest_Request_EnvVar `protobuf:"bytes,4,rep,name=envVars,proto3" json:"envVars,omitempty"`
-	RunAsRoot     bool                          `protobuf:"varint,5,opt,name=runAsRoot,proto3" json:"runAsRoot,omitempty"`
-	HasStdin      bool                          `protobuf:"varint,6,opt,name=hasStdin,proto3" json:"hasStdin,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// WorkspaceRef is the reference of the Workspace in which the command is
+	// executed.
+	WorkspaceRef *metav1.ObjectReference `protobuf:"bytes,1,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
+	// Command is the shell command to be executed.
+	Command string `protobuf:"bytes,2,opt,name=command,proto3" json:"command,omitempty"`
+	// WorkingDir is the working directory of the command.
+	WorkingDir string `protobuf:"bytes,3,opt,name=workingDir,proto3" json:"workingDir,omitempty"`
+	// EnvVars is the list of the environment variables that are set for the
+	// command.
+	EnvVars []*ExecRequest_Request_EnvVar `protobuf:"bytes,4,rep,name=envVars,proto3" json:"envVars,omitempty"`
+	// RunAsRoot runs the command as `root` instead of as the Workspace User.
+	RunAsRoot bool `protobuf:"varint,5,opt,name=runAsRoot,proto3" json:"runAsRoot,omitempty"`
+	// HasStdin means that the client streams stdin to the command via the
+	// subsequent writeData messages.
+	HasStdin      bool `protobuf:"varint,6,opt,name=hasStdin,proto3" json:"hasStdin,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -11406,6 +12457,7 @@ func (x *ExecRequest_Request) GetHasStdin() bool {
 	return false
 }
 
+// Kill terminates the running command.
 type ExecRequest_Kill struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -11442,9 +12494,11 @@ func (*ExecRequest_Kill) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{59, 1}
 }
 
+// WriteData writes data to the command's standard input.
 type ExecRequest_WriteData struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Data is the raw data that is written to the command's standard input.
+	Data          []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -11486,10 +12540,13 @@ func (x *ExecRequest_WriteData) GetData() []byte {
 	return nil
 }
 
+// EnvVar is an environment variable that is set for the executed command.
 type ExecRequest_Request_EnvVar struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
-	Value         string                 `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Key is the environment variable's name.
+	Key string `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	// Value is the environment variable's value.
+	Value         string `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -11538,9 +12595,11 @@ func (x *ExecRequest_Request_EnvVar) GetValue() string {
 	return ""
 }
 
+// Stdout is a chunk of the command's standard output.
 type ExecResponse_Stdout struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Data is the raw output data.
+	Data          []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -11582,9 +12641,11 @@ func (x *ExecResponse_Stdout) GetData() []byte {
 	return nil
 }
 
+// Stderr is a chunk of the command's standard error.
 type ExecResponse_Stderr struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Data          []byte                 `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Data is the raw error output data.
+	Data          []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -11626,9 +12687,11 @@ func (x *ExecResponse_Stderr) GetData() []byte {
 	return nil
 }
 
+// Exit means that the command exited.
 type ExecResponse_Exit struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Code is the exit code with which the command exited.
+	Code          int32 `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -11670,9 +12733,12 @@ func (x *ExecResponse_Exit) GetCode() int32 {
 	return 0
 }
 
+// Spec is the ClusterConfig specification
 type ClusterConfig_Spec struct {
-	state         protoimpl.MessageState        `protogen:"open.v1"`
-	Space         *ClusterConfig_Spec_Space     `protobuf:"bytes,1,opt,name=space,proto3" json:"space,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Space is the Cluster-wide Space-related configuration.
+	Space *ClusterConfig_Spec_Space `protobuf:"bytes,1,opt,name=space,proto3" json:"space,omitempty"`
+	// Workspace is the Cluster-wide Workspace-related configuration.
 	Workspace     *ClusterConfig_Spec_Workspace `protobuf:"bytes,2,opt,name=workspace,proto3" json:"workspace,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -11722,6 +12788,8 @@ func (x *ClusterConfig_Spec) GetWorkspace() *ClusterConfig_Spec_Workspace {
 	return nil
 }
 
+// Status is the current status of the ClusterConfig. It is intentionally
+// empty.
 type ClusterConfig_Status struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -11758,8 +12826,11 @@ func (*ClusterConfig_Status) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{61, 1}
 }
 
+// Space is the Cluster-wide Space-related configuration.
 type ClusterConfig_Spec_Space struct {
-	state         protoimpl.MessageState              `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Ownership is the policy that controls which Users are allowed to own
+	// Spaces. If it is unset, no User is allowed to own a Space.
 	Ownership     *ClusterConfig_Spec_Space_Ownership `protobuf:"bytes,1,opt,name=ownership,proto3" json:"ownership,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -11802,11 +12873,16 @@ func (x *ClusterConfig_Spec_Space) GetOwnership() *ClusterConfig_Spec_Space_Owne
 	return nil
 }
 
+// Workspace is the Cluster-wide Workspace-related configuration.
 type ClusterConfig_Spec_Workspace struct {
-	state         protoimpl.MessageState                `protogen:"open.v1"`
-	Storage       *ClusterConfig_Spec_Workspace_Storage `protobuf:"bytes,1,opt,name=storage,proto3" json:"storage,omitempty"`
-	Limit         *ClusterConfig_Spec_Workspace_Limit   `protobuf:"bytes,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Timeout       *ClusterConfig_Spec_Workspace_Timeout `protobuf:"bytes,3,opt,name=timeout,proto3" json:"timeout,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Storage is the storage provisioning configuration of the Workspaces.
+	Storage *ClusterConfig_Spec_Workspace_Storage `protobuf:"bytes,1,opt,name=storage,proto3" json:"storage,omitempty"`
+	// Limit is the Cluster-wide Workspace limits.
+	Limit *ClusterConfig_Spec_Workspace_Limit `protobuf:"bytes,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Timeout is the Cluster-wide Workspace inactivity timeouts.
+	Timeout *ClusterConfig_Spec_Workspace_Timeout `protobuf:"bytes,3,opt,name=timeout,proto3" json:"timeout,omitempty"`
+	// Runtime is the Cluster-wide runtime configuration of the Workspaces.
 	Runtime       *ClusterConfig_Spec_Workspace_Runtime `protobuf:"bytes,4,opt,name=runtime,proto3" json:"runtime,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -11870,8 +12946,13 @@ func (x *ClusterConfig_Spec_Workspace) GetRuntime() *ClusterConfig_Spec_Workspac
 	return nil
 }
 
+// Ownership is the policy that controls which Users are allowed to own
+// (i.e. create) Spaces.
 type ClusterConfig_Spec_Space_Ownership struct {
-	state         protoimpl.MessageState                     `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Rules is the list of the ownership rules. The DENY rules are
+	// evaluated first and, if none of them matches, the ALLOW rules are
+	// evaluated. If no rule matches, the request is denied.
 	Rules         []*ClusterConfig_Spec_Space_Ownership_Rule `protobuf:"bytes,1,rep,name=rules,proto3" json:"rules,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -11914,12 +12995,16 @@ func (x *ClusterConfig_Spec_Space_Ownership) GetRules() []*ClusterConfig_Spec_Sp
 	return nil
 }
 
+// Rule is a single ownership rule.
 type ClusterConfig_Spec_Space_Ownership_Rule struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Effect is the effect of the policy when a match happens to any of
 	// the Conditions.
-	Effect        ClusterConfig_Spec_Space_Ownership_Rule_Effect `protobuf:"varint,1,opt,name=effect,proto3,enum=octelium.api.main.cordium.v1.ClusterConfig_Spec_Space_Ownership_Rule_Effect" json:"effect,omitempty"`
-	Condition     *Condition                                     `protobuf:"bytes,2,opt,name=condition,proto3" json:"condition,omitempty"`
+	Effect ClusterConfig_Spec_Space_Ownership_Rule_Effect `protobuf:"varint,1,opt,name=effect,proto3,enum=octelium.api.main.cordium.v1.ClusterConfig_Spec_Space_Ownership_Rule_Effect" json:"effect,omitempty"`
+	// Condition is evaluated against the request context which contains
+	// the requesting User (i.e. `ctx.user`) and the Space that is being
+	// created (i.e. `ctx.space`).
+	Condition     *Condition `protobuf:"bytes,2,opt,name=condition,proto3" json:"condition,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -11968,9 +13053,14 @@ func (x *ClusterConfig_Spec_Space_Ownership_Rule) GetCondition() *Condition {
 	return nil
 }
 
+// Storage is the storage provisioning configuration of the Workspaces.
 type ClusterConfig_Spec_Workspace_Storage struct {
-	state               protoimpl.MessageState                                    `protogen:"open.v1"`
-	StorageClass        *ClusterConfig_Spec_Workspace_Storage_StorageClass        `protobuf:"bytes,1,opt,name=storageClass,proto3" json:"storageClass,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// StorageClass selects the StorageClass of the Workspaces' volumes.
+	StorageClass *ClusterConfig_Spec_Workspace_Storage_StorageClass `protobuf:"bytes,1,opt,name=storageClass,proto3" json:"storageClass,omitempty"`
+	// VolumeSnapshotClass selects the VolumeSnapshotClass of the Template
+	// pre-build snapshots. If it is unset or if no rule matches, the
+	// Template pre-builds are disabled.
 	VolumeSnapshotClass *ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass `protobuf:"bytes,2,opt,name=volumeSnapshotClass,proto3" json:"volumeSnapshotClass,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
@@ -12020,16 +13110,30 @@ func (x *ClusterConfig_Spec_Workspace_Storage) GetVolumeSnapshotClass() *Cluster
 	return nil
 }
 
+// Limit is the Cluster-wide Workspace limits. All the fields are
+// optional and omitting one means that no Cluster-level restriction is
+// applied for that dimension.
 type ClusterConfig_Spec_Workspace_Limit struct {
-	state                         protoimpl.MessageState `protogen:"open.v1"`
-	MaxPerUser                    uint32                 `protobuf:"varint,1,opt,name=maxPerUser,proto3" json:"maxPerUser,omitempty"`
-	MaxActivePerUser              uint32                 `protobuf:"varint,2,opt,name=maxActivePerUser,proto3" json:"maxActivePerUser,omitempty"`
-	BuildLimit                    *Workspace_Spec_Limit  `protobuf:"bytes,3,opt,name=buildLimit,proto3" json:"buildLimit,omitempty"`
-	DefaultOrganizationSpaceLimit *Workspace_Spec_Limit  `protobuf:"bytes,4,opt,name=defaultOrganizationSpaceLimit,proto3" json:"defaultOrganizationSpaceLimit,omitempty"`
-	DefaultUserSpaceLimit         *Workspace_Spec_Limit  `protobuf:"bytes,5,opt,name=defaultUserSpaceLimit,proto3" json:"defaultUserSpaceLimit,omitempty"`
-	MaxLimit                      *Workspace_Spec_Limit  `protobuf:"bytes,6,opt,name=maxLimit,proto3" json:"maxLimit,omitempty"`
-	unknownFields                 protoimpl.UnknownFields
-	sizeCache                     protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// MaxPerUser is the maximum total number of the Workspaces that a
+	// single User can own.
+	MaxPerUser uint32 `protobuf:"varint,1,opt,name=maxPerUser,proto3" json:"maxPerUser,omitempty"`
+	// MaxActivePerUser is the maximum number of the Workspaces that a
+	// single User can have running at the same time.
+	MaxActivePerUser uint32 `protobuf:"varint,2,opt,name=maxActivePerUser,proto3" json:"maxActivePerUser,omitempty"`
+	// BuildLimit is the compute resources that are allocated for the
+	// Template pre-build Workspaces.
+	BuildLimit *Workspace_Spec_Limit `protobuf:"bytes,3,opt,name=buildLimit,proto3" json:"buildLimit,omitempty"`
+	// DefaultOrganizationSpaceLimit is the default compute resources of
+	// the Workspaces that belong to ORGANIZATION Spaces.
+	DefaultOrganizationSpaceLimit *Workspace_Spec_Limit `protobuf:"bytes,4,opt,name=defaultOrganizationSpaceLimit,proto3" json:"defaultOrganizationSpaceLimit,omitempty"`
+	// DefaultUserSpaceLimit is the default compute resources of the
+	// Workspaces that belong to USER Spaces.
+	DefaultUserSpaceLimit *Workspace_Spec_Limit `protobuf:"bytes,5,opt,name=defaultUserSpaceLimit,proto3" json:"defaultUserSpaceLimit,omitempty"`
+	// MaxLimit is a hard cap that no Workspace of the Cluster can exceed.
+	MaxLimit      *Workspace_Spec_Limit `protobuf:"bytes,6,opt,name=maxLimit,proto3" json:"maxLimit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ClusterConfig_Spec_Workspace_Limit) Reset() {
@@ -12104,15 +13208,27 @@ func (x *ClusterConfig_Spec_Workspace_Limit) GetMaxLimit() *Workspace_Spec_Limit
 	return nil
 }
 
+// Timeout is the Cluster-wide inactivity timeouts after which a running
+// Workspace is automatically stopped. All the fields are optional.
 type ClusterConfig_Spec_Workspace_Timeout struct {
-	state                     protoimpl.MessageState `protogen:"open.v1"`
-	DefaultDuration           *metav1.Duration       `protobuf:"bytes,1,opt,name=defaultDuration,proto3" json:"defaultDuration,omitempty"`
-	UserSpaceDuration         *metav1.Duration       `protobuf:"bytes,2,opt,name=userSpaceDuration,proto3" json:"userSpaceDuration,omitempty"`
-	OrganizationSpaceDuration *metav1.Duration       `protobuf:"bytes,3,opt,name=organizationSpaceDuration,proto3" json:"organizationSpaceDuration,omitempty"`
-	MaxActiveDuration         *metav1.Duration       `protobuf:"bytes,4,opt,name=maxActiveDuration,proto3" json:"maxActiveDuration,omitempty"`
-	AllowNoTimeout            bool                   `protobuf:"varint,5,opt,name=allowNoTimeout,proto3" json:"allowNoTimeout,omitempty"`
-	unknownFields             protoimpl.UnknownFields
-	sizeCache                 protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// DefaultDuration is the inactivity timeout that is applied when no
+	// Space-type-specific duration is set.
+	DefaultDuration *metav1.Duration `protobuf:"bytes,1,opt,name=defaultDuration,proto3" json:"defaultDuration,omitempty"`
+	// UserSpaceDuration is the inactivity timeout of the Workspaces that
+	// belong to USER Spaces.
+	UserSpaceDuration *metav1.Duration `protobuf:"bytes,2,opt,name=userSpaceDuration,proto3" json:"userSpaceDuration,omitempty"`
+	// OrganizationSpaceDuration is the inactivity timeout of the
+	// Workspaces that belong to ORGANIZATION Spaces.
+	OrganizationSpaceDuration *metav1.Duration `protobuf:"bytes,3,opt,name=organizationSpaceDuration,proto3" json:"organizationSpaceDuration,omitempty"`
+	// MaxActiveDuration is the maximum total duration for which a
+	// Workspace can remain running regardless of its activity.
+	MaxActiveDuration *metav1.Duration `protobuf:"bytes,4,opt,name=maxActiveDuration,proto3" json:"maxActiveDuration,omitempty"`
+	// AllowNoTimeout allows the Workspaces to disable their inactivity
+	// timeout entirely via their runtime's timeout mode.
+	AllowNoTimeout bool `protobuf:"varint,5,opt,name=allowNoTimeout,proto3" json:"allowNoTimeout,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *ClusterConfig_Spec_Workspace_Timeout) Reset() {
@@ -12180,8 +13296,11 @@ func (x *ClusterConfig_Spec_Workspace_Timeout) GetAllowNoTimeout() bool {
 	return false
 }
 
+// Runtime is the Cluster-wide runtime configuration of the Workspaces.
 type ClusterConfig_Spec_Workspace_Runtime struct {
-	state         protoimpl.MessageState               `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Capabilities is the Linux capabilities that are merged into every
+	// Workspace of the Cluster.
 	Capabilities  *Workspace_Spec_Runtime_Capabilities `protobuf:"bytes,1,opt,name=capabilities,proto3" json:"capabilities,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -12224,8 +13343,12 @@ func (x *ClusterConfig_Spec_Workspace_Runtime) GetCapabilities() *Workspace_Spec
 	return nil
 }
 
+// StorageClass selects the Kubernetes StorageClass that is used to
+// provision the Workspaces' volumes.
 type ClusterConfig_Spec_Workspace_Storage_StorageClass struct {
-	state         protoimpl.MessageState                                    `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Rules is the list of the storage class selection rules. They are
+	// evaluated in order and the first matching one is used.
 	Rules         []*ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule `protobuf:"bytes,1,rep,name=rules,proto3" json:"rules,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -12268,8 +13391,12 @@ func (x *ClusterConfig_Spec_Workspace_Storage_StorageClass) GetRules() []*Cluste
 	return nil
 }
 
+// VolumeSnapshotClass selects the Kubernetes VolumeSnapshotClass that
+// is used for the Template pre-build snapshots.
 type ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass struct {
-	state         protoimpl.MessageState                                           `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Rules is the list of the volume snapshot class selection rules.
+	// They are evaluated in order and the first matching one is used.
 	Rules         []*ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule `protobuf:"bytes,1,rep,name=rules,proto3" json:"rules,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -12312,10 +13439,15 @@ func (x *ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass) GetRules() []
 	return nil
 }
 
+// Rule is a single storage class selection rule.
 type ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Condition     *Condition             `protobuf:"bytes,1,opt,name=condition,proto3" json:"condition,omitempty"`
-	StorageClass  string                 `protobuf:"bytes,2,opt,name=storageClass,proto3" json:"storageClass,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Condition is evaluated against the Workspace that is being
+	// provisioned (i.e. `workspace`).
+	Condition *Condition `protobuf:"bytes,1,opt,name=condition,proto3" json:"condition,omitempty"`
+	// StorageClass is the name of the Kubernetes StorageClass that is
+	// used once the Condition matches.
+	StorageClass  string `protobuf:"bytes,2,opt,name=storageClass,proto3" json:"storageClass,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -12364,10 +13496,16 @@ func (x *ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule) GetStorageClass
 	return ""
 }
 
+// Rule is a single volume snapshot class selection rule.
 type ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule struct {
-	state               protoimpl.MessageState `protogen:"open.v1"`
-	Condition           *Condition             `protobuf:"bytes,1,opt,name=condition,proto3" json:"condition,omitempty"`
-	VolumeSnapshotClass string                 `protobuf:"bytes,2,opt,name=volumeSnapshotClass,proto3" json:"volumeSnapshotClass,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Condition is evaluated against the request context which
+	// contains the build Workspace (i.e. `ctx.workspace`) and its
+	// Template (i.e. `ctx.template`).
+	Condition *Condition `protobuf:"bytes,1,opt,name=condition,proto3" json:"condition,omitempty"`
+	// VolumeSnapshotClass is the name of the Kubernetes
+	// VolumeSnapshotClass that is used once the Condition matches.
+	VolumeSnapshotClass string `protobuf:"bytes,2,opt,name=volumeSnapshotClass,proto3" json:"volumeSnapshotClass,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -12416,9 +13554,11 @@ func (x *ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule) GetVolum
 	return ""
 }
 
+// All acts as a logical AND operator on its list of Conditions.
 type Condition_All struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Of            []*Condition           `protobuf:"bytes,1,rep,name=of,proto3" json:"of,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Of is the list of the Conditions that all have to match.
+	Of            []*Condition `protobuf:"bytes,1,rep,name=of,proto3" json:"of,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -12460,9 +13600,10 @@ func (x *Condition_All) GetOf() []*Condition {
 	return nil
 }
 
+// Any acts as a logical OR operator on its list of Conditions.
 type Condition_Any struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Expressions is the list of CEL expressions
+	// Of is the list of the Conditions of which at least one has to match.
 	Of            []*Condition `protobuf:"bytes,1,rep,name=of,proto3" json:"of,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -12505,9 +13646,10 @@ func (x *Condition_Any) GetOf() []*Condition {
 	return nil
 }
 
+// None acts as a logical NOR operator on its list of Conditions.
 type Condition_None struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Expressions is the list of CEL expressions
+	// Of is the list of the Conditions of which none is allowed to match.
 	Of            []*Condition `protobuf:"bytes,1,rep,name=of,proto3" json:"of,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -12550,8 +13692,11 @@ func (x *Condition_None) GetOf() []*Condition {
 	return nil
 }
 
+// OPA is an OPA (Open Policy Agent) Rego script.
 type Condition_OPA struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
+	// Type is the source of the Rego script
+	//
 	// Types that are valid to be assigned to Type:
 	//
 	//	*Condition_OPA_Inline

@@ -18,7 +18,6 @@ package usersecret
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/octelium/cordium/client/cordium/commands/ccommon"
 	pb "github.com/octelium/octelium/apis/main/cordiumv1"
@@ -33,6 +32,7 @@ type args struct {
 	Type     string
 	Value    string
 	FromFile string
+	FromEnv  string
 }
 
 var cmdArgs args
@@ -42,11 +42,13 @@ func init() {
 		`UserSecret type. Use "ssh-key" to generate a server-side ECDSA key pair.
 Omit for a standard secret value (token, password, certificate, etc.).`)
 	Cmd.PersistentFlags().StringVar(&cmdArgs.Value, "value", "",
-		"UserSecret value (inline). Cannot be used with --file or --type ssh-key.")
+		"UserSecret value (inline). Cannot be used with --file, --from-env or --type ssh-key.")
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.FromFile, "file", "f", "",
-		"Read the UserSecret value from a file. Cannot be used with --value or --type ssh-key.")
+		"Read the UserSecret value from a file. Set it to `-` to read from stdin. Cannot be used with --value, --from-env or --type ssh-key.")
+	Cmd.PersistentFlags().StringVar(&cmdArgs.FromEnv, "from-env", "",
+		"Read the UserSecret value from an environment variable. Cannot be used with --value, --file or --type ssh-key.")
 
-	Cmd.MarkFlagsMutuallyExclusive("value", "file")
+	Cmd.MarkFlagsMutuallyExclusive("value", "file", "from-env")
 }
 
 var Cmd = &cobra.Command{
@@ -57,7 +59,7 @@ environment variable sources in UserConfig or as credentials for dotfile
 repository access.
 
 For standard secrets (tokens, passwords, certificates), provide the value
-via --value, --file, or an interactive prompt.
+via --value, --file, --from-env, or an interactive prompt.
 
 For SSH key UserSecrets (--type ssh-key), the server generates an ECDSA key
 pair. The private key is stored and automatically loaded into every Workspace
@@ -72,6 +74,9 @@ SSH agent. The public key is printed after creation for external registration
 
   # Create a UserSecret from a file (content stored as binary)
   cordium create usec my-tls-cert --file ./cert.pem
+
+  # Create a UserSecret from an environment variable
+  cordium create usec my-github-token --from-env GITHUB_TOKEN
 
   # Generate a server-side ECDSA SSH key pair
   cordium create usec my-deploy-key --type ssh-key`,
@@ -94,8 +99,8 @@ func doCmd(cmd *cobra.Command, args []string) error {
 	if cmdArgs.Type != "" && !isSshKey {
 		return errors.Errorf("unknown --type %q: the only supported type is ssh-key", cmdArgs.Type)
 	}
-	if isSshKey && (cmd.Flags().Changed("value") || cmd.Flags().Changed("file")) {
-		return errors.New("--value and --file cannot be used with --type ssh-key: the key pair is generated server-side")
+	if isSshKey && (cmd.Flags().Changed("value") || cmd.Flags().Changed("file") || cmd.Flags().Changed("from-env")) {
+		return errors.New("--value, --file and --from-env cannot be used with --type ssh-key: the key pair is generated server-side")
 	}
 
 	conn, err := client.GetGRPCClientConn(ctx, i.Domain)
@@ -155,12 +160,10 @@ func doCmd(cmd *cobra.Command, args []string) error {
 }
 
 func getValue() ([]byte, error) {
-	if cmdArgs.FromFile != "" {
-		return os.ReadFile(cmdArgs.FromFile)
-	}
-	if cmdArgs.Value != "" {
-		return []byte(cmdArgs.Value), nil
-	}
-
-	return cliutils.GetSecretPrompt()
+	return cliutils.GetDataValue(&cliutils.GetDataValueOpts{
+		Value:    cmdArgs.Value,
+		FromFile: cmdArgs.FromFile,
+		FromEnv:  cmdArgs.FromEnv,
+		Prompt:   "Enter the UserSecret value",
+	})
 }

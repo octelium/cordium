@@ -102,70 +102,160 @@ const (
 // MainServiceClient is the client API for MainService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// MainService is the primary Cordium API that is used by the Users (i.e. via
+// the `cordium` CLI, the web portal and the SDKs) to manage their Spaces,
+// Templates, Workspaces, Memberships, Secrets, UserSecrets, GitProviders and
+// their UserConfig. Every method is executed on behalf of the authenticated
+// Octelium User and is authorized against that User's ownership of the
+// resource and/or their Membership role in the resource's Space.
 type MainServiceClient interface {
-	// CreateSecret creates a Secret
+	// CreateSecret creates a Secret inside a Space. The caller must be at least
+	// an ADMIN Member of the Space. The Secret data is never returned back by
+	// the Cluster once the Secret is created.
 	CreateSecret(ctx context.Context, in *Secret, opts ...grpc.CallOption) (*Secret, error)
-	// ListSecret lists Secrets
+	// ListSecret lists the Secrets of a Space. The Secrets' data is not
+	// included in the response.
 	ListSecret(ctx context.Context, in *ListSecretOptions, opts ...grpc.CallOption) (*SecretList, error)
-	// DeleteWorkspace deletes a Workspace
+	// DeleteSecret deletes a Secret. The caller must be at least an ADMIN Member
+	// of the Secret's Space.
 	DeleteSecret(ctx context.Context, in *metav1.DeleteOptions, opts ...grpc.CallOption) (*metav1.OperationResult, error)
-	// GetWorkspace retrieves a specific Workspace
+	// GetSecret retrieves a specific Secret. The Secret data is not included in
+	// the response.
 	GetSecret(ctx context.Context, in *metav1.GetOptions, opts ...grpc.CallOption) (*Secret, error)
-	// CreateTemplate creates a Template owned by the User.
+	// CreateTemplate creates a Template inside a Space. The caller must be at
+	// least an ADMIN Member of the Space.
 	CreateTemplate(ctx context.Context, in *Template, opts ...grpc.CallOption) (*Template, error)
-	// UpdateTemplate updates a Template owned by the User.
+	// UpdateTemplate updates a Template. The caller must be at least an ADMIN
+	// Member of the Template's Space.
 	UpdateTemplate(ctx context.Context, in *Template, opts ...grpc.CallOption) (*Template, error)
-	// DeleteTemplate deletes a Template owned by the User.
+	// DeleteTemplate deletes a Template. The default Template of a Space cannot
+	// be deleted.
 	DeleteTemplate(ctx context.Context, in *metav1.DeleteOptions, opts ...grpc.CallOption) (*metav1.OperationResult, error)
+	// BuildTemplate starts a pre-build for a Template. A pre-build runs a
+	// hidden build Workspace whose storage is snapshotted once it successfully
+	// completes so that the subsequent Workspaces of the Template can be
+	// restored from that snapshot instead of being initialized from scratch. A
+	// Template can only have one running pre-build at a time. Starting a new
+	// pre-build cancels the currently running one, if any.
 	BuildTemplate(ctx context.Context, in *BuildTemplateRequest, opts ...grpc.CallOption) (*Template, error)
+	// CancelBuildTemplate cancels the currently running pre-build of a Template,
+	// if any, and returns the updated Template.
 	CancelBuildTemplate(ctx context.Context, in *CancelBuildTemplateRequest, opts ...grpc.CallOption) (*Template, error)
-	// CreateTemplate creates a Template owned by the User.
+	// CreateSpace creates a Space owned by the User. Whether a User is allowed
+	// to own a Space is controlled by the Space ownership rules of the
+	// ClusterConfig. A default Membership and a default Template are
+	// automatically created along with the Space.
 	CreateSpace(ctx context.Context, in *Space, opts ...grpc.CallOption) (*Space, error)
-	// UpdateTemplate updates a Template owned by the User.
+	// UpdateSpace updates a Space. The caller must be the Space creator or an
+	// OWNER Member of the Space.
 	UpdateSpace(ctx context.Context, in *Space, opts ...grpc.CallOption) (*Space, error)
-	// DeleteTemplate deletes a Template owned by the User.
+	// DeleteSpace deletes a Space as well as all of its Memberships, Templates,
+	// Secrets and GitProviders.
 	DeleteSpace(ctx context.Context, in *metav1.DeleteOptions, opts ...grpc.CallOption) (*metav1.OperationResult, error)
+	// CreateMembership adds a User as a Member to a Space. The caller must be at
+	// least an ADMIN Member of the Space. Members can currently only be added to
+	// ORGANIZATION Spaces.
 	CreateMembership(ctx context.Context, in *CreateMembershipRequest, opts ...grpc.CallOption) (*Membership, error)
+	// DeleteMembership removes a Member from a Space. The caller must be at
+	// least an ADMIN Member of the Space. Space creators cannot be removed.
 	DeleteMembership(ctx context.Context, in *metav1.DeleteOptions, opts ...grpc.CallOption) (*metav1.OperationResult, error)
+	// GetSpaceMembership retrieves the Membership of the calling User in a
+	// specific Space.
 	GetSpaceMembership(ctx context.Context, in *GetSpaceMembershipRequest, opts ...grpc.CallOption) (*Membership, error)
+	// UpdateMembership updates a Membership (i.e. its Role). The caller must be
+	// at least an ADMIN Member of the Space. Setting a Role to OWNER
+	// additionally requires the caller to be an OWNER.
 	UpdateMembership(ctx context.Context, in *Membership, opts ...grpc.CallOption) (*Membership, error)
+	// CreateGitProvider creates a GitProvider inside a Space. The caller must be
+	// at least an ADMIN Member of the Space.
 	CreateGitProvider(ctx context.Context, in *GitProvider, opts ...grpc.CallOption) (*GitProvider, error)
+	// UpdateGitProvider updates a GitProvider.
 	UpdateGitProvider(ctx context.Context, in *GitProvider, opts ...grpc.CallOption) (*GitProvider, error)
+	// DeleteGitProvider deletes a GitProvider.
 	DeleteGitProvider(ctx context.Context, in *metav1.DeleteOptions, opts ...grpc.CallOption) (*metav1.OperationResult, error)
-	// CreateWorkspace creates a Workspace owned by the User.
+	// CreateWorkspace creates a Workspace owned by the User. The Workspace is
+	// created in the STOPPED state and it is assigned a short randomly generated
+	// name by the Cluster. If no Template is set in the request's
+	// `status.templateRef`, the User's default Template is used.
 	CreateWorkspace(ctx context.Context, in *Workspace, opts ...grpc.CallOption) (*Workspace, error)
-	// UpdateWorkspace updates a Workspace owned by the User.
+	// UpdateWorkspace updates a Workspace owned by the User. Only the
+	// Workspace's displayName and spec can be updated.
 	UpdateWorkspace(ctx context.Context, in *Workspace, opts ...grpc.CallOption) (*Workspace, error)
 	// DeleteWorkspace deletes a Workspace owned by the User.
 	DeleteWorkspace(ctx context.Context, in *metav1.DeleteOptions, opts ...grpc.CallOption) (*metav1.OperationResult, error)
 	// ListWorkspace lists the Workspaces owned by the User.
 	ListWorkspace(ctx context.Context, in *ListWorkspaceOptions, opts ...grpc.CallOption) (*WorkspaceList, error)
+	// StartWorkspace starts a stopped Workspace. The Cluster creates a dedicated
+	// Octelium Session for the run and moves the Workspace to the INIT_REQUEST
+	// state. The actual initialization is asynchronous and can be followed via
+	// the WatchWorkspace method.
 	StartWorkspace(ctx context.Context, in *StartWorkspaceRequest, opts ...grpc.CallOption) (*StartWorkspaceResponse, error)
+	// StopWorkspace requests a graceful stop of a running Workspace. The
+	// Workspace moves to the STOPPING_REQUEST state and the stoppage itself is
+	// asynchronous.
 	StopWorkspace(ctx context.Context, in *StopWorkspaceRequest, opts ...grpc.CallOption) (*StopWorkspaceResponse, error)
+	// ShareWorkspacePort shares a named Application of a Workspace with other
+	// Users so that they can access it via the Workspace's public hostname.
 	ShareWorkspacePort(ctx context.Context, in *ShareWorkspacePortRequest, opts ...grpc.CallOption) (*ShareWorkspacePortResponse, error)
+	// UnshareWorkspacePort stops sharing a previously shared named Application
+	// of a Workspace.
 	UnshareWorkspacePort(ctx context.Context, in *UnshareWorkspacePortRequest, opts ...grpc.CallOption) (*UnshareWorkspacePortResponse, error)
+	// ListSpace lists the Spaces that are either created by the User or where
+	// the User is a Member depending on the requested mode.
 	ListSpace(ctx context.Context, in *ListSpaceOptions, opts ...grpc.CallOption) (*SpaceList, error)
+	// ListTemplate lists the Templates of a Space that the User is a Member of.
 	ListTemplate(ctx context.Context, in *ListTemplateOptions, opts ...grpc.CallOption) (*TemplateList, error)
+	// ListMembership lists the Memberships of a Space that the User is a Member
+	// of.
 	ListMembership(ctx context.Context, in *ListMembershipOptions, opts ...grpc.CallOption) (*MembershipList, error)
+	// ListGitProvider lists the GitProviders of a Space that the User is a
+	// Member of.
 	ListGitProvider(ctx context.Context, in *ListGitProviderOptions, opts ...grpc.CallOption) (*GitProviderList, error)
+	// GetSpace retrieves a specific Space. The caller must be a Member of the
+	// Space.
 	GetSpace(ctx context.Context, in *metav1.GetOptions, opts ...grpc.CallOption) (*Space, error)
+	// GetWorkspace retrieves a specific Workspace owned by the User.
 	GetWorkspace(ctx context.Context, in *metav1.GetOptions, opts ...grpc.CallOption) (*Workspace, error)
+	// GetTemplate retrieves a specific Template. The caller must be a Member of
+	// the Template's Space.
 	GetTemplate(ctx context.Context, in *metav1.GetOptions, opts ...grpc.CallOption) (*Template, error)
+	// GetGitProvider retrieves a specific GitProvider. The caller must be a
+	// Member of the GitProvider's Space.
 	GetGitProvider(ctx context.Context, in *metav1.GetOptions, opts ...grpc.CallOption) (*GitProvider, error)
+	// GetMembership retrieves a specific Membership. The caller must be a Member
+	// of the Membership's Space.
 	GetMembership(ctx context.Context, in *metav1.GetOptions, opts ...grpc.CallOption) (*Membership, error)
+	// LeaveSpace removes the calling User's own Membership from a Space. Space
+	// creators cannot leave their own Spaces, they can only delete them.
 	LeaveSpace(ctx context.Context, in *LeaveSpaceRequest, opts ...grpc.CallOption) (*LeaveSpaceResponse, error)
-	// CreateWorkspace creates a Workspace owned by the User.
+	// CreateUserSecret creates a UserSecret owned by the User. UserSecrets of
+	// the SSH_KEY type have their key pair generated by the Cluster. The
+	// UserSecret data is never returned back by the Cluster.
 	CreateUserSecret(ctx context.Context, in *UserSecret, opts ...grpc.CallOption) (*UserSecret, error)
-	// UpdateWorkspace updates a Workspace owned by the User.
+	// UpdateUserSecret updates a UserSecret owned by the User.
 	UpdateUserSecret(ctx context.Context, in *UserSecret, opts ...grpc.CallOption) (*UserSecret, error)
-	// DeleteWorkspace deletes a Workspace owned by the User.
+	// DeleteUserSecret deletes a UserSecret owned by the User.
 	DeleteUserSecret(ctx context.Context, in *metav1.DeleteOptions, opts ...grpc.CallOption) (*metav1.OperationResult, error)
-	// ListWorkspace lists the Workspaces owned by the User.
+	// ListUserSecret lists the UserSecrets owned by the User. The UserSecrets'
+	// data is not included in the response.
 	ListUserSecret(ctx context.Context, in *ListUserSecretOptions, opts ...grpc.CallOption) (*UserSecretList, error)
+	// GetUserSecret retrieves a specific UserSecret owned by the User. The
+	// UserSecret data is not included in the response.
 	GetUserSecret(ctx context.Context, in *metav1.GetOptions, opts ...grpc.CallOption) (*UserSecret, error)
+	// GetUserConfig retrieves the calling User's UserConfig. The UserConfig is
+	// automatically created by the Cluster upon the first call.
 	GetUserConfig(ctx context.Context, in *GetUserConfigRequest, opts ...grpc.CallOption) (*UserConfig, error)
+	// UpdateUserConfig updates the calling User's UserConfig.
 	UpdateUserConfig(ctx context.Context, in *UserConfig, opts ...grpc.CallOption) (*UserConfig, error)
+	// ListRegion lists the Regions of the Cluster that are enabled to host
+	// Workspaces.
 	ListRegion(ctx context.Context, in *ListRegionOptions, opts ...grpc.CallOption) (*RegionList, error)
+	// WatchWorkspace opens a server-side stream that publishes the create,
+	// update and delete events of the User's Workspaces. If a workspaceRef is
+	// set in the request, only the events of that specific Workspace are
+	// published. It is the recommended way to follow a Workspace's state
+	// throughout its lifecycle.
 	WatchWorkspace(ctx context.Context, in *WatchWorkspaceRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[WatchWorkspaceResponse], error)
 }
 
@@ -649,70 +739,160 @@ type MainService_WatchWorkspaceClient = grpc.ServerStreamingClient[WatchWorkspac
 // MainServiceServer is the server API for MainService service.
 // All implementations must embed UnimplementedMainServiceServer
 // for forward compatibility.
+//
+// MainService is the primary Cordium API that is used by the Users (i.e. via
+// the `cordium` CLI, the web portal and the SDKs) to manage their Spaces,
+// Templates, Workspaces, Memberships, Secrets, UserSecrets, GitProviders and
+// their UserConfig. Every method is executed on behalf of the authenticated
+// Octelium User and is authorized against that User's ownership of the
+// resource and/or their Membership role in the resource's Space.
 type MainServiceServer interface {
-	// CreateSecret creates a Secret
+	// CreateSecret creates a Secret inside a Space. The caller must be at least
+	// an ADMIN Member of the Space. The Secret data is never returned back by
+	// the Cluster once the Secret is created.
 	CreateSecret(context.Context, *Secret) (*Secret, error)
-	// ListSecret lists Secrets
+	// ListSecret lists the Secrets of a Space. The Secrets' data is not
+	// included in the response.
 	ListSecret(context.Context, *ListSecretOptions) (*SecretList, error)
-	// DeleteWorkspace deletes a Workspace
+	// DeleteSecret deletes a Secret. The caller must be at least an ADMIN Member
+	// of the Secret's Space.
 	DeleteSecret(context.Context, *metav1.DeleteOptions) (*metav1.OperationResult, error)
-	// GetWorkspace retrieves a specific Workspace
+	// GetSecret retrieves a specific Secret. The Secret data is not included in
+	// the response.
 	GetSecret(context.Context, *metav1.GetOptions) (*Secret, error)
-	// CreateTemplate creates a Template owned by the User.
+	// CreateTemplate creates a Template inside a Space. The caller must be at
+	// least an ADMIN Member of the Space.
 	CreateTemplate(context.Context, *Template) (*Template, error)
-	// UpdateTemplate updates a Template owned by the User.
+	// UpdateTemplate updates a Template. The caller must be at least an ADMIN
+	// Member of the Template's Space.
 	UpdateTemplate(context.Context, *Template) (*Template, error)
-	// DeleteTemplate deletes a Template owned by the User.
+	// DeleteTemplate deletes a Template. The default Template of a Space cannot
+	// be deleted.
 	DeleteTemplate(context.Context, *metav1.DeleteOptions) (*metav1.OperationResult, error)
+	// BuildTemplate starts a pre-build for a Template. A pre-build runs a
+	// hidden build Workspace whose storage is snapshotted once it successfully
+	// completes so that the subsequent Workspaces of the Template can be
+	// restored from that snapshot instead of being initialized from scratch. A
+	// Template can only have one running pre-build at a time. Starting a new
+	// pre-build cancels the currently running one, if any.
 	BuildTemplate(context.Context, *BuildTemplateRequest) (*Template, error)
+	// CancelBuildTemplate cancels the currently running pre-build of a Template,
+	// if any, and returns the updated Template.
 	CancelBuildTemplate(context.Context, *CancelBuildTemplateRequest) (*Template, error)
-	// CreateTemplate creates a Template owned by the User.
+	// CreateSpace creates a Space owned by the User. Whether a User is allowed
+	// to own a Space is controlled by the Space ownership rules of the
+	// ClusterConfig. A default Membership and a default Template are
+	// automatically created along with the Space.
 	CreateSpace(context.Context, *Space) (*Space, error)
-	// UpdateTemplate updates a Template owned by the User.
+	// UpdateSpace updates a Space. The caller must be the Space creator or an
+	// OWNER Member of the Space.
 	UpdateSpace(context.Context, *Space) (*Space, error)
-	// DeleteTemplate deletes a Template owned by the User.
+	// DeleteSpace deletes a Space as well as all of its Memberships, Templates,
+	// Secrets and GitProviders.
 	DeleteSpace(context.Context, *metav1.DeleteOptions) (*metav1.OperationResult, error)
+	// CreateMembership adds a User as a Member to a Space. The caller must be at
+	// least an ADMIN Member of the Space. Members can currently only be added to
+	// ORGANIZATION Spaces.
 	CreateMembership(context.Context, *CreateMembershipRequest) (*Membership, error)
+	// DeleteMembership removes a Member from a Space. The caller must be at
+	// least an ADMIN Member of the Space. Space creators cannot be removed.
 	DeleteMembership(context.Context, *metav1.DeleteOptions) (*metav1.OperationResult, error)
+	// GetSpaceMembership retrieves the Membership of the calling User in a
+	// specific Space.
 	GetSpaceMembership(context.Context, *GetSpaceMembershipRequest) (*Membership, error)
+	// UpdateMembership updates a Membership (i.e. its Role). The caller must be
+	// at least an ADMIN Member of the Space. Setting a Role to OWNER
+	// additionally requires the caller to be an OWNER.
 	UpdateMembership(context.Context, *Membership) (*Membership, error)
+	// CreateGitProvider creates a GitProvider inside a Space. The caller must be
+	// at least an ADMIN Member of the Space.
 	CreateGitProvider(context.Context, *GitProvider) (*GitProvider, error)
+	// UpdateGitProvider updates a GitProvider.
 	UpdateGitProvider(context.Context, *GitProvider) (*GitProvider, error)
+	// DeleteGitProvider deletes a GitProvider.
 	DeleteGitProvider(context.Context, *metav1.DeleteOptions) (*metav1.OperationResult, error)
-	// CreateWorkspace creates a Workspace owned by the User.
+	// CreateWorkspace creates a Workspace owned by the User. The Workspace is
+	// created in the STOPPED state and it is assigned a short randomly generated
+	// name by the Cluster. If no Template is set in the request's
+	// `status.templateRef`, the User's default Template is used.
 	CreateWorkspace(context.Context, *Workspace) (*Workspace, error)
-	// UpdateWorkspace updates a Workspace owned by the User.
+	// UpdateWorkspace updates a Workspace owned by the User. Only the
+	// Workspace's displayName and spec can be updated.
 	UpdateWorkspace(context.Context, *Workspace) (*Workspace, error)
 	// DeleteWorkspace deletes a Workspace owned by the User.
 	DeleteWorkspace(context.Context, *metav1.DeleteOptions) (*metav1.OperationResult, error)
 	// ListWorkspace lists the Workspaces owned by the User.
 	ListWorkspace(context.Context, *ListWorkspaceOptions) (*WorkspaceList, error)
+	// StartWorkspace starts a stopped Workspace. The Cluster creates a dedicated
+	// Octelium Session for the run and moves the Workspace to the INIT_REQUEST
+	// state. The actual initialization is asynchronous and can be followed via
+	// the WatchWorkspace method.
 	StartWorkspace(context.Context, *StartWorkspaceRequest) (*StartWorkspaceResponse, error)
+	// StopWorkspace requests a graceful stop of a running Workspace. The
+	// Workspace moves to the STOPPING_REQUEST state and the stoppage itself is
+	// asynchronous.
 	StopWorkspace(context.Context, *StopWorkspaceRequest) (*StopWorkspaceResponse, error)
+	// ShareWorkspacePort shares a named Application of a Workspace with other
+	// Users so that they can access it via the Workspace's public hostname.
 	ShareWorkspacePort(context.Context, *ShareWorkspacePortRequest) (*ShareWorkspacePortResponse, error)
+	// UnshareWorkspacePort stops sharing a previously shared named Application
+	// of a Workspace.
 	UnshareWorkspacePort(context.Context, *UnshareWorkspacePortRequest) (*UnshareWorkspacePortResponse, error)
+	// ListSpace lists the Spaces that are either created by the User or where
+	// the User is a Member depending on the requested mode.
 	ListSpace(context.Context, *ListSpaceOptions) (*SpaceList, error)
+	// ListTemplate lists the Templates of a Space that the User is a Member of.
 	ListTemplate(context.Context, *ListTemplateOptions) (*TemplateList, error)
+	// ListMembership lists the Memberships of a Space that the User is a Member
+	// of.
 	ListMembership(context.Context, *ListMembershipOptions) (*MembershipList, error)
+	// ListGitProvider lists the GitProviders of a Space that the User is a
+	// Member of.
 	ListGitProvider(context.Context, *ListGitProviderOptions) (*GitProviderList, error)
+	// GetSpace retrieves a specific Space. The caller must be a Member of the
+	// Space.
 	GetSpace(context.Context, *metav1.GetOptions) (*Space, error)
+	// GetWorkspace retrieves a specific Workspace owned by the User.
 	GetWorkspace(context.Context, *metav1.GetOptions) (*Workspace, error)
+	// GetTemplate retrieves a specific Template. The caller must be a Member of
+	// the Template's Space.
 	GetTemplate(context.Context, *metav1.GetOptions) (*Template, error)
+	// GetGitProvider retrieves a specific GitProvider. The caller must be a
+	// Member of the GitProvider's Space.
 	GetGitProvider(context.Context, *metav1.GetOptions) (*GitProvider, error)
+	// GetMembership retrieves a specific Membership. The caller must be a Member
+	// of the Membership's Space.
 	GetMembership(context.Context, *metav1.GetOptions) (*Membership, error)
+	// LeaveSpace removes the calling User's own Membership from a Space. Space
+	// creators cannot leave their own Spaces, they can only delete them.
 	LeaveSpace(context.Context, *LeaveSpaceRequest) (*LeaveSpaceResponse, error)
-	// CreateWorkspace creates a Workspace owned by the User.
+	// CreateUserSecret creates a UserSecret owned by the User. UserSecrets of
+	// the SSH_KEY type have their key pair generated by the Cluster. The
+	// UserSecret data is never returned back by the Cluster.
 	CreateUserSecret(context.Context, *UserSecret) (*UserSecret, error)
-	// UpdateWorkspace updates a Workspace owned by the User.
+	// UpdateUserSecret updates a UserSecret owned by the User.
 	UpdateUserSecret(context.Context, *UserSecret) (*UserSecret, error)
-	// DeleteWorkspace deletes a Workspace owned by the User.
+	// DeleteUserSecret deletes a UserSecret owned by the User.
 	DeleteUserSecret(context.Context, *metav1.DeleteOptions) (*metav1.OperationResult, error)
-	// ListWorkspace lists the Workspaces owned by the User.
+	// ListUserSecret lists the UserSecrets owned by the User. The UserSecrets'
+	// data is not included in the response.
 	ListUserSecret(context.Context, *ListUserSecretOptions) (*UserSecretList, error)
+	// GetUserSecret retrieves a specific UserSecret owned by the User. The
+	// UserSecret data is not included in the response.
 	GetUserSecret(context.Context, *metav1.GetOptions) (*UserSecret, error)
+	// GetUserConfig retrieves the calling User's UserConfig. The UserConfig is
+	// automatically created by the Cluster upon the first call.
 	GetUserConfig(context.Context, *GetUserConfigRequest) (*UserConfig, error)
+	// UpdateUserConfig updates the calling User's UserConfig.
 	UpdateUserConfig(context.Context, *UserConfig) (*UserConfig, error)
+	// ListRegion lists the Regions of the Cluster that are enabled to host
+	// Workspaces.
 	ListRegion(context.Context, *ListRegionOptions) (*RegionList, error)
+	// WatchWorkspace opens a server-side stream that publishes the create,
+	// update and delete events of the User's Workspaces. If a workspaceRef is
+	// set in the request, only the events of that specific Workspace are
+	// published. It is the recommended way to follow a Workspace's state
+	// throughout its lifecycle.
 	WatchWorkspace(*WatchWorkspaceRequest, grpc.ServerStreamingServer[WatchWorkspaceResponse]) error
 	mustEmbedUnimplementedMainServiceServer()
 }
@@ -1916,14 +2096,35 @@ const (
 // WorkspaceServiceClient is the client API for WorkspaceService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// WorkspaceService is the API that operates inside a running Workspace. It
+// provides interactive terminals, command execution and the initialization
+// logs. Every method requires the Workspace to be owned by the calling User
+// and to be in the PREPARING or the RUNNING state.
 type WorkspaceServiceClient interface {
+	// CreateTerminal creates a new interactive terminal (i.e. a PTY-backed
+	// shell) inside a Workspace and returns its ID.
 	CreateTerminal(ctx context.Context, in *CreateTerminalRequest, opts ...grpc.CallOption) (*CreateTerminalResponse, error)
+	// RemoveTerminal terminates a terminal.
 	RemoveTerminal(ctx context.Context, in *RemoveTerminalRequest, opts ...grpc.CallOption) (*RemoveTerminalResponse, error)
+	// ListTerminal lists the currently open terminals of a Workspace.
 	ListTerminal(ctx context.Context, in *ListTerminalRequest, opts ...grpc.CallOption) (*ListTerminalResponse, error)
+	// WriteTerminalData writes data (i.e. stdin) to a terminal.
 	WriteTerminalData(ctx context.Context, in *WriteTerminalDataRequest, opts ...grpc.CallOption) (*WriteTerminalDataResponse, error)
+	// SetTerminalWindowSize resizes a terminal's window.
 	SetTerminalWindowSize(ctx context.Context, in *SetTerminalWindowSizeRequest, opts ...grpc.CallOption) (*SetTerminalWindowSizeResponse, error)
+	// ListenTerminal opens a server-side stream of a terminal's output. Multiple
+	// listeners can be attached to the same terminal at the same time.
 	ListenTerminal(ctx context.Context, in *ListenTerminalRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ListenTerminalResponse], error)
+	// ListenLog opens a server-side stream of a Workspace's initialization logs
+	// (i.e. the repository cloning, image pulling, image building and the
+	// lifecycle tasks output).
 	ListenLog(ctx context.Context, in *ListenLogRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ListenLogResponse], error)
+	// Exec runs a one-off command inside a Workspace over a bidirectional
+	// stream. The first client message must be a `request` message. The
+	// subsequent client messages carry the command's stdin or a kill signal
+	// while the server messages carry the command's stdout, stderr and its
+	// eventual exit code.
 	Exec(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[ExecRequest, ExecResponse], error)
 }
 
@@ -2039,14 +2240,35 @@ type WorkspaceService_ExecClient = grpc.BidiStreamingClient[ExecRequest, ExecRes
 // WorkspaceServiceServer is the server API for WorkspaceService service.
 // All implementations must embed UnimplementedWorkspaceServiceServer
 // for forward compatibility.
+//
+// WorkspaceService is the API that operates inside a running Workspace. It
+// provides interactive terminals, command execution and the initialization
+// logs. Every method requires the Workspace to be owned by the calling User
+// and to be in the PREPARING or the RUNNING state.
 type WorkspaceServiceServer interface {
+	// CreateTerminal creates a new interactive terminal (i.e. a PTY-backed
+	// shell) inside a Workspace and returns its ID.
 	CreateTerminal(context.Context, *CreateTerminalRequest) (*CreateTerminalResponse, error)
+	// RemoveTerminal terminates a terminal.
 	RemoveTerminal(context.Context, *RemoveTerminalRequest) (*RemoveTerminalResponse, error)
+	// ListTerminal lists the currently open terminals of a Workspace.
 	ListTerminal(context.Context, *ListTerminalRequest) (*ListTerminalResponse, error)
+	// WriteTerminalData writes data (i.e. stdin) to a terminal.
 	WriteTerminalData(context.Context, *WriteTerminalDataRequest) (*WriteTerminalDataResponse, error)
+	// SetTerminalWindowSize resizes a terminal's window.
 	SetTerminalWindowSize(context.Context, *SetTerminalWindowSizeRequest) (*SetTerminalWindowSizeResponse, error)
+	// ListenTerminal opens a server-side stream of a terminal's output. Multiple
+	// listeners can be attached to the same terminal at the same time.
 	ListenTerminal(*ListenTerminalRequest, grpc.ServerStreamingServer[ListenTerminalResponse]) error
+	// ListenLog opens a server-side stream of a Workspace's initialization logs
+	// (i.e. the repository cloning, image pulling, image building and the
+	// lifecycle tasks output).
 	ListenLog(*ListenLogRequest, grpc.ServerStreamingServer[ListenLogResponse]) error
+	// Exec runs a one-off command inside a Workspace over a bidirectional
+	// stream. The first client message must be a `request` message. The
+	// subsequent client messages carry the command's stdin or a kill signal
+	// while the server messages carry the command's stdout, stderr and its
+	// eventual exit code.
 	Exec(grpc.BidiStreamingServer[ExecRequest, ExecResponse]) error
 	mustEmbedUnimplementedWorkspaceServiceServer()
 }
@@ -2279,10 +2501,14 @@ const (
 // ManagementServiceClient is the client API for ManagementService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// ManagementService is the administrative API of a Cordium Cluster. It is used
+// by the Cluster administrators (e.g. via `cordium man`) to read and update
+// the Cluster-wide configuration.
 type ManagementServiceClient interface {
 	// GetClusterConfig gets the Cluster Configuration.
 	GetClusterConfig(ctx context.Context, in *GetClusterConfigRequest, opts ...grpc.CallOption) (*ClusterConfig, error)
-	// UpdateConfig updates the Cluster Configuration.
+	// UpdateClusterConfig updates the Cluster Configuration.
 	UpdateClusterConfig(ctx context.Context, in *ClusterConfig, opts ...grpc.CallOption) (*ClusterConfig, error)
 }
 
@@ -2317,10 +2543,14 @@ func (c *managementServiceClient) UpdateClusterConfig(ctx context.Context, in *C
 // ManagementServiceServer is the server API for ManagementService service.
 // All implementations must embed UnimplementedManagementServiceServer
 // for forward compatibility.
+//
+// ManagementService is the administrative API of a Cordium Cluster. It is used
+// by the Cluster administrators (e.g. via `cordium man`) to read and update
+// the Cluster-wide configuration.
 type ManagementServiceServer interface {
 	// GetClusterConfig gets the Cluster Configuration.
 	GetClusterConfig(context.Context, *GetClusterConfigRequest) (*ClusterConfig, error)
-	// UpdateConfig updates the Cluster Configuration.
+	// UpdateClusterConfig updates the Cluster Configuration.
 	UpdateClusterConfig(context.Context, *ClusterConfig) (*ClusterConfig, error)
 	mustEmbedUnimplementedManagementServiceServer()
 }

@@ -25,8 +25,7 @@ import (
 	"syscall"
 	"time"
 
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/octelium/cordium/cluster/apiserver/apiserver/mains"
 	"github.com/octelium/cordium/cluster/apiserver/apiserver/mans"
 	"github.com/octelium/cordium/cluster/apiserver/apiserver/wrks"
@@ -118,14 +117,12 @@ func Run(ctx context.Context) error {
 			Time:              2 * time.Minute,
 			Timeout:           20 * time.Second,
 		}),
-		grpc.StreamInterceptor(
-			grpc_middleware.ChainStreamServer(
-				grpc_recovery.StreamServerInterceptor(recoveryOpts...),
-				mdlwr.StreamServerInterceptor())),
-		grpc.UnaryInterceptor(
-			grpc_middleware.ChainUnaryServer(
-				grpc_recovery.UnaryServerInterceptor(recoveryOpts...),
-				mdlwr.UnaryServerInterceptor())),
+		grpc.ChainStreamInterceptor(
+			grpc_recovery.StreamServerInterceptor(recoveryOpts...),
+			mdlwr.StreamServerInterceptor()),
+		grpc.ChainUnaryInterceptor(
+			grpc_recovery.UnaryServerInterceptor(recoveryOpts...),
+			mdlwr.UnaryServerInterceptor()),
 	)
 
 	cordiumv1.RegisterMainServiceServer(s, mainSrv)

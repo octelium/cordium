@@ -138,7 +138,7 @@ gen-go-cluster:
 		--go_out=apis/cluster/cvigilv1 --go-grpc_out=apis/cluster/cvigilv1 $(PROTO_GO_OPT_GRPC)
 
 gen-go-rsc:
-	mkdir -p apis/rsc/rmetav1 apis/rsc/rcorev1 apis/rsc/rcachev1 apis/rsc/rratelimitv1 apis/rsc/rlockv1
+	mkdir -p apis/rsc/rmetav1 apis/rsc/rcorev1 apis/rsc/rcachev1 apis/rsc/rratelimitv1 apis/rsc/rlockv1 apis/rsc/rvectorv1
 	mkdir -p apis/rsc/rcordiumv1
 	protoc -I . -I $(PROTO_IN_RSC)/metav1 rmetav1.proto \
 		--go_out=apis/rsc/rmetav1 --go-grpc_out=apis/rsc/rmetav1 $(PROTO_GO_OPT)
@@ -153,13 +153,16 @@ gen-go-rsc:
 		--go_out=apis/rsc/rratelimitv1 --go-grpc_out=apis/rsc/rratelimitv1 $(PROTO_GO_OPT_GRPC)
 	protoc -I . -I $(PROTO_IN_RSC)/lockv1 rlockv1.proto \
 		--go_out=apis/rsc/rlockv1 --go-grpc_out=apis/rsc/rlockv1 $(PROTO_GO_OPT_GRPC)
+	protoc -I . -I $(PROTO_IN_RSC)/vectorv1 rvectorv1.proto \
+		--go_out=apis/rsc/rvectorv1 --go-grpc_out=apis/rsc/rvectorv1 $(PROTO_GO_OPT_GRPC)
 
 
 gen-go-client:
-	mkdir -p apis/client/cliconfigv1
+	mkdir -p apis/client/cliconfigv1 apis/client/daemonv1
 	protoc -I . -I $(PROTO_IN_CLIENT)/configv1 configv1.proto \
 		--go_out=apis/client/cliconfigv1 --go-grpc_out=apis/client/cliconfigv1 $(PROTO_GO_OPT)
-
+	protoc -I . -I $(PROTO_IN_CLIENT)/daemonv1 daemonv1.proto \
+		--go_out=apis/client/daemonv1 --go-grpc_out=apis/client/daemonv1 $(PROTO_GO_OPT_GRPC)
 
 cp-pb:
 	cp -r ../pb/apis/protobuf ./apis

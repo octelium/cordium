@@ -17,8 +17,6 @@
 package secret
 
 import (
-	"os"
-
 	"github.com/octelium/cordium/client/cordium/commands/ccommon"
 	pb "github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
@@ -30,13 +28,15 @@ import (
 type args struct {
 	Value    string
 	FromFile string
+	FromEnv  string
 }
 
 var cmdArgs args
 
 func init() {
 	Cmd.PersistentFlags().StringVar(&cmdArgs.Value, "value", "", "Secret value")
-	Cmd.PersistentFlags().StringVarP(&cmdArgs.FromFile, "file", "f", "", "Get Secret value from file path")
+	Cmd.PersistentFlags().StringVarP(&cmdArgs.FromFile, "file", "f", "", "Get Secret value from file path. Set it to `-` to read from stdin")
+	Cmd.PersistentFlags().StringVar(&cmdArgs.FromEnv, "from-env", "", "Get Secret value from an environment variable")
 }
 
 var Cmd = &cobra.Command{
@@ -51,6 +51,9 @@ var Cmd = &cobra.Command{
 
   # Create a Secret from a file
   cordium create secret tls-cert.my-project --file ./cert.pem
+
+  # Create a Secret from an environment variable
+  cordium create secret stripe-key.my-project --from-env STRIPE_KEY
 
   # Create a Secret in the default Space
   cordium create secret db-password`,
@@ -109,13 +112,10 @@ func doCmd(cmd *cobra.Command, args []string) error {
 }
 
 func getValue() ([]byte, error) {
-	if cmdArgs.FromFile != "" {
-		return os.ReadFile(cmdArgs.FromFile)
-	}
-
-	if cmdArgs.Value != "" {
-		return []byte(cmdArgs.Value), nil
-	}
-
-	return cliutils.GetSecretPrompt()
+	return cliutils.GetDataValue(&cliutils.GetDataValueOpts{
+		Value:    cmdArgs.Value,
+		FromFile: cmdArgs.FromFile,
+		FromEnv:  cmdArgs.FromEnv,
+		Prompt:   "Enter the Secret value",
+	})
 }

@@ -49,7 +49,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware/v2"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"github.com/octelium/cordium/cluster/apiserver/apiserver/mains"
 	"github.com/octelium/cordium/cluster/apiserver/apiserver/wrks"
@@ -207,10 +207,8 @@ func Run(ctx context.Context) error {
 	}
 
 	s := grpc.NewServer(
-		grpc.StreamInterceptor(
-			grpc_middleware.ChainStreamServer(mdlwr.StreamServerInterceptor())),
-		grpc.UnaryInterceptor(
-			grpc_middleware.ChainUnaryServer(mdlwr.UnaryServerInterceptor())),
+		grpc.ChainStreamInterceptor(mdlwr.StreamServerInterceptor()),
+		grpc.ChainUnaryInterceptor(mdlwr.UnaryServerInterceptor()),
 	)
 
 	corev1.RegisterMainServiceServer(s, srv)

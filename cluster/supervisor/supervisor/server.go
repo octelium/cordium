@@ -32,7 +32,7 @@ import (
 	"time"
 
 	cfs "github.com/containerd/continuity/fs"
-	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/octelium/cordium/cluster/common/suputils"
 	"github.com/octelium/cordium/cluster/common/wsclient"
 	"github.com/octelium/cordium/cluster/supervisor/supervisor/oproxy"
