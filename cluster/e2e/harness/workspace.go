@@ -39,7 +39,9 @@ const (
 	firstDiagnosticsAfter = 45 * time.Second
 	diagnosticsEvery      = 60 * time.Second
 
-	initRequestBudget = 6 * time.Minute
+	restartCheckEvery = 10 * time.Second
+
+	initRequestBudget = 4 * time.Minute
 )
 
 func (h *H) CreateWorkspace(t *testing.T, ws *cordiumv1.Workspace) *cordiumv1.Workspace {
@@ -157,8 +159,6 @@ func (h *H) GetWorkspace(t *testing.T, ws *cordiumv1.Workspace) *cordiumv1.Works
 func (h *H) WaitWorkspaceRunning(t *testing.T, ws *cordiumv1.Workspace) *cordiumv1.Workspace {
 	t.Helper()
 
-	started := time.Now()
-
 	return h.WaitWorkspace(t, ws, "the Workspace to run", StartBudget,
 		func(cur *cordiumv1.Workspace) (bool, error) {
 			if ucordiumv1.ToWorkspace(cur).IsRunning() {
@@ -168,15 +168,6 @@ func (h *H) WaitWorkspaceRunning(t *testing.T, ws *cordiumv1.Workspace) *cordium
 				return false, errors.Errorf(
 					"the Workspace stopped while starting up. Failure: %s",
 					WorkspaceFailure(cur))
-			}
-
-			if cur.Status.State == cordiumv1.Workspace_Status_INIT_REQUEST &&
-				time.Since(started) > initRequestBudget {
-				return false, errors.Errorf(
-					"the Workspace is still at INIT_REQUEST after %s. Nocturne gives up on "+
-						"an unreachable Workspace supervisor after 5m, so its pod never "+
-						"became ready",
-					time.Since(started).Truncate(time.Second))
 			}
 
 			return false, nil
@@ -220,6 +211,7 @@ func (h *H) WaitWorkspace(t *testing.T, ws *cordiumv1.Workspace, what string,
 	started := time.Now()
 	state := ws.GetStatus().GetState()
 	reportAt := started.Add(firstDiagnosticsAfter)
+	checkAt := started.Add(restartCheckEvery)
 	var cur *cordiumv1.Workspace
 	var lastErr error
 
@@ -242,6 +234,26 @@ func (h *H) WaitWorkspace(t *testing.T, ws *cordiumv1.Workspace, what string,
 			}
 			if done {
 				return cur
+			}
+
+			if ucordiumv1.ToWorkspace(cur).IsPreRunning() && time.Now().After(checkAt) {
+				checkAt = time.Now().Add(restartCheckEvery)
+
+				if err := h.CheckWorkspacePodRestarts(ctx, cur); err != nil {
+					t.Fatalf("The Workspace %s cannot start up: %+v\n%s",
+						ws.Metadata.Name, err, h.Diagnostics(ws))
+				}
+			}
+
+			if cur.Status.State == cordiumv1.Workspace_Status_INIT_REQUEST &&
+				cur.Status.CurrentStateSetAt.IsValid() &&
+				time.Since(cur.Status.CurrentStateSetAt.AsTime()) > initRequestBudget {
+				t.Fatalf("The Workspace %s has been at INIT_REQUEST for %s. Its supervisor "+
+					"pod never became reachable, so nocturne force-stops it at the 5m mark "+
+					"without recording a Failure.\n%s",
+					ws.Metadata.Name,
+					time.Since(cur.Status.CurrentStateSetAt.AsTime()).Truncate(time.Second),
+					h.Diagnostics(ws))
 			}
 		}
 

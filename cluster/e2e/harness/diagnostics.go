@@ -30,6 +30,7 @@ import (
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/cluster/common/vutils"
+	"github.com/pkg/errors"
 	k8scorev1 "k8s.io/api/core/v1"
 	k8serr "k8s.io/apimachinery/pkg/api/errors"
 	k8smetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,8 +40,13 @@ const (
 	logTailLines  = 50
 	maxEventLines = 20
 
+	logRetryInterval  = 3 * time.Second
+	crashLoopRestarts = 3
+
 	diagnosticsBudget = 30 * time.Second
 )
+
+const workspaceContainer = "workspace"
 
 func DiagnosticsCtx() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), diagnosticsBudget)
@@ -101,8 +107,8 @@ func (h *H) StreamWorkspaceLogs(t *testing.T, ws *cordiumv1.Workspace) {
 						continue
 					}
 
-					go h.streamPodLogs(ctx, WorkspaceNamespace, pod.Name, "workspace",
-						fmt.Sprintf("ws/%s", ws.Metadata.Name))
+					go h.streamPodLogs(ctx, WorkspaceNamespace, pod.Name,
+						workspaceContainer, fmt.Sprintf("ws/%s", ws.Metadata.Name))
 				}
 			}
 
@@ -116,38 +122,129 @@ func (h *H) StreamWorkspaceLogs(t *testing.T, ws *cordiumv1.Workspace) {
 }
 
 func (h *H) streamPodLogs(ctx context.Context, ns, pod, container, prefix string) {
-	tail := int64(logTailLines)
+	var streamed string
+	var reported int32
 
 	for {
-		strm, err := h.K8sC().CoreV1().Pods(ns).GetLogs(pod, &k8scorev1.PodLogOptions{
-			Container: container,
-			Follow:    true,
-			TailLines: &tail,
-		}).Stream(ctx)
-		if err == nil {
-			writeLine("--- [%s] streaming the logs of the pod %s ---", prefix, pod)
-
-			scanner := bufio.NewScanner(strm)
-			scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
-			for scanner.Scan() {
-				writeLine("[%s] %s", prefix, scanner.Text())
-			}
-			strm.Close()
-
-			writeLine("--- [%s] the log stream of the pod %s ended ---", prefix, pod)
+		cur, err := h.K8sC().CoreV1().Pods(ns).Get(ctx, pod, k8smetav1.GetOptions{})
+		if k8serr.IsNotFound(err) {
+			writeLine("--- [%s] the pod %s no longer exists ---", prefix, pod)
+			return
 		}
 
-		if _, err := h.K8sC().CoreV1().Pods(ns).
-			Get(ctx, pod, k8smetav1.GetOptions{}); k8serr.IsNotFound(err) {
-			return
+		if cs := containerStatus(cur, container); err == nil && cs != nil {
+			if cs.RestartCount > reported {
+				reported = cs.RestartCount
+				writeLine("--- [%s] the container %s of the pod %s has restarted %d time(s), "+
+					"the previous instance %s ---\n%s",
+					prefix, container, pod, cs.RestartCount, lastTermination(cs),
+					KubectlHints(ns, pod, container))
+			}
+
+			if gen := containerGeneration(cs); gen != "" && gen != streamed {
+				streamed = gen
+				h.followPodLogs(ctx, ns, pod, container, prefix)
+			}
 		}
 
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(3 * time.Second):
+		case <-time.After(logRetryInterval):
 		}
 	}
+}
+
+func (h *H) followPodLogs(ctx context.Context, ns, pod, container, prefix string) {
+	tail := int64(logTailLines)
+
+	strm, err := h.K8sC().CoreV1().Pods(ns).GetLogs(pod, &k8scorev1.PodLogOptions{
+		Container: container,
+		Follow:    true,
+		TailLines: &tail,
+	}).Stream(ctx)
+	if err != nil {
+		return
+	}
+	defer strm.Close()
+
+	writeLine("--- [%s] streaming the logs of the pod %s ---\n%s",
+		prefix, pod, KubectlHints(ns, pod, container))
+
+	scanner := bufio.NewScanner(strm)
+	scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
+	for scanner.Scan() {
+		writeLine("[%s] %s", prefix, scanner.Text())
+	}
+
+	writeLine("--- [%s] the log stream of the pod %s ended ---", prefix, pod)
+}
+
+func KubectlHints(ns, pod, container string) string {
+	return fmt.Sprintf("To inspect the pod directly:\n"+
+		"  kubectl -n %s get pod %s -o wide\n"+
+		"  kubectl -n %s describe pod %s\n"+
+		"  kubectl -n %s logs %s -c %s -f\n"+
+		"  kubectl -n %s logs %s -c %s --previous",
+		ns, pod, ns, pod, ns, pod, container, ns, pod, container)
+}
+
+func containerStatus(pod *k8scorev1.Pod, container string) *k8scorev1.ContainerStatus {
+	if pod == nil {
+		return nil
+	}
+
+	for i := range pod.Status.ContainerStatuses {
+		if pod.Status.ContainerStatuses[i].Name == container {
+			return &pod.Status.ContainerStatuses[i]
+		}
+	}
+
+	return nil
+}
+
+func containerGeneration(cs *k8scorev1.ContainerStatus) string {
+	switch {
+	case cs.State.Running != nil:
+		return fmt.Sprintf("%s/%s", cs.ContainerID, cs.State.Running.StartedAt)
+	case cs.State.Terminated != nil:
+		return fmt.Sprintf("%s/%s", cs.ContainerID, cs.State.Terminated.StartedAt)
+	default:
+		return ""
+	}
+}
+
+func lastTermination(cs *k8scorev1.ContainerStatus) string {
+	term := cs.LastTerminationState.Terminated
+	if term == nil {
+		term = cs.State.Terminated
+	}
+	if term == nil {
+		return "did not report a termination state"
+	}
+
+	return fmt.Sprintf("exited with the code %d (%s) at %s",
+		term.ExitCode, term.Reason, term.FinishedAt.Format(time.RFC3339))
+}
+
+func (h *H) CheckWorkspacePodRestarts(ctx context.Context, ws *cordiumv1.Workspace) error {
+	pods, err := h.WorkspacePods(ctx, ws)
+	if err != nil {
+		return nil
+	}
+
+	for i := range pods {
+		cs := containerStatus(&pods[i], workspaceContainer)
+		if cs == nil || cs.RestartCount < crashLoopRestarts {
+			continue
+		}
+
+		return errors.Errorf(
+			"the container %s of the pod %s has restarted %d time(s), the previous instance %s",
+			workspaceContainer, pods[i].Name, cs.RestartCount, lastTermination(cs))
+	}
+
+	return nil
 }
 
 func (h *H) WorkspaceDiagnostics(ctx context.Context, ws *cordiumv1.Workspace) string {
@@ -184,6 +281,7 @@ func (h *H) WorkspaceDiagnostics(ctx context.Context, ws *cordiumv1.Workspace) s
 	default:
 		for i := range pods {
 			b.WriteString(describePod(&pods[i]))
+			b.WriteString(h.previousLogTail(ctx, &pods[i]))
 		}
 	}
 
@@ -213,7 +311,9 @@ func describePod(pod *k8scorev1.Pod) string {
 			cond.Type, cond.Status, cond.Reason, cond.Message)
 	}
 
-	for _, cs := range pod.Status.ContainerStatuses {
+	for i := range pod.Status.ContainerStatuses {
+		cs := &pod.Status.ContainerStatuses[i]
+
 		switch {
 		case cs.State.Waiting != nil:
 			fmt.Fprintf(&b, "  container %s: waiting on %s %s\n",
@@ -222,13 +322,42 @@ func describePod(pod *k8scorev1.Pod) string {
 			fmt.Fprintf(&b, "  container %s: terminated with %s (exit %d)\n",
 				cs.Name, cs.State.Terminated.Reason, cs.State.Terminated.ExitCode)
 		case cs.State.Running != nil:
-			fmt.Fprintf(&b, "  container %s: running since %s (ready=%t restarts=%d)\n",
-				cs.Name, cs.State.Running.StartedAt.Format(time.RFC3339),
-				cs.Ready, cs.RestartCount)
+			fmt.Fprintf(&b, "  container %s: running since %s (ready=%t)\n",
+				cs.Name, cs.State.Running.StartedAt.Format(time.RFC3339), cs.Ready)
+		}
+
+		if cs.RestartCount > 0 {
+			fmt.Fprintf(&b, "  container %s: restarts=%d, the previous instance %s\n",
+				cs.Name, cs.RestartCount, lastTermination(cs))
 		}
 	}
 
+	fmt.Fprintf(&b, "%s\n", KubectlHints(pod.Namespace, pod.Name, workspaceContainer))
+
 	return b.String()
+}
+
+func (h *H) previousLogTail(ctx context.Context, pod *k8scorev1.Pod) string {
+	cs := containerStatus(pod, workspaceContainer)
+	if cs == nil || cs.RestartCount == 0 {
+		return ""
+	}
+
+	tail := int64(logTailLines)
+
+	out, err := h.K8sC().CoreV1().Pods(pod.Namespace).
+		GetLogs(pod.Name, &k8scorev1.PodLogOptions{
+			Container: workspaceContainer,
+			Previous:  true,
+			TailLines: &tail,
+		}).DoRaw(ctx)
+	if err != nil {
+		return fmt.Sprintf("The previous logs of the pod %s could not be read: %+v\n",
+			pod.Name, err)
+	}
+
+	return fmt.Sprintf("--- the previous instance of the pod %s ---\n%s\n",
+		pod.Name, string(out))
 }
 
 func (h *H) describePVC(ctx context.Context, name string) string {

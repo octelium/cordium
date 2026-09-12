@@ -117,6 +117,8 @@ func testWorkspaceAutoStop(t *testing.T, ch *harness.H) {
 	stopped := h.WaitWorkspaceState(t, ws,
 		cordiumv1.Workspace_Status_STOPPED, charness.StartBudget)
 
+	watcher.WaitState(t, cordiumv1.Workspace_Status_RUNNING, charness.PropagationBudget)
+
 	t.Run("TheWorkspaceStopsItselfAfterTheTasks", func(t *testing.T) {
 		assert.Equal(t, uint32(1), stopped.Status.SuccessfulRuns)
 		assert.Nil(t, stopped.Status.Failure)
