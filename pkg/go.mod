@@ -6,7 +6,7 @@ require (
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/pkg v0.0.0-20260912095159-4af4f27d984c
 	github.com/pkg/errors v0.9.1
-	google.golang.org/protobuf v1.36.11
+	google.golang.org/protobuf v1.36.12
 )
 
 require (
