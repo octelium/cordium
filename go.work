@@ -5,6 +5,7 @@ use (
 	./client/cordium
 	./cluster/apiserver
 	./cluster/common
+	./cluster/e2e
 	./cluster/genesis
 	./cluster/mockapiserver
 	./cluster/nocturne

@@ -33,6 +33,7 @@ var (
 	clusterComponents = []string{
 		"apiserver",
 		"common",
+		"e2e",
 		"genesis",
 		"mockapiserver",
 		"nocturne",
