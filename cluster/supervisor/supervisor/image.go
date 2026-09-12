@@ -20,6 +20,8 @@ import (
 	"context"
 	"os"
 	"path"
+	"path/filepath"
+	"strings"
 
 	"github.com/compose-spec/compose-go/v2/loader"
 	"github.com/compose-spec/compose-go/v2/types"
@@ -208,7 +210,7 @@ func (s *Server) prepareImageFromRepository(ctx context.Context) error {
 					dirPath = s.buildDir
 					filePath = path.Join(dirPath, ".devcontainer.json")
 				} else {
-					dirPath = path.Join(s.buildDir, dirPath)
+					dirPath = path.Join(s.buildDir, spec.GetDevcontainer().DirPath)
 					filePath = path.Join(dirPath, "devcontainer.json")
 				}
 
@@ -286,6 +288,27 @@ func (s *Server) prepareImageFromRepository(ctx context.Context) error {
 	}
 
 	return s.pullImageFromExternal(ctx, "", nil)
+}
+
+func checkPathWithin(baseDir, arg string) (string, error) {
+	ret := arg
+	if !filepath.IsAbs(ret) {
+		ret = filepath.Join(baseDir, ret)
+	}
+	ret = filepath.Clean(ret)
+
+	baseDir = filepath.Clean(baseDir)
+
+	rel, err := filepath.Rel(baseDir, ret)
+	if err != nil {
+		return "", errors.Errorf("Could not resolve path %q against %q: %+v", arg, baseDir, err)
+	}
+
+	if rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return "", errors.Errorf("Path %q escapes the build directory %q", arg, baseDir)
+	}
+
+	return ret, nil
 }
 
 func (s *Server) prepareImageFromGit(ctx context.Context) error {

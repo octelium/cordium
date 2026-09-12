@@ -257,15 +257,45 @@ func getShellCommand(ctx context.Context, cmdStr string) *exec.Cmd {
 
 func (s *Server) setStatus(st cordiumv1.Workspace_Status_State) {
 	s.status.mu.Lock()
-	defer s.status.mu.Unlock()
 	zap.L().Debug("Setting status", zap.String("status", st.String()))
 	s.status.status = st
+	s.status.mu.Unlock()
 
 	s.statusSubscribersMap.mu.RLock()
 	defer s.statusSubscribersMap.mu.RUnlock()
 	for _, sub := range s.statusSubscribersMap.subscribersMap {
-		sub.statusCh <- st
+		select {
+		case sub.statusCh <- st:
+		default:
+			zap.L().Warn("Dropping status for a lagging subscriber", zap.String("subID", sub.id))
+		}
 	}
+}
+
+func (s *Server) getLimitMemoryMegabytes() int64 {
+	limit := s.initReq.GetWorkspace().GetStatus().GetLimit()
+	if limit.GetMemory() == nil || limit.GetMemory().Megabytes < 256 {
+		return 256
+	}
+
+	if limit.GetMemory().Megabytes > 128*1000 {
+		return 128 * 1000
+	}
+
+	return int64(limit.GetMemory().Megabytes)
+}
+
+func (s *Server) getLimitMillicores() int64 {
+	limit := s.initReq.GetWorkspace().GetStatus().GetLimit()
+	if limit.GetCpu() == nil || limit.GetCpu().Millicores < 100 {
+		return 100
+	}
+
+	if limit.GetCpu().Millicores > 10000*1000 {
+		return 10000 * 1000
+	}
+
+	return int64(limit.GetCpu().Millicores)
 }
 
 func (s *Server) getStatus() cordiumv1.Workspace_Status_State {

@@ -223,30 +223,37 @@ func (a *Agent) doRun(ctx context.Context) error {
 		return err
 	}
 
-	if err := os.Chmod(SocketPath, 0766); err != nil {
+	if err := os.Chmod(SocketPath, 0600); err != nil {
 		return err
 	}
+
+	go func() {
+		<-ctx.Done()
+		lis.Close()
+	}()
 
 	type temporary interface {
 		Temporary() bool
 	}
 
 	for {
-		select {
-		case <-ctx.Done():
-			return nil
-		default:
-			c, err := lis.Accept()
-			if err != nil {
-
-				if err, ok := err.(temporary); ok && err.Temporary() {
-					zap.L().Error("Could not temporarily accept connection")
-					time.Sleep(1 * time.Second)
-					continue
-				}
-				zap.L().Error("Could not accept connection", zap.Error(err))
+		c, err := lis.Accept()
+		if err != nil {
+			if ctx.Err() != nil {
+				zap.L().Debug("Exiting the SSH agent accept loop. ctx done")
+				return nil
 			}
-			go a.serveConn(c)
+
+			if err, ok := err.(temporary); ok && err.Temporary() {
+				zap.L().Error("Could not temporarily accept connection")
+				time.Sleep(1 * time.Second)
+				continue
+			}
+
+			zap.L().Error("Could not accept connection", zap.Error(err))
+			return err
 		}
+
+		go a.serveConn(c)
 	}
 }

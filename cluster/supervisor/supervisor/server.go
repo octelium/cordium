@@ -362,7 +362,12 @@ func (s *Server) waitForTermInner(ctx context.Context) error {
 	}
 
 	zap.L().Debug("Waiting for shutdown ack signal")
-	<-s.shutdownAckCh
+	select {
+	case <-s.shutdownAckCh:
+		zap.L().Debug("Received the shutdown ack signal")
+	case <-time.After(10 * time.Second):
+		zap.L().Warn("Timeout exceeded waiting for the shutdown ack signal. Proceeding...")
+	}
 
 	gracefulShutdownCh := make(chan struct{}, 10)
 
@@ -483,14 +488,17 @@ func (s *Server) waitUntilWorkspaceAgentReady() error {
 
 		ctx, cancel := context.WithTimeout(s.ctxMain, 300*time.Millisecond)
 		defer cancel()
-		if resp, err := s.healthCheckC.Check(ctx, &grpc_health_v1.HealthCheckRequest{}); err == nil &&
-			resp.Status == grpc_health_v1.HealthCheckResponse_SERVING {
+		resp, cerr := s.healthCheckC.Check(ctx, &grpc_health_v1.HealthCheckRequest{})
+		if cerr == nil && resp.Status == grpc_health_v1.HealthCheckResponse_SERVING {
 			zap.L().Debug("Workspace healthCheck passed and it is now serving...")
 			return nil
 		}
 
 		grpcConn.Close()
-		return err
+		if cerr != nil {
+			return cerr
+		}
+		return errors.Errorf("Workspace agent is not serving yet: %s", resp.Status.String())
 	}
 
 	if ldflags.IsTest() {

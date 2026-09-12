@@ -98,14 +98,12 @@ func (s *Server) createPod(ctx context.Context) error {
 	args := []string{
 		"pod", "create",
 		"--name", "ws",
-		"--dns", "8.8.8.8",
-		"--dns-search=.",
 		"--hostname", "cordium",
 		"-p", fmt.Sprintf("%d:%d", wsPort, wsPort),
 		"-p", fmt.Sprintf("%d:%d/udp", tunPort, tunPort),
 		"-p", fmt.Sprintf("%d:%d", eSSHPort, eSSHPort),
 
-		fmt.Sprintf("--memory=%dm", int(s.initReq.Workspace.Status.Limit.Memory.Megabytes*95/100)),
+		fmt.Sprintf("--memory=%dm", s.getLimitMemoryMegabytes()*95/100),
 		"--network=slirp4netns",
 		// "--network=slirp4netns:mtu=10000",
 		// "--network=slirp4netns:port_handler=rootlesskit",
@@ -318,8 +316,6 @@ func (s *Server) podmanRunImage(ctx context.Context) error {
 		// "--cap-add", "mknod,net_admin,sys_admin,net_raw,sys_ptrace",
 		"-d",
 		// "--privileged",
-		"--dns", "8.8.8.8",
-		"--dns-search=.",
 		"--http-proxy=false",
 
 		"--no-hosts",
@@ -343,8 +339,8 @@ func (s *Server) podmanRunImage(ctx context.Context) error {
 		// "--cgroups=disabled",
 		// "--oom-kill-disable",
 
-		fmt.Sprintf("--memory=%dm", int(s.initReq.Workspace.Status.Limit.Memory.Megabytes*95/100)),
-		fmt.Sprintf("--memory-reservation=%dm", int(s.initReq.Workspace.Status.Limit.Memory.Megabytes*85/100)),
+		fmt.Sprintf("--memory=%dm", s.getLimitMemoryMegabytes()*95/100),
+		fmt.Sprintf("--memory-reservation=%dm", s.getLimitMemoryMegabytes()*85/100),
 
 		`--security-opt=seccomp=/etc/containers/seccomp.json`,
 		"--runtime=crun",
@@ -505,7 +501,7 @@ func (s *Server) doStartContainer(ctx context.Context) error {
 func (s *Server) doRunContainer(ctx context.Context, commonArgs []string, containerCmd []string) error {
 
 	aCPUs := []string{fmt.Sprintf("--cpus=%.2f",
-		float32(float32(s.initReq.Workspace.Status.Limit.Cpu.Millicores*97)/float32(100*1000)))}
+		float32(float32(s.getLimitMillicores()*97)/float32(100*1000)))}
 	// aCAP := []string{"--cap-add", "net_admin,sys_admin,net_raw,sys_ptrace,net_bind_service"}
 	aCAP := []string{"--cap-add", "net_admin,sys_admin,net_raw,net_bind_service"}
 
@@ -706,6 +702,23 @@ func (s *Server) copyToContainer(ctx context.Context) error {
 func (s *Server) buildImage(ctx context.Context, workdir, dockerfilePath, contextDir string, args map[string]string) error {
 	ctx, cancelFn := context.WithTimeout(ctx, 10*time.Minute)
 	defer cancelFn()
+
+	workdir, err := checkPathWithin(s.buildDir, workdir)
+	if err != nil {
+		return err
+	}
+
+	if dockerfilePath != "" {
+		dockerfilePath, err = checkPathWithin(workdir, dockerfilePath)
+		if err != nil {
+			return err
+		}
+	}
+
+	contextDir, err = checkPathWithin(workdir, contextDir)
+	if err != nil {
+		return err
+	}
 
 	zap.L().Debug("Starting building image",
 		zap.String("workDir", workdir),

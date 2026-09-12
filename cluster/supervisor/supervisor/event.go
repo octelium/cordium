@@ -54,7 +54,11 @@ func (p *eventPublisher) publish(event *ccordiumv1.ListenEventResponse) {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 	for _, itm := range p.subMap {
-		itm.resp <- event
+		select {
+		case itm.resp <- event:
+		default:
+			zap.L().Warn("Dropping event for a lagging subscriber", zap.String("subID", itm.id))
+		}
 	}
 }
 

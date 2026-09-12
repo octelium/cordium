@@ -145,31 +145,9 @@ func (s *Server) prepareCgroups(ctx context.Context) error {
 		return path.Join(cgParentPath, name)
 	}
 
-	limit := s.initReq.Workspace.Status.Limit
+	limitMemoryBytes := s.getLimitMemoryMegabytes() * 1000 * 1000
 
-	limitMemoryBytes := func() int64 {
-		if limit == nil || limit.Memory == nil || limit.Memory.Megabytes < 256 {
-			return 256 * 1000 * 1000
-		}
-
-		if limit.Memory.Megabytes > 128*1000 {
-			return 128 * 1000 * 1000 * 1000
-		}
-
-		return int64(limit.Memory.Megabytes) * 1000 * 1000
-	}()
-
-	limitMillicores := func() int64 {
-		if limit == nil || limit.Cpu == nil || limit.Cpu.Millicores < 100 {
-			return 100
-		}
-
-		if limit.Cpu.Millicores > 10000*1000 {
-			return 10000 * 1000
-		}
-
-		return int64(limit.Cpu.Millicores)
-	}()
+	limitMillicores := s.getLimitMillicores()
 
 	cmds := []string{
 

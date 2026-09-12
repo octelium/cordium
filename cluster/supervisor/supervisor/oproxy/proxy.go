@@ -55,14 +55,7 @@ func (p *OcteliumProxy) getHTTPHandler(ctx context.Context) (http.Handler, error
 }
 
 func (s *OcteliumProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	proxy, err := s.getProxy()
-	if err != nil {
-		zap.S().Debugf("Could not get proxy: %+v", err)
-		w.WriteHeader(http.StatusBadGateway)
-		return
-	}
-
-	proxy.ServeHTTP(w, r)
+	s.proxy.ServeHTTP(w, r)
 }
 
 func (p *OcteliumProxy) getProxy() (http.Handler, error) {
@@ -154,38 +147,35 @@ func (b *bufferPool) Put(bytes []byte) {
 
 type roundTripper struct {
 	sniName string
+	rt      http.RoundTripper
 }
 
 func (p *OcteliumProxy) getRoundTripper(sniName string) (*roundTripper, error) {
-	return &roundTripper{
+	ret := &roundTripper{
 		sniName: sniName,
-	}, nil
-}
-
-func (r *roundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-
-	rt, err := r.getRoundTripper(req)
-	if err != nil {
-		return nil, err
 	}
-
-	return rt.RoundTrip(req)
-}
-
-func (r *roundTripper) getRoundTripper(req *http.Request) (http.RoundTripper, error) {
 
 	tlsCfg := &tls.Config{
 		MinVersion:         tls.VersionTLS12,
 		MaxVersion:         tls.VersionTLS13,
-		ServerName:         r.sniName,
+		ServerName:         sniName,
 		InsecureSkipVerify: ldflags.IsDev(),
 	}
 
-	return r.getRoundTripperHTTP2(req, tlsCfg)
+	rt, err := ret.getRoundTripperHTTP2(tlsCfg)
+	if err != nil {
+		return nil, err
+	}
+	ret.rt = rt
 
+	return ret, nil
 }
 
-func (r *roundTripper) getRoundTripperHTTP2(req *http.Request, tlsCfg *tls.Config) (http.RoundTripper, error) {
+func (r *roundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	return r.rt.RoundTrip(req)
+}
+
+func (r *roundTripper) getRoundTripperHTTP2(tlsCfg *tls.Config) (http.RoundTripper, error) {
 	ret, err := r.getRoundTripperHTTP1(tlsCfg)
 	if err != nil {
 		return nil, err

@@ -21,8 +21,11 @@ import (
 	"testing"
 
 	"github.com/octelium/cordium/cluster/common/tests"
+	"github.com/octelium/cordium/cluster/common/wsutils"
 	wssrv "github.com/octelium/cordium/cluster/workspace/workspace"
 	"github.com/octelium/octelium/apis/cluster/ccordiumv1"
+	"github.com/octelium/octelium/apis/main/cordiumv1"
+	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -74,4 +77,58 @@ func TestServerAPI(t *testing.T) {
 	assert.Nil(t, err)
 	_, err = srv.ShutdownAck(ctx, &ccordiumv1.ShutdownAckRequest{})
 	assert.Nil(t, err)
+}
+
+func TestInitializeIdempotency(t *testing.T) {
+	ctx := context.Background()
+
+	tst, err := tests.Initialize(nil)
+	assert.Nil(t, err, "%+v", err)
+	t.Cleanup(func() {
+		tst.Destroy()
+	})
+
+	wsSrv, err := wssrv.NewServer(ctx)
+	assert.Nil(t, err)
+
+	defer wsSrv.Close()
+
+	err = wsSrv.Run(ctx)
+	assert.Nil(t, err, "%+v", err)
+
+	srv, err := NewServer(ctx)
+	assert.Nil(t, err)
+
+	first := &ccordiumv1.InitializeRequest{
+		Workspace: &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{
+				Name: wsutils.GenWorkspaceName(),
+			},
+			Spec:   &cordiumv1.Workspace_Spec{},
+			Status: &cordiumv1.Workspace_Status{},
+		},
+	}
+
+	second := &ccordiumv1.InitializeRequest{
+		Workspace: &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{
+				Name: wsutils.GenWorkspaceName(),
+			},
+			Spec:   &cordiumv1.Workspace_Spec{},
+			Status: &cordiumv1.Workspace_Status{},
+		},
+	}
+
+	_, err = srv.Initialize(ctx, first)
+	assert.Nil(t, err)
+
+	_, err = srv.Initialize(ctx, second)
+	assert.Nil(t, err)
+
+	srv.mu.Lock()
+	initReq := srv.initReq
+	srv.mu.Unlock()
+
+	assert.Equal(t, first.Workspace.Metadata.Name, initReq.Workspace.Metadata.Name)
+	assert.NotEqual(t, second.Workspace.Metadata.Name, initReq.Workspace.Metadata.Name)
 }

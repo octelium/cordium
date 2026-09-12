@@ -23,6 +23,7 @@ import (
 
 	"github.com/octelium/cordium/cluster/common/tests"
 	wssrv "github.com/octelium/cordium/cluster/workspace/workspace"
+	"github.com/octelium/octelium/apis/cluster/ccordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/stretchr/testify/assert"
 )
@@ -56,4 +57,92 @@ func TestServer(t *testing.T) {
 
 	time.Sleep(2 * time.Second)
 
+}
+
+func TestWaitUntilWorkspaceAgentReady(t *testing.T) {
+	ctx := context.Background()
+
+	tst, err := tests.Initialize(nil)
+	assert.Nil(t, err, "%+v", err)
+	t.Cleanup(func() {
+		tst.Destroy()
+	})
+
+	srv, err := NewServer(ctx)
+	assert.Nil(t, err)
+
+	{
+		err := srv.waitUntilWorkspaceAgentReady()
+		assert.NotNil(t, err)
+	}
+
+	wsSrv, err := wssrv.NewServer(ctx)
+	assert.Nil(t, err)
+
+	defer wsSrv.Close()
+
+	err = wsSrv.Run(ctx)
+	assert.Nil(t, err, "%+v", err)
+
+	{
+		err := srv.waitUntilWorkspaceAgentReady()
+		assert.Nil(t, err, "%+v", err)
+	}
+}
+
+func TestLimits(t *testing.T) {
+	ctx := context.Background()
+
+	tst, err := tests.Initialize(nil)
+	assert.Nil(t, err, "%+v", err)
+	t.Cleanup(func() {
+		tst.Destroy()
+	})
+
+	srv, err := NewServer(ctx)
+	assert.Nil(t, err)
+
+	{
+		assert.Equal(t, int64(256), srv.getLimitMemoryMegabytes())
+		assert.Equal(t, int64(100), srv.getLimitMillicores())
+	}
+
+	srv.initReq = &ccordiumv1.InitializeRequest{
+		Workspace: &cordiumv1.Workspace{
+			Status: &cordiumv1.Workspace_Status{},
+		},
+	}
+
+	{
+		assert.Equal(t, int64(256), srv.getLimitMemoryMegabytes())
+		assert.Equal(t, int64(100), srv.getLimitMillicores())
+	}
+
+	srv.initReq.Workspace.Status.Limit = &cordiumv1.Workspace_Spec_Limit{
+		Memory: &cordiumv1.Workspace_Spec_Limit_Memory{
+			Megabytes: 2048,
+		},
+		Cpu: &cordiumv1.Workspace_Spec_Limit_CPU{
+			Millicores: 2000,
+		},
+	}
+
+	{
+		assert.Equal(t, int64(2048), srv.getLimitMemoryMegabytes())
+		assert.Equal(t, int64(2000), srv.getLimitMillicores())
+	}
+
+	srv.initReq.Workspace.Status.Limit = &cordiumv1.Workspace_Spec_Limit{
+		Memory: &cordiumv1.Workspace_Spec_Limit_Memory{
+			Megabytes: 1024 * 1024,
+		},
+		Cpu: &cordiumv1.Workspace_Spec_Limit_CPU{
+			Millicores: 1000 * 1000 * 1000,
+		},
+	}
+
+	{
+		assert.Equal(t, int64(128*1000), srv.getLimitMemoryMegabytes())
+		assert.Equal(t, int64(10000*1000), srv.getLimitMillicores())
+	}
 }

@@ -20,11 +20,11 @@ import (
 	"context"
 	"errors"
 	"io"
-	"time"
 
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	"github.com/octelium/octelium/apis/cluster/ccordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
+	"github.com/octelium/octelium/pkg/grpcerr"
 	"github.com/octelium/octelium/pkg/utils/ldflags"
 	"github.com/octelium/octelium/pkg/utils/utilrand"
 	"go.uber.org/zap"
@@ -35,14 +35,13 @@ func (s *Server) Shutdown(ctx context.Context, req *ccordiumv1.ShutdownRequest) 
 	zap.L().Debug("Shutdown requested by API")
 
 	s.mu.Lock()
-	isShuttingDown := s.isShuttingDown
-	s.mu.Unlock()
-	if isShuttingDown {
+	if s.isShuttingDown {
+		s.mu.Unlock()
 		zap.L().Debug("Already shutting down. No need to signal apiShutdownCh")
 		return &ccordiumv1.ShutdownResponse{}, nil
 	}
-
 	s.shutdownReq = req
+	s.mu.Unlock()
 
 	s.apiShutdownCh <- struct{}{}
 
@@ -61,19 +60,14 @@ func (s *Server) ShutdownAck(ctx context.Context, req *ccordiumv1.ShutdownAckReq
 func (s *Server) Initialize(ctx context.Context, req *ccordiumv1.InitializeRequest) (*ccordiumv1.InitializeResponse, error) {
 	zap.L().Debug("Initialize requested", redactInitializeRequest(req)...)
 
-	var isInitializeRequested bool
 	s.mu.Lock()
-	s.initReq = req
-	isInitializeRequested = s.isInitializeRequested
-	s.mu.Unlock()
-
-	if isInitializeRequested {
+	if s.isInitializeRequested {
+		s.mu.Unlock()
 		zap.L().Debug("Initialize already requested. Nothing to be done...")
 		return &ccordiumv1.InitializeResponse{}, nil
 	}
-
-	s.mu.Lock()
 	s.isInitializeRequested = true
+	s.initReq = req
 	s.mu.Unlock()
 
 	go s.initialize()
@@ -164,11 +158,19 @@ func (s *Server) ListenTerminal(req *ccordiumv1.ListenTerminalRequest, srv ccord
 		default:
 			msg, err := strm.Recv()
 			if err != nil {
-				time.Sleep(200 * time.Millisecond)
-				continue
+				if errors.Is(err, io.EOF) || grpcerr.IsCanceled(err) {
+					zap.L().Debug("Upstream ListenTerminal stream ended", zap.Error(err))
+					return nil
+				}
+				zap.L().Debug("Could not recv from the upstream ListenTerminal stream",
+					zap.Error(err))
+				return err
 			}
-			srv.Send(msg)
 
+			if err := srv.Send(msg); err != nil {
+				zap.L().Debug("Could not send ListenTerminal msg downstream", zap.Error(err))
+				return err
+			}
 		}
 	}
 

@@ -35,8 +35,9 @@ import (
 type OcteliumProxy struct {
 	opts *Opts
 
-	srv *http.Server
-	lis net.Listener
+	srv   *http.Server
+	lis   net.Listener
+	proxy http.Handler
 
 	resp accessTokenResponse
 
@@ -121,6 +122,9 @@ func (p *OcteliumProxy) Close() error {
 
 func (p *OcteliumProxy) doSetInitAccessToken(ctx context.Context) error {
 
+	p.resp.Lock()
+	defer p.resp.Unlock()
+
 	p.resp.createdAt = time.Now()
 	p.resp.resp = &authv1.SessionToken{
 		AccessToken:  p.opts.ClientInfo.AccessToken,
@@ -141,8 +145,13 @@ func (p *OcteliumProxy) runProxy(ctx context.Context) error {
 		return errors.Errorf("Could not listen on unix socket path: %+v", err)
 	}
 
-	if err := os.Chmod(SocketPath, 0766); err != nil {
+	if err := os.Chmod(SocketPath, 0600); err != nil {
 		return errors.Errorf("Could not chmod socke path: %+v", err)
+	}
+
+	p.proxy, err = p.getProxy()
+	if err != nil {
+		return err
 	}
 
 	handler, err := p.getHTTPHandler(ctx)
@@ -181,8 +190,16 @@ func (p *OcteliumProxy) startRefreshLoop(ctx context.Context) {
 
 func (p *OcteliumProxy) doRefresh(ctx context.Context) error {
 
+	p.resp.RLock()
 	at := p.resp.resp
-	expiresAt := p.resp.createdAt.Add(time.Duration(at.ExpiresIn * int64(time.Second))).Add(-6 * time.Minute)
+	createdAt := p.resp.createdAt
+	p.resp.RUnlock()
+
+	if at == nil {
+		return errors.Errorf("Could not find an access token to refresh")
+	}
+
+	expiresAt := createdAt.Add(time.Duration(at.ExpiresIn * int64(time.Second))).Add(-6 * time.Minute)
 
 	if time.Now().Before(expiresAt) {
 		// zap.L().Debug("No need to start an auth request")

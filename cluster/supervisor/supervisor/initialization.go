@@ -51,13 +51,13 @@ func (s *Server) doInitialize() error {
 		return errors.Errorf("wg private key cannot be nil")
 	}
 
-	if s.initReq == nil || s.initReq.Workspace == nil {
-		return errors.Errorf("Cannot doInitialize. No Workspace in req")
-	}
-
 	s.mu.Lock()
 	req := s.initReq
 	s.mu.Unlock()
+
+	if req == nil || req.Workspace == nil {
+		return errors.Errorf("Cannot doInitialize. No Workspace in req")
+	}
 
 	s.spec, err = wsutils.MergeSpec(&wsutils.MergeSpecReq{
 		Workspace: req.Workspace,
@@ -67,7 +67,7 @@ func (s *Server) doInitialize() error {
 		return errors.Errorf("Could not merge spec: %+v", err)
 	}
 
-	ws := s.initReq.Workspace
+	ws := req.Workspace
 
 	s.isFreshRun = func() bool {
 		if ldflags.IsTest() {
@@ -77,15 +77,15 @@ func (s *Server) doInitialize() error {
 			return true
 		}
 		return (ws.Spec.IsEphemeral || ws.Status.SuccessfulRuns == 0) &&
-			!(ucordiumv1.ToTemplate(s.initReq.Template).HasReadyBuild() &&
-				s.initReq.TemplateHasSnapshot)
+			!(ucordiumv1.ToTemplate(req.Template).HasReadyBuild() &&
+				req.TemplateHasSnapshot)
 	}()
 
 	s.wsUID = ws.Metadata.Uid
 
 	zap.L().Debug("Initializing Workspace",
 		zap.String("wsName", ws.GetMetadata().GetName()),
-		zap.String("space", s.initReq.Space.GetMetadata().GetName()),
+		zap.String("space", req.Space.GetMetadata().GetName()),
 		zap.Bool("isFreshRun", s.isFreshRun))
 
 	if s.isFreshRun {
@@ -104,10 +104,6 @@ func (s *Server) doInitialize() error {
 			src: "/octelium/workspace",
 			dst: "/workspace",
 		})
-	}
-
-	if req == nil {
-		return errors.Errorf("Cannot start doInitialize. Nil initReq")
 	}
 
 	if err := s.prepareCgroups(ctx); err != nil {
@@ -230,15 +226,15 @@ func (s *Server) doInitialize() error {
 		TunnelPeerPublicKey: req.TunnelPeerPublicKey,
 		TunnelPrivateKey:    s.wgPrivateKey.String(),
 
-		Workspace:           s.initReq.Workspace,
-		Space:               s.initReq.Space,
-		Template:            s.initReq.Template,
-		SecretList:          s.initReq.SecretList,
-		UserSecretList:      s.initReq.UserSecretList,
-		UserConfig:          s.initReq.UserConfig,
-		GitProviderInfo:     s.initReq.GitProviderInfo,
-		Ssh:                 s.initReq.Ssh,
-		TemplateHasSnapshot: s.initReq.TemplateHasSnapshot,
+		Workspace:           req.Workspace,
+		Space:               req.Space,
+		Template:            req.Template,
+		SecretList:          req.SecretList,
+		UserSecretList:      req.UserSecretList,
+		UserConfig:          req.UserConfig,
+		GitProviderInfo:     req.GitProviderInfo,
+		Ssh:                 req.Ssh,
+		TemplateHasSnapshot: req.TemplateHasSnapshot,
 	}
 
 	zap.L().Debug("sending prepare request")

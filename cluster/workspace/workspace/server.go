@@ -471,6 +471,8 @@ func (s *Server) setUser(ctx context.Context) error {
 		zap.L().Warn("Could not set the agent socket permissions", zap.Error(err))
 	}
 
+	s.setWorkloadSocketOwnership()
+
 	if s.isFreshRun {
 		if err := s.setSudoersFile(); err != nil {
 			zap.L().Warn("Could not set sudoers file", zap.Error(err))
@@ -518,6 +520,38 @@ func (s *Server) setSocketPermissions() error {
 	}
 
 	return os.Chmod(s.socketPath, 0660)
+}
+
+func (s *Server) setWorkloadSocketOwnership() {
+	if s.userInfo == nil {
+		return
+	}
+
+	socketPaths := []string{
+		"/var/run/octelium-proxy.sock",
+		"/var/run/octelium-ssh-agent.sock",
+	}
+
+	for _, socketPath := range socketPaths {
+		if !vutils.FSPathExists(socketPath) {
+			continue
+		}
+
+		if err := os.Chown(socketPath, s.userInfo.uid, s.userInfo.gid); err != nil {
+			zap.L().Warn("Could not chown the socket to the Workspace User",
+				zap.String("path", socketPath), zap.Error(err))
+			if err := os.Chmod(socketPath, 0666); err != nil {
+				zap.L().Warn("Could not chmod the socket",
+					zap.String("path", socketPath), zap.Error(err))
+			}
+			continue
+		}
+
+		if err := os.Chmod(socketPath, 0600); err != nil {
+			zap.L().Warn("Could not chmod the socket",
+				zap.String("path", socketPath), zap.Error(err))
+		}
+	}
 }
 
 func (s *Server) setSudoersFile() error {
@@ -1118,7 +1152,7 @@ func (s *Server) getDevContainerJSONPath(ctx context.Context) string {
 					if dPath == repoDir {
 						return path.Join(repoDir, ".devcontainer.json")
 					} else {
-						return path.Join(repoDir, "devcontainer.json")
+						return path.Join(dPath, "devcontainer.json")
 					}
 				}
 
