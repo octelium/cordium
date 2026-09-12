@@ -63,12 +63,13 @@ func (s *Server) CreateWorkspace(ctx context.Context, req *cordiumv1.Workspace) 
 		return nil, err
 	}
 
-	wsList, err := s.octeliumC.CordiumC().ListWorkspace(ctx, urscsrv.FilterByUser(i.User))
+	wsList, err := s.octeliumC.CordiumC().ListWorkspace(ctx,
+		ourscsrv.SetCountOnly(urscsrv.FilterByUser(i.User)))
 	if err != nil {
 		return nil, err
 	}
 
-	if len(wsList.Items) >= int(s.getMaxWorkspacesPerUser(cc)) {
+	if wsList.GetListResponseMeta().GetTotalCount() >= uint32(s.getMaxWorkspacesPerUser(cc)) {
 		return nil, serr.InvalidArg("Number of Workspaces per User has been exceeded")
 	}
 

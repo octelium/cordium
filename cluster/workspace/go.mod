@@ -20,7 +20,10 @@ require (
 	google.golang.org/grpc v1.82.1
 )
 
-require github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
+require (
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
+	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
+)
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
@@ -58,7 +61,6 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-containerregistry v0.21.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.28.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect

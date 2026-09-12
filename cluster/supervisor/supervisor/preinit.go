@@ -24,7 +24,6 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"strings"
 
 	"github.com/octelium/octelium/pkg/utils/ldflags"
 	"github.com/opencontainers/runtime-spec/specs-go"
@@ -74,7 +73,7 @@ func (s *Server) runPreInitCommandsInner(ctx context.Context) error {
 
 	for _, cmdStr := range cmds {
 		zap.L().Debug("running inner init cmd", zap.String("cmd", cmdStr))
-		cmd := getCommand(ctx, cmdStr)
+		cmd := getShellCommand(ctx, cmdStr)
 
 		if ldflags.IsDev() {
 			cmd.Stdout = os.Stdout
@@ -208,7 +207,7 @@ func (s *Server) runPreInitCommandsRoot(ctx context.Context) error {
 
 	for _, cmdStr := range cmds {
 		zap.L().Debug("running init cmd", zap.String("cmd", cmdStr))
-		cmd := getCommand(ctx, cmdStr)
+		cmd := getShellCommand(ctx, cmdStr)
 
 		if ldflags.IsDev() {
 			cmd.Stdout = os.Stdout
@@ -361,7 +360,7 @@ func (s *Server) prepareFuse(ctx context.Context) error {
 
 	for _, cmdStr := range cmds {
 		zap.L().Debug("running init cmd", zap.String("cmd", cmdStr))
-		cmd := getCommand(ctx, cmdStr)
+		cmd := getShellCommand(ctx, cmdStr)
 
 		if ldflags.IsDev() {
 			cmd.Stdout = os.Stdout
@@ -384,6 +383,7 @@ func (s *Server) prepareFuse(ctx context.Context) error {
 
 func (s *Server) runOuterPodman(ctx context.Context) error {
 	argList := []string{
+		"run",
 		// "-d",
 		"--root=/octelium-root",
 		"--name=inner",
@@ -393,28 +393,28 @@ func (s *Server) runOuterPodman(ctx context.Context) error {
 		"--env=OCTELIUM_RUN_LAYER=INNER0",
 		// "--env-host",
 
-		"-v /usr:/usr:ro,nosuid",
-		"-v /bin:/bin:ro,nosuid",
-		"-v /sbin:/sbin:ro,nosuid",
-		"-v /lib:/lib:ro,nosuid",
-		"-v /lib64:/lib64:ro,nosuid",
+		"-v", "/usr:/usr:ro,nosuid",
+		"-v", "/bin:/bin:ro,nosuid",
+		"-v", "/sbin:/sbin:ro,nosuid",
+		"-v", "/lib:/lib:ro,nosuid",
+		"-v", "/lib64:/lib64:ro,nosuid",
 
-		"-v /etc/passwd:/etc/passwd:ro",
-		"-v /etc/shadow:/etc/shadow:ro",
-		"-v /etc/group:/etc/group:ro",
-		"-v /etc/subuid:/etc/subuid:ro",
-		"-v /etc/subgid:/etc/subgid:ro",
+		"-v", "/etc/passwd:/etc/passwd:ro",
+		"-v", "/etc/shadow:/etc/shadow:ro",
+		"-v", "/etc/group:/etc/group:ro",
+		"-v", "/etc/subuid:/etc/subuid:ro",
+		"-v", "/etc/subgid:/etc/subgid:ro",
 
-		"-v /usr/bin/newuidmap:/usr/bin/newuidmap:ro",
-		"-v /usr/bin/newgidmap:/usr/bin/newgidmap:ro",
+		"-v", "/usr/bin/newuidmap:/usr/bin/newuidmap:ro",
+		"-v", "/usr/bin/newgidmap:/usr/bin/newgidmap:ro",
 
-		"-v /octelium/outer/var/tmp:/var/tmp:noexec,nosuid",
-		"-v /octelium/outer/tmp:/tmp:noexec,nosuid",
-		"-v /octelium/outer/home:/home/octelium:noexec,nosuid",
+		"-v", "/octelium/outer/var/tmp:/var/tmp:noexec,nosuid",
+		"-v", "/octelium/outer/tmp:/tmp:noexec,nosuid",
+		"-v", "/octelium/outer/home:/home/octelium:noexec,nosuid",
 		// "-v /octelium/outer/runtime:/octelium-runtime",
 
-		"-v /octelium:/octelium:nosuid",
-		"-v /tmp/podman-conf/containers:/etc/containers:ro",
+		"-v", "/octelium:/octelium:nosuid",
+		"-v", "/tmp/podman-conf/containers:/etc/containers:ro",
 
 		"--device=/dev/net/tun",
 		"--device=/dev/net/tun-octelium0",
@@ -425,23 +425,24 @@ func (s *Server) runOuterPodman(ctx context.Context) error {
 
 		// "--tmpfs /run:rw,mode=1777",
 
-		"--net host",
-		`--security-opt=unmask=/sys/fs/cgroup --security-opt=unmask="/proc/*"`,
+		"--net", "host",
+		"--security-opt=unmask=/sys/fs/cgroup", "--security-opt=unmask=/proc/*",
 		`--security-opt=seccomp=/etc/containers/seccomp-octelium.json`,
 		`--security-opt=proc-opts=hidepid=2`,
 
 		"--read-only",
-		"--cap-add fowner,chown,kill,dac_override,fsetid,setuid,setgid",
-		"--cap-drop ALL",
+		"--cap-add", "fowner,chown,kill,dac_override,fsetid,setuid,setgid",
+		"--cap-drop", "ALL",
 		"--runtime=crun",
 
-		fmt.Sprintf("--cgroup-manager=cgroupfs --cgroup-parent=%s", s.getRelativePathOuterCgroup()),
+		"--cgroup-manager=cgroupfs",
+		fmt.Sprintf("--cgroup-parent=%s", s.getRelativePathOuterCgroup()),
 	}
 
 	if ldflags.IsDev() {
 		argList = append(argList, "--log-level=debug")
 		argList = append(argList, "--env=OCTELIUM_DEV=true")
-		argList = append(argList, "-v /etc/sudoers:/etc/sudoers:ro")
+		argList = append(argList, "-v", "/etc/sudoers:/etc/sudoers:ro")
 	}
 
 	if ldflags.IsDev() {
@@ -449,13 +450,11 @@ func (s *Server) runOuterPodman(ctx context.Context) error {
 		argList = append(argList, "--env=GRPC_GO_LOG_SEVERITY_LEVEL=info")
 	}
 
-	ctrCmd := "cordium-supervisor"
+	argList = append(argList, "--rootfs", "/root/rootfs", "cordium-supervisor")
 
-	cmdStr := fmt.Sprintf("podman run %s --rootfs /root/rootfs %s", strings.Join(argList, " "), ctrCmd)
+	zap.L().Debug("Starting running outer podman", zap.Strings("args", argList))
 
-	zap.L().Debug("Starting running outer podman", zap.String("cmd", cmdStr))
-
-	cmd := s.getCommandAsRoot(ctx, cmdStr)
+	cmd := s.getCommandAsRoot(ctx, "podman", argList...)
 	if err := cmd.Start(); err != nil {
 		return errors.Errorf("Could not start running outer podman run cmd: %+v", err)
 	}

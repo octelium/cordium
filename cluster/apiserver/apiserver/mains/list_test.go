@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/octelium/cordium/cluster/common/octeliumc"
+	"github.com/octelium/cordium/cluster/common/ourscsrv"
 	otests "github.com/octelium/cordium/cluster/common/tests"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/corev1"
@@ -315,4 +316,74 @@ func TestList(t *testing.T) {
 		}
 
 	}
+}
+
+func TestSetCountOnly(t *testing.T) {
+
+	ctx := context.Background()
+
+	tst, err := otests.Initialize(nil)
+	assert.Nil(t, err, "%+v", err)
+	t.Cleanup(func() {
+		tst.Destroy()
+	})
+	fakeC := tst.C
+	tstAllowAllOwnSpace(t, fakeC.OcteliumC)
+
+	srv, err := NewServer(ctx, fakeC.OcteliumC)
+	assert.Nil(t, err)
+	adminSrv := admin.NewServer(&admin.Opts{
+		OcteliumC:  fakeC.OcteliumC,
+		IsEmbedded: true,
+	})
+
+	usr, err := tstuser.NewUserWithType(fakeC.OcteliumC, adminSrv, nil, nil, corev1.User_Spec_HUMAN, corev1.Session_Status_CLIENTLESS)
+	assert.Nil(t, err)
+
+	newSpace := func() *cordiumv1.Space {
+		ret, err := srv.CreateSpace(usr.Ctx(), &cordiumv1.Space{
+			Metadata: &metav1.Metadata{
+				Name: fmt.Sprintf("%s.cordium", utilrand.GetRandomStringCanonical(8)),
+			},
+			Spec: &cordiumv1.Space_Spec{},
+			Status: &cordiumv1.Space_Status{
+				Type: cordiumv1.Space_Status_ORGANIZATION,
+			},
+		})
+		assert.Nil(t, err, "%+v", err)
+		return ret
+	}
+
+	getCount := func(org *cordiumv1.Space) uint32 {
+		itmList, err := fakeC.OcteliumC.CordiumC().ListSecret(ctx,
+			ourscsrv.SetCountOnly(ourscsrv.FilterBySpace(org)))
+		assert.Nil(t, err, "%+v", err)
+		assert.LessOrEqual(t, len(itmList.Items), 1)
+		return itmList.GetListResponseMeta().GetTotalCount()
+	}
+
+	org := newSpace()
+	orgOther := newSpace()
+
+	assert.Equal(t, uint32(0), getCount(org))
+
+	n := 5
+	for range n {
+		_, err := srv.CreateSecret(usr.Ctx(), &cordiumv1.Secret{
+			Metadata: &metav1.Metadata{
+				Name: fmt.Sprintf("%s.%s", utilrand.GetRandomStringCanonical(8), org.Metadata.Name),
+			},
+			Spec:   &cordiumv1.Secret_Spec{},
+			Status: &cordiumv1.Secret_Status{},
+			Data: &cordiumv1.Secret_Data{
+				Type: &cordiumv1.Secret_Data_Value{
+					Value: utilrand.GetRandomString(200),
+				},
+			},
+		})
+		assert.Nil(t, err, "%+v", err)
+	}
+
+	assert.Equal(t, uint32(n), getCount(org))
+	assert.Equal(t, uint32(0), getCount(orgOther))
 }

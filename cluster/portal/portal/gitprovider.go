@@ -214,7 +214,7 @@ func (s *Server) handleAuthGitProviderBegin(w http.ResponseWriter, r *http.Reque
 
 	loginURL := oauth2Cfg.AuthCodeURL(state)
 
-	zap.L().Debug("Successfully create auth code URL", zap.String("url", loginURL))
+	zap.L().Debug("Successfully created auth code URL")
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(handleAuthGitProviderBeginResponse{
@@ -433,7 +433,8 @@ func (s *Server) oauth2Config(ctx context.Context, gitProvider *cordiumv1.GitPro
 	var clientID string
 	var clientSecret string
 
-	zap.L().Debug("Building oauth2Config", zap.Any("gitProvider", gitProvider))
+	zap.L().Debug("Building oauth2Config",
+		zap.String("gitProvider", gitProvider.GetMetadata().GetName()))
 
 	switch gitProvider.Spec.Type.(type) {
 	case *cordiumv1.GitProvider_Spec_Github_:
@@ -499,7 +500,8 @@ func (s *Server) oauth2Config(ctx context.Context, gitProvider *cordiumv1.GitPro
 		return nil, errors.Errorf("Invalid GitProvider type")
 	}
 
-	zap.L().Debug("Successfully built oauth2Config", zap.Any("gitProvider", gitProvider))
+	zap.L().Debug("Successfully built oauth2Config",
+		zap.String("gitProvider", gitProvider.GetMetadata().GetName()))
 
 	return &oauth2.Config{
 		ClientID:     clientID,
@@ -569,7 +571,11 @@ func (s *Server) getGitProviderInfo(ctx context.Context, oauth2Config *oauth2.Co
 		ret.Email = res.Email
 	}
 
-	zap.L().Debug("Successfully built gitProviderInfo", zap.Any("gitProviderInfo", ret))
+	zap.L().Debug("Successfully built gitProviderInfo",
+		zap.String("username", ret.Username),
+		zap.String("email", ret.Email),
+		zap.Bool("hasRefreshToken", ret.RefreshToken != ""),
+		zap.Time("expiresAt", tkn.Expiry))
 
 	return ret, nil
 }

@@ -19,7 +19,9 @@ package workspace
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os/exec"
+	"strings"
 	"sync"
 
 	"github.com/octelium/octelium/apis/cluster/ccordiumv1"
@@ -92,16 +94,18 @@ func (s *Server) setupGit(ctx context.Context) error {
 }
 
 func (s *Server) GetGitCreds(ctx context.Context, req *ccordiumv1.GetGitCredsRequest) (*ccordiumv1.GetGitCredsResponse, error) {
-	zap.L().Debug("New GetGitCreds Request", zap.Any("req", req))
+	zap.L().Debug("New GetGitCreds Request", zap.String("host", req.GetRequest()["host"]))
 
 	if req.Request == nil {
 		return nil, grpcutils.NotFound("Nil request")
 	}
 
+	host := req.Request["host"]
+
 	s.gitStore.Lock()
 	defer s.gitStore.Unlock()
 
-	if entry, ok := s.gitStore.entryMap[req.Request["host"]]; ok {
+	if entry, ok := s.gitStore.entryMap[host]; ok {
 		zap.L().Debug("Found entry stored", zap.Any("username", entry.Username))
 		resp := req.Request
 		resp["username"] = entry.Username
@@ -112,6 +116,12 @@ func (s *Server) GetGitCreds(ctx context.Context, req *ccordiumv1.GetGitCredsReq
 	}
 
 	if s.initReq != nil && s.initReq.GitProviderInfo != nil {
+		if !s.isGitProviderHostAllowed(host) {
+			zap.L().Warn("Refusing to release the GitProvider token to an unconfigured host",
+				zap.String("host", host))
+			return nil, grpcutils.NotFound("No git creds found")
+		}
+
 		zap.L().Debug("Found gitProviderInfo", zap.Any("username", s.initReq.GitProviderInfo.Username))
 		resp := req.Request
 		resp["username"] = s.initReq.GitProviderInfo.Username
@@ -126,14 +136,64 @@ func (s *Server) GetGitCreds(ctx context.Context, req *ccordiumv1.GetGitCredsReq
 	return nil, grpcutils.NotFound("No git creds found")
 }
 
+func (s *Server) isGitProviderHostAllowed(host string) bool {
+	if host == "" {
+		return false
+	}
+
+	for _, allowed := range s.getGitProviderHosts() {
+		if strings.EqualFold(allowed, host) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (s *Server) getGitProviderHosts() []string {
+	var ret []string
+
+	addURL := func(rawURL string) {
+		if rawURL == "" {
+			return
+		}
+		u, err := url.Parse(strings.TrimSpace(rawURL))
+		if err != nil || u.Hostname() == "" {
+			return
+		}
+		ret = append(ret, u.Hostname())
+	}
+
+	if spec := s.spec; spec != nil {
+		if spec.Repository != nil {
+			addURL(spec.Repository.Url)
+		}
+		for _, repo := range spec.AdditionalRepositories {
+			if repo != nil && repo.Repository != nil {
+				addURL(repo.Repository.Url)
+			}
+		}
+		if spec.Image != nil && spec.Image.GetGit() != nil {
+			addURL(spec.Image.GetGit().Url)
+		}
+	}
+
+	if s.initReq != nil && s.initReq.UserConfig != nil &&
+		s.initReq.UserConfig.Spec != nil && s.initReq.UserConfig.Spec.Dotfiles != nil {
+		addURL(s.initReq.UserConfig.Spec.Dotfiles.Url)
+	}
+
+	return ret
+}
+
 func (s *Server) StoreGitCreds(ctx context.Context, req *ccordiumv1.StoreGitCredsRequest) (*ccordiumv1.StoreGitCredsResponse, error) {
-	zap.L().Debug("New StoreGitCreds Request", zap.Any("req", req))
+	zap.L().Debug("New StoreGitCreds Request", zap.String("host", req.GetRequest()["host"]))
 
 	s.gitStore.Lock()
 	defer s.gitStore.Unlock()
 
 	if req.Request == nil || req.Request["host"] == "" || req.Request["username"] == "" || req.Request["password"] == "" {
-		zap.L().Debug("Invalid request. Nothing to be stored", zap.Any("req", req))
+		zap.L().Debug("Invalid request. Nothing to be stored")
 		return nil, grpcutils.InvalidArg("host, username and password fields must be set")
 	}
 
@@ -150,7 +210,7 @@ func (s *Server) StoreGitCreds(ctx context.Context, req *ccordiumv1.StoreGitCred
 }
 
 func (s *Server) EraseGitCreds(ctx context.Context, req *ccordiumv1.EraseGitCredsRequest) (*ccordiumv1.EraseGitCredsResponse, error) {
-	zap.L().Debug("New EraseGitCreds Request", zap.Any("req", req))
+	zap.L().Debug("New EraseGitCreds Request", zap.String("host", req.GetRequest()["host"]))
 
 	if req.Request == nil {
 		return nil, grpcutils.InvalidArg("Nil request")

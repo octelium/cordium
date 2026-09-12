@@ -75,7 +75,7 @@ func (s *Server) setIPTablesRules(ctx context.Context) error {
 
 		for _, cmdStr := range cmds {
 			zap.L().Debug("running iptables cmd", zap.String("cmd", cmdStr))
-			cmd := getCommand(ctx, cmdStr)
+			cmd := getShellCommand(ctx, cmdStr)
 
 			if ldflags.IsDev() {
 				cmd.Stdout = os.Stdout
@@ -140,7 +140,7 @@ func (s *Server) unsetIPTablesRules(ctx context.Context) error {
 
 		for _, cmdStr := range cmds {
 			zap.L().Debug("running iptables cmd", zap.String("cmd", cmdStr))
-			cmd := getCommand(ctx, cmdStr)
+			cmd := getShellCommand(ctx, cmdStr)
 
 			if ldflags.IsDev() {
 				cmd.Stdout = os.Stdout

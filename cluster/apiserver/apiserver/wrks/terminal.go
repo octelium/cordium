@@ -287,7 +287,11 @@ func (s *Server) Exec(srv cordiumv1.WorkspaceService_ExecServer) error {
 		return grpcutils.InvalidArg("Init message must be request")
 	}
 
-	zap.L().Debug("Got init msg", zap.Any("req", msg.GetRequest()))
+	zap.L().Debug("Got init msg",
+		zap.String("workspace", msg.GetRequest().GetWorkspaceRef().GetName()),
+		zap.String("workingDir", msg.GetRequest().GetWorkingDir()),
+		zap.Bool("runAsRoot", msg.GetRequest().GetRunAsRoot()),
+		zap.Int("envVars", len(msg.GetRequest().GetEnvVars())))
 
 	wssupClient, err := s.getSupC(ctx, apivalidation.ObjectReferenceToGetOptions(msg.GetRequest().WorkspaceRef))
 	if err != nil {

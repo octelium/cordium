@@ -41,7 +41,6 @@ func (s *Server) doInitialize() error {
 	defer cancelFn()
 
 	zap.L().Debug("Starting doInitialize")
-	zap.L().Debug("Env vars", zap.Strings("env", os.Environ()))
 
 	if vutils.FSPathExists("/octelium/sockets/workspace.sock") {
 		zap.L().Debug("Removing workspace.sock")
@@ -84,9 +83,10 @@ func (s *Server) doInitialize() error {
 
 	s.wsUID = ws.Metadata.Uid
 
-	zap.L().Debug("Workspace", zap.Any("workspace", s.initReq.Workspace))
-	zap.L().Debug("Space", zap.Any("space", s.initReq.Space))
-	zap.L().Debug("Merged spec", zap.Any("spec", s.spec))
+	zap.L().Debug("Initializing Workspace",
+		zap.String("wsName", ws.GetMetadata().GetName()),
+		zap.String("space", s.initReq.Space.GetMetadata().GetName()),
+		zap.Bool("isFreshRun", s.isFreshRun))
 
 	if s.isFreshRun {
 		if err := s.chownDirOctelium(ctx, "/octelium"); err != nil {
@@ -122,8 +122,7 @@ func (s *Server) doInitialize() error {
 
 		ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 		defer cancel()
-		cmdStr := "podman inspect --type container workspace"
-		cmd := s.getCommandAsOctelium(ctx, cmdStr)
+		cmd := s.getCommandAsOctelium(ctx, "podman", "inspect", "--type", "container", "workspace")
 		err := cmd.Run()
 		if err != nil {
 			zap.L().Warn("Could not inspect pre", zap.Error(err))
@@ -147,7 +146,7 @@ func (s *Server) doInitialize() error {
 			"cat /proc/mounts",
 		}
 
-		s.runAllCommandsAsOctelium(ctx, cmds)
+		s.runAllShellCommandsAsOctelium(ctx, cmds)
 	}
 
 	if err := s.runOcteliumProxy(); err != nil {
@@ -172,7 +171,8 @@ func (s *Server) doInitialize() error {
 	s.setStatus(cordiumv1.Workspace_Status_STARTING_RUNTIME)
 
 	if ldflags.IsDev() && !ldflags.IsTest() {
-		if err := s.getCommandAsOctelium(ctx, "skopeo inspect containers-storage:localhost/workspace").Run(); err != nil {
+		if err := s.getCommandAsOctelium(ctx,
+			"skopeo", "inspect", "containers-storage:localhost/workspace").Run(); err != nil {
 			zap.L().Warn("Could not run skopeo inspect", zap.Error(err))
 		}
 	}
@@ -241,11 +241,7 @@ func (s *Server) doInitialize() error {
 		TemplateHasSnapshot: s.initReq.TemplateHasSnapshot,
 	}
 
-	if ldflags.IsDev() {
-		zap.L().Debug("sending prepare request", zap.Any("req", prepareReq))
-	} else {
-		zap.L().Debug("sending prepare request")
-	}
+	zap.L().Debug("sending prepare request")
 
 	for i := range 30 {
 		if _, err := s.wsC.Prepare(ctx, prepareReq); err == nil {

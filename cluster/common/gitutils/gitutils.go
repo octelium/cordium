@@ -45,6 +45,20 @@ type CloneOpts struct {
 	UserUID    int
 }
 
+func (o *CloneOpts) logFields() []zap.Field {
+	if o == nil {
+		return []zap.Field{zap.Bool("nil", true)}
+	}
+	return []zap.Field{
+		zap.String("dir", o.Dir),
+		zap.String("url", o.Repo.GetUrl()),
+		zap.String("branch", o.Repo.GetCloneOptions().GetBranch()),
+		zap.String("checkout", o.Repo.GetCloneOptions().GetCheckout()),
+		zap.Bool("hasAuth", o.Repo.GetAuthentication() != nil),
+		zap.Int("userUID", o.UserUID),
+	}
+}
+
 func Unshallow(ctx context.Context, o *CloneOpts) error {
 	if o == nil {
 		return errors.Errorf("Could not unhshallow fetch. Nil req")
@@ -70,10 +84,10 @@ func Unshallow(ctx context.Context, o *CloneOpts) error {
 }
 
 func unshallowCmd(ctx context.Context, o *CloneOpts) error {
-	zap.L().Debug("Starting unshallow using git cmd", zap.Any("opts", o))
+	zap.L().Debug("Starting unshallow using git cmd", o.logFields()...)
 
 	{
-		cmd, err := getGitCmd(ctx, "git rev-parse --is-shallow-repository", o)
+		cmd, err := getGitCmd(ctx, o, "rev-parse", "--is-shallow-repository")
 		if err != nil {
 			return err
 		}
@@ -95,7 +109,7 @@ func unshallowCmd(ctx context.Context, o *CloneOpts) error {
 	}
 
 	{
-		cmd, err := getGitCmd(ctx, "git fetch --unshallow", o)
+		cmd, err := getGitCmd(ctx, o, "fetch", "--unshallow")
 		if err != nil {
 			return err
 		}
@@ -124,7 +138,7 @@ func unshallowCmd(ctx context.Context, o *CloneOpts) error {
 }
 
 func unshallowEmbedded(ctx context.Context, o *CloneOpts) error {
-	zap.L().Debug("Starting embedded unshallow", zap.Any("opts", o))
+	zap.L().Debug("Starting embedded unshallow", o.logFields()...)
 	repo, err := git.PlainOpen(o.Dir)
 	if err != nil {
 		return err
@@ -171,18 +185,18 @@ func Clone(ctx context.Context, o *CloneOpts) error {
 
 func cloneCmd(ctx context.Context, o *CloneOpts) error {
 
-	zap.L().Debug("Starting clone using git cmd", zap.Any("opts", o))
-	cmdOpts := []string{}
+	zap.L().Debug("Starting clone using git cmd", o.logFields()...)
+	cmdOpts := []string{"clone"}
 	opts := o.Repo.CloneOptions
 	if opts == nil {
-		cmdOpts = append(cmdOpts, "--depth 1")
+		cmdOpts = append(cmdOpts, "--depth", "1")
 	} else {
 
 		if !opts.DisableLazyUnshallow {
-			cmdOpts = append(cmdOpts, "--depth 1")
+			cmdOpts = append(cmdOpts, "--depth", "1")
 		} else {
 			if opts.Depth > 0 {
-				cmdOpts = append(cmdOpts, fmt.Sprintf("--depth %d", opts.Depth))
+				cmdOpts = append(cmdOpts, "--depth", fmt.Sprintf("%d", opts.Depth))
 			}
 		}
 
@@ -196,14 +210,15 @@ func cloneCmd(ctx context.Context, o *CloneOpts) error {
 	}
 
 	if opts != nil && opts.Branch != "" {
-		cmdOpts = append(cmdOpts, fmt.Sprintf("--branch %s", strings.TrimSpace(opts.Branch)))
+		cmdOpts = append(cmdOpts, "--branch", strings.TrimSpace(opts.Branch))
 	}
 
-	cmdStr := fmt.Sprintf("git clone %s %s %s", strings.Join(cmdOpts, " "), strings.TrimSpace(o.Repo.Url), strings.TrimSpace(o.Dir))
+	cmdOpts = append(cmdOpts, "--",
+		strings.TrimSpace(o.Repo.Url), strings.TrimSpace(o.Dir))
 
-	zap.L().Debug("Executing git clone", zap.String("cmd", cmdStr))
+	zap.L().Debug("Executing git clone", zap.Strings("args", cmdOpts))
 
-	cmd, err := getGitCmd(ctx, cmdStr, o)
+	cmd, err := getGitCmd(ctx, o, cmdOpts...)
 	if err != nil {
 		return err
 	}
@@ -211,15 +226,17 @@ func cloneCmd(ctx context.Context, o *CloneOpts) error {
 	return cmd.Run()
 }
 
-func getGitCmd(ctx context.Context, cmdStr string, o *CloneOpts) (*exec.Cmd, error) {
-	cmd := exec.CommandContext(ctx, "sh", "-c", cmdStr)
+func getGitCmd(ctx context.Context, o *CloneOpts, args ...string) (*exec.Cmd, error) {
+	cmd := exec.CommandContext(ctx, "git", args...)
 	if ldflags.IsDev() {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	}
 
 	cmd.Env = []string{
-		os.Getenv("PATH"),
+		fmt.Sprintf("PATH=%s", os.Getenv("PATH")),
+		"GIT_TERMINAL_PROMPT=0",
+		"GIT_SSH_COMMAND=ssh -o BatchMode=yes",
 	}
 
 	if o.UserUID != 0 {
@@ -261,7 +278,7 @@ func getGitCmd(ctx context.Context, cmdStr string, o *CloneOpts) (*exec.Cmd, err
 
 func cloneEmbedded(ctx context.Context, o *CloneOpts) error {
 
-	zap.L().Debug("Starting embedded clone", zap.Any("opts", o))
+	zap.L().Debug("Starting embedded clone", o.logFields()...)
 	gopts := &git.CloneOptions{
 		URL: strings.TrimSpace(o.Repo.Url),
 	}
@@ -352,9 +369,9 @@ func Checkout(ctx context.Context, o *CloneOpts) error {
 }
 
 func checkoutCmd(ctx context.Context, o *CloneOpts) error {
-	zap.L().Debug("Starting checkout using git cmd", zap.Any("opts", o))
+	zap.L().Debug("Starting checkout using git cmd", o.logFields()...)
 
-	cmd, err := getGitCmd(ctx, fmt.Sprintf("git checkout %s", o.Repo.CloneOptions.Checkout), o)
+	cmd, err := getGitCmd(ctx, o, "checkout", o.Repo.CloneOptions.Checkout, "--")
 	if err != nil {
 		return err
 	}
@@ -382,7 +399,7 @@ func checkoutCmd(ctx context.Context, o *CloneOpts) error {
 }
 
 func checkoutEmbedded(ctx context.Context, o *CloneOpts) error {
-	zap.L().Debug("Starting embedded unshallow", zap.Any("opts", o))
+	zap.L().Debug("Starting embedded checkout", o.logFields()...)
 	repo, err := git.PlainOpen(o.Dir)
 	if err != nil {
 		return err

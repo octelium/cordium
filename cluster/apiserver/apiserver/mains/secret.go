@@ -65,12 +65,13 @@ func (s *Server) CreateSecret(ctx context.Context, req *cordiumv1.Secret) (*cord
 	}
 
 	{
-		itmList, err := s.octeliumC.CordiumC().ListSecret(ctx, ourscsrv.FilterBySpace(org))
+		itmList, err := s.octeliumC.CordiumC().ListSecret(ctx,
+			ourscsrv.SetCountOnly(ourscsrv.FilterBySpace(org)))
 		if err != nil {
 			return nil, err
 		}
 
-		if len(itmList.Items) >= maxSecretsPerSpace {
+		if itmList.GetListResponseMeta().GetTotalCount() >= maxSecretsPerSpace {
 			return nil, serr.Unauthorized("Number of Secrets per Space has been exceeded")
 		}
 	}

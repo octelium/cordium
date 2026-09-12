@@ -111,3 +111,9 @@ func FilterByTemplateRef(u *metav1.ObjectReference) *rmetav1.ListOptions {
 		},
 	}
 }
+
+func SetCountOnly(opts *rmetav1.ListOptions) *rmetav1.ListOptions {
+	opts.Paginate = true
+	opts.ItemsPerPage = 1
+	return opts
+}

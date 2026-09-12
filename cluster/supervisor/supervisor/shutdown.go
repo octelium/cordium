@@ -120,17 +120,17 @@ func (s *Server) doShutdownInner() error {
 	zap.L().Debug("Starting inner shutdown")
 	s.setStatus(cordiumv1.Workspace_Status_STOPPING)
 
-	cmds := []string{
-		"podman stop workspace -t 60",
-		// "rm -rf /octelium/podman/tmp",
+	cmds := [][]string{
+		{"podman", "stop", "workspace", "-t", "60"},
 	}
 
-	for _, cmdStr := range cmds {
-		zap.L().Debug("running inner shutdown cmd", zap.String("cmd", cmdStr))
-		cmd := s.getCommandAsOctelium(ctx, cmdStr)
+	for _, cmdArgs := range cmds {
+		zap.L().Debug("running inner shutdown cmd", zap.Strings("cmd", cmdArgs))
+		cmd := s.getCommandAsOctelium(ctx, cmdArgs[0], cmdArgs[1:]...)
 
 		if err := cmd.Run(); err != nil {
-			zap.S().Errorf("Could not run shutdown cmd: %s: %+v", cmdStr, err)
+			zap.L().Error("Could not run shutdown cmd",
+				zap.Strings("cmd", cmdArgs), zap.Error(err))
 		}
 	}
 
@@ -154,8 +154,7 @@ func (s *Server) doShutdownInner() error {
 	{
 		ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 		defer cancel()
-		cmdStr := "podman inspect --type container workspace"
-		cmd := s.getCommandAsOctelium(ctx, cmdStr)
+		cmd := s.getCommandAsOctelium(ctx, "podman", "inspect", "--type", "container", "workspace")
 		err := cmd.Run()
 		if err != nil {
 			zap.L().Warn("Could not inspect at shutdown", zap.Error(err))
@@ -165,8 +164,7 @@ func (s *Server) doShutdownInner() error {
 	{
 		ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 		defer cancel()
-		cmdStr := "podman container cleanup workspace"
-		cmd := s.getCommandAsOctelium(ctx, cmdStr)
+		cmd := s.getCommandAsOctelium(ctx, "podman", "container", "cleanup", "workspace")
 		err := cmd.Run()
 		if err != nil {
 			zap.L().Warn("Could not cleanup Workspace", zap.Error(err))
@@ -176,8 +174,7 @@ func (s *Server) doShutdownInner() error {
 	{
 		ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 		defer cancel()
-		cmdStr := "podman inspect --type container workspace"
-		cmd := s.getCommandAsOctelium(ctx, cmdStr)
+		cmd := s.getCommandAsOctelium(ctx, "podman", "inspect", "--type", "container", "workspace")
 		err := cmd.Run()
 		if err != nil {
 			zap.L().Warn("Could not inspect at shutdown", zap.Error(err))

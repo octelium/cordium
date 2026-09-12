@@ -20,6 +20,7 @@ import (
 	"context"
 	"net/url"
 	"regexp"
+	"strings"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
@@ -84,6 +85,10 @@ func ValidateWorkspace(ctx context.Context, req *ValidateWorkspaceReq) error {
 		case *cordiumv1.Workspace_Spec_Image_Git_:
 			if !isValidURL(specImage.GetGit().GetUrl()) {
 				return serr.InvalidArg("Image git URL is not valid")
+			}
+
+			if err := checkGitRef("checkout", specImage.GetGit().GetCheckout()); err != nil {
+				return err
 			}
 
 			if specImage.GetGit().GetDockerfile() != "" &&
@@ -393,6 +398,15 @@ func ValidateWorkspace(ctx context.Context, req *ValidateWorkspaceReq) error {
 			}
 		}
 
+		if repo.CloneOptions != nil {
+			if err := checkGitRef("branch", repo.CloneOptions.Branch); err != nil {
+				return err
+			}
+			if err := checkGitRef("checkout", repo.CloneOptions.Checkout); err != nil {
+				return err
+			}
+		}
+
 		if repo.Authentication != nil {
 			switch repo.Authentication.Type.(type) {
 			case *cordiumv1.Workspace_Spec_Repository_Authentication_Http:
@@ -550,3 +564,22 @@ func ValidateWorkspace(ctx context.Context, req *ValidateWorkspaceReq) error {
 }
 
 var k8sCapabilityRegex = regexp.MustCompile(`^(ALL|[A-Z][A-Z0-9_]{0,29})$`)
+
+var gitRefRegex = regexp.MustCompile(`^[A-Za-z0-9_][A-Za-z0-9._/+-]{0,254}$`)
+
+func checkGitRef(field, arg string) error {
+	if arg == "" {
+		return nil
+	}
+	if !gitRefRegex.MatchString(arg) {
+		return serr.InvalidArg("Invalid git %s: %s", field, arg)
+	}
+	if strings.Contains(arg, "..") {
+		return serr.InvalidArg("Invalid git %s: %s", field, arg)
+	}
+	if strings.HasSuffix(arg, ".lock") || strings.HasSuffix(arg, "/") {
+		return serr.InvalidArg("Invalid git %s: %s", field, arg)
+	}
+
+	return nil
+}

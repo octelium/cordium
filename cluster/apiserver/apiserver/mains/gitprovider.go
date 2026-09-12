@@ -64,12 +64,13 @@ func (s *Server) CreateGitProvider(ctx context.Context, req *cordiumv1.GitProvid
 	}
 
 	{
-		itmList, err := s.octeliumC.CordiumC().ListGitProvider(ctx, ourscsrv.FilterBySpace(org))
+		itmList, err := s.octeliumC.CordiumC().ListGitProvider(ctx,
+			ourscsrv.SetCountOnly(ourscsrv.FilterBySpace(org)))
 		if err != nil {
 			return nil, err
 		}
 
-		if len(itmList.Items) >= maxGitProviderPerSpace {
+		if itmList.GetListResponseMeta().GetTotalCount() >= maxGitProviderPerSpace {
 			return nil, serr.Unauthorized("Number of Git Provider per Space has been exceeded")
 		}
 	}

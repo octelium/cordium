@@ -132,12 +132,13 @@ func (s *Server) CreateMembership(ctx context.Context, req *cordiumv1.CreateMemb
 	}
 
 	{
-		itmList, err := s.octeliumC.CordiumC().ListMembership(ctx, ourscsrv.FilterBySpace(org))
+		itmList, err := s.octeliumC.CordiumC().ListMembership(ctx,
+			ourscsrv.SetCountOnly(ourscsrv.FilterBySpace(org)))
 		if err != nil {
 			return nil, err
 		}
 
-		if len(itmList.Items) >= maxMembersPerSpace {
+		if itmList.GetListResponseMeta().GetTotalCount() >= maxMembersPerSpace {
 			return nil, serr.Unauthorized("Number of Members per Space has been exceeded")
 		}
 	}

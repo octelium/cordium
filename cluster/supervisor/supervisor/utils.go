@@ -34,6 +34,35 @@ import (
 
 const tmpImageLocation = "/tmp/octelium-workspace-image.tar.gz"
 
+func redactInitializeRequest(req *ccordiumv1.InitializeRequest) []zap.Field {
+	if req == nil {
+		return []zap.Field{zap.Bool("nil", true)}
+	}
+
+	ret := []zap.Field{
+		zap.String("wsName", req.Workspace.GetMetadata().GetName()),
+		zap.String("wsUID", req.Workspace.GetMetadata().GetUid()),
+		zap.String("space", req.Space.GetMetadata().GetName()),
+		zap.String("template", req.Template.GetMetadata().GetName()),
+		zap.Bool("isBuild", req.Workspace.GetStatus().GetIsBuild()),
+		zap.Bool("templateHasSnapshot", req.TemplateHasSnapshot),
+		zap.Int("secrets", len(req.SecretList.GetItems())),
+		zap.Int("userSecrets", len(req.UserSecretList.GetItems())),
+		zap.Bool("hasGitProviderInfo", req.GitProviderInfo != nil),
+		zap.Bool("hasUserConfig", req.UserConfig != nil),
+	}
+
+	if req.ClientInfo != nil {
+		ret = append(ret,
+			zap.String("domain", req.ClientInfo.Domain),
+			zap.Bool("hasAccessToken", req.ClientInfo.AccessToken != ""),
+			zap.Bool("hasRefreshToken", req.ClientInfo.RefreshToken != ""),
+			zap.Int64("expiresIn", req.ClientInfo.ExpiresIn))
+	}
+
+	return ret
+}
+
 func (s *Server) setFailure(failure *cordiumv1.Workspace_Status_Failure) {
 	s.failureWrp.mu.Lock()
 	defer s.failureWrp.mu.Unlock()
@@ -48,18 +77,18 @@ func (s *Server) getFailure() *cordiumv1.Workspace_Status_Failure {
 }
 
 func (s *Server) chownDirOctelium(ctx context.Context, path string) error {
-	cmd := getCommand(ctx, fmt.Sprintf("chown -R octelium:octelium %s", path))
+	cmd := getCommand(ctx, "chown", "-R", "octelium:octelium", path)
 	return cmd.Run()
 }
 
 func (s *Server) chownFileOctelium(ctx context.Context, path string) error {
 
-	cmd := getCommand(ctx, fmt.Sprintf("chown octelium:octelium %s", path))
+	cmd := getCommand(ctx, "chown", "octelium:octelium", path)
 	return cmd.Run()
 }
 
-func (s *Server) getCommandAsRoot(ctx context.Context, cmdStr string) *exec.Cmd {
-	cmd := getCommand(ctx, cmdStr)
+func (s *Server) getCommandAsRoot(ctx context.Context, name string, args ...string) *exec.Cmd {
+	cmd := getCommand(ctx, name, args...)
 	cmd.Env = []string{
 		"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
 		"HOME=/root",
@@ -75,18 +104,26 @@ func (s *Server) getCommandAsRoot(ctx context.Context, cmdStr string) *exec.Cmd 
 	return cmd
 }
 
-func (s *Server) runAllCommandsAsOctelium(ctx context.Context, cmds []string) {
+func (s *Server) runAllShellCommandsAsOctelium(ctx context.Context, cmds []string) {
 	for _, cmdStr := range cmds {
-		if err := s.getCommandAsOctelium(ctx, cmdStr).Run(); err != nil {
+		if err := s.getShellCommandAsOctelium(ctx, cmdStr).Run(); err != nil {
 			zap.L().Warn("Could not exec", zap.String("cmd", cmdStr), zap.Error(err))
 		}
 	}
 }
 
-func (s *Server) getCommandAsOctelium(ctx context.Context, cmdStr string) *exec.Cmd {
-	zap.L().Debug("Getting command as octelium", zap.String("cmd", cmdStr))
-	cmd := getCommand(ctx, cmdStr)
+func (s *Server) getCommandAsOctelium(ctx context.Context, name string, args ...string) *exec.Cmd {
+	zap.L().Debug("Getting command as octelium",
+		zap.String("cmd", name), zap.Strings("args", args))
+	return s.setCmdAsOctelium(getCommand(ctx, name, args...), true)
+}
 
+func (s *Server) getShellCommandAsOctelium(ctx context.Context, cmdStr string) *exec.Cmd {
+	zap.L().Debug("Getting shell command as octelium", zap.String("cmd", cmdStr))
+	return s.setCmdAsOctelium(getShellCommand(ctx, cmdStr), true)
+}
+
+func (s *Server) setCmdAsOctelium(cmd *exec.Cmd, withStdout bool) *exec.Cmd {
 	// setEnv(&cmd.Env, "HOME", "/home/octelium")
 	// setEnv(&cmd.Env, "PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin")
 	// setEnv(&cmd.Env, "XDG_RUNTIME_DIR", "/octelium-runtime")
@@ -99,7 +136,7 @@ func (s *Server) getCommandAsOctelium(ctx context.Context, cmdStr string) *exec.
 		Credential: &syscall.Credential{Uid: uint32(s.octeliumUID), Gid: uint32(s.octeliumGID)},
 	}
 
-	if ldflags.IsDev() {
+	if withStdout && ldflags.IsDev() {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	}
@@ -116,17 +153,8 @@ func (s *Server) getDefaultCmdEnvAsOctelium() map[string]string {
 	}
 }
 
-func (s *Server) getCommandAsOcteliumNOStdout(ctx context.Context, cmdStr string) *exec.Cmd {
-	cmd := getCommand(ctx, cmdStr)
-	for k, v := range s.getDefaultCmdEnvAsOctelium() {
-		setEnv(&cmd.Env, k, v)
-	}
-
-	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Credential: &syscall.Credential{Uid: uint32(s.octeliumUID), Gid: uint32(s.octeliumGID)},
-	}
-
-	return cmd
+func (s *Server) getCommandAsOcteliumNOStdout(ctx context.Context, name string, args ...string) *exec.Cmd {
+	return s.setCmdAsOctelium(getCommand(ctx, name, args...), false)
 }
 
 func (s *Server) isStatusEqual(st cordiumv1.Workspace_Status_State) bool {
@@ -219,7 +247,11 @@ func (s *Server) doSyncState() error {
 	}
 }
 
-func getCommand(ctx context.Context, cmdStr string) *exec.Cmd {
+func getCommand(ctx context.Context, name string, args ...string) *exec.Cmd {
+	return exec.CommandContext(ctx, name, args...)
+}
+
+func getShellCommand(ctx context.Context, cmdStr string) *exec.Cmd {
 	return exec.CommandContext(ctx, "sh", "-c", cmdStr)
 }
 

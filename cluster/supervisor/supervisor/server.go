@@ -25,12 +25,14 @@ import (
 	"os/exec"
 	"os/signal"
 	"os/user"
+	"runtime/debug"
 	"strconv"
 	"sync"
 	"syscall"
 	"time"
 
 	cfs "github.com/containerd/continuity/fs"
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/octelium/cordium/cluster/common/suputils"
 	"github.com/octelium/cordium/cluster/common/wsclient"
 	"github.com/octelium/cordium/cluster/supervisor/supervisor/oproxy"
@@ -43,8 +45,26 @@ import (
 	"go.uber.org/zap"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/keepalive"
+	"google.golang.org/grpc/status"
 )
+
+const (
+	maxConcurrentStreams = 2048
+	maxRecvMsgSize       = 8 * 1024 * 1024
+)
+
+func recoveryOpts() []grpc_recovery.Option {
+	return []grpc_recovery.Option{
+		grpc_recovery.WithRecoveryHandler(func(p any) error {
+			zap.L().Error("Recovered from panic in gRPC handler",
+				zap.Any("panic", p), zap.ByteString("stack", debug.Stack()))
+			return status.Error(codes.Internal, "Internal error")
+		}),
+	}
+}
 
 type Server struct {
 	mu sync.Mutex
@@ -162,8 +182,6 @@ func NewServer(ctx context.Context) (*Server, error) {
 		zap.L().Debug("Initializing a new Server in outer mode")
 	}
 
-	zap.L().Debug("Env vars", zap.Strings("env", os.Environ()))
-
 	usr, err := user.Current()
 	if err != nil {
 		return nil, err
@@ -262,7 +280,14 @@ func (s *Server) doRunInner(ctx context.Context) error {
 	}
 
 	s.grpcSrv = grpc.NewServer(
-		grpc.MaxConcurrentStreams(1000000),
+		grpc.MaxConcurrentStreams(maxConcurrentStreams),
+		grpc.MaxRecvMsgSize(maxRecvMsgSize),
+		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+			MinTime:             30 * time.Second,
+			PermitWithoutStream: true,
+		}),
+		grpc.ChainUnaryInterceptor(grpc_recovery.UnaryServerInterceptor(recoveryOpts()...)),
+		grpc.ChainStreamInterceptor(grpc_recovery.StreamServerInterceptor(recoveryOpts()...)),
 	)
 
 	ccordiumv1.RegisterWorkspaceSupervisorServiceServer(s.grpcSrv, s)

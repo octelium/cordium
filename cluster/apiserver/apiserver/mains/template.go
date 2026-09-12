@@ -73,12 +73,13 @@ func (s *Server) CreateTemplate(ctx context.Context, req *cordiumv1.Template) (*
 	}
 
 	{
-		itmList, err := s.octeliumC.CordiumC().ListTemplate(ctx, ourscsrv.FilterBySpace(org))
+		itmList, err := s.octeliumC.CordiumC().ListTemplate(ctx,
+			ourscsrv.SetCountOnly(ourscsrv.FilterBySpace(org)))
 		if err != nil {
 			return nil, err
 		}
 
-		if len(itmList.Items) >= maxTemplatesPerEnvironment {
+		if itmList.GetListResponseMeta().GetTotalCount() >= maxTemplatesPerEnvironment {
 			return nil, serr.Unauthorized("Number of Templates per Environment has been exceeded")
 		}
 	}

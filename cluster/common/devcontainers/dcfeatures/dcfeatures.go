@@ -186,7 +186,7 @@ func GetSortedFeatures(o *GetSortedFeaturesOpts) ([]*Feature, error) {
 	var features []*Feature
 	basePath := o.BasePath
 
-	zap.L().Debug("Sorting devcontainers features", zap.Any("opts", o))
+	zap.L().Debug("Sorting devcontainers features", zap.String("basePath", basePath))
 
 	if err := filepath.Walk(basePath,
 		func(path string, info os.FileInfo, err error) error {

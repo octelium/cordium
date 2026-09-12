@@ -25,6 +25,7 @@ import (
 	"os/user"
 	"path"
 	"path/filepath"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"sync"
@@ -33,6 +34,7 @@ import (
 
 	"slices"
 
+	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/octelium/cordium/cluster/common/wsutils"
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
 	"github.com/octelium/octelium/apis/cluster/ccordiumv1"
@@ -43,8 +45,25 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/status"
 )
+
+const (
+	maxConcurrentStreams = 2048
+	maxRecvMsgSize       = 8 * 1024 * 1024
+)
+
+func recoveryOpts() []grpc_recovery.Option {
+	return []grpc_recovery.Option{
+		grpc_recovery.WithRecoveryHandler(func(p any) error {
+			zap.L().Error("Recovered from panic in gRPC handler",
+				zap.Any("panic", p), zap.ByteString("stack", debug.Stack()))
+			return status.Error(codes.Internal, "Internal error")
+		}),
+	}
+}
 
 type Server struct {
 	mu      sync.RWMutex
@@ -255,7 +274,10 @@ func (s *Server) Run(ctx context.Context) error {
 	zap.L().Debug("Creating a new gRPC server")
 
 	s.grpcSrv = grpc.NewServer(
-		grpc.MaxConcurrentStreams(1000000),
+		grpc.MaxConcurrentStreams(maxConcurrentStreams),
+		grpc.MaxRecvMsgSize(maxRecvMsgSize),
+		grpc.ChainUnaryInterceptor(grpc_recovery.UnaryServerInterceptor(recoveryOpts()...)),
+		grpc.ChainStreamInterceptor(grpc_recovery.StreamServerInterceptor(recoveryOpts()...)),
 	)
 
 	grpc_health_v1.RegisterHealthServer(s.grpcSrv, s)
@@ -590,7 +612,12 @@ func (s *Server) doPrepare(ctx context.Context, req *ccordiumv1.PrepareRequest) 
 	s.mu.Unlock()
 
 	var err error
-	zap.L().Debug("Starting preparing the Workspace", zap.Any("req", req))
+	zap.L().Debug("Starting preparing the Workspace",
+		zap.String("wsName", req.Workspace.GetMetadata().GetName()),
+		zap.String("domain", req.Domain),
+		zap.Int("secrets", len(req.SecretList.GetItems())),
+		zap.Int("userSecrets", len(req.UserSecretList.GetItems())),
+		zap.Bool("hasGitProviderInfo", req.GitProviderInfo != nil))
 	s.initReq = req
 	s.ws = req.Workspace
 
@@ -823,6 +850,18 @@ func setEnv(envVars *[]string, key, val string) {
 	}
 }
 
+func envKeys(envVars []string) []string {
+	ret := make([]string, 0, len(envVars))
+	for _, envVar := range envVars {
+		key, _, found := strings.Cut(envVar, "=")
+		if !found {
+			continue
+		}
+		ret = append(ret, key)
+	}
+	return ret
+}
+
 /*
 func (s *Server) ListenFailure(req *ccordiumv1.ListenFailureRequest, srv ccordiumv1.WorkspaceService_ListenFailureServer) error {
 
@@ -989,7 +1028,7 @@ func (s *Server) setEnvVars(_ context.Context) {
 	setEnv(&s.env, "OCTELIUM_HOME", "mem")
 	// setEnv(&s.env, "CONTAINER_HOST", "unix:///var/run/docker.sock")
 
-	zap.L().Debug("Env vars set to", zap.Strings("env", s.env))
+	zap.L().Debug("Env vars set", zap.Strings("keys", envKeys(s.env)))
 
 }
 

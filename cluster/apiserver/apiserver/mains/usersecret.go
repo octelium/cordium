@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/octelium/cordium/cluster/apiserver/apiserver/commonw"
+	"github.com/octelium/cordium/cluster/common/ourscsrv"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/apis/rsc/rmetav1"
@@ -66,11 +67,12 @@ func (s *Server) CreateUserSecret(ctx context.Context, req *cordiumv1.UserSecret
 	}
 
 	{
-		secretList, err := s.octeliumC.CordiumC().ListUserSecret(ctx, urscsrv.FilterByUser(i.User))
+		secretList, err := s.octeliumC.CordiumC().ListUserSecret(ctx,
+			ourscsrv.SetCountOnly(urscsrv.FilterByUser(i.User)))
 		if err != nil {
 			return nil, serr.InternalWithErr(err)
 		}
-		if len(secretList.Items) >= maxUserSecretPerUser {
+		if secretList.GetListResponseMeta().GetTotalCount() >= maxUserSecretPerUser {
 			return nil, serr.Unauthorized("Maximum UserSecret limit reached")
 		}
 	}

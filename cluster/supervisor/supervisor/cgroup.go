@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 
 	"github.com/containerd/cgroups/v3/cgroup2"
@@ -45,7 +46,7 @@ func (s *Server) moveSelfToWorkspaceLeafCgroup(ctx context.Context) error {
 	}
 
 	zap.L().Debug("Moving myPID to workspace leaf cgroup", zap.Int("pid", s.myPID))
-	return s.getCommandAsRoot(ctx, fmt.Sprintf("echo %d > %s/cgroup.procs", s.myPID, s.getCgroupWorkspaceLeaf())).Run()
+	return writeCgroupFile(path.Join(s.getCgroupWorkspaceLeaf(), "cgroup.procs"), strconv.Itoa(s.myPID))
 }
 
 func (s *Server) returnToMyCgroup(ctx context.Context) error {
@@ -55,14 +56,20 @@ func (s *Server) returnToMyCgroup(ctx context.Context) error {
 		return nil
 	}
 
-	return s.getCommandAsRoot(ctx, fmt.Sprintf("echo %d > %s/cgroup.procs", s.myPID, path.Join(cgSystemRoot, s.myCgroup))).Run()
+	return writeCgroupFile(
+		path.Join(cgSystemRoot, s.myCgroup, "cgroup.procs"), strconv.Itoa(s.myPID))
+}
+
+func writeCgroupFile(path, value string) error {
+	return os.WriteFile(path, []byte(value), 0644)
 }
 
 func (s *Server) createInitCgroup(ctx context.Context) error {
 
 	zap.L().Debug("Creating init cgroup")
 
-	if err := s.getCommandAsOctelium(ctx, fmt.Sprintf(`mkdir -p %s/init`, s.getCgroupWorkspace())).Run(); err != nil {
+	if err := s.getCommandAsOctelium(ctx,
+		"mkdir", "-p", path.Join(s.getCgroupWorkspace(), "init")).Run(); err != nil {
 		return err
 	}
 
@@ -189,7 +196,7 @@ func (s *Server) prepareCgroups(ctx context.Context) error {
 
 	for _, cmdStr := range cmds {
 		zap.L().Debug("running cmd", zap.String("cmd", cmdStr))
-		cmd := getCommand(ctx, cmdStr)
+		cmd := getShellCommand(ctx, cmdStr)
 
 		if ldflags.IsDev() {
 			cmd.Stdout = os.Stdout
@@ -227,7 +234,7 @@ func (s *Server) prepareCgroupsOuter(ctx context.Context) error {
 
 	for _, cmdStr := range cmds {
 		zap.L().Debug("running cmd", zap.String("cmd", cmdStr))
-		cmd := getCommand(ctx, cmdStr)
+		cmd := getShellCommand(ctx, cmdStr)
 
 		if ldflags.IsDev() {
 			cmd.Stdout = os.Stdout

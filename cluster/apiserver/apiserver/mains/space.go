@@ -52,12 +52,13 @@ func (s *Server) CreateSpace(ctx context.Context, req *cordiumv1.Space) (*cordiu
 	}
 
 	{
-		spcList, err := s.octeliumC.CordiumC().ListSpace(ctx, urscsrv.FilterByUser(i.User))
+		spcList, err := s.octeliumC.CordiumC().ListSpace(ctx,
+			ourscsrv.SetCountOnly(urscsrv.FilterByUser(i.User)))
 		if err != nil {
 			return nil, err
 		}
 
-		if len(spcList.Items) >= maxSpacesPerUser {
+		if spcList.GetListResponseMeta().GetTotalCount() >= maxSpacesPerUser {
 			return nil, serr.Unauthorized("Number of Spaces per User has been exceeded")
 		}
 	}

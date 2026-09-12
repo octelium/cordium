@@ -59,7 +59,7 @@ func (s *Server) ShutdownAck(ctx context.Context, req *ccordiumv1.ShutdownAckReq
 }
 
 func (s *Server) Initialize(ctx context.Context, req *ccordiumv1.InitializeRequest) (*ccordiumv1.InitializeResponse, error) {
-	zap.L().Debug("Initialize requested", zap.Any("req", req))
+	zap.L().Debug("Initialize requested", redactInitializeRequest(req)...)
 
 	var isInitializeRequested bool
 	s.mu.Lock()

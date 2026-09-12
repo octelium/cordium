@@ -18,10 +18,13 @@ package supervisor
 
 import (
 	"bufio"
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"os/exec"
+	"path"
 	"strings"
 	"time"
 
@@ -46,12 +49,13 @@ func (s *Server) execWorkspaceBinary() error {
 	}
 
 	cmdArgs := []string{
-		" --user 0",
-		// fmt.Sprintf("--env-file %s", s.envFilePath),
+		"exec",
+		"--user", "0",
+		// "--env-file", s.envFilePath,
+		"workspace", "/bin/cordium-workspace", "serve",
 	}
 
-	cmdStr := fmt.Sprintf("podman exec %s workspace /bin/cordium-workspace serve", strings.Join(cmdArgs, " "))
-	s.runCmd = s.getCommandAsOctelium(context.Background(), cmdStr)
+	s.runCmd = s.getCommandAsOctelium(context.Background(), "podman", cmdArgs...)
 	zap.L().Debug("Executing workspace agent in the container")
 	if err := s.runCmd.Start(); err != nil {
 		return err
@@ -92,23 +96,23 @@ func (s *Server) createPod(ctx context.Context) error {
 	const eSSHPort = 2022
 
 	args := []string{
-		"--name ws",
-		"--dns 8.8.8.8",
+		"pod", "create",
+		"--name", "ws",
+		"--dns", "8.8.8.8",
 		"--dns-search=.",
-		"--hostname cordium",
-		fmt.Sprintf("-p %d:%d", wsPort, wsPort),
-		fmt.Sprintf("-p %d:%d/udp", tunPort, tunPort),
-		fmt.Sprintf("-p %d:%d", eSSHPort, eSSHPort),
+		"--hostname", "cordium",
+		"-p", fmt.Sprintf("%d:%d", wsPort, wsPort),
+		"-p", fmt.Sprintf("%d:%d/udp", tunPort, tunPort),
+		"-p", fmt.Sprintf("%d:%d", eSSHPort, eSSHPort),
 
 		fmt.Sprintf("--memory=%dm", int(s.initReq.Workspace.Status.Limit.Memory.Megabytes*95/100)),
 		"--network=slirp4netns",
 		// "--network=slirp4netns:mtu=10000",
 		// "--network=slirp4netns:port_handler=rootlesskit",
-		// fmt.Sprintf("--network slirp4netns:outbound_addr=%s", brIP),
+		// fmt.Sprintf("--network=slirp4netns:outbound_addr=%s", brIP),
 	}
 
-	cmdStr := fmt.Sprintf("podman pod create %s", strings.Join(args, " "))
-	cmd := s.getCommandAsOctelium(ctx, cmdStr)
+	cmd := s.getCommandAsOctelium(ctx, "podman", args...)
 
 	return cmd.Run()
 }
@@ -233,7 +237,7 @@ func (s *Server) pullImageFromExternal(ctx context.Context, image string, auth *
 		// image = "mcr.microsoft.com/vscode/devcontainers/base:ubuntu"
 	}
 
-	podmanRunArgs := []string{}
+	podmanRunArgs := []string{"pull"}
 	if auth != nil {
 		if auth.Username != "" && auth.Password != nil && auth.Password.GetFromSecret() != "" {
 			if sec, err := ucordiumv1.ToSecretList(s.initReq.SecretList).GetByName(auth.Password.GetFromSecret()); err == nil {
@@ -249,10 +253,10 @@ func (s *Server) pullImageFromExternal(ctx context.Context, image string, auth *
 		podmanRunArgs = append(podmanRunArgs, "--log-level=debug")
 	}
 
-	cmdStr := fmt.Sprintf("podman pull %s %s", strings.Join(podmanRunArgs, " "), image)
+	podmanRunArgs = append(podmanRunArgs, "--", image)
 
 	zap.L().Debug("Pulling external image", zap.String("image", image))
-	cmd := s.getCommandAsOctelium(ctx, cmdStr)
+	cmd := s.getCommandAsOctelium(ctx, "podman", podmanRunArgs...)
 	if err := s.cmdStdout(cmd, func(data []byte) {
 		s.publishLog(data,
 			cordiumv1.ListenLogResponse_TYPE_PULLING_IMAGE, cordiumv1.ListenLogResponse_MODE_STDOUT)
@@ -278,8 +282,7 @@ func (s *Server) pullImageFromExternal(ctx context.Context, image string, auth *
 
 	{
 		zap.L().Debug("Tagging image")
-		cmdStr := fmt.Sprintf("podman tag %s workspace", image)
-		cmd := s.getCommandAsOctelium(ctx, cmdStr)
+		cmd := s.getCommandAsOctelium(ctx, "podman", "tag", "--", image, "workspace")
 		if err := cmd.Run(); err != nil {
 			return err
 		}
@@ -299,23 +302,23 @@ func (s *Server) podmanRunImage(ctx context.Context) error {
 	ws := s.initReq.Workspace
 
 	containerSpec := s.spec.Runtime
-	containerCmd := func() string {
+	containerCmd := func() []string {
 		if s.doNotOverrideCmd {
-			return ""
+			return nil
 		}
 		if containerSpec != nil && containerSpec.Cmd != "" {
-			return strings.TrimSpace(containerSpec.Cmd)
+			return []string{"/bin/sh", "-c", strings.TrimSpace(containerSpec.Cmd)}
 		}
-		return "sleep infinity"
+		return []string{"/bin/sh", "-c", "sleep infinity"}
 	}()
 
 	podmanRunArgs := []string{
-		"--name workspace",
-		"--pod ws",
-		// "--cap-add mknod,net_admin,sys_admin,net_raw,sys_ptrace",
+		"--name", "workspace",
+		"--pod", "ws",
+		// "--cap-add", "mknod,net_admin,sys_admin,net_raw,sys_ptrace",
 		"-d",
 		// "--privileged",
-		"--dns 8.8.8.8",
+		"--dns", "8.8.8.8",
 		"--dns-search=.",
 		"--http-proxy=false",
 
@@ -323,14 +326,14 @@ func (s *Server) podmanRunImage(ctx context.Context) error {
 		// "--network=slirp4netns:mtu=10000",
 		// "--network=slirp4netns:port_handler=rootlesskit",
 
-		"--volume /octelium/podman/dind/docker:/var/lib/docker",
-		"--volume /octelium/podman/dind/containers:/var/lib/containers",
-		"--volume /octelium/sockets:/run/octelium",
-		"--volume /octelium/podman/tmp/var/tmp:/var/tmp",
-		"--volume /octelium/podman/tmp/tmp:/tmp",
+		"--volume", "/octelium/podman/dind/docker:/var/lib/docker",
+		"--volume", "/octelium/podman/dind/containers:/var/lib/containers",
+		"--volume", "/octelium/sockets:/run/octelium",
+		"--volume", "/octelium/podman/tmp/var/tmp:/var/tmp",
+		"--volume", "/octelium/podman/tmp/tmp:/tmp",
 
 		"--device=/dev/net/tun-octelium0:/dev/net/tun",
-		// fmt.Sprintf("--env-file %s", s.envFilePath),
+		// "--env-file", s.envFilePath,
 		fmt.Sprintf("--log-level=%s", func() string {
 			if ldflags.IsDev() {
 				return "debug"
@@ -345,8 +348,8 @@ func (s *Server) podmanRunImage(ctx context.Context) error {
 
 		`--security-opt=seccomp=/etc/containers/seccomp.json`,
 		"--runtime=crun",
-		fmt.Sprintf("-e OCTELIUM_DOMAIN=%s", s.initReq.ClientInfo.Domain),
-		`-e OCTELIUM_AUTH_PROXY_SOCKET="/var/run/octelium-proxy.sock"`,
+		"-e", fmt.Sprintf("OCTELIUM_DOMAIN=%s", s.initReq.ClientInfo.Domain),
+		"-e", "OCTELIUM_AUTH_PROXY_SOCKET=/var/run/octelium-proxy.sock",
 	}
 	if ldflags.IsDev() {
 		podmanRunArgs = append(podmanRunArgs, "--env=OCTELIUM_DEV=true")
@@ -357,46 +360,46 @@ func (s *Server) podmanRunImage(ctx context.Context) error {
 	}
 
 	for _, bin := range s.mountBinaries {
-		podmanRunArgs = append(podmanRunArgs, fmt.Sprintf("--volume %s:%s:ro,exec,nosuid", bin, bin))
+		podmanRunArgs = append(podmanRunArgs, "--volume", fmt.Sprintf("%s:%s:ro,exec,nosuid", bin, bin))
 	}
 
 	/*
 		if ldflags.IsDev() {
-			podmanRunArgs = append(podmanRunArgs, "--env GRPC_GO_LOG_VERBOSITY_LEVEL=99")
-			podmanRunArgs = append(podmanRunArgs, "--env GRPC_GO_LOG_SEVERITY_LEVEL=info")
+			podmanRunArgs = append(podmanRunArgs, "--env", "GRPC_GO_LOG_VERBOSITY_LEVEL=99")
+			podmanRunArgs = append(podmanRunArgs, "--env", "GRPC_GO_LOG_SEVERITY_LEVEL=info")
 		}
 	*/
 
 	if s.containerInitProcess || containerSpec == nil || (containerSpec != nil && !containerSpec.DisableInit) {
 		podmanRunArgs = append(podmanRunArgs, "--init")
 	} else {
-		// podmanRunArgs = append(podmanRunArgs, "--systemd always")
+		// podmanRunArgs = append(podmanRunArgs, "--systemd", "always")
 	}
 
 	if !ws.Status.IsBuild {
 		podmanRunArgs = append(podmanRunArgs,
-			fmt.Sprintf("--volume %s:/var/run/octelium-proxy.sock", oproxy.SocketPath))
+			"--volume", fmt.Sprintf("%s:/var/run/octelium-proxy.sock", oproxy.SocketPath))
 
 		podmanRunArgs = append(podmanRunArgs,
-			fmt.Sprintf("--volume %s:/var/run/octelium-ssh-agent.sock", sshagent.SocketPath))
+			"--volume", fmt.Sprintf("%s:/var/run/octelium-ssh-agent.sock", sshagent.SocketPath))
 	}
 
 	if containerSpec != nil && containerSpec.Entrypoint != "" {
 		podmanRunArgs = append(podmanRunArgs,
-			fmt.Sprintf("--entrypoint %s", strings.TrimSpace(containerSpec.Entrypoint)))
+			"--entrypoint", strings.TrimSpace(containerSpec.Entrypoint))
 	}
 
 	setCapAdd := func(caps []string) {
 		caps = deduplicateCapabilities(caps)
 		if len(caps) > 0 && len(caps) < 128 {
-			podmanRunArgs = append(podmanRunArgs, "--cap-add "+strings.Join(caps, ","))
+			podmanRunArgs = append(podmanRunArgs, "--cap-add", strings.Join(caps, ","))
 		}
 	}
 
 	setCapDrop := func(caps []string) {
 		caps = deduplicateCapabilities(caps)
 		if len(caps) > 0 && len(caps) < 128 {
-			podmanRunArgs = append(podmanRunArgs, "--cap-drop "+strings.Join(caps, ","))
+			podmanRunArgs = append(podmanRunArgs, "--cap-drop", strings.Join(caps, ","))
 		}
 	}
 
@@ -475,11 +478,11 @@ func (s *Server) doStartContainer(ctx context.Context) error {
 			zap.L().Warn("Could not migrate podman", zap.Error(err))
 		}
 
-		if err := s.getCommandAsOctelium(ctx, "podman init workspace").Run(); err != nil {
+		if err := s.getCommandAsOctelium(ctx, "podman", "init", "workspace").Run(); err != nil {
 			zap.L().Warn("podman init err", zap.Error(err))
 		}
 
-		return s.getCommandAsOctelium(ctx, "podman start workspace").Run()
+		return s.getCommandAsOctelium(ctx, "podman", "start", "workspace").Run()
 	}
 
 	/*
@@ -499,78 +502,75 @@ func (s *Server) doStartContainer(ctx context.Context) error {
 	return nil
 }
 
-func (s *Server) doRunContainer(ctx context.Context, commonArgs []string, containerCmd string) error {
+func (s *Server) doRunContainer(ctx context.Context, commonArgs []string, containerCmd []string) error {
 
-	aCPUs := fmt.Sprintf("--cpus=%.2f",
-		float32(float32(s.initReq.Workspace.Status.Limit.Cpu.Millicores*97)/float32(100*1000)))
-	// aCAP := "--cap-add net_admin,sys_admin,net_raw,sys_ptrace,net_bind_service"
-	aCAP := "--cap-add net_admin,sys_admin,net_raw,net_bind_service"
+	aCPUs := []string{fmt.Sprintf("--cpus=%.2f",
+		float32(float32(s.initReq.Workspace.Status.Limit.Cpu.Millicores*97)/float32(100*1000)))}
+	// aCAP := []string{"--cap-add", "net_admin,sys_admin,net_raw,sys_ptrace,net_bind_service"}
+	aCAP := []string{"--cap-add", "net_admin,sys_admin,net_raw,net_bind_service"}
 
-	aSecFS := "--tmpfs /sys/kernel/security:rw,size=100k,mode=1755"
-	aSecOpts := "--security-opt=unmask=/sys/fs/cgroup --security-opt=unmask=/proc/sys"
-	aCG := fmt.Sprintf("--cgroup-manager=cgroupfs --cgroup-parent=%s", s.getRelativePathCgroupWorkspace())
-	// noSeccomp := "--security-opt=seccomp=unconfined"
+	aSecFS := []string{"--tmpfs", "/sys/kernel/security:rw,size=100k,mode=1755"}
+	aSecOpts := []string{"--security-opt=unmask=/sys/fs/cgroup", "--security-opt=unmask=/proc/sys"}
+	aCG := []string{"--cgroup-manager=cgroupfs",
+		fmt.Sprintf("--cgroup-parent=%s", s.getRelativePathCgroupWorkspace())}
+	// noSeccomp := []string{"--security-opt=seccomp=unconfined"}
 
 	if ldflags.IsDev() {
-		if err := s.getCommandAsOctelium(ctx,
-			fmt.Sprintf(`ls -la %s`, s.getCgroupWorkspace())).Run(); err != nil {
+		if err := s.getCommandAsOctelium(ctx, "ls", "-la", s.getCgroupWorkspace()).Run(); err != nil {
 			return err
 		}
 
 		if err := s.getCommandAsOctelium(ctx,
-			fmt.Sprintf(`cat %s/cgroup.subtree_control`, s.getCgroupWorkspace())).Run(); err != nil {
+			"cat", path.Join(s.getCgroupWorkspace(), "cgroup.subtree_control")).Run(); err != nil {
 			return err
 		}
 	}
 
 	argsList := [][]string{
 
-		{aCAP, aCPUs, aSecOpts, aSecFS, aCG},
+		concatArgs(aCAP, aCPUs, aSecOpts, aSecFS, aCG),
 
 		/*
-			{aCAP, aCPUs, aSecOpts, aSecFS, fmt.Sprintf("--cgroup-parent=%s", s.getRelativePathCgroupWorkspace())},
-			{aCAP, aSecOpts, aSecFS, aCG},
-			{aCAP, aSecOpts, aSecFS, fmt.Sprintf("--cgroup-manager=cgroupfs --cgroup-parent=%s", s.getCgroupWorkspace())},
-			{aCAP, aSecOpts, aSecFS, fmt.Sprintf("--cgroup-parent=%s", s.getCgroupWorkspace())},
-			{aCAP, aCPUs, aSecOpts, aSecFS, aCG, "--runtime=runc"},
+			concatArgs(aCAP, aCPUs, aSecOpts, aSecFS, []string{fmt.Sprintf("--cgroup-parent=%s", s.getRelativePathCgroupWorkspace())}),
+			concatArgs(aCAP, aSecOpts, aSecFS, aCG),
+			concatArgs(aCAP, aSecOpts, aSecFS, []string{"--cgroup-manager=cgroupfs", fmt.Sprintf("--cgroup-parent=%s", s.getCgroupWorkspace())}),
+			concatArgs(aCAP, aSecOpts, aSecFS, []string{fmt.Sprintf("--cgroup-parent=%s", s.getCgroupWorkspace())}),
+			concatArgs(aCAP, aCPUs, aSecOpts, aSecFS, aCG, []string{"--runtime=runc"}),
 
-			{aCAP, aCPUs, aSecOpts, aSecFS, aCG, "--cgroups=no-conmon"},
-			{aCAP, aCPUs, aSecOpts, aSecFS, aCG, "--cgroups=no-conmon", "--runtime=runc"},
+			concatArgs(aCAP, aCPUs, aSecOpts, aSecFS, aCG, []string{"--cgroups=no-conmon"}),
+			concatArgs(aCAP, aCPUs, aSecOpts, aSecFS, aCG, []string{"--cgroups=no-conmon", "--runtime=runc"}),
 
-			{aCAP, aCPUs, aSecOpts},
-			{"--privileged", aCPUs},
-			{aCAP, aCPUs, "--security-opt=unmask=/proc/sys"},
-			{aCAP, aCPUs, "--security-opt=unmask=/proc/sys", "--runtime=runc"},
+			concatArgs(aCAP, aCPUs, aSecOpts),
+			concatArgs([]string{"--privileged"}, aCPUs),
+			concatArgs(aCAP, aCPUs, []string{"--security-opt=unmask=/proc/sys"}),
+			concatArgs(aCAP, aCPUs, []string{"--security-opt=unmask=/proc/sys", "--runtime=runc"}),
 
-			{"--privileged", aCPUs},
+			concatArgs([]string{"--privileged"}, aCPUs),
 			{"--privileged"},
 			{"--privileged", "--runtime=runc"},
 		*/
 	}
 
 	for _, args := range argsList {
-		podmanRunArgs := args
-		podmanRunArgs = append(podmanRunArgs, commonArgs...)
+		podmanRunArgs := concatArgs([]string{"run"}, args, commonArgs)
 
-		cmdStr := fmt.Sprintf("podman run %s workspace", strings.Join(podmanRunArgs, " "))
+		podmanRunArgs = append(podmanRunArgs, "--", "workspace")
+		podmanRunArgs = append(podmanRunArgs, containerCmd...)
 
-		if containerCmd != "" {
-			cmdStr = fmt.Sprintf("%s %s", cmdStr, containerCmd)
-		}
+		zap.L().Debug("running podman run cmd", zap.Strings("args", podmanRunArgs))
 
-		zap.L().Debug("running podman run cmd", zap.String("cmd", cmdStr))
-
-		cmd := s.getCommandAsOctelium(ctx, cmdStr)
+		cmd := s.getCommandAsOctelium(ctx, "podman", podmanRunArgs...)
 
 		err := cmd.Run()
 		if err == nil {
-			zap.L().Debug("Successfully ran podman run cmd", zap.String("cmd", cmdStr))
+			zap.L().Debug("Successfully ran podman run cmd", zap.Strings("args", podmanRunArgs))
 			return nil
 		}
-		zap.S().Errorf("Could not run podman run cmd: %s: %+v", cmdStr, err)
+		zap.L().Error("Could not run podman run cmd",
+			zap.Strings("args", podmanRunArgs), zap.Error(err))
 
 		{
-			cmd := s.getCommandAsOctelium(ctx, "podman container rm -f workspace")
+			cmd := s.getCommandAsOctelium(ctx, "podman", "container", "rm", "-f", "workspace")
 			if err := cmd.Run(); err == nil {
 				zap.L().Debug("Successfully removed Workspace container")
 			}
@@ -578,6 +578,18 @@ func (s *Server) doRunContainer(ctx context.Context, commonArgs []string, contai
 		time.Sleep(1 * time.Second)
 	}
 	return errors.Errorf("Could not run any of the podman run cmds")
+}
+
+func concatArgs(args ...[]string) []string {
+	var n int
+	for _, a := range args {
+		n = n + len(a)
+	}
+	ret := make([]string, 0, n)
+	for _, a := range args {
+		ret = append(ret, a...)
+	}
+	return ret
 }
 
 func (s *Server) waitUntilContainerIsRunning(ctx context.Context) error {
@@ -620,8 +632,7 @@ func (s *Server) createVolume(ctx context.Context, name string) error {
 */
 
 func (s *Server) inspectWorkspaceContainer(ctx context.Context) (*inspectContainer, error) {
-	cmdStr := "podman inspect --type container workspace"
-	cmd := s.getCommandAsOctelium(ctx, cmdStr)
+	cmd := s.getCommandAsOctelium(ctx, "podman", "inspect", "--type", "container", "workspace")
 
 	cmd.Stderr = nil
 	cmd.Stdout = nil
@@ -676,12 +687,11 @@ func (s *Server) copyToContainer(ctx context.Context) error {
 	}
 
 	for _, cpInfo := range s.cpToContainer {
-		cmdStr := fmt.Sprintf("podman cp %s workspace:%s", cpInfo.src, cpInfo.dst)
-
 		zap.L().Debug("Copying binary to the container",
 			zap.String("src", cpInfo.src), zap.String("dst", cpInfo.dst))
 
-		cmd := s.getCommandAsOctelium(ctx, cmdStr)
+		cmd := s.getCommandAsOctelium(ctx, "podman", "cp", "--",
+			cpInfo.src, fmt.Sprintf("workspace:%s", cpInfo.dst))
 		if err := cmd.Run(); err != nil {
 			return err
 		}
@@ -704,11 +714,12 @@ func (s *Server) buildImage(ctx context.Context, workdir, dockerfilePath, contex
 		zap.Any("args", args))
 
 	podmanRunArgs := []string{
-		"--tag workspace",
+		"build",
+		"--tag", "workspace",
 	}
 
 	if dockerfilePath != "" {
-		podmanRunArgs = append(podmanRunArgs, fmt.Sprintf("-f %s", dockerfilePath))
+		podmanRunArgs = append(podmanRunArgs, "-f", dockerfilePath)
 	}
 
 	if len(args) > 0 {
@@ -720,9 +731,9 @@ func (s *Server) buildImage(ctx context.Context, workdir, dockerfilePath, contex
 		}
 	}
 
-	cmdStr := fmt.Sprintf("podman build %s %s", strings.Join(podmanRunArgs, " "), contextDir)
+	podmanRunArgs = append(podmanRunArgs, "--", contextDir)
 
-	cmd := s.getCommandAsOctelium(ctx, cmdStr)
+	cmd := s.getCommandAsOctelium(ctx, "podman", podmanRunArgs...)
 	cmd.Dir = workdir
 
 	s.setStatus(cordiumv1.Workspace_Status_BUILDING_IMAGE)
@@ -740,7 +751,8 @@ func (s *Server) buildImage(ctx context.Context, workdir, dockerfilePath, contex
 	}
 
 	if err := cmd.Run(); err != nil {
-		zap.S().Errorf("Could not run podman build cmd: %s: %+v", cmdStr, err)
+		zap.L().Error("Could not run podman build cmd",
+			zap.Strings("args", podmanRunArgs), zap.Error(err))
 		s.setFailure(&cordiumv1.Workspace_Status_Failure{
 			Type: &cordiumv1.Workspace_Status_Failure_ImageBuild_{
 				ImageBuild: &cordiumv1.Workspace_Status_Failure_ImageBuild{},
@@ -755,18 +767,30 @@ func (s *Server) buildImage(ctx context.Context, workdir, dockerfilePath, contex
 }
 
 func (s *Server) exportContainer(ctx context.Context) error {
-	cmdStr := fmt.Sprintf("podman export workspace | gzip > %s", tmpImageLocation)
+	zap.L().Debug("Exporting Workspace container", zap.String("dst", tmpImageLocation))
 
-	zap.L().Debug("Exporting Workspace container", zap.String("cmd", cmdStr))
+	f, err := os.Create(tmpImageLocation)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
 
-	cmd := s.getCommandAsOctelium(ctx, cmdStr)
+	gzw := gzip.NewWriter(f)
+
+	cmd := s.getCommandAsOcteliumNOStdout(ctx, "podman", "export", "workspace")
+	cmd.Stdout = gzw
 
 	if err := cmd.Run(); err != nil {
-		zap.S().Errorf("Could not run podman export cmd: %s: %+v", cmdStr, err)
+		gzw.Close()
+		zap.L().Error("Could not run podman export cmd", zap.Error(err))
 		return err
 	}
 
-	return nil
+	if err := gzw.Close(); err != nil {
+		return err
+	}
+
+	return f.Close()
 }
 
 /*
@@ -800,21 +824,22 @@ func (s *Server) importImage(ctx context.Context) error {
 func (s *Server) commitContainer(ctx context.Context) error {
 
 	args := []string{
-		"--format oci",
+		"commit",
+		"--format", "oci",
 	}
 
 	if s.initReq != nil && s.initReq.Workspace.Status.IsBuild {
 		args = append(args, "--squash")
 	}
 
-	cmdStr := fmt.Sprintf("podman commit %s workspace workspace", strings.Join(args, " "))
+	args = append(args, "--", "workspace", "workspace")
 
-	zap.L().Debug("Committing Workspace container", zap.String("cmd", cmdStr))
+	zap.L().Debug("Committing Workspace container", zap.Strings("args", args))
 
-	cmd := s.getCommandAsOctelium(ctx, cmdStr)
+	cmd := s.getCommandAsOctelium(ctx, "podman", args...)
 
 	if err := cmd.Run(); err != nil {
-		zap.S().Errorf("Could not run podman commit cmd: %s: %+v", cmdStr, err)
+		zap.L().Error("Could not run podman commit cmd", zap.Strings("args", args), zap.Error(err))
 		return err
 	}
 
@@ -823,16 +848,16 @@ func (s *Server) commitContainer(ctx context.Context) error {
 
 func (s *Server) getContainerStats(ctx context.Context) ([]containerStats, error) {
 	// zap.L().Debug("Fetching Workspace container stats")
-	cmdStr := "podman stats workspace --no-stream --format json"
 	if ldflags.IsTest() {
 		return []containerStats{}, nil
 	}
 
-	cmd := s.getCommandAsOcteliumNOStdout(ctx, cmdStr)
+	cmd := s.getCommandAsOcteliumNOStdout(ctx,
+		"podman", "stats", "workspace", "--no-stream", "--format", "json")
 
 	out, err := cmd.Output()
 	if err != nil {
-		zap.S().Errorf("Could not run podman stats cmd: %s: %+v", cmdStr, err)
+		zap.L().Error("Could not run podman stats cmd", zap.Error(err))
 		return nil, err
 	}
 
@@ -845,7 +870,7 @@ func (s *Server) getContainerStats(ctx context.Context) ([]containerStats, error
 }
 
 func (s *Server) podmanMigrate(ctx context.Context) error {
-	cmd := s.getCommandAsOctelium(ctx, "podman system migrate")
+	cmd := s.getCommandAsOctelium(ctx, "podman", "system", "migrate")
 	if err := cmd.Run(); err != nil {
 		zap.L().Warn("Could not podman system migrate", zap.Error(err))
 	}
@@ -914,9 +939,9 @@ func (s *Server) waitForInnerPodman(ctx context.Context) error {
 */
 
 func (s *Server) podmanStopOuter(ctx context.Context) error {
-	cmdStr := "podman stop --root=/octelium-root -t 5000 inner"
 	zap.L().Debug("Stopping outer container")
-	if err := s.getCommandAsRoot(ctx, cmdStr).Run(); err != nil {
+	if err := s.getCommandAsRoot(ctx,
+		"podman", "stop", "--root=/octelium-root", "-t", "5000", "inner").Run(); err != nil {
 		zap.L().Error("outer podman exited with error", zap.Error(err))
 	}
 
