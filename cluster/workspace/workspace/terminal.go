@@ -73,6 +73,10 @@ type terminal struct {
 	stdinCloseCh  chan struct{}
 	stdoutCloseCh chan struct{}
 
+	doneCh chan struct{}
+
+	termSrv *terminalSrv
+
 	cancelFn context.CancelFunc
 
 	buf []byte
@@ -106,6 +110,8 @@ func (s *Server) newTerminal(req *ccordiumv1.CreateTerminalRequest) (*terminal, 
 		stdoutCh:      make(chan []byte, 1000),
 		stdinCloseCh:  make(chan struct{}, 2),
 		stdoutCloseCh: make(chan struct{}, 2),
+		doneCh:        make(chan struct{}),
+		termSrv:       &s.terminalSrv,
 	}
 	ret.closeCh.ch = make(chan struct{})
 	ret.subscribers.subscribersMap = map[string]*terminalSubscription{}
@@ -316,7 +322,11 @@ func (t *terminal) startStdoutLoop(ctx context.Context) {
 			if err != nil {
 				return
 			}
-			t.stdoutCh <- buf[:n]
+			select {
+			case t.stdoutCh <- buf[:n]:
+			case <-ctx.Done():
+				return
+			}
 		}
 	}
 }
@@ -392,10 +402,16 @@ func (t *terminal) startSendLoop(ctx context.Context) {
 
 func (t *terminal) publishMsg(msg *ccordiumv1.ListenTerminalResponse) {
 	t.subscribers.mu.RLock()
+	defer t.subscribers.mu.RUnlock()
+
 	for _, sub := range t.subscribers.subscribersMap {
-		sub.msgCh <- msg
+		select {
+		case sub.msgCh <- msg:
+		default:
+			zap.L().Warn("Dropping terminal msg for a lagging subscriber",
+				zap.String("id", t.id), zap.String("subID", sub.id))
+		}
 	}
-	t.subscribers.mu.RUnlock()
 }
 
 /*
@@ -451,6 +467,10 @@ func (t *terminal) waitAndClose(ctx context.Context) {
 	if err := t.close(); err != nil {
 		zap.L().Debug("Could not close terminal", zap.String("id", t.id), zap.Error(err))
 	}
+
+	if t.termSrv != nil {
+		t.termSrv.delete(t.id)
+	}
 }
 
 func (t *terminal) killAndClose() error {
@@ -476,10 +496,10 @@ func (t *terminal) close() error {
 	t.isClosed = true
 	t.cancelFn()
 
+	close(t.doneCh)
+
 	t.subscribers.mu.Lock()
-	for _, sub := range t.subscribers.subscribersMap {
-		close(sub.msgCh)
-	}
+	t.subscribers.subscribersMap = map[string]*terminalSubscription{}
 	t.subscribers.mu.Unlock()
 
 	zap.S().Debugf("closing terminal for uid: %s", t.id)
@@ -615,14 +635,13 @@ func (s *Server) ListenTerminal(req *ccordiumv1.ListenTerminalRequest, srv ccord
 			zap.L().Debug("Exiting ListenTerminal. ctx done",
 				zap.String("id", term.id))
 			return nil
-		case msg, ok := <-sub.msgCh:
-			if !ok {
-				zap.L().Debug("Exiting ListenTerminal. Subscription ended",
-					zap.String("id", term.id),
-					zap.String("subID", sub.id))
-				return nil
-			}
-
+		case <-term.doneCh:
+			zap.L().Debug("Exiting ListenTerminal. Terminal closed",
+				zap.String("id", term.id),
+				zap.String("subID", sub.id))
+			term.drainSubscription(srv, sub)
+			return nil
+		case msg := <-sub.msgCh:
 			if err := srv.Send(msg); err != nil {
 				zap.L().Error("Could not send terminal stdout",
 					zap.String("id", term.id), zap.Error(err))
@@ -630,6 +649,22 @@ func (s *Server) ListenTerminal(req *ccordiumv1.ListenTerminalRequest, srv ccord
 		}
 	}
 
+}
+
+func (t *terminal) drainSubscription(srv ccordiumv1.TerminalService_ListenTerminalServer,
+	sub *terminalSubscription) {
+	for {
+		select {
+		case msg := <-sub.msgCh:
+			if err := srv.Send(msg); err != nil {
+				zap.L().Error("Could not send terminal stdout",
+					zap.String("id", t.id), zap.Error(err))
+				return
+			}
+		default:
+			return
+		}
+	}
 }
 
 func (term *terminal) sendInitListenMsg(srv ccordiumv1.TerminalService_ListenTerminalServer) error {
@@ -817,6 +852,13 @@ func (s *Server) Exec(srv cordiumv1.WorkspaceService_ExecServer) error {
 	listenCh, unsub := task.listenBroker.Subscribe()
 	defer unsub()
 
+	defer func() {
+		if err := task.close(); err != nil {
+			zap.L().Warn("Could not close exec task",
+				zap.String("name", task.name), zap.Error(err))
+		}
+	}()
+
 	if err := task.run(ctx); err != nil {
 		return err
 	}
@@ -863,7 +905,7 @@ func (s *Server) Exec(srv cordiumv1.WorkspaceService_ExecServer) error {
 						}
 					}
 				case *cordiumv1.ExecRequest_Kill_:
-					if err := task.cmd.Process.Kill(); err != nil {
+					if err := task.close(); err != nil {
 						zap.L().Debug("Could not kill task", zap.Error(err))
 					} else {
 						zap.L().Debug("Successfully killed task", zap.String("name", task.name))

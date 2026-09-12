@@ -212,6 +212,12 @@ func (t *taskManager) removeRunningTask(tsk *task) {
 	delete(t.runningTasks, tsk.tUID)
 }
 
+func (t *taskManager) runningTasksLen() int {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	return len(t.runningTasks)
+}
+
 func (t *taskManager) getTaskByName(name string) (*task, error) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -316,12 +322,6 @@ type task struct {
 	ctxCancelFn context.CancelFunc
 	cmdCancelFn context.CancelFunc
 
-	listenExecResponse []*cordiumv1.ExecResponse
-	respMu             sync.Mutex
-
-	taskExecListener      <-chan *cordiumv1.ExecResponse
-	taskExecListenerUnsub func()
-
 	taskManager *taskManager
 }
 
@@ -349,8 +349,6 @@ func (t *taskManager) newTask(in *cordiumv1.Workspace_Spec_Runtime_Task) (*task,
 		taskManager:    t,
 	}
 
-	ret.taskExecListener, ret.taskExecListenerUnsub = ret.listenBroker.Subscribe()
-
 	if in.RunAsRoot {
 		ret.uid = 0
 		ret.gid = 0
@@ -374,8 +372,6 @@ func (t *task) isUserRoot() bool {
 
 func (t *task) run(parentCtx context.Context) error {
 	var err error
-
-	go t.captureExecResponses()
 
 	zap.L().Debug("Starting running task",
 		zap.String("name", t.name),
@@ -488,18 +484,6 @@ func (t *task) shouldAbortOnFailure() bool {
 	return t.onFailure == cordiumv1.Workspace_Spec_Runtime_Task_ON_FAILURE_ABORT
 }
 
-func (t *task) captureExecResponses() {
-	for msg := range t.taskExecListener {
-		if msg == nil {
-			return
-		}
-
-		t.respMu.Lock()
-		t.listenExecResponse = append(t.listenExecResponse, msg)
-		t.respMu.Unlock()
-	}
-}
-
 func (t *task) wait() error {
 	err := t.cmd.Wait()
 
@@ -578,10 +562,6 @@ func (t *task) close() error {
 
 	if cmd != nil && cmd.Process != nil && !hasExited {
 		t.terminateProcessGroup(cmd.Process.Pid)
-	}
-
-	if t.taskExecListenerUnsub != nil {
-		t.taskExecListenerUnsub()
 	}
 
 	t.taskManager.removeRunningTask(t)
@@ -782,9 +762,7 @@ func (t *task) readOutputLoop(r io.Reader, mode cordiumv1.ListenLogResponse_Mode
 		zap.String("mode", mode.String()))
 }
 
-func (t *task) publishStdout(buf []byte) {
-	data := cloneBytes(buf)
-
+func (t *task) publishStdout(data []byte) {
 	t.listenBroker.Publish(&cordiumv1.ExecResponse{
 		Type: &cordiumv1.ExecResponse_Stdout_{
 			Stdout: &cordiumv1.ExecResponse_Stdout{
@@ -795,7 +773,7 @@ func (t *task) publishStdout(buf []byte) {
 
 	if t.eventPublisher != nil {
 		if ldflags.IsDev() {
-			zap.L().Debug("Task stdout", zap.String("data", string(buf)), zap.String("task", t.name))
+			zap.L().Debug("Task stdout", zap.String("data", string(data)), zap.String("task", t.name))
 		}
 
 		t.eventPublisher.publish(&ccordiumv1.ListenEventResponse{
@@ -804,16 +782,14 @@ func (t *task) publishStdout(buf []byte) {
 					CreatedAt: pbutils.Now(),
 					Type:      cordiumv1.ListenLogResponse_TYPE_TASK,
 					Mode:      cordiumv1.ListenLogResponse_MODE_STDOUT,
-					Data:      cloneBytes(buf),
+					Data:      data,
 				},
 			},
 		})
 	}
 }
 
-func (t *task) publishStderr(buf []byte) {
-	data := cloneBytes(buf)
-
+func (t *task) publishStderr(data []byte) {
 	t.listenBroker.Publish(&cordiumv1.ExecResponse{
 		Type: &cordiumv1.ExecResponse_Stderr_{
 			Stderr: &cordiumv1.ExecResponse_Stderr{
@@ -824,7 +800,7 @@ func (t *task) publishStderr(buf []byte) {
 
 	if t.eventPublisher != nil {
 		if ldflags.IsDev() {
-			zap.L().Debug("Task stderr", zap.String("data", string(buf)), zap.String("task", t.name))
+			zap.L().Debug("Task stderr", zap.String("data", string(data)), zap.String("task", t.name))
 		}
 
 		t.eventPublisher.publish(&ccordiumv1.ListenEventResponse{
@@ -833,7 +809,7 @@ func (t *task) publishStderr(buf []byte) {
 					CreatedAt: pbutils.Now(),
 					Type:      cordiumv1.ListenLogResponse_TYPE_TASK,
 					Mode:      cordiumv1.ListenLogResponse_MODE_STDERR,
-					Data:      cloneBytes(buf),
+					Data:      data,
 				},
 			},
 		})

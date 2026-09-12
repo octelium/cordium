@@ -18,7 +18,6 @@ package workspace
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 	"os/exec"
 	"strings"
@@ -47,8 +46,8 @@ func (s *Server) setupGit(ctx context.Context) error {
 	}
 
 	{
-		cmdStr := `git config --global credential.helper "/bin/cordium-git-cred-helper"`
-		cmd := s.getCmdAsUser(ctx, cmdStr)
+		cmd := s.getCmdArgsAsUser(ctx, "git", "config", "--global",
+			"credential.helper", "/bin/cordium-git-cred-helper")
 
 		if err := cmd.Run(); err != nil {
 			return err
@@ -64,8 +63,8 @@ func (s *Server) setupGit(ctx context.Context) error {
 			zap.String("username", s.initReq.GitProviderInfo.Username),
 			zap.String("email", s.initReq.GitProviderInfo.Email))
 		{
-			cmdStr := fmt.Sprintf(`git config --global user.email "%s"`, s.initReq.GitProviderInfo.Email)
-			cmd := s.getCmdAsUser(ctx, cmdStr)
+			cmd := s.getCmdArgsAsUser(ctx, "git", "config", "--global",
+				"user.email", s.initReq.GitProviderInfo.Email)
 
 			if err := cmd.Run(); err != nil {
 				return err
@@ -76,8 +75,8 @@ func (s *Server) setupGit(ctx context.Context) error {
 		}
 
 		{
-			cmdStr := fmt.Sprintf(`git config --global user.name "%s"`, s.initReq.GitProviderInfo.Username)
-			cmd := s.getCmdAsUser(ctx, cmdStr)
+			cmd := s.getCmdArgsAsUser(ctx, "git", "config", "--global",
+				"user.name", s.initReq.GitProviderInfo.Username)
 
 			if err := cmd.Run(); err != nil {
 				return err

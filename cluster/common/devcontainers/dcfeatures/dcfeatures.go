@@ -19,6 +19,7 @@ package dcfeatures
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,6 +31,11 @@ import (
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+)
+
+const (
+	maxFeatureDepth   = 16
+	maxFeatureArchive = 512 * 1024 * 1024
 )
 
 type GetFeaturesOpts struct {
@@ -81,8 +87,10 @@ func DownloadFeatures(ctx context.Context, o *GetFeaturesOpts) error {
 
 	zap.L().Debug("Downloading devcontainers features", zap.Any("featureMap", featuresMap))
 
+	visited := make(map[string]struct{})
+
 	for ftr, _ := range featuresMap {
-		if err := getFeature(ctx, ftr, o); err != nil {
+		if err := getFeature(ctx, ftr, o, visited, 0); err != nil {
 			return err
 		}
 	}
@@ -90,12 +98,24 @@ func DownloadFeatures(ctx context.Context, o *GetFeaturesOpts) error {
 	return nil
 }
 
-func getFeature(ctx context.Context, featureURL string, o *GetFeaturesOpts) error {
+func getFeature(ctx context.Context, featureURL string, o *GetFeaturesOpts,
+	visited map[string]struct{}, depth int) error {
+	if depth > maxFeatureDepth {
+		return errors.Errorf("Devcontainer feature dependencies are too deep: %s", featureURL)
+	}
+
 	featureURL = strings.TrimSpace(featureURL)
 	ref, err := name.ParseReference(featureURL)
 	if err != nil {
 		return errors.Errorf("Could not parse devcontainer feature ref: %+v", err)
 	}
+
+	if _, ok := visited[ref.Name()]; ok {
+		zap.L().Debug("Devcontainer feature has already been fetched. Skipping",
+			zap.String("name", ref.Name()))
+		return nil
+	}
+	visited[ref.Name()] = struct{}{}
 
 	dirBase := o.DirBase
 
@@ -119,6 +139,8 @@ func getFeature(ctx context.Context, featureURL string, o *GetFeaturesOpts) erro
 		return errors.Errorf("Invalid media type")
 	} else if len(manifest.Layers) == 0 {
 		return errors.Errorf("No layers found")
+	} else if manifest.Layers[0].Size > maxFeatureArchive {
+		return errors.Errorf("Devcontainer feature layer is too large: %d", manifest.Layers[0].Size)
 	}
 
 	layer, err := img.LayerByDigest(manifest.Layers[0].Digest)
@@ -141,7 +163,7 @@ func getFeature(ctx context.Context, featureURL string, o *GetFeaturesOpts) erro
 
 	zap.L().Debug("Extracting feature from archive", zap.String("path", dirPath))
 
-	if err := extract.Archive(ctx, data, dirPath, nil); err != nil {
+	if err := extract.Archive(ctx, &limitedReader{r: data, n: maxFeatureArchive}, dirPath, nil); err != nil {
 		return errors.Errorf("Could not extract archive: %+v", err)
 	}
 
@@ -162,12 +184,29 @@ func getFeature(ctx context.Context, featureURL string, o *GetFeaturesOpts) erro
 	zap.L().Debug("Features spec", zap.Any("spec", spec))
 
 	for _, installAfter := range spec.InstallsAfter {
-		if err := getFeature(ctx, installAfter, o); err != nil {
+		if err := getFeature(ctx, installAfter, o, visited, depth+1); err != nil {
 			return err
 		}
 	}
 
 	return nil
+}
+
+type limitedReader struct {
+	r io.Reader
+	n int64
+}
+
+func (l *limitedReader) Read(p []byte) (int, error) {
+	if l.n <= 0 {
+		return 0, errors.Errorf("Devcontainer feature archive is too large")
+	}
+	if int64(len(p)) > l.n {
+		p = p[0:l.n]
+	}
+	n, err := l.r.Read(p)
+	l.n = l.n - int64(n)
+	return n, err
 }
 
 type Feature struct {
@@ -234,7 +273,7 @@ func GetSortedFeatures(o *GetSortedFeaturesOpts) ([]*Feature, error) {
 	var sortedFeatures []*Feature
 
 	for _, ftr := range features {
-		doAddFeature(features, &sortedFeatures, ftr)
+		doAddFeature(features, &sortedFeatures, ftr, make(map[string]struct{}))
 	}
 
 	zap.L().Debug("Sorted features", zap.Any("features", sortedFeatures))
@@ -262,7 +301,16 @@ func getByName(lst []*Feature, name string) *Feature {
 	return nil
 }
 
-func doAddFeature(features []*Feature, sortedFeatures *[]*Feature, ftr *Feature) {
+func doAddFeature(features []*Feature, sortedFeatures *[]*Feature, ftr *Feature,
+	visiting map[string]struct{}) {
+	if _, ok := visiting[ftr.Name]; ok {
+		zap.L().Warn("Skipping a cyclic devcontainer feature dependency",
+			zap.String("name", ftr.Name))
+		return
+	}
+	visiting[ftr.Name] = struct{}{}
+	defer delete(visiting, ftr.Name)
+
 	for _, dep := range ftr.Spec.InstallsAfter {
 		args := strings.Split(dep, ":")
 		if len(args) < 1 {
@@ -271,7 +319,7 @@ func doAddFeature(features []*Feature, sortedFeatures *[]*Feature, ftr *Feature)
 		name := args[0]
 		if !isInList(*sortedFeatures, name) {
 			if ftr := getByName(features, name); ftr != nil {
-				doAddFeature(features, sortedFeatures, ftr)
+				doAddFeature(features, sortedFeatures, ftr, visiting)
 			}
 		}
 	}

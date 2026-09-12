@@ -354,3 +354,225 @@ func TestExec(t *testing.T) {
 
 	zap.S().Debugf("test ended successfully")
 }
+
+func TestTerminalCleanup(t *testing.T) {
+
+	ctx := context.Background()
+
+	tst, err := tests.Initialize(nil)
+	assert.Nil(t, err, "%+v", err)
+	t.Cleanup(func() {
+		tst.Destroy()
+	})
+
+	srv, err := NewServer(ctx)
+	assert.Nil(t, err)
+
+	defer srv.Close()
+
+	err = srv.Run(ctx)
+	assert.Nil(t, err, "%+v", err)
+
+	grpcConn, err := wsclient.GetWorkspaceGRPCClient(&wsclient.GetWorkspaceGRPCClientOpts{})
+	assert.Nil(t, err)
+	defer grpcConn.Close()
+
+	wsC := ccordiumv1.NewWorkspaceServiceClient(grpcConn)
+
+	_, err = wsC.Prepare(ctx, &ccordiumv1.PrepareRequest{
+		Workspace: &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{
+				Name: wsutils.GenWorkspaceName(),
+			},
+			Spec:   &cordiumv1.Workspace_Spec{},
+			Status: &cordiumv1.Workspace_Status{},
+		},
+	})
+	assert.Nil(t, err, "%+v", err)
+	time.Sleep(2 * time.Second)
+
+	termC := ccordiumv1.NewTerminalServiceClient(grpcConn)
+
+	term, err := termC.CreateTerminal(ctx, &ccordiumv1.CreateTerminalRequest{})
+	assert.Nil(t, err)
+	assert.Equal(t, 1, srv.terminalSrv.len())
+
+	_, err = termC.WriteDataTerminal(ctx, &ccordiumv1.WriteDataTerminalRequest{
+		Id:   term.Id,
+		Data: []byte("exit\r\n"),
+	})
+	assert.Nil(t, err, "%+v", err)
+
+	for range 50 {
+		if srv.terminalSrv.len() == 0 {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	assert.Equal(t, 0, srv.terminalSrv.len())
+
+	termList, err := termC.ListTerminal(ctx, &ccordiumv1.ListTerminalRequest{})
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(termList.Items))
+}
+
+func TestTerminalPublishMsg(t *testing.T) {
+
+	ctx := context.Background()
+
+	tst, err := tests.Initialize(nil)
+	assert.Nil(t, err, "%+v", err)
+	t.Cleanup(func() {
+		tst.Destroy()
+	})
+
+	srv, err := NewServer(ctx)
+	assert.Nil(t, err)
+
+	defer srv.Close()
+
+	err = srv.Run(ctx)
+	assert.Nil(t, err, "%+v", err)
+
+	grpcConn, err := wsclient.GetWorkspaceGRPCClient(&wsclient.GetWorkspaceGRPCClientOpts{})
+	assert.Nil(t, err)
+	defer grpcConn.Close()
+
+	wsC := ccordiumv1.NewWorkspaceServiceClient(grpcConn)
+
+	_, err = wsC.Prepare(ctx, &ccordiumv1.PrepareRequest{
+		Workspace: &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{
+				Name: wsutils.GenWorkspaceName(),
+			},
+			Spec:   &cordiumv1.Workspace_Spec{},
+			Status: &cordiumv1.Workspace_Status{},
+		},
+	})
+	assert.Nil(t, err, "%+v", err)
+	time.Sleep(2 * time.Second)
+
+	msg := &ccordiumv1.ListenTerminalResponse{
+		Type: &ccordiumv1.ListenTerminalResponse_Close_{
+			Close: &ccordiumv1.ListenTerminalResponse_Close{},
+		},
+	}
+
+	t.Run("publishing after close is a no-op", func(t *testing.T) {
+		term, err := srv.newTerminal(&ccordiumv1.CreateTerminalRequest{})
+		assert.Nil(t, err)
+
+		err = term.run(ctx)
+		assert.Nil(t, err)
+
+		sub := term.subscribe()
+
+		err = term.close()
+		assert.Nil(t, err)
+
+		term.publishMsg(msg)
+
+		assert.Equal(t, 0, len(term.subscribers.subscribersMap))
+		assert.Equal(t, 0, len(sub.msgCh))
+
+		isDone := func() bool {
+			select {
+			case <-term.doneCh:
+				return true
+			default:
+				return false
+			}
+		}()
+		assert.True(t, isDone)
+	})
+
+	t.Run("a lagging subscriber does not block the publisher", func(t *testing.T) {
+		term, err := srv.newTerminal(&ccordiumv1.CreateTerminalRequest{})
+		assert.Nil(t, err)
+
+		err = term.run(ctx)
+		assert.Nil(t, err)
+
+		defer term.close()
+
+		sub := term.subscribe()
+
+		for range cap(sub.msgCh) + 10 {
+			term.publishMsg(msg)
+		}
+
+		assert.Equal(t, cap(sub.msgCh), len(sub.msgCh))
+	})
+}
+
+func TestExecCleanup(t *testing.T) {
+
+	ctx := context.Background()
+
+	tst, err := tests.Initialize(nil)
+	assert.Nil(t, err, "%+v", err)
+	t.Cleanup(func() {
+		tst.Destroy()
+	})
+
+	srv, err := NewServer(ctx)
+	assert.Nil(t, err)
+
+	defer srv.Close()
+
+	err = srv.Run(ctx)
+	assert.Nil(t, err, "%+v", err)
+
+	grpcConn, err := wsclient.GetWorkspaceGRPCClient(&wsclient.GetWorkspaceGRPCClientOpts{})
+	assert.Nil(t, err)
+	defer grpcConn.Close()
+
+	wsC := ccordiumv1.NewWorkspaceServiceClient(grpcConn)
+
+	_, err = wsC.Prepare(ctx, &ccordiumv1.PrepareRequest{
+		Workspace: &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{
+				Name: wsutils.GenWorkspaceName(),
+			},
+			Spec:   &cordiumv1.Workspace_Spec{},
+			Status: &cordiumv1.Workspace_Status{},
+		},
+	})
+	assert.Nil(t, err, "%+v", err)
+	time.Sleep(2 * time.Second)
+
+	termC := ccordiumv1.NewTerminalServiceClient(grpcConn)
+
+	ectx, cancelFn := context.WithCancel(ctx)
+
+	strm, err := termC.Exec(ectx)
+	assert.Nil(t, err)
+
+	err = strm.Send(&cordiumv1.ExecRequest{
+		Type: &cordiumv1.ExecRequest_Request_{
+			Request: &cordiumv1.ExecRequest_Request{
+				Command: "sleep 300",
+			},
+		},
+	})
+	assert.Nil(t, err)
+
+	for range 50 {
+		if srv.taskManager.runningTasksLen() > 0 {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	assert.Equal(t, 1, srv.taskManager.runningTasksLen())
+
+	cancelFn()
+
+	for range 50 {
+		if srv.taskManager.runningTasksLen() == 0 {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	assert.Equal(t, 0, srv.taskManager.runningTasksLen())
+}

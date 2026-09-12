@@ -91,6 +91,7 @@ type Server struct {
 	// failurePublisher *failurePublisher
 
 	lis            net.Listener
+	socketPath     string
 	eventPublisher *eventPublisher
 
 	env []string
@@ -103,6 +104,7 @@ type Server struct {
 	gitStore gitStore
 
 	startedPrepare bool
+	prepareFailed  bool
 
 	statusSubscribersMap struct {
 		mu             sync.RWMutex
@@ -223,18 +225,17 @@ func (s *Server) Run(ctx context.Context) error {
 		}
 	*/
 
-	var socketPath string
 	if ldflags.IsTest() {
-		socketPath = "/tmp/oct-ws.sock"
-		os.Remove(socketPath)
+		s.socketPath = "/tmp/oct-ws.sock"
+		os.Remove(s.socketPath)
 	} else {
-		socketPath = "/run/octelium/workspace.sock"
+		s.socketPath = "/run/octelium/workspace.sock"
 	}
 
 	if err := func() error {
 		var err error
 
-		s.lis, err = net.Listen("unix", socketPath)
+		s.lis, err = net.Listen("unix", s.socketPath)
 		if err != nil {
 			return err
 		}
@@ -243,14 +244,9 @@ func (s *Server) Run(ctx context.Context) error {
 		return err
 	}
 
-	go func() {
-		time.Sleep(2 * time.Second)
-		if err := os.Chmod(socketPath, 0777); err == nil {
-			zap.L().Debug("Successfully chmoded socketPath")
-		} else {
-			zap.L().Warn("Could not chmod socketPath", zap.Error(err))
-		}
-	}()
+	if err := os.Chmod(s.socketPath, 0600); err != nil {
+		zap.L().Warn("Could not chmod socketPath", zap.Error(err))
+	}
 
 	/*
 		if err := func() error {
@@ -471,6 +467,10 @@ func (s *Server) setUser(ctx context.Context) error {
 		return nil
 	}
 
+	if err := s.setSocketPermissions(); err != nil {
+		zap.L().Warn("Could not set the agent socket permissions", zap.Error(err))
+	}
+
 	if s.isFreshRun {
 		if err := s.setSudoersFile(); err != nil {
 			zap.L().Warn("Could not set sudoers file", zap.Error(err))
@@ -506,6 +506,20 @@ func (s *Server) setUser(ctx context.Context) error {
 	return nil
 }
 
+func (s *Server) setSocketPermissions() error {
+	if s.socketPath == "" || s.userInfo == nil {
+		return nil
+	}
+
+	if err := os.Chown(s.socketPath, -1, s.userInfo.gid); err != nil {
+		zap.L().Warn("Could not chown the agent socket to the Workspace User group",
+			zap.Error(err))
+		return os.Chmod(s.socketPath, 0777)
+	}
+
+	return os.Chmod(s.socketPath, 0660)
+}
+
 func (s *Server) setSudoersFile() error {
 	sudoersDir := "/etc/sudoers.d"
 	username := s.userInfo.name
@@ -539,8 +553,24 @@ func (s *Server) getCmd(ctx context.Context, cmdStr string) *exec.Cmd {
 	return cmd
 }
 
+func (s *Server) getCmdArgs(ctx context.Context, name string, args ...string) *exec.Cmd {
+	cmd := exec.CommandContext(ctx, name, args...)
+	if ldflags.IsDev() {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
+	return cmd
+}
+
 func (s *Server) getCmdAsUser(ctx context.Context, cmdStr string) *exec.Cmd {
-	cmd := s.getCmd(ctx, cmdStr)
+	return s.setCmdAsUser(s.getCmd(ctx, cmdStr))
+}
+
+func (s *Server) getCmdArgsAsUser(ctx context.Context, name string, args ...string) *exec.Cmd {
+	return s.setCmdAsUser(s.getCmdArgs(ctx, name, args...))
+}
+
+func (s *Server) setCmdAsUser(cmd *exec.Cmd) *exec.Cmd {
 	if s.env != nil {
 		cmd.Env = slices.Clone(s.env)
 	} else {
@@ -577,6 +607,26 @@ func (s *Server) startPrepare(req *ccordiumv1.PrepareRequest) {
 
 	if err := s.doPrepare(context.Background(), req); err != nil {
 		zap.L().Error("Could not doPrepare", zap.Error(err))
+		s.signalDone()
+	}
+}
+
+func (s *Server) setPrepareFailed() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.prepareFailed = true
+}
+
+func (s *Server) hasPrepareFailed() bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.prepareFailed
+}
+
+func (s *Server) signalDone() {
+	select {
+	case s.buildDoneCh <- struct{}{}:
+	default:
 	}
 }
 
@@ -587,13 +637,20 @@ func (s *Server) startWaitAndSetRunning() {
 	}
 	zap.L().Debug("starting waitAndSetRunning")
 	s.runningWG.Wait()
+
+	if s.hasPrepareFailed() {
+		zap.L().Error("Preparing the Workspace failed. Signalling shutdown")
+		s.signalDone()
+		return
+	}
+
 	zap.L().Debug("status is now set to running")
 	s.setState(cordiumv1.Workspace_Status_RUNNING)
 	s.initReq.SecretList = nil
 	time.Sleep(1000 * time.Millisecond)
 	if s.initReq.Workspace.Status.IsBuild ||
 		(s.spec != nil && s.spec.Runtime != nil && s.spec.Runtime.AutoStop) {
-		s.buildDoneCh <- struct{}{}
+		s.signalDone()
 	}
 }
 
@@ -709,14 +766,14 @@ func (s *Server) doPrepare(ctx context.Context, req *ccordiumv1.PrepareRequest) 
 	}
 
 	s.runningWG.Add(1)
+	defer s.runningWG.Done()
 
 	go s.startWaitAndSetRunning()
 
 	if err := s.taskManager.run(); err != nil {
+		s.setPrepareFailed()
 		return err
 	}
-
-	s.runningWG.Done()
 
 	return nil
 }
@@ -1194,7 +1251,11 @@ func (s *Server) setState(st cordiumv1.Workspace_Status_State) {
 	s.statusSubscribersMap.mu.RLock()
 	defer s.statusSubscribersMap.mu.RUnlock()
 	for _, sub := range s.statusSubscribersMap.subscribersMap {
-		sub.statusCh <- st
+		select {
+		case sub.statusCh <- st:
+		default:
+			zap.L().Warn("Dropping state for a lagging subscriber", zap.String("subID", sub.id))
+		}
 	}
 }
 

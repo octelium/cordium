@@ -17,9 +17,12 @@
 package dcfeatures
 
 import (
+	"bytes"
 	"context"
+	"io"
 	"testing"
 
+	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/octelium/cordium/cluster/common/tests"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
@@ -36,7 +39,7 @@ func TestGetFeature(t *testing.T) {
 
 	err = getFeature(ctx, "ghcr.io/devcontainers/features/aws-cli:1", &GetFeaturesOpts{
 		DirBase: "/tmp/tdc01",
-	})
+	}, make(map[string]struct{}), 0)
 	assert.Nil(t, err)
 
 	features, err := GetSortedFeatures(&GetSortedFeaturesOpts{
@@ -45,5 +48,80 @@ func TestGetFeature(t *testing.T) {
 	assert.Nil(t, err)
 	for _, ftr := range features {
 		zap.L().Debug("FEA", zap.Any("ftr", ftr))
+	}
+}
+
+func TestGetFeatureLimits(t *testing.T) {
+	ctx := context.Background()
+
+	featureURL := "ghcr.io/devcontainers/features/aws-cli:1"
+
+	{
+		err := getFeature(ctx, featureURL, &GetFeaturesOpts{
+			DirBase: "/tmp/tdc02",
+		}, make(map[string]struct{}), maxFeatureDepth+1)
+		assert.NotNil(t, err)
+	}
+
+	{
+		ref, err := name.ParseReference(featureURL)
+		assert.Nil(t, err)
+
+		visited := map[string]struct{}{
+			ref.Name(): {},
+		}
+
+		err = getFeature(ctx, featureURL, &GetFeaturesOpts{
+			DirBase: "/tmp/tdc02",
+		}, visited, 0)
+		assert.Nil(t, err)
+	}
+}
+
+func TestDoAddFeatureCycle(t *testing.T) {
+
+	features := []*Feature{
+		{
+			Name: "a",
+			Spec: &Spec{
+				InstallsAfter: []string{"b"},
+			},
+		},
+		{
+			Name: "b",
+			Spec: &Spec{
+				InstallsAfter: []string{"a"},
+			},
+		},
+		{
+			Name: "c",
+			Spec: &Spec{
+				InstallsAfter: []string{"c"},
+			},
+		},
+	}
+
+	var sortedFeatures []*Feature
+	for _, ftr := range features {
+		doAddFeature(features, &sortedFeatures, ftr, make(map[string]struct{}))
+	}
+
+	assert.Equal(t, len(features), len(sortedFeatures))
+}
+
+func TestLimitedReader(t *testing.T) {
+
+	{
+		r := &limitedReader{r: bytes.NewReader(make([]byte, 8)), n: 32}
+		out, err := io.ReadAll(r)
+		assert.Nil(t, err)
+		assert.Equal(t, 8, len(out))
+	}
+
+	{
+		r := &limitedReader{r: bytes.NewReader(make([]byte, 64)), n: 32}
+		out, err := io.ReadAll(r)
+		assert.NotNil(t, err)
+		assert.Equal(t, 32, len(out))
 	}
 }
