@@ -37,13 +37,16 @@ type watcher struct {
 	octeliumC octeliumc.ClientInterface
 	regionRef *metav1.ObjectReference
 	k8sC      kubernetes.Interface
+	ctl       *wscontroller.Controller
 }
 
-func newWatcher(octeliumC octeliumc.ClientInterface, k8sC kubernetes.Interface, regionRef *metav1.ObjectReference) *watcher {
+func newWatcher(octeliumC octeliumc.ClientInterface, k8sC kubernetes.Interface,
+	regionRef *metav1.ObjectReference, ctl *wscontroller.Controller) *watcher {
 	return &watcher{
 		octeliumC: octeliumC,
 		regionRef: regionRef,
 		k8sC:      k8sC,
+		ctl:       ctl,
 	}
 }
 
@@ -55,6 +58,11 @@ func (c *watcher) run(ctx context.Context) error {
 func (c *watcher) startWSLoop(ctx context.Context) {
 	tickerCh := time.NewTicker(5 * time.Minute)
 	defer tickerCh.Stop()
+
+	if err := c.handleWorkspaces(ctx); err != nil {
+		zap.L().Error("Could not handle Workspace by watcher", zap.Error(err))
+	}
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -107,12 +115,24 @@ func (c *watcher) handleWorkspaces(ctx context.Context) error {
 			continue
 		}
 
+		if err := c.doResumeWorkspace(ctx, ws); err != nil {
+			zap.L().Warn("Could not doResumeWorkspace", zap.String("name", ws.Metadata.Name), zap.Error(err))
+		}
+
 		if err := c.doHandleStalledState(ctx, ws, cc); err != nil {
 			zap.L().Warn("Could not doHandleStalledState", zap.Any("ws", ws), zap.Error(err))
 		}
 	}
 
 	return nil
+}
+
+func (c *watcher) doResumeWorkspace(ctx context.Context, ws *cordiumv1.Workspace) error {
+	if c.ctl == nil {
+		return nil
+	}
+
+	return c.ctl.ResumeWorkspace(ctx, ws)
 }
 
 func (c *watcher) isMyRegion(ws *cordiumv1.Workspace) bool {

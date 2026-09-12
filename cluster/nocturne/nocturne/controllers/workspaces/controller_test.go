@@ -37,6 +37,7 @@ import (
 	"github.com/octelium/octelium/cluster/common/tests/tstuser"
 	"github.com/octelium/octelium/cluster/common/vutils"
 	"github.com/octelium/octelium/pkg/apiutils/umetav1"
+	"github.com/octelium/octelium/pkg/common/pbutils"
 	"github.com/octelium/octelium/pkg/utils/utilrand"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/ssh"
@@ -176,4 +177,113 @@ func TestServer(t *testing.T) {
 	err = ctl.stopWorkspace(ctx, ws)
 	assert.Nil(t, err, "tt %+v", err)
 
+}
+
+func TestResumeWorkspace(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	tst, err := otests.Initialize(nil)
+	assert.Nil(t, err, "%+v", err)
+	t.Cleanup(func() {
+		tst.Destroy()
+	})
+	fakeC := tst.C
+
+	adminSrv := admin.NewServer(&admin.Opts{
+		OcteliumC:  fakeC.OcteliumC,
+		IsEmbedded: true,
+	})
+
+	usr, err := tstuser.NewUserWithType(fakeC.OcteliumC, adminSrv, nil, nil, corev1.User_Spec_HUMAN, corev1.Session_Status_CLIENT)
+	assert.Nil(t, err)
+
+	regionRef := &metav1.ObjectReference{
+		Name: utilrand.GetRandomStringCanonical(8),
+		Uid:  vutils.UUIDv4(),
+	}
+
+	otherRegionRef := &metav1.ObjectReference{
+		Name: utilrand.GetRandomStringCanonical(8),
+		Uid:  vutils.UUIDv4(),
+	}
+
+	ctl := newTestController(ctx, t, fakeC, regionRef)
+
+	createWorkspace := func(state cordiumv1.Workspace_Status_State,
+		regionRef *metav1.ObjectReference) *cordiumv1.Workspace {
+		ws, err := fakeC.OcteliumC.CordiumC().CreateWorkspace(ctx, &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{
+				Name: wsutils.GenWorkspaceName(),
+			},
+			Spec: &cordiumv1.Workspace_Spec{},
+			Status: &cordiumv1.Workspace_Status{
+				State:      state,
+				UserRef:    umetav1.GetObjectReference(usr.Usr),
+				SessionRef: umetav1.GetObjectReference(usr.Session),
+				RegionRef:  regionRef,
+			},
+		})
+		assert.Nil(t, err)
+		return ws
+	}
+
+	t.Run("a Workspace past the init request is resumed", func(t *testing.T) {
+		ws := createWorkspace(cordiumv1.Workspace_Status_RUNNING, regionRef)
+
+		err := ctl.ResumeWorkspace(ctx, ws)
+		assert.Nil(t, err)
+
+		wtchr := ctl.getWatcher(ws.Metadata.Uid)
+		assert.NotNil(t, wtchr)
+		assert.True(t, wtchr.isResumed)
+
+		err = ctl.ResumeWorkspace(ctx, ws)
+		assert.Nil(t, err)
+		assert.Equal(t, wtchr, ctl.getWatcher(ws.Metadata.Uid))
+
+		err = wtchr.detach()
+		assert.Nil(t, err)
+		assert.Nil(t, ctl.getWatcher(ws.Metadata.Uid))
+	})
+
+	t.Run("a stopped Workspace is not resumed", func(t *testing.T) {
+		ws := createWorkspace(cordiumv1.Workspace_Status_STOPPED, regionRef)
+
+		err := ctl.ResumeWorkspace(ctx, ws)
+		assert.Nil(t, err)
+		assert.Nil(t, ctl.getWatcher(ws.Metadata.Uid))
+	})
+
+	t.Run("an init request Workspace is not resumed", func(t *testing.T) {
+		ws := createWorkspace(cordiumv1.Workspace_Status_INIT_REQUEST, regionRef)
+
+		err := ctl.ResumeWorkspace(ctx, ws)
+		assert.Nil(t, err)
+		assert.Nil(t, ctl.getWatcher(ws.Metadata.Uid))
+	})
+
+	t.Run("a Workspace in another Region is not resumed", func(t *testing.T) {
+		ws := createWorkspace(cordiumv1.Workspace_Status_RUNNING, otherRegionRef)
+
+		err := ctl.ResumeWorkspace(ctx, ws)
+		assert.Nil(t, err)
+		assert.Nil(t, ctl.getWatcher(ws.Metadata.Uid))
+	})
+
+	t.Run("a stale Workspace is resumed by onAdd", func(t *testing.T) {
+		ws := createWorkspace(cordiumv1.Workspace_Status_PREPARING, regionRef)
+		ws.Metadata.CreatedAt = pbutils.Timestamp(time.Now().Add(-1 * time.Hour))
+
+		err := ctl.OnAdd(ctx, ws)
+		assert.Nil(t, err)
+
+		wtchr := ctl.getWatcher(ws.Metadata.Uid)
+		assert.NotNil(t, wtchr)
+
+		err = wtchr.detach()
+		assert.Nil(t, err)
+	})
+
+	ctl.WaitUntilAllWatchersClosed()
 }

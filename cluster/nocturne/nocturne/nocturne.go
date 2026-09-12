@@ -102,7 +102,7 @@ func Run(ctx context.Context) error {
 		return err
 	}
 
-	watcher := newWatcher(octeliumC, k8sC, umetav1.GetObjectReference(region))
+	watcher := newWatcher(octeliumC, k8sC, umetav1.GetObjectReference(region), ctl)
 	if err := watcher.run(ctx); err != nil {
 		return err
 	}

@@ -19,6 +19,7 @@ package controller
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"context"
 
@@ -133,11 +134,10 @@ func TestWatcher(t *testing.T) {
 		assert.Nil(t, err)
 		ctl.snapshotC = snapshotclientfake.NewSimpleClientset()
 
-		wtchr, err := newStatusWatcher(ctl, ws)
+		wtchr, err := newStatusWatcher(ctl, ws, false)
 		assert.Nil(t, err)
 
-		err = wtchr.run(ctx)
-		assert.Nil(t, err)
+		wtchr.run()
 
 		err = wtchr.onReadyInit(ctx)
 		assert.Nil(t, err)
@@ -190,10 +190,9 @@ func TestWatcher(t *testing.T) {
 		assert.Nil(t, err)
 		ctl.snapshotC = snapshotclientfake.NewSimpleClientset()
 
-		wtchr, err := newStatusWatcher(ctl, ws)
+		wtchr, err := newStatusWatcher(ctl, ws, false)
 		assert.Nil(t, err)
-		err = wtchr.run(ctx)
-		assert.Nil(t, err)
+		wtchr.run()
 
 		err = wtchr.onReadyInit(ctx)
 		assert.Nil(t, err, "%+v", err)
@@ -235,10 +234,9 @@ func TestWatcher(t *testing.T) {
 		assert.Nil(t, err)
 		ctl.snapshotC = snapshotclientfake.NewSimpleClientset()
 
-		wtchr, err := newStatusWatcher(ctl, ws)
+		wtchr, err := newStatusWatcher(ctl, ws, false)
 		assert.Nil(t, err)
-		err = wtchr.run(ctx)
-		assert.Nil(t, err)
+		wtchr.run()
 
 		err = wtchr.onReadyInit(ctx)
 		assert.Nil(t, err)
@@ -302,10 +300,9 @@ func TestWatcher(t *testing.T) {
 		assert.Nil(t, err)
 		ctl.snapshotC = snapshotclientfake.NewSimpleClientset()
 
-		wtchr, err := newStatusWatcher(ctl, ws)
+		wtchr, err := newStatusWatcher(ctl, ws, false)
 		assert.Nil(t, err)
-		err = wtchr.run(ctx)
-		assert.Nil(t, err)
+		wtchr.run()
 
 		err = wtchr.onReadyInit(ctx)
 		assert.Nil(t, err)
@@ -319,4 +316,153 @@ func TestWatcher(t *testing.T) {
 
 	})
 
+}
+
+func newTestController(ctx context.Context, t *testing.T,
+	fakeC *otests.FakeClient, regionRef *metav1.ObjectReference) *Controller {
+
+	jwkCtl, err := jwkctl.NewJWKController(ctx, fakeC.OcteliumC, nil)
+	assert.Nil(t, err)
+
+	ctl, err := NewController(ctx, ctx, fakeC.OcteliumC, fakeC.K8sC, jwkCtl, regionRef)
+	assert.Nil(t, err)
+	ctl.snapshotC = snapshotclientfake.NewSimpleClientset()
+
+	return ctl
+}
+
+func TestDetach(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	tst, err := otests.Initialize(nil)
+	assert.Nil(t, err, "%+v", err)
+	t.Cleanup(func() {
+		tst.Destroy()
+	})
+	fakeC := tst.C
+
+	adminSrv := admin.NewServer(&admin.Opts{
+		OcteliumC:  fakeC.OcteliumC,
+		IsEmbedded: true,
+	})
+
+	usr, err := tstuser.NewUserWithType(fakeC.OcteliumC, adminSrv, nil, nil, corev1.User_Spec_HUMAN, corev1.Session_Status_CLIENT)
+	assert.Nil(t, err)
+
+	regionRef := &metav1.ObjectReference{
+		Name: utilrand.GetRandomStringCanonical(8),
+		Uid:  vutils.UUIDv4(),
+	}
+
+	ctl := newTestController(ctx, t, fakeC, regionRef)
+
+	lastRunningAt := time.Now().Add(-2 * time.Hour)
+
+	ws, err := fakeC.OcteliumC.CordiumC().CreateWorkspace(ctx, &cordiumv1.Workspace{
+		Metadata: &metav1.Metadata{
+			Name: fmt.Sprintf("ws-%s", utilrand.GetRandomStringCanonical(6)),
+		},
+		Spec: &cordiumv1.Workspace_Spec{},
+		Status: &cordiumv1.Workspace_Status{
+			State:         cordiumv1.Workspace_Status_RUNNING,
+			UserRef:       umetav1.GetObjectReference(usr.Usr),
+			SessionRef:    umetav1.GetObjectReference(usr.Session),
+			RegionRef:     regionRef,
+			LastRunningAt: pbutils.Timestamp(lastRunningAt),
+		},
+	})
+	assert.Nil(t, err)
+
+	wtchr, err := ctl.setWatcher(ws, true)
+	assert.Nil(t, err)
+	assert.NotNil(t, wtchr)
+	assert.NotNil(t, ctl.getWatcher(ws.Metadata.Uid))
+	assert.Equal(t, lastRunningAt.Unix(), wtchr.runningStartedAt.Unix())
+
+	err = wtchr.detach()
+	assert.Nil(t, err)
+
+	assert.Nil(t, ctl.getWatcher(ws.Metadata.Uid))
+
+	wsCur, err := fakeC.OcteliumC.CordiumC().GetWorkspace(ctx, &rmetav1.GetOptions{Uid: ws.Metadata.Uid})
+	assert.Nil(t, err)
+	assert.Equal(t, cordiumv1.Workspace_Status_RUNNING, wsCur.Status.State)
+	assert.Equal(t, ws.Metadata.ResourceVersion, wsCur.Metadata.ResourceVersion)
+
+	_, err = fakeC.OcteliumC.CoreC().GetSession(ctx, &rmetav1.GetOptions{Uid: usr.Session.Metadata.Uid})
+	assert.Nil(t, err)
+
+	ctl.WaitUntilAllWatchersClosed()
+}
+
+func TestUpdateStatusIdempotency(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	tst, err := otests.Initialize(nil)
+	assert.Nil(t, err, "%+v", err)
+	t.Cleanup(func() {
+		tst.Destroy()
+	})
+	fakeC := tst.C
+
+	adminSrv := admin.NewServer(&admin.Opts{
+		OcteliumC:  fakeC.OcteliumC,
+		IsEmbedded: true,
+	})
+
+	usr, err := tstuser.NewUserWithType(fakeC.OcteliumC, adminSrv, nil, nil, corev1.User_Spec_HUMAN, corev1.Session_Status_CLIENT)
+	assert.Nil(t, err)
+
+	regionRef := &metav1.ObjectReference{
+		Name: utilrand.GetRandomStringCanonical(8),
+		Uid:  vutils.UUIDv4(),
+	}
+
+	ctl := newTestController(ctx, t, fakeC, regionRef)
+
+	ws, err := fakeC.OcteliumC.CordiumC().CreateWorkspace(ctx, &cordiumv1.Workspace{
+		Metadata: &metav1.Metadata{
+			Name: fmt.Sprintf("ws-%s", utilrand.GetRandomStringCanonical(6)),
+		},
+		Spec: &cordiumv1.Workspace_Spec{},
+		Status: &cordiumv1.Workspace_Status{
+			State:          cordiumv1.Workspace_Status_RUNNING,
+			UserRef:        umetav1.GetObjectReference(usr.Usr),
+			SessionRef:     umetav1.GetObjectReference(usr.Session),
+			RegionRef:      regionRef,
+			SuccessfulRuns: 1,
+		},
+	})
+	assert.Nil(t, err)
+
+	wtchr, err := ctl.setWatcher(ws, true)
+	assert.Nil(t, err)
+
+	t.Run("re-applying the current state is a no-op", func(t *testing.T) {
+		err = wtchr.doUpdateStatus(ctx, cordiumv1.Workspace_Status_RUNNING)
+		assert.Nil(t, err)
+
+		wsCur, err := fakeC.OcteliumC.CordiumC().GetWorkspace(ctx, &rmetav1.GetOptions{Uid: ws.Metadata.Uid})
+		assert.Nil(t, err)
+		assert.Equal(t, ws.Metadata.ResourceVersion, wsCur.Metadata.ResourceVersion)
+		assert.Equal(t, uint32(1), wsCur.Status.SuccessfulRuns)
+	})
+
+	t.Run("a new state is applied", func(t *testing.T) {
+		err = wtchr.doUpdateStatus(ctx, cordiumv1.Workspace_Status_STOPPING)
+		assert.Nil(t, err)
+
+		wsCur, err := fakeC.OcteliumC.CordiumC().GetWorkspace(ctx, &rmetav1.GetOptions{Uid: ws.Metadata.Uid})
+		assert.Nil(t, err)
+		assert.NotEqual(t, ws.Metadata.ResourceVersion, wsCur.Metadata.ResourceVersion)
+		assert.Equal(t, cordiumv1.Workspace_Status_STOPPING, wsCur.Status.State)
+		assert.Equal(t, cordiumv1.Workspace_Status_RUNNING, wsCur.Status.LastState)
+	})
+
+	err = wtchr.detach()
+	assert.Nil(t, err)
+
+	ctl.WaitUntilAllWatchersClosed()
 }

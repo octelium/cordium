@@ -46,11 +46,23 @@ import (
 	k8smetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	minRunLoopBackoff        = 250 * time.Millisecond
+	maxRunLoopBackoff        = 10 * time.Second
+	runLoopBackoffResetAfter = 30 * time.Second
+
+	supInitTimeout        = 5 * time.Minute
+	supInitTimeoutResumed = 15 * time.Minute
+
+	maxUpdateStatusAttempts = 10
+)
+
 type statusWatcher struct {
 	octeliumC octeliumc.ClientInterface
 
 	uid      string
 	name     string
+	ctx      context.Context
 	cancelFn context.CancelFunc
 	isClosed bool
 	mu       sync.RWMutex
@@ -59,52 +71,95 @@ type statusWatcher struct {
 
 	ctl *Controller
 
-	wssupC *suputils.WorkspaceSupClient
+	wssupC  *suputils.WorkspaceSupClient
+	svcAddr string
 
 	ws *cordiumv1.Workspace
 
+	isResumed bool
+
 	runningStartedAt time.Time
 
-	// ctxMain        context.Context
 	didOnStopping  bool
 	didOnStopped   bool
 	didOnInit      bool
 	healthCheckErr bool
 }
 
-func newStatusWatcher(ctl *Controller, ws *cordiumv1.Workspace) (*statusWatcher, error) {
+func newStatusWatcher(ctl *Controller, ws *cordiumv1.Workspace, isResumed bool) (*statusWatcher, error) {
+	ctx, cancelFn := context.WithCancel(ctl.ctxMain)
+
 	ret := &statusWatcher{
 		ctl:       ctl,
 		octeliumC: ctl.octeliumC,
 		uid:       ws.Metadata.Uid,
 		name:      ws.Metadata.Name,
 		jwkCtl:    ctl.jwkCtl,
+		ctx:       ctx,
+		cancelFn:  cancelFn,
+		isResumed: isResumed,
 
 		ws: ws,
 	}
 
-	zap.L().Debug("Workspace watcher created", zap.String("uid", ret.uid))
+	if ws.Status.State == cordiumv1.Workspace_Status_RUNNING && ws.Status.LastRunningAt.IsValid() {
+		ret.runningStartedAt = ws.Status.LastRunningAt.AsTime()
+	}
+
+	ctl.wg.Add(1)
+
+	zap.L().Debug("Workspace watcher created",
+		zap.String("uid", ret.uid), zap.Bool("isResumed", isResumed))
 
 	return ret, nil
 }
 
-func (c *statusWatcher) run(ctx context.Context) error {
-
+func (c *statusWatcher) run() {
 	zap.L().Debug("Workspace watcher is starting running", zap.String("name", c.name))
+	go c.startSupervise()
+}
 
-	if err := c.waitUntilWorkspaceSupInitialized(ctx); err != nil {
-		return err
+func (c *statusWatcher) startSupervise() {
+	defer func() {
+		if c.ctl.ctxMain.Err() != nil {
+			c.detach()
+			return
+		}
+		c.close()
+	}()
+
+	if err := c.waitUntilWorkspaceSupInitialized(c.ctx); err != nil {
+		if c.ctx.Err() != nil {
+			return
+		}
+		zap.L().Warn("Could not wait until the Workspace supervisor is ready",
+			zap.String("name", c.name), zap.Error(err))
+		c.setHealthCheckErr()
+		return
 	}
 
-	ctx, cancelFn := context.WithCancel(ctx)
-	c.cancelFn = cancelFn
+	if c.ctx.Err() != nil {
+		return
+	}
 
-	go c.startRunLoop(ctx)
-	go c.startHealthCheckLoop(ctx)
+	go c.startHealthCheckLoop(c.ctx)
 
 	zap.L().Debug("Workspace watcher is now running", zap.String("name", c.name))
 
-	return nil
+	c.startRunLoop(c.ctx)
+}
+
+func (c *statusWatcher) getSupInitTimeout() time.Duration {
+	if c.isResumed {
+		return supInitTimeoutResumed
+	}
+	return supInitTimeout
+}
+
+func (c *statusWatcher) setHealthCheckErr() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.healthCheckErr = true
 }
 
 func (c *statusWatcher) doGetWorkspaceK8sSvcAddr(ctx context.Context) (string, error) {
@@ -125,17 +180,21 @@ func (c *statusWatcher) doGetWorkspaceK8sSvcAddr(ctx context.Context) (string, e
 	return addr.String(), nil
 }
 
-func (c *statusWatcher) getWorkspaceK8sSvcAddr(ctx context.Context) (string, error) {
-
-	for i := 0; i < 100; i++ {
-		addr, err := c.doGetWorkspaceK8sSvcAddr(ctx)
-		if err == nil {
-			return addr, nil
-		}
-		time.Sleep(1 * time.Second)
+func (c *statusWatcher) setWorkspaceK8sSvcAddr(ctx context.Context) {
+	if c.svcAddr != "" {
+		return
 	}
 
-	return "", errors.Errorf("Could not getWorkspaceK8sSvcAddr")
+	addr, err := c.doGetWorkspaceK8sSvcAddr(ctx)
+	if err != nil {
+		zap.L().Debug("Could not get workspaceK8sServiceAddr",
+			zap.String("name", c.name), zap.Error(err))
+		return
+	}
+
+	zap.L().Debug("Found Workspace k8s service addr",
+		zap.String("name", c.name), zap.String("addr", addr))
+	c.svcAddr = addr
 }
 
 func (c *statusWatcher) waitUntilWorkspaceSupInitialized(ctx context.Context) error {
@@ -149,18 +208,14 @@ func (c *statusWatcher) waitUntilWorkspaceSupInitialized(ctx context.Context) er
 	}
 	zap.L().Debug("Starting waitUntilWorkspaceSupInitialized", zap.String("name", c.name))
 
-	addr, err := c.getWorkspaceK8sSvcAddr(ctx)
-	if err != nil {
-		zap.L().Warn("Could not get workspaceK8sServiceAddr", zap.Error(err))
-	}
-	zap.L().Debug("Found Workspace k8s service addr", zap.String("addr", addr))
-
 	doFn := func(ctx context.Context) error {
+		c.setWorkspaceK8sSvcAddr(ctx)
+
 		ctx, cancel := context.WithTimeout(ctx, 1500*time.Millisecond)
 		defer cancel()
 
 		wssupC, err := suputils.GetWorkspaceSupClient(c.ws, &suputils.GetWorkspaceSupClientOpts{
-			Host: addr,
+			Host: c.svcAddr,
 		})
 		if err != nil {
 			return err
@@ -183,14 +238,14 @@ func (c *statusWatcher) waitUntilWorkspaceSupInitialized(ctx context.Context) er
 	tickerCh := time.NewTicker(2 * time.Second)
 	defer tickerCh.Stop()
 
-	timeoutCh := time.NewTimer(5 * time.Minute)
+	timeoutCh := time.NewTimer(c.getSupInitTimeout())
 	defer timeoutCh.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
 			zap.L().Debug("ctx done. Exiting waitUntilWorkspaceSupInitialized loop", zap.String("name", c.name))
-			return nil
+			return errors.Errorf("ctx done while waiting for the Workspace supervisor")
 		case <-timeoutCh.C:
 			return errors.Errorf("Deadline for waitUntilWorkspaceSupInitialized exceeded")
 		case <-tickerCh.C:
@@ -206,22 +261,47 @@ func (c *statusWatcher) waitUntilWorkspaceSupInitialized(ctx context.Context) er
 
 func (c *statusWatcher) startRunLoop(ctx context.Context) {
 	zap.L().Debug("Starting runLoop", zap.String("name", c.name))
-	c.ctl.wg.Add(1)
+	defer zap.L().Debug("runLoop ended", zap.String("name", c.name))
 
-	if err := c.doStartRunLoop(ctx); err != nil {
-		zap.L().Error("Could not run status watcher. Stopping the workspace",
+	backoff := minRunLoopBackoff
+
+	for {
+		if ctx.Err() != nil || c._isClosed() {
+			return
+		}
+
+		startedAt := time.Now()
+		err := c.doStartRunLoop(ctx)
+		if err == nil {
+			return
+		}
+
+		if ctx.Err() != nil || c._isClosed() {
+			return
+		}
+
+		zap.L().Warn("Could not run the ListenState loop. Trying again...",
 			zap.String("name", c.name), zap.Error(err))
-	}
 
-	zap.L().Debug("runLoop ended", zap.String("name", c.name))
+		if time.Since(startedAt) >= runLoopBackoffResetAfter {
+			backoff = minRunLoopBackoff
+		}
+
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(backoff):
+		}
+
+		backoff = backoff * 2
+		if backoff > maxRunLoopBackoff {
+			backoff = maxRunLoopBackoff
+		}
+	}
 }
 
 func (c *statusWatcher) doStartRunLoop(ctx context.Context) error {
-	var errNum int
-
-	defer c.close()
 	defer zap.L().Debug("Exiting doStartRunLoop", zap.String("name", c.name))
-doRunStart:
 
 	zap.L().Debug("Sending ListenState call", zap.String("name", c.name))
 
@@ -240,23 +320,13 @@ doRunStart:
 		default:
 			msg, err := strm.Recv()
 			if err != nil {
-				if grpcerr.IsCanceled(err) {
+				if grpcerr.IsCanceled(err) || ctx.Err() != nil || c._isClosed() {
 					return nil
 				}
 
-				if c._isClosed() {
-					return nil
-				}
 				zap.L().Error("Could not recv msg by status watcher",
-					zap.String("name", c.ws.Metadata.Name), zap.Error(err))
-				errNum = errNum + 1
-				if errNum >= 300 {
-					zap.L().Error("Too many ListenState loop errors. Exiting the loop")
-					return errors.Errorf("Too many ListenState loop errors")
-				}
-				time.Sleep(250 * time.Millisecond)
-				zap.L().Debug("Restarting the ListenState loop again", zap.String("name", c.ws.Metadata.Name))
-				goto doRunStart
+					zap.String("name", c.name), zap.Error(err))
+				return err
 			}
 
 			if err := c.handleStatus(ctx, msg.State); err != nil {
@@ -275,41 +345,54 @@ func (c *statusWatcher) _isClosed() bool {
 }
 
 func (c *statusWatcher) close() error {
+	return c.doClose(false)
+}
 
-	if c._isClosed() {
-		return nil
-	}
+func (c *statusWatcher) detach() error {
+	return c.doClose(true)
+}
 
-	ctx := context.Background()
+func (c *statusWatcher) doClose(isDetach bool) error {
 
 	c.mu.Lock()
+	if c.isClosed {
+		c.mu.Unlock()
+		return nil
+	}
 	c.isClosed = true
 	didOnStopping := c.didOnStopping
 	didOnStopped := c.didOnStopped
 	healthCheckErr := c.healthCheckErr
 	c.mu.Unlock()
 
-	zap.L().Debug("Closing status watcher", zap.String("name", c.name))
+	ctx := context.Background()
 
-	if healthCheckErr {
+	zap.L().Debug("Closing status watcher",
+		zap.String("name", c.name), zap.Bool("isDetach", isDetach))
+
+	switch {
+	case isDetach:
+		zap.L().Debug("Detaching the status watcher. The Workspace is left running",
+			zap.String("name", c.name))
+	case healthCheckErr:
 		zap.L().Debug("Health check error detected. Forcing stop")
 		if err := c.forceOnStop(ctx); err != nil {
 			zap.L().Error("Could not forceOnStop during close", zap.Error(err))
 		}
-	} else if !didOnStopping && didOnStopped {
+	case !didOnStopping && didOnStopped:
 		zap.L().Error("STOPPED has been handled while not handling STOPPING. This should never happen",
 			zap.String("name", c.name))
-	} else if !didOnStopping {
+	case !didOnStopping:
 		zap.L().Debug("STOPPING has not been handled on close. Forcing stop", zap.String("name", c.name))
 		if err := c.doStopWorkspace(ctx); err != nil {
 			zap.L().Error("Could not stopWorkspace", zap.Error(err))
 		}
-	} else if !didOnStopped {
+	case !didOnStopped:
 		zap.L().Debug("STOPPED has not been handled on close. Forcing stop", zap.String("name", c.name))
 		if err := c.forceOnStop(ctx); err != nil {
 			zap.L().Error("Could not forceOnStop", zap.Error(err))
 		}
-	} else {
+	default:
 		zap.L().Debug("Initializing a normal close after a successful STOPPED Workspace", zap.String("name", c.name))
 	}
 
@@ -320,9 +403,7 @@ func (c *statusWatcher) close() error {
 
 	zap.L().Debug("Status watcher is now closed", zap.String("name", c.name))
 
-	c.ctl.watcherMap.mu.Lock()
-	delete(c.ctl.watcherMap.mp, c.uid)
-	c.ctl.watcherMap.mu.Unlock()
+	c.ctl.removeWatcher(c)
 
 	c.ctl.wg.Done()
 
@@ -330,6 +411,25 @@ func (c *statusWatcher) close() error {
 }
 
 func (c *statusWatcher) doUpdateStatus(ctx context.Context, st cordiumv1.Workspace_Status_State) error {
+	for i := 0; i < maxUpdateStatusAttempts; i++ {
+		err := c.doUpdateStatusOnce(ctx, st)
+		if err == nil {
+			return nil
+		}
+
+		if !grpcerr.IsResourceChanged(err) {
+			return err
+		}
+
+		zap.L().Debug("Could not update Workspace status due to resource change. Trying again...",
+			zap.String("name", c.name))
+		time.Sleep(200 * time.Millisecond)
+	}
+
+	return errors.Errorf("Could not update the Workspace status after too many attempts")
+}
+
+func (c *statusWatcher) doUpdateStatusOnce(ctx context.Context, st cordiumv1.Workspace_Status_State) error {
 
 	state := st
 	now := time.Now()
@@ -345,6 +445,12 @@ func (c *statusWatcher) doUpdateStatus(ctx context.Context, st cordiumv1.Workspa
 			return nil
 		}
 		return err
+	}
+
+	if ws.Status.State == state {
+		zap.L().Debug("Workspace is already at the state. Nothing to be done",
+			zap.String("name", c.name), zap.String("state", state.String()))
+		return nil
 	}
 
 	zap.L().Debug("status watcher setting state", zap.String("name", c.name),
@@ -393,13 +499,6 @@ func (c *statusWatcher) doUpdateStatus(ctx context.Context, st cordiumv1.Workspa
 			return nil
 		}
 
-		if grpcerr.IsResourceChanged(err) {
-			zap.L().Debug("Could not update Workspace status due to resource change. Trying again...",
-				zap.String("name", c.name))
-			time.Sleep(200 * time.Millisecond)
-			return c.doUpdateStatus(ctx, st)
-		}
-
 		return err
 	}
 
@@ -430,9 +529,12 @@ func (c *statusWatcher) handleStatus(ctx context.Context, st cordiumv1.Workspace
 
 	case cordiumv1.Workspace_Status_STOPPING:
 		c.mu.Lock()
+		didOnStopping := c.didOnStopping
 		c.didOnStopping = true
 		c.mu.Unlock()
-		go c.cleanupStaleStoppingState(ctx)
+		if !didOnStopping {
+			go c.cleanupStaleStoppingState(ctx)
+		}
 	case cordiumv1.Workspace_Status_STOPPED:
 
 		defer c.close()
@@ -748,10 +850,10 @@ func (c *statusWatcher) onStopped(ctx context.Context) error {
 		zap.L().Debug("Found failure", zap.Any("failure", failure), zap.String("name", c.name))
 	}
 
-	if c.ws.Status.SessionRef != nil {
+	if sessRef := c.getSessionRef(ctx); sessRef != nil {
 		zap.L().Debug("Deleting the Workspace Session",
-			zap.String("name", c.name), zap.String("sessUID", c.ws.Status.SessionRef.Uid))
-		_, err := c.octeliumC.CoreC().DeleteSession(ctx, &rmetav1.DeleteOptions{Uid: c.ws.Status.SessionRef.Uid})
+			zap.String("name", c.name), zap.String("sessUID", sessRef.Uid))
+		_, err := c.octeliumC.CoreC().DeleteSession(ctx, &rmetav1.DeleteOptions{Uid: sessRef.Uid})
 		if err != nil && !grpcerr.IsNotFound(err) {
 			return err
 		}
@@ -870,6 +972,19 @@ func (c *statusWatcher) onStopped(ctx context.Context) error {
 	return nil
 }
 
+func (c *statusWatcher) getSessionRef(ctx context.Context) *metav1.ObjectReference {
+	if c.ws.Status.SessionRef != nil {
+		return c.ws.Status.SessionRef
+	}
+
+	ws, err := c.octeliumC.CordiumC().GetWorkspace(ctx, &rmetav1.GetOptions{Uid: c.uid})
+	if err != nil {
+		return nil
+	}
+
+	return ws.Status.SessionRef
+}
+
 func (c *statusWatcher) doStopWorkspace(ctx context.Context) error {
 	zap.L().Debug("Stopping the Workspace by the watcher", zap.String("name", c.name))
 	ws, err := c.octeliumC.CordiumC().GetWorkspace(ctx, &rmetav1.GetOptions{
@@ -935,9 +1050,7 @@ func (c *statusWatcher) startHealthCheckLoop(ctx context.Context) {
 				errN = errN + 1
 				if errN >= maxErrs {
 					zap.L().Warn("HealthCheck max attempts exceeded. Closing the watcher", zap.Int("max", maxErrs))
-					c.mu.Lock()
-					c.healthCheckErr = true
-					c.mu.Unlock()
+					c.setHealthCheckErr()
 					c.close()
 					return
 				}

@@ -77,7 +77,7 @@ func TestServer(t *testing.T) {
 	ws, err = fakeC.OcteliumC.CordiumC().CreateWorkspace(ctx, ws)
 	assert.Nil(t, err)
 
-	watcher := newWatcher(fakeC.OcteliumC, fakeC.K8sC, regionRef)
+	watcher := newWatcher(fakeC.OcteliumC, fakeC.K8sC, regionRef, nil)
 
 	cc, err := fakeC.OcteliumC.CordiumV1Utils().GetClusterConfig(ctx)
 	assert.Nil(t, err)

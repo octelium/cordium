@@ -120,7 +120,7 @@ func (c *Controller) isMyRegion(ws *cordiumv1.Workspace) bool {
 func (c *Controller) OnAdd(ctx context.Context, ws *cordiumv1.Workspace) error {
 	if ws.Metadata.CreatedAt.AsTime().Add(1 * time.Minute).Before(time.Now()) {
 		zap.L().Debug("Most probably a stale Workspace. No need to start it")
-		return nil
+		return c.ResumeWorkspace(ctx, ws)
 	}
 
 	if err := c.setPersistentVolumeClaim(ctx, ws); err != nil {
@@ -134,10 +134,79 @@ func (c *Controller) OnAdd(ctx context.Context, ws *cordiumv1.Workspace) error {
 
 	if ws.Status.State != cordiumv1.Workspace_Status_INIT_REQUEST {
 		zap.S().Debugf("Workspace: %s is not in init mode. Nothing to be done....", ws.Metadata.Name)
-		return nil
+		return c.ResumeWorkspace(ctx, ws)
 	}
 
 	return c.startWorkspace(ctx, ws)
+}
+
+func (c *Controller) setWatcher(ws *cordiumv1.Workspace, isResumed bool) (*statusWatcher, error) {
+	if c.ctxMain.Err() != nil {
+		return nil, nil
+	}
+
+	c.watcherMap.mu.Lock()
+	defer c.watcherMap.mu.Unlock()
+
+	if _, ok := c.watcherMap.mp[ws.Metadata.Uid]; ok {
+		return nil, nil
+	}
+
+	watcher, err := newStatusWatcher(c, ws, isResumed)
+	if err != nil {
+		return nil, err
+	}
+
+	c.watcherMap.mp[ws.Metadata.Uid] = watcher
+
+	return watcher, nil
+}
+
+func (c *Controller) removeWatcher(watcher *statusWatcher) {
+	c.watcherMap.mu.Lock()
+	defer c.watcherMap.mu.Unlock()
+
+	if cur, ok := c.watcherMap.mp[watcher.uid]; ok && cur == watcher {
+		delete(c.watcherMap.mp, watcher.uid)
+	}
+}
+
+func (c *Controller) getWatcher(wsUID string) *statusWatcher {
+	c.watcherMap.mu.RLock()
+	defer c.watcherMap.mu.RUnlock()
+
+	return c.watcherMap.mp[wsUID]
+}
+
+func (c *Controller) ResumeWorkspace(ctx context.Context, ws *cordiumv1.Workspace) error {
+
+	if !c.isMyRegion(ws) {
+		return nil
+	}
+
+	switch ws.Status.State {
+	case cordiumv1.Workspace_Status_UNKNOWN,
+		cordiumv1.Workspace_Status_INIT_REQUEST,
+		cordiumv1.Workspace_Status_STOPPED:
+		return nil
+	}
+
+	watcher, err := c.setWatcher(ws, true)
+	if err != nil {
+		return err
+	}
+
+	if watcher == nil {
+		return nil
+	}
+
+	zap.L().Debug("Resuming the control of the Workspace",
+		zap.String("uid", ws.Metadata.Uid), zap.String("name", ws.Metadata.Name),
+		zap.String("state", ws.Status.State.String()))
+
+	watcher.run()
+
+	return nil
 }
 
 func (c *Controller) startWorkspace(ctx context.Context, ws *cordiumv1.Workspace) error {
@@ -151,30 +220,25 @@ func (c *Controller) startWorkspace(ctx context.Context, ws *cordiumv1.Workspace
 	zap.L().Debug("Starting Workspace",
 		zap.String("uid", ws.Metadata.Uid), zap.String("name", ws.Metadata.Name))
 
-	if err := c.doOnAdd(ctx, ws); err != nil {
-		return err
-	}
-
-	{
-		c.watcherMap.mu.RLock()
-		_, ok := c.watcherMap.mp[ws.Metadata.Uid]
-		c.watcherMap.mu.RUnlock()
-		if ok {
-			return nil
-		}
-	}
-
-	watcher, err := newStatusWatcher(c, ws)
+	watcher, err := c.setWatcher(ws, false)
 	if err != nil {
 		return err
 	}
 
-	c.watcherMap.mu.Lock()
-	c.watcherMap.mp[ws.Metadata.Uid] = watcher
-	c.watcherMap.mu.Unlock()
+	if watcher == nil {
+		zap.L().Debug("A watcher already exists for the Workspace. No need to start it again",
+			zap.String("uid", ws.Metadata.Uid), zap.String("name", ws.Metadata.Name))
+		return nil
+	}
 
-	return watcher.run(c.ctxMain)
+	if err := c.doOnAdd(ctx, ws); err != nil {
+		watcher.detach()
+		return err
+	}
 
+	watcher.run()
+
+	return nil
 }
 
 func (c *Controller) OnUpdate(ctx context.Context, new, old *cordiumv1.Workspace) error {
@@ -268,10 +332,7 @@ func (c *Controller) stopWorkspace(ctx context.Context, ws *cordiumv1.Workspace)
 			return err
 		}
 
-		c.watcherMap.mu.RLock()
-		watcher, ok := c.watcherMap.mp[ws.Metadata.Uid]
-		c.watcherMap.mu.RUnlock()
-		if ok {
+		if watcher := c.getWatcher(ws.Metadata.Uid); watcher != nil {
 			go func() {
 				if err := watcher.forceOnStop(context.Background()); err != nil {
 					zap.L().Error("Could not force Stop", zap.Error(err))
