@@ -102,7 +102,10 @@ jobs:
           { df -h /; echo; free -h; } > "$OUT/host-resources.txt" 2>&1 || true
           kubectl describe pods -n octelium > "$OUT/describe-pods.txt" 2>&1 || true
           kubectl describe pods -n cordium > "$OUT/describe-pods-cordium.txt" 2>&1 || true
-          kubectl get pvc -n cordium -o wide > "$OUT/pvc-cordium.txt" 2>&1 || true
+          kubectl get pvc -A -o wide > "$OUT/pvc.txt" 2>&1 || true
+          kubectl describe pvc -n cordium > "$OUT/describe-pvc-cordium.txt" 2>&1 || true
+          kubectl get storageclass -o wide > "$OUT/storageclass.txt" 2>&1 || true
+          kubectl get nodes --show-labels > "$OUT/nodes.txt" 2>&1 || true
           kubectl get jobs -n octelium -o wide > "$OUT/jobs.txt" 2>&1 || true
 
           for ns in octelium cordium; do

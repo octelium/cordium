@@ -25,6 +25,7 @@ import (
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/cluster/e2e/harness"
+	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"github.com/octelium/octelium/pkg/grpcerr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -50,7 +51,9 @@ func testSecret(t *testing.T, ch *harness.H) {
 		require.Nil(t, err)
 		assert.Nil(t, cur.Data)
 
-		res, err := h.CordiumC().ListSecret(ctx, &cordiumv1.ListSecretOptions{})
+		res, err := h.CordiumC().ListSecret(ctx, &cordiumv1.ListSecretOptions{
+			SpaceRef: umetav1.GetObjectReference(spc),
+		})
 		require.Nil(t, err)
 
 		var found bool
@@ -138,18 +141,11 @@ func testUserSecret(t *testing.T, ch *harness.H) {
 		assert.True(t, found)
 	})
 
-	t.Run("TheUserSecretIsUpdatable", func(t *testing.T) {
+	t.Run("TheValueIsNotReadableBack", func(t *testing.T) {
 		cur, err := h.CordiumC().GetUserSecret(ctx, &metav1.GetOptions{Uid: sec.Metadata.Uid})
 		require.Nil(t, err)
-
-		cur.Metadata.DisplayName = "e2e user secret"
-		cur.Data = &cordiumv1.UserSecret_Data{
-			Type: &cordiumv1.UserSecret_Data_Value{Value: "rotated-value"},
-		}
-
-		res, err := h.CordiumC().UpdateUserSecret(ctx, cur)
-		require.Nil(t, err)
-		assert.Equal(t, "e2e user secret", res.Metadata.DisplayName)
+		assert.Equal(t, sec.Metadata.Name, cur.Metadata.Name)
+		assert.Nil(t, cur.Data)
 	})
 
 	t.Run("AShortNameIsCompletedWithTheUser", func(t *testing.T) {

@@ -33,7 +33,14 @@ import (
 	"go.uber.org/zap"
 )
 
-const workspacePollInterval = 2 * time.Second
+const (
+	workspacePollInterval = 2 * time.Second
+
+	firstDiagnosticsAfter = 45 * time.Second
+	diagnosticsEvery      = 60 * time.Second
+
+	initRequestBudget = 6 * time.Minute
+)
 
 func (h *H) CreateWorkspace(t *testing.T, ws *cordiumv1.Workspace) *cordiumv1.Workspace {
 	t.Helper()
@@ -93,6 +100,8 @@ func (h *H) StartWorkspace(t *testing.T, ws *cordiumv1.Workspace) {
 		t.Fatalf("Could not start the Workspace %s: %+v", ws.Metadata.Name, err)
 	}
 
+	h.StreamWorkspaceLogs(t, ws)
+
 	t.Cleanup(func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 		defer cancel()
@@ -148,6 +157,8 @@ func (h *H) GetWorkspace(t *testing.T, ws *cordiumv1.Workspace) *cordiumv1.Works
 func (h *H) WaitWorkspaceRunning(t *testing.T, ws *cordiumv1.Workspace) *cordiumv1.Workspace {
 	t.Helper()
 
+	started := time.Now()
+
 	return h.WaitWorkspace(t, ws, "the Workspace to run", StartBudget,
 		func(cur *cordiumv1.Workspace) (bool, error) {
 			if ucordiumv1.ToWorkspace(cur).IsRunning() {
@@ -157,6 +168,15 @@ func (h *H) WaitWorkspaceRunning(t *testing.T, ws *cordiumv1.Workspace) *cordium
 				return false, errors.Errorf(
 					"the Workspace stopped while starting up. Failure: %s",
 					WorkspaceFailure(cur))
+			}
+
+			if cur.Status.State == cordiumv1.Workspace_Status_INIT_REQUEST &&
+				time.Since(started) > initRequestBudget {
+				return false, errors.Errorf(
+					"the Workspace is still at INIT_REQUEST after %s. Nocturne gives up on "+
+						"an unreachable Workspace supervisor after 5m, so its pod never "+
+						"became ready",
+					time.Since(started).Truncate(time.Second))
 			}
 
 			return false, nil
@@ -199,6 +219,7 @@ func (h *H) WaitWorkspace(t *testing.T, ws *cordiumv1.Workspace, what string,
 
 	started := time.Now()
 	state := ws.GetStatus().GetState()
+	reportAt := started.Add(firstDiagnosticsAfter)
 	var cur *cordiumv1.Workspace
 	var lastErr error
 
@@ -215,19 +236,29 @@ func (h *H) WaitWorkspace(t *testing.T, ws *cordiumv1.Workspace, what string,
 
 			done, err := fn(cur)
 			if err != nil {
-				t.Fatalf("Gave up waiting for %s after %s: %+v",
-					what, time.Since(started).Truncate(time.Millisecond), err)
+				t.Fatalf("Gave up waiting for %s after %s: %+v\n%s",
+					what, time.Since(started).Truncate(time.Millisecond), err,
+					h.Diagnostics(ws))
 			}
 			if done {
 				return cur
 			}
 		}
 
+		if time.Now().After(reportAt) {
+			reportAt = time.Now().Add(diagnosticsEvery)
+
+			writeLine("--- Still waiting for %s after %s. The Workspace %s is %s ---\n%s",
+				what, time.Since(started).Truncate(time.Second),
+				ws.Metadata.Name, state, h.Diagnostics(ws))
+		}
+
 		select {
 		case <-ctx.Done():
-			t.Fatalf("Timed out after %s waiting for %s. The Workspace %s is %s. Last error: %+v",
+			t.Fatalf(
+				"Timed out after %s waiting for %s. The Workspace %s is %s. Last error: %+v\n%s",
 				time.Since(started).Truncate(time.Millisecond), what,
-				ws.Metadata.Name, state, lastErr)
+				ws.Metadata.Name, state, lastErr, h.Diagnostics(ws))
 		case <-time.After(workspacePollInterval):
 		}
 	}
@@ -343,6 +374,8 @@ func (h *H) StartWorkspaceWithConfig(t *testing.T, ws *cordiumv1.Workspace,
 	}); err != nil {
 		t.Fatalf("Could not start the Workspace %s: %+v", ws.Metadata.Name, err)
 	}
+
+	h.StreamWorkspaceLogs(t, ws)
 }
 
 func (h *H) WaitWorkspaceState(t *testing.T, ws *cordiumv1.Workspace,

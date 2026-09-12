@@ -18,6 +18,7 @@ package suite
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/octelium/cordium/cluster/common/ovutils"
@@ -25,7 +26,9 @@ import (
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/cluster/e2e/harness"
+	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"github.com/octelium/octelium/pkg/common/pbutils"
+	"github.com/octelium/octelium/pkg/grpcerr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -94,24 +97,57 @@ func testCordiumAPI(t *testing.T, ch *harness.H) {
 		assert.Equal(t, cfg.Metadata.Uid, again.Metadata.Uid)
 	})
 
-	t.Run("TheResourcesAreListable", func(t *testing.T) {
+	t.Run("TheUserScopedResourcesAreListable", func(t *testing.T) {
 		_, err := h.CordiumC().ListWorkspace(ctx, &cordiumv1.ListWorkspaceOptions{})
 		assert.Nil(t, err)
 
 		_, err = h.CordiumC().ListSpace(ctx, &cordiumv1.ListSpaceOptions{})
 		assert.Nil(t, err)
 
-		_, err = h.CordiumC().ListTemplate(ctx, &cordiumv1.ListTemplateOptions{})
-		assert.Nil(t, err)
-
-		_, err = h.CordiumC().ListMembership(ctx, &cordiumv1.ListMembershipOptions{})
-		assert.Nil(t, err)
-
-		_, err = h.CordiumC().ListGitProvider(ctx, &cordiumv1.ListGitProviderOptions{})
-		assert.Nil(t, err)
-
 		_, err = h.CordiumC().ListUserSecret(ctx, &cordiumv1.ListUserSecretOptions{})
 		assert.Nil(t, err)
+	})
+
+	t.Run("TheSpaceScopedResourcesAreListable", func(t *testing.T) {
+		spc := h.CreateSpace(t, nil)
+		spcRef := umetav1.GetObjectReference(spc)
+
+		tmpls, err := h.CordiumC().ListTemplate(ctx, &cordiumv1.ListTemplateOptions{
+			SpaceRef: spcRef,
+		})
+		require.Nil(t, err)
+		require.Len(t, tmpls.Items, 1)
+		assert.Equal(t, fmt.Sprintf("default.%s", spc.Metadata.Name),
+			tmpls.Items[0].Metadata.Name)
+
+		mems, err := h.CordiumC().ListMembership(ctx, &cordiumv1.ListMembershipOptions{
+			SpaceRef: spcRef,
+		})
+		require.Nil(t, err)
+		require.Len(t, mems.Items, 1)
+		assert.Equal(t, cordiumv1.Membership_Spec_OWNER, mems.Items[0].Spec.Role)
+
+		secs, err := h.CordiumC().ListSecret(ctx, &cordiumv1.ListSecretOptions{
+			SpaceRef: spcRef,
+		})
+		require.Nil(t, err)
+		assert.Empty(t, secs.Items)
+
+		gits, err := h.CordiumC().ListGitProvider(ctx, &cordiumv1.ListGitProviderOptions{
+			SpaceRef: spcRef,
+		})
+		require.Nil(t, err)
+		assert.Empty(t, gits.Items)
+	})
+
+	t.Run("TheSpaceScopedListsRequireASpace", func(t *testing.T) {
+		_, err := h.CordiumC().ListTemplate(ctx, &cordiumv1.ListTemplateOptions{})
+		require.NotNil(t, err)
+		assert.True(t, grpcerr.IsInvalidArg(err))
+
+		_, err = h.CordiumC().ListSecret(ctx, &cordiumv1.ListSecretOptions{})
+		require.NotNil(t, err)
+		assert.True(t, grpcerr.IsInvalidArg(err))
 	})
 }
 

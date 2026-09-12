@@ -33,8 +33,11 @@ func testCordiumReady(t *testing.T, ch *harness.H) {
 
 	h.StartCordiumLogStreams(t, cscenario.Components...)
 
+	h.PrintClusterDiagnostics(t)
+
 	h.MustRun(t, "kubectl get pods -n octelium")
 	h.MustRun(t, "kubectl get pods -n "+charness.WorkspaceNamespace)
+	h.MustRun(t, "kubectl get pvc -A")
 }
 
 func testCordiumComponentHealth(t *testing.T, ch *harness.H) {

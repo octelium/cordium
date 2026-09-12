@@ -255,7 +255,9 @@ func testTemplate(t *testing.T, ch *harness.H) {
 	})
 
 	t.Run("TheTemplateIsListed", func(t *testing.T) {
-		res, err := h.CordiumC().ListTemplate(ctx, &cordiumv1.ListTemplateOptions{})
+		res, err := h.CordiumC().ListTemplate(ctx, &cordiumv1.ListTemplateOptions{
+			SpaceRef: umetav1.GetObjectReference(spc),
+		})
 		require.Nil(t, err)
 
 		var found bool
