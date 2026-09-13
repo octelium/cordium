@@ -17,14 +17,17 @@
 package suite
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	charness "github.com/octelium/cordium/cluster/e2e/harness"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/cluster/e2e/harness"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	k8serr "k8s.io/apimachinery/pkg/api/errors"
 	k8smetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -60,13 +63,13 @@ func testWorkspaceStorage(t *testing.T, ch *harness.H) {
 
 	waitLineCount(t, h, ws, counter, 1)
 
+	h.StopWorkspace(t, ws)
+	h.WaitWorkspaceStopped(t, ws)
+
+	h.StartWorkspace(t, ws)
+	second := h.WaitWorkspaceRunning(t, ws)
+
 	t.Run("TheWorkspaceDirSurvivesTheSecondRun", func(t *testing.T) {
-		h.StopWorkspace(t, ws)
-		h.WaitWorkspaceStopped(t, ws)
-
-		h.StartWorkspace(t, ws)
-		second := h.WaitWorkspaceRunning(t, ws)
-
 		require.Equal(t, uint32(2), second.Status.SuccessfulRuns)
 		assert.Equal(t, "persisted", h.MustExec(t, ws, "cat "+marker))
 	})
@@ -95,13 +98,13 @@ func testWorkspaceStorage(t *testing.T, ch *harness.H) {
 		waitLineCount(t, h, ws, counter, 2)
 	})
 
+	h.StopWorkspace(t, ws)
+	h.WaitWorkspaceStopped(t, ws)
+
+	h.StartWorkspace(t, ws)
+	third := h.WaitWorkspaceRunning(t, ws)
+
 	t.Run("TheStorageSurvivesAThirdRun", func(t *testing.T) {
-		h.StopWorkspace(t, ws)
-		h.WaitWorkspaceStopped(t, ws)
-
-		h.StartWorkspace(t, ws)
-		third := h.WaitWorkspaceRunning(t, ws)
-
 		require.Equal(t, uint32(3), third.Status.SuccessfulRuns)
 		assert.Len(t, third.Status.LastRuns, 2)
 		assert.Equal(t, "persisted", h.MustExec(t, ws, "cat "+marker))
@@ -138,6 +141,7 @@ func testWorkspaceStorage(t *testing.T, ch *harness.H) {
 
 		h.StopWorkspace(t, eph)
 		h.WaitWorkspaceStopped(t, eph)
+		waitWorkspacePVCGone(t, h, eph)
 
 		h.StartWorkspace(t, eph)
 		h.WaitWorkspaceRunning(t, eph)
@@ -167,6 +171,7 @@ func testWorkspaceStorage(t *testing.T, ch *harness.H) {
 
 		h.StopWorkspace(t, eph)
 		h.WaitWorkspaceStopped(t, eph)
+		waitWorkspacePVCGone(t, h, eph)
 
 		h.StartWorkspace(t, eph)
 		h.WaitWorkspaceRunning(t, eph)
@@ -192,6 +197,26 @@ func testWorkspaceStorage(t *testing.T, ch *harness.H) {
 		require.NotNil(t, cur.Status.Limit.Storage)
 		assert.Equal(t, uint32(3000), cur.Status.Limit.Storage.Megabytes)
 	})
+}
+
+func waitWorkspacePVCGone(t *testing.T, h *charness.H, ws *cordiumv1.Workspace) {
+	t.Helper()
+
+	h.Eventually(t, "the ephemeral Workspace storage to be removed",
+		charness.StopBudget, func(ctx context.Context) error {
+			_, err := h.K8sC().CoreV1().
+				PersistentVolumeClaims(charness.WorkspaceNamespace).
+				Get(ctx, workspacePVCName(ws), k8smetav1.GetOptions{})
+			if err == nil {
+				return errors.Errorf("the PersistentVolumeClaim %s still exists",
+					workspacePVCName(ws))
+			}
+			if !k8serr.IsNotFound(err) {
+				return err
+			}
+
+			return nil
+		})
 }
 
 func workspacePVCUID(t *testing.T, h *charness.H, ws *cordiumv1.Workspace) string {

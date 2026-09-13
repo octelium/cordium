@@ -38,6 +38,8 @@ const workspaceDir = "/workspace"
 
 const netProbeSeconds = 8
 
+const timeoutExitCode = 124
+
 const (
 	publicDNSAddr   = "8.8.8.8"
 	publicAltAddr   = "1.1.1.1"

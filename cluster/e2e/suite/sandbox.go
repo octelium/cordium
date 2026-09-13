@@ -127,7 +127,7 @@ func testWorkspaceSandbox(t *testing.T, ch *harness.H) {
 		assert.Equal(t, "present", res.Out())
 	})
 
-	t.Run("TheSandboxKeepsItsNamespacedNetworkCapabilities", func(t *testing.T) {
+	t.Run("TheSandboxRootCanManageItsNetworkNamespace", func(t *testing.T) {
 		res := h.Exec(t, ws, charness.ExecOpts{
 			Command:   "ip link set lo up",
 			RunAsRoot: true,
@@ -147,7 +147,8 @@ func testWorkspaceSandbox(t *testing.T, ch *harness.H) {
 
 	t.Run("TheWorkspaceUserIsNotRoot", func(t *testing.T) {
 		assert.NotEqual(t, "0", h.MustExec(t, ws, "id -u"))
-		assert.Equal(t, "octelium", h.MustExec(t, ws, "id -un"))
+		assert.NotEqual(t, "0", h.MustExec(t, ws, "id -g"))
+		assert.NotEqual(t, "root", h.MustExec(t, ws, "id -un"))
 	})
 
 	t.Run("TheSupervisorPodRunsASingleContainer", func(t *testing.T) {

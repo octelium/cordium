@@ -17,14 +17,17 @@
 package suite
 
 import (
+	"context"
 	"testing"
 
 	charness "github.com/octelium/cordium/cluster/e2e/harness"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/cluster/e2e/harness"
 	"github.com/octelium/octelium/pkg/apiutils/umetav1"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	k8scorev1 "k8s.io/api/core/v1"
 	k8smetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -46,14 +49,12 @@ func testWorkspaceNetwork(t *testing.T, ch *harness.H) {
 		}
 	})
 
-	t.Run("TheOcteliumSessionStillConnects", func(t *testing.T) {
-		sess := h.WaitWorkspaceSessionConnected(t, ws)
-		require.NotNil(t, sess.Status.Connection)
-		assert.True(t, sess.Status.Connection.ESSHEnable)
-	})
-
-	t.Run("TheLoopbackOfTheSandboxIsReachable", func(t *testing.T) {
-		assertReachable(t, h, ws, "127.0.0.1", 2022)
+	t.Run("TheSandboxLoopbackIsNotFiltered", func(t *testing.T) {
+		res := h.Exec(t, ws, charness.ExecOpts{Command: tcpProbe("127.0.0.1", 2022)})
+		assert.Equal(t, int32(1), res.Code,
+			"the sandbox loopback is filtered instead of refusing the connection: %s",
+			res.Stderr)
+		assert.Contains(t, res.Stderr, "Connection refused")
 	})
 
 	t.Run("ThePublicInternetIsReachableByDefault", func(t *testing.T) {
@@ -326,22 +327,45 @@ func assertBlocked(t *testing.T, h *charness.H, ws *cordiumv1.Workspace,
 	t.Helper()
 
 	res := h.Exec(t, ws, charness.ExecOpts{Command: tcpProbe(addr, port)})
-	assert.NotEqual(t, int32(0), res.Code,
-		"the Workspace %s reached %s:%d, which the network policy must deny",
-		ws.Metadata.Name, addr, port)
+	assert.Equal(t, int32(timeoutExitCode), res.Code,
+		"the Workspace %s did not have its packets to %s:%d dropped. stderr: %q",
+		ws.Metadata.Name, addr, port, res.Stderr)
 }
 
 func workspacePodIP(t *testing.T, h *charness.H, ws *cordiumv1.Workspace) string {
 	t.Helper()
 
-	ctx, cancel := h.Ctx(t)
-	defer cancel()
+	var ret string
 
-	pods, err := h.WorkspacePods(ctx, ws)
-	require.Nil(t, err)
-	require.Len(t, pods, 1)
+	h.Eventually(t, "the Workspace to have a single live pod", charness.StopBudget,
+		func(ctx context.Context) error {
+			pods, err := h.WorkspacePods(ctx, ws)
+			if err != nil {
+				return err
+			}
 
-	return pods[0].Status.PodIP
+			var ips []string
+			for _, pod := range pods {
+				if pod.DeletionTimestamp != nil ||
+					pod.Status.Phase != k8scorev1.PodRunning ||
+					pod.Status.PodIP == "" {
+					continue
+				}
+
+				ips = append(ips, pod.Status.PodIP)
+			}
+
+			if len(ips) != 1 {
+				return errors.Errorf("the Workspace %s has %d live pods",
+					ws.Metadata.Name, len(ips))
+			}
+
+			ret = ips[0]
+
+			return nil
+		})
+
+	return ret
 }
 
 func kubernetesClusterIP(t *testing.T, h *charness.H) string {

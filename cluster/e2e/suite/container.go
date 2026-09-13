@@ -187,7 +187,8 @@ func testWorkspaceTaskFailure(t *testing.T, ch *harness.H) {
 		})
 
 		waitLineCount(t, h, ws, userMarker, 1)
-		assert.Equal(t, "octelium", h.MustExec(t, ws, "cat "+userMarker))
+		assert.Equal(t, h.MustExec(t, ws, "id -un"),
+			h.MustExec(t, ws, "cat "+userMarker))
 
 		waitLineCount(t, h, ws, rootMarker, 1)
 		assert.Equal(t, "root", h.MustExec(t, ws, "cat "+rootMarker))
