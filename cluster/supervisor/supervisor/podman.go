@@ -125,22 +125,6 @@ func (s *Server) createPod(ctx context.Context) error {
 	return cmd.Run()
 }
 
-func (s *Server) startPod(ctx context.Context) error {
-	if ldflags.IsTest() {
-		return nil
-	}
-
-	zap.L().Debug("Starting the Workspace pod")
-
-	if err := s.getCommandAsOctelium(ctx, "podman", "pod", "start", "ws").Run(); err != nil {
-		return errors.Errorf("Could not start the Workspace pod: %+v", err)
-	}
-
-	zap.L().Debug("Successfully started the Workspace pod")
-
-	return nil
-}
-
 /*
 func (s *Server) pullImageFromLocal(ctx context.Context, imagePath string) error {
 

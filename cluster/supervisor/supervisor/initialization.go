@@ -181,10 +181,6 @@ func (s *Server) doInitialize() error {
 		}
 	}
 
-	if err := s.startPod(ctx); err != nil {
-		return errors.Errorf("Could not start the Workspace pod: %+v", err)
-	}
-
 	if err := s.setNetworkPolicy(ctx); err != nil {
 		s.setFailure(&cordiumv1.Workspace_Status_Failure{
 			Type: &cordiumv1.Workspace_Status_Failure_NetworkPolicy_{
