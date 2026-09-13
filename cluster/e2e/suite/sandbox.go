@@ -82,9 +82,15 @@ func testWorkspaceSandbox(t *testing.T, ch *harness.H) {
 			"the outer podman storage is mounted into the sandbox")
 	})
 
-	t.Run("TheSandboxRunsUnderTheWorkspaceCgroup", func(t *testing.T) {
+	t.Run("TheSandboxRunsInItsOwnCgroupNamespace", func(t *testing.T) {
 		out := h.MustExec(t, ws, "cat /proc/self/cgroup")
-		assert.Contains(t, out, "0::", "unexpected cgroup format %q", out)
+		require.True(t, strings.HasPrefix(out, "0::/"),
+			"unexpected cgroup format %q", out)
+
+		assert.NotContains(t, out, "cordium.slice",
+			"the sandbox sees the host cgroup hierarchy: %q", out)
+		assert.NotContains(t, out, ws.Metadata.Uid,
+			"the sandbox sees its own Workspace cgroup path: %q", out)
 
 		controllers := strings.Fields(
 			h.MustExec(t, ws, "cat /sys/fs/cgroup/cgroup.controllers"))
@@ -175,9 +181,8 @@ func testWorkspaceSandbox(t *testing.T, ch *harness.H) {
 	})
 
 	t.Run("TheInitProcessReapsTheSandbox", func(t *testing.T) {
-		out := h.MustExec(t, ws, "cat /proc/1/comm")
-		assert.NotEqual(t, "sleep", out,
-			"pid 1 of the sandbox is the command itself, so zombies are not reaped")
+		assert.Equal(t, "podman-init", h.MustExec(t, ws, "cat /proc/1/comm"),
+			"pid 1 of the sandbox is not the init process, so zombies are not reaped")
 	})
 
 	t.Run("ANestedRootlessContainerRuntimeHasItsStorage", func(t *testing.T) {

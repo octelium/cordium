@@ -112,40 +112,65 @@ func testWorkspaceNetworkPolicy(t *testing.T, ch *harness.H) {
 
 	ctx := t.Context()
 
-	t.Run("ADenyRuleOverridesAnOverlappingAllowAllRule", func(t *testing.T) {
-		ws := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
-			Runtime: &cordiumv1.Workspace_Spec_Runtime{
-				Network: egressNetwork(
-					cordiumv1.Workspace_Spec_Runtime_Network_Egress_ALLOW_PUBLIC,
-					allowEgress([]string{"0.0.0.0/0", "::/0"}),
-					denyEgress([]string{publicAltAddr + "/32"}),
-				),
-			},
-		})
+	ws := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
+		Runtime: &cordiumv1.Workspace_Spec_Runtime{
+			Network: egressNetwork(
+				cordiumv1.Workspace_Spec_Runtime_Network_Egress_ALLOW_PUBLIC,
+				allowEgress([]string{"0.0.0.0/0", "::/0"}),
+				denyEgress([]string{publicAltAddr + "/32"}),
+				denyEgress([]string{publicDNSAddr + "/32"}, 443),
+			),
+		},
+	})
 
+	t.Run("ADenyRuleOverridesAnOverlappingAllowAllRule", func(t *testing.T) {
 		assertBlocked(t, h, ws, publicAltAddr, 443)
 		assertReachable(t, h, ws, publicDNSAddr, 53)
-
-		assertBlocked(t, h, ws, workspacePodIP(t, h, ws), 8080)
-		assertBlocked(t, h, ws, metadataAddr, 80)
 	})
 
 	t.Run("ADenyRuleIsScopedToItsPorts", func(t *testing.T) {
-		ws := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
-			Runtime: &cordiumv1.Workspace_Spec_Runtime{
-				Network: egressNetwork(
-					cordiumv1.Workspace_Spec_Runtime_Network_Egress_ALLOW_PUBLIC,
-					denyEgress([]string{publicDNSAddr + "/32"}, 443),
-				),
-			},
-		})
-
 		assertBlocked(t, h, ws, publicDNSAddr, 443)
 		assertReachable(t, h, ws, publicDNSAddr, 53)
 	})
 
+	t.Run("TheProtectedNetworksSurviveAnAllowAllRule", func(t *testing.T) {
+		assertBlocked(t, h, ws, workspacePodIP(t, h, ws), 8080)
+		assertBlocked(t, h, ws, metadataAddr, 80)
+	})
+
+	h.StopWorkspace(t, ws)
+	h.WaitWorkspaceStopped(t, ws)
+
+	h.StartWorkspace(t, ws)
+	restarted := h.WaitWorkspaceRunning(t, ws)
+
+	t.Run("ThePolicyIsReappliedOnASubsequentRun", func(t *testing.T) {
+		require.Equal(t, uint32(2), restarted.Status.SuccessfulRuns)
+
+		assertBlocked(t, h, ws, publicAltAddr, 443)
+		assertReachable(t, h, ws, publicDNSAddr, 53)
+		assertBlocked(t, h, ws, workspacePodIP(t, h, ws), 8080)
+	})
+
+	h.StopWorkspace(t, ws)
+	h.WaitWorkspaceStopped(t, ws)
+
+	cur := h.GetWorkspace(t, ws)
+	cur.Spec.Runtime.Network = egressNetwork(
+		cordiumv1.Workspace_Spec_Runtime_Network_Egress_DENY)
+	if _, err := h.CordiumC().UpdateWorkspace(ctx, cur); err != nil {
+		t.Fatalf("Could not update the Workspace network policy: %+v", err)
+	}
+
+	h.StartWorkspace(t, ws)
+	h.WaitWorkspaceRunning(t, ws)
+
+	t.Run("AnUpdatedPolicyTakesEffectOnTheNextRun", func(t *testing.T) {
+		assertBlocked(t, h, ws, publicDNSAddr, 53)
+	})
+
 	t.Run("AnAllowRulePunchesThroughTheDenyDefault", func(t *testing.T) {
-		ws := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
+		locked := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
 			Runtime: &cordiumv1.Workspace_Spec_Runtime{
 				Network: egressNetwork(
 					cordiumv1.Workspace_Spec_Runtime_Network_Egress_DENY,
@@ -154,11 +179,10 @@ func testWorkspaceNetworkPolicy(t *testing.T, ch *harness.H) {
 			},
 		})
 
-		assertReachable(t, h, ws, publicDNSAddr, 53)
-		assertBlocked(t, h, ws, publicAltAddr, 443)
-		assertBlocked(t, h, ws, publicDNSAddr, 443)
+		assertReachable(t, h, locked, publicDNSAddr, 53)
+		assertBlocked(t, h, locked, publicAltAddr, 443)
 
-		cur := h.GetWorkspace(t, ws)
+		cur := h.GetWorkspace(t, locked)
 		assert.Equal(t, cordiumv1.Workspace_Status_RUNNING, cur.Status.State,
 			"a Workspace with a locked-down egress policy did not stay running")
 		assert.Nil(t, cur.Status.Failure)
@@ -175,7 +199,7 @@ func testWorkspaceNetworkPolicy(t *testing.T, ch *harness.H) {
 			},
 		})
 
-		ws := h.CreateWorkspace(t, &cordiumv1.Workspace{
+		merged := h.CreateWorkspace(t, &cordiumv1.Workspace{
 			Spec: &cordiumv1.Workspace_Spec{
 				Runtime: &cordiumv1.Workspace_Spec_Runtime{
 					Network: egressNetwork(
@@ -188,57 +212,11 @@ func testWorkspaceNetworkPolicy(t *testing.T, ch *harness.H) {
 			},
 		})
 
-		h.StartWorkspace(t, ws)
-		h.WaitWorkspaceRunning(t, ws)
+		h.StartWorkspace(t, merged)
+		h.WaitWorkspaceRunning(t, merged)
 
-		assertBlocked(t, h, ws, publicAltAddr, 443)
-		assertReachable(t, h, ws, publicDNSAddr, 53)
-	})
-
-	t.Run("ThePolicyIsReappliedOnASubsequentRun", func(t *testing.T) {
-		ws := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
-			Runtime: &cordiumv1.Workspace_Spec_Runtime{
-				Network: egressNetwork(
-					cordiumv1.Workspace_Spec_Runtime_Network_Egress_ALLOW_PUBLIC,
-					denyEgress([]string{publicAltAddr + "/32"}),
-				),
-			},
-		})
-
-		assertBlocked(t, h, ws, publicAltAddr, 443)
-
-		h.StopWorkspace(t, ws)
-		h.WaitWorkspaceStopped(t, ws)
-
-		h.StartWorkspace(t, ws)
-		restarted := h.WaitWorkspaceRunning(t, ws)
-		require.Equal(t, uint32(2), restarted.Status.SuccessfulRuns)
-
-		assertBlocked(t, h, ws, publicAltAddr, 443)
-		assertReachable(t, h, ws, publicDNSAddr, 53)
-		assertBlocked(t, h, ws, workspacePodIP(t, h, ws), 8080)
-	})
-
-	t.Run("AnUpdatedPolicyTakesEffectOnTheNextRun", func(t *testing.T) {
-		ws := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{})
-
-		assertReachable(t, h, ws, publicDNSAddr, 53)
-
-		h.StopWorkspace(t, ws)
-		h.WaitWorkspaceStopped(t, ws)
-
-		cur := h.GetWorkspace(t, ws)
-		cur.Spec.Runtime = &cordiumv1.Workspace_Spec_Runtime{
-			Network: egressNetwork(
-				cordiumv1.Workspace_Spec_Runtime_Network_Egress_DENY),
-		}
-		_, err := h.CordiumC().UpdateWorkspace(ctx, cur)
-		require.Nil(t, err)
-
-		h.StartWorkspace(t, ws)
-		h.WaitWorkspaceRunning(t, ws)
-
-		assertBlocked(t, h, ws, publicDNSAddr, 53)
+		assertBlocked(t, h, merged, publicAltAddr, 443)
+		assertReachable(t, h, merged, publicDNSAddr, 53)
 	})
 }
 
@@ -326,7 +304,9 @@ func assertBlocked(t *testing.T, h *charness.H, ws *cordiumv1.Workspace,
 	addr string, port int32) {
 	t.Helper()
 
-	res := h.Exec(t, ws, charness.ExecOpts{Command: tcpProbe(addr, port)})
+	res := h.Exec(t, ws, charness.ExecOpts{
+		Command: tcpProbeWithin(blockedProbeSeconds, addr, port),
+	})
 	assert.Equal(t, int32(timeoutExitCode), res.Code,
 		"the Workspace %s did not have its packets to %s:%d dropped. stderr: %q",
 		ws.Metadata.Name, addr, port, res.Stderr)

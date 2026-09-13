@@ -129,12 +129,21 @@ func testWorkspaceStorage(t *testing.T, ch *harness.H) {
 		assert.NotContains(t, ids, cur.Status.Run.Id)
 	})
 
-	t.Run("TheEphemeralWorkspaceGetsAFreshVolumeOnEveryRun", func(t *testing.T) {
+	t.Run("TheEphemeralWorkspaceStartsFreshOnEveryRun", func(t *testing.T) {
+		ephMarker := workspacePath("e2e-eph-" + name)
+		onCreate := workspacePath("e2e-eph-oncreate-" + name)
+
 		eph := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
 			IsEphemeral: true,
+			Runtime: &cordiumv1.Workspace_Spec_Runtime{
+				Tasks: []*cordiumv1.Workspace_Spec_Runtime_Task{
+					onCreateTask("e2e-eph-on-create",
+						fmt.Sprintf("echo run >> %s", onCreate)),
+				},
+			},
 		})
 
-		ephMarker := workspacePath("e2e-eph-" + name)
+		waitLineCount(t, h, eph, onCreate, 1)
 		h.MustExec(t, eph, fmt.Sprintf("echo gone > %s", ephMarker))
 
 		before := workspacePVCUID(t, h, eph)
@@ -152,29 +161,6 @@ func testWorkspaceStorage(t *testing.T, ch *harness.H) {
 
 		assert.NotEqual(t, before, workspacePVCUID(t, h, eph),
 			"the ephemeral Workspace reused its previous PersistentVolumeClaim")
-	})
-
-	t.Run("TheEphemeralWorkspaceRunsOnCreateTasksOnEveryRun", func(t *testing.T) {
-		onCreate := workspacePath("e2e-eph-oncreate-" + name)
-
-		eph := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
-			IsEphemeral: true,
-			Runtime: &cordiumv1.Workspace_Spec_Runtime{
-				Tasks: []*cordiumv1.Workspace_Spec_Runtime_Task{
-					onCreateTask("e2e-eph-on-create",
-						fmt.Sprintf("echo run >> %s", onCreate)),
-				},
-			},
-		})
-
-		waitLineCount(t, h, eph, onCreate, 1)
-
-		h.StopWorkspace(t, eph)
-		h.WaitWorkspaceStopped(t, eph)
-		waitWorkspacePVCGone(t, h, eph)
-
-		h.StartWorkspace(t, eph)
-		h.WaitWorkspaceRunning(t, eph)
 
 		waitLineCount(t, h, eph, onCreate, 1)
 	})

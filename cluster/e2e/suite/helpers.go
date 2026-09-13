@@ -21,6 +21,7 @@ import (
 	"slices"
 	"testing"
 
+	charness "github.com/octelium/cordium/cluster/e2e/harness"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/cluster/e2e/scenario"
 	"github.com/stretchr/testify/assert"
@@ -36,7 +37,10 @@ const (
 
 const workspaceDir = "/workspace"
 
-const netProbeSeconds = 8
+const (
+	netProbeSeconds     = 8
+	blockedProbeSeconds = 3
+)
 
 const timeoutExitCode = 124
 
@@ -134,8 +138,19 @@ func onCreateTask(name, run string) *cordiumv1.Workspace_Spec_Runtime_Task {
 }
 
 func tcpProbe(addr string, port int32) string {
+	return tcpProbeWithin(netProbeSeconds, addr, port)
+}
+
+func tcpProbeWithin(seconds int, addr string, port int32) string {
 	return fmt.Sprintf("timeout %d bash -c 'exec 3<>/dev/tcp/%s/%d'",
-		netProbeSeconds, addr, port)
+		seconds, addr, port)
+}
+
+func sandboxCmdlines(t *testing.T, h *charness.H, ws *cordiumv1.Workspace) string {
+	t.Helper()
+
+	return h.MustExec(t, ws,
+		"for f in /proc/[0-9]*/cmdline; do tr '\\0' ' ' < $f; echo; done")
 }
 
 func workspaceHome(elems ...string) string {

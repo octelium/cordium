@@ -94,7 +94,7 @@ func testWorkspaceFilesystem(t *testing.T, ch *harness.H) {
 	})
 
 	t.Run("TheReadOnlyWorkspaceKeepsItsWritableVolumes", func(t *testing.T) {
-		for _, dir := range []string{"/tmp", "/var/tmp"} {
+		for _, dir := range []string{"/tmp", "/var/tmp", workspaceDir, "${HOME}"} {
 			file := fmt.Sprintf("%s/e2e-ro-%s", dir, name)
 
 			res := h.Exec(t, readOnly, charness.ExecOpts{

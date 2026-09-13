@@ -34,51 +34,48 @@ func testWorkspaceContainer(t *testing.T, ch *harness.H) {
 
 	name := h.Name()
 
-	t.Run("TheCmdOverrideRunsAsTheContainerProcess", func(t *testing.T) {
-		marker := "/tmp/e2e-cmd-" + name
+	marker := "/tmp/e2e-cmd-" + name
 
-		ws := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
-			Runtime: &cordiumv1.Workspace_Spec_Runtime{
-				Cmd: fmt.Sprintf("echo cmd-ran > %s; sleep infinity", marker),
-			},
-		})
-
-		assert.Equal(t, "cmd-ran", h.MustExec(t, ws, "cat "+marker))
+	overridden := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
+		Runtime: &cordiumv1.Workspace_Spec_Runtime{
+			Entrypoint: "/usr/bin/env",
+			Cmd:        fmt.Sprintf("echo cmd-ran > %s; sleep infinity", marker),
+		},
 	})
 
-	t.Run("TheCapabilitiesAreAddedToTheSandbox", func(t *testing.T) {
-		ws := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
-			Runtime: &cordiumv1.Workspace_Spec_Runtime{
-				Capabilities: capabilities([]string{"SYS_PTRACE"}, nil),
-			},
-		})
+	t.Run("TheCmdOverrideRunsInTheSandbox", func(t *testing.T) {
+		assert.Equal(t, "cmd-ran", h.MustExec(t, overridden, "cat "+marker))
+	})
 
-		assert.True(t, hasCapability(sandboxCapEff(t, h, ws), capSysPtrace),
+	t.Run("TheEntrypointOverrideReplacesTheImageEntrypoint", func(t *testing.T) {
+		cmdlines := sandboxCmdlines(t, h, overridden)
+
+		assert.Contains(t, cmdlines, "/usr/bin/env",
+			"the Entrypoint override never reached the container process")
+		assert.NotContains(t, cmdlines, "tini",
+			"the image entrypoint still runs despite the Entrypoint override")
+	})
+
+	capped := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
+		Runtime: &cordiumv1.Workspace_Spec_Runtime{
+			Capabilities: capabilities([]string{"SYS_PTRACE"}, []string{"SYS_CHROOT"}),
+		},
+	})
+
+	t.Run("TheRequestedCapabilitiesReachTheSandbox", func(t *testing.T) {
+		caps := sandboxCapEff(t, h, capped)
+
+		assert.True(t, hasCapability(caps, capSysPtrace),
 			"the requested capability did not reach the sandbox")
-	})
-
-	t.Run("TheDroppedCapabilitiesAreRemovedFromTheSandbox", func(t *testing.T) {
-		ws := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
-			Runtime: &cordiumv1.Workspace_Spec_Runtime{
-				Capabilities: capabilities(nil, []string{"SYS_CHROOT"}),
-			},
-		})
-
-		assert.False(t, hasCapability(sandboxCapEff(t, h, ws), capSysChroot),
+		assert.False(t, hasCapability(caps, capSysChroot),
 			"the dropped capability is still held by the sandbox")
+		assert.True(t, hasCapability(caps, capNetAdmin),
+			"the sandbox lost NET_ADMIN while adjusting the capabilities")
 	})
 
-	t.Run("TheEntrypointOverrideIsApplied", func(t *testing.T) {
-		marker := "/tmp/e2e-entrypoint-" + name
-
-		ws := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
-			Runtime: &cordiumv1.Workspace_Spec_Runtime{
-				Entrypoint: "/usr/bin/env",
-				Cmd:        fmt.Sprintf("echo entrypoint-ran > %s; sleep infinity", marker),
-			},
-		})
-
-		assert.Equal(t, "entrypoint-ran", h.MustExec(t, ws, "cat "+marker))
+	t.Run("TheDefaultSandboxKeepsTheImageEntrypoint", func(t *testing.T) {
+		assert.Contains(t, sandboxCmdlines(t, h, capped), "tini",
+			"the default Workspace does not run the image entrypoint")
 	})
 
 	t.Run("TheTimeoutModeIsStored", func(t *testing.T) {
@@ -127,65 +124,85 @@ func testWorkspaceTaskFailure(t *testing.T, ch *harness.H) {
 		assert.Equal(t, int32(13), task.ExitCode)
 	})
 
-	t.Run("AContinuingTaskLetsTheWorkspaceRun", func(t *testing.T) {
-		marker := workspacePath("e2e-continue-" + name)
+	userMarker := workspacePath("e2e-task-user-" + name)
+	rootMarker := workspacePath("e2e-task-root-" + name)
+	dirMarker := workspacePath("e2e-task-dir-" + name)
+	envMarker := workspacePath("e2e-task-env-" + name)
+	afterMarker := workspacePath("e2e-continue-" + name)
+	lateMarker := workspacePath("e2e-background-" + name)
 
-		ws := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
-			Runtime: &cordiumv1.Workspace_Spec_Runtime{
-				Tasks: []*cordiumv1.Workspace_Spec_Runtime_Task{
-					{
-						Name:      "e2e-continue-failing",
-						Run:       "exit 5",
-						Type:      cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
-						OnFailure: cordiumv1.Workspace_Spec_Runtime_Task_ON_FAILURE_CONTINUE,
+	ws := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
+		Runtime: &cordiumv1.Workspace_Spec_Runtime{
+			Tasks: []*cordiumv1.Workspace_Spec_Runtime_Task{
+				{
+					Name:      "e2e-continue-failing",
+					Run:       "exit 5",
+					Type:      cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
+					OnFailure: cordiumv1.Workspace_Spec_Runtime_Task_ON_FAILURE_CONTINUE,
+				},
+				postStartTask("e2e-continue-after",
+					fmt.Sprintf("echo after > %s", afterMarker)),
+				postStartTask("e2e-task-user",
+					fmt.Sprintf("id -un > %s", userMarker)),
+				{
+					Name:      "e2e-task-root",
+					Run:       fmt.Sprintf("id -un > %s", rootMarker),
+					Type:      cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
+					RunAsRoot: true,
+				},
+				{
+					Name:       "e2e-task-dir",
+					Run:        fmt.Sprintf("pwd > %s", dirMarker),
+					Type:       cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
+					WorkingDir: workspaceDir,
+				},
+				{
+					Name: "e2e-task-env",
+					Run:  fmt.Sprintf("printenv E2E_TASK > %s", envMarker),
+					Type: cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
+					EnvVars: []*cordiumv1.Workspace_Spec_Runtime_Task_EnvVar{
+						{Key: "E2E_TASK", Value: "task-env-value"},
 					},
-					postStartTask("e2e-continue-after",
-						fmt.Sprintf("echo after > %s", marker)),
+				},
+				{
+					Name:         "e2e-background",
+					Run:          fmt.Sprintf("sleep 5; echo late > %s", lateMarker),
+					Type:         cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
+					IsBackground: true,
+				},
+				{
+					Name:         "e2e-background-failing",
+					Run:          "exit 9",
+					Type:         cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
+					IsBackground: true,
+					OnFailure:    cordiumv1.Workspace_Spec_Runtime_Task_ON_FAILURE_ABORT,
 				},
 			},
-		})
+		},
+	})
 
-		waitLineCount(t, h, ws, marker, 1)
+	started := h.GetWorkspace(t, ws)
+	lateAtStartup := h.Exec(t, ws, charness.ExecOpts{Command: "cat " + lateMarker})
+
+	t.Run("TheBackgroundTasksDoNotBlockOrFailTheStartup", func(t *testing.T) {
+		require.Equal(t, cordiumv1.Workspace_Status_RUNNING, started.Status.State)
+		require.Nil(t, started.Status.Failure)
+
+		assert.NotEqual(t, int32(0), lateAtStartup.Code,
+			"the Workspace only reached RUNNING once the background task had finished")
+
+		waitLineCount(t, h, ws, lateMarker, 1)
+	})
+
+	t.Run("AContinuingTaskLetsTheWorkspaceRun", func(t *testing.T) {
+		waitLineCount(t, h, ws, afterMarker, 1)
 
 		cur := h.GetWorkspace(t, ws)
+		assert.Equal(t, cordiumv1.Workspace_Status_RUNNING, cur.Status.State)
 		assert.Nil(t, cur.Status.Failure)
 	})
 
 	t.Run("TheTaskOptionsAreHonored", func(t *testing.T) {
-		userMarker := workspacePath("e2e-task-user-" + name)
-		rootMarker := workspacePath("e2e-task-root-" + name)
-		dirMarker := workspacePath("e2e-task-dir-" + name)
-		envMarker := workspacePath("e2e-task-env-" + name)
-
-		ws := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
-			Runtime: &cordiumv1.Workspace_Spec_Runtime{
-				Tasks: []*cordiumv1.Workspace_Spec_Runtime_Task{
-					postStartTask("e2e-task-user",
-						fmt.Sprintf("id -un > %s", userMarker)),
-					{
-						Name:      "e2e-task-root",
-						Run:       fmt.Sprintf("id -un > %s", rootMarker),
-						Type:      cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
-						RunAsRoot: true,
-					},
-					{
-						Name:       "e2e-task-dir",
-						Run:        fmt.Sprintf("pwd > %s", dirMarker),
-						Type:       cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
-						WorkingDir: workspaceDir,
-					},
-					{
-						Name: "e2e-task-env",
-						Run:  fmt.Sprintf("printenv E2E_TASK > %s", envMarker),
-						Type: cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
-						EnvVars: []*cordiumv1.Workspace_Spec_Runtime_Task_EnvVar{
-							{Key: "E2E_TASK", Value: "task-env-value"},
-						},
-					},
-				},
-			},
-		})
-
 		waitLineCount(t, h, ws, userMarker, 1)
 		assert.Equal(t, h.MustExec(t, ws, "id -un"),
 			h.MustExec(t, ws, "cat "+userMarker))
@@ -198,36 +215,6 @@ func testWorkspaceTaskFailure(t *testing.T, ch *harness.H) {
 
 		waitLineCount(t, h, ws, envMarker, 1)
 		assert.Equal(t, "task-env-value", h.MustExec(t, ws, "cat "+envMarker))
-	})
-
-	t.Run("TheBackgroundTasksDoNotBlockOrFailTheStartup", func(t *testing.T) {
-		marker := workspacePath("e2e-background-" + name)
-
-		ws := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
-			Runtime: &cordiumv1.Workspace_Spec_Runtime{
-				Tasks: []*cordiumv1.Workspace_Spec_Runtime_Task{
-					{
-						Name:         "e2e-background",
-						Run:          fmt.Sprintf("sleep 5; echo late > %s", marker),
-						Type:         cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
-						IsBackground: true,
-					},
-					{
-						Name:         "e2e-background-failing",
-						Run:          "exit 9",
-						Type:         cordiumv1.Workspace_Spec_Runtime_Task_POST_START,
-						IsBackground: true,
-						OnFailure:    cordiumv1.Workspace_Spec_Runtime_Task_ON_FAILURE_ABORT,
-					},
-				},
-			},
-		})
-
-		cur := h.GetWorkspace(t, ws)
-		assert.Equal(t, cordiumv1.Workspace_Status_RUNNING, cur.Status.State)
-		assert.Nil(t, cur.Status.Failure)
-
-		waitLineCount(t, h, ws, marker, 1)
 	})
 }
 
