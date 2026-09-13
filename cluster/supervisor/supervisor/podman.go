@@ -91,6 +91,11 @@ func (s *Server) createPod(ctx context.Context) error {
 		return nil
 	}
 
+	if err := s.getCommandAsOctelium(ctx, "podman", "pod", "exists", "ws").Run(); err == nil {
+		zap.L().Debug("The Workspace pod already exists. Nothing to be done")
+		return nil
+	}
+
 	const wsPort = 35921
 	tunPort := workspacecommon.GetWorkspaceTunnelPort()
 	const eSSHPort = 2022

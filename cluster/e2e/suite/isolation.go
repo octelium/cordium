@@ -61,12 +61,12 @@ func testWorkspaceIsolation(t *testing.T, ch *harness.H) {
 
 	t.Run("TheWorkspaceRuntimesAreCgroupConfined", func(t *testing.T) {
 		for _, ws := range []*cordiumv1.Workspace{first, second} {
-			res := h.Exec(t, ws, charness.ExecOpts{Command: "cat /sys/fs/cgroup/pids.max"})
+			res := h.Exec(t, ws, charness.ExecOpts{Command: "cat /sys/fs/cgroup/memory.max"})
 			require.Equal(t, int32(0), res.Code,
-				"the pids cgroup controller does not reach the Workspace %s: %s",
+				"the memory cgroup controller does not reach the Workspace %s: %s",
 				ws.Metadata.Name, res.Stderr)
 			assert.NotEqual(t, "max", res.Out(),
-				"the Workspace %s runs without a cgroup pids limit", ws.Metadata.Name)
+				"the Workspace %s runs without a cgroup memory limit", ws.Metadata.Name)
 		}
 	})
 

@@ -33,9 +33,10 @@ import (
 )
 
 const (
-	StartBudget       = 12 * time.Minute
-	StopBudget        = 5 * time.Minute
-	ExecBudget        = 3 * time.Minute
+	StartBudget       = 5 * time.Minute
+	StopBudget        = 2 * time.Minute
+	ExecBudget        = 60 * time.Second
+	SessionBudget     = 2 * time.Minute
 	PropagationBudget = 90 * time.Second
 )
 

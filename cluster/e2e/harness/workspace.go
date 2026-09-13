@@ -423,7 +423,7 @@ func (h *H) WaitWorkspaceSessionConnected(t *testing.T, ws *cordiumv1.Workspace)
 
 	var ret *corev1.Session
 
-	h.Eventually(t, "the Workspace Session to connect with eSSH", StartBudget,
+	h.Eventually(t, "the Workspace Session to connect with eSSH", SessionBudget,
 		func(ctx context.Context) error {
 			cur, err := h.CordiumC().GetWorkspace(ctx,
 				&metav1.GetOptions{Uid: ws.Metadata.Uid})

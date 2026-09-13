@@ -122,6 +122,7 @@ func testCordiumCLIWorkspace(t *testing.T, ch *harness.H) {
 	})
 
 	h.MustRun(t, fmt.Sprintf("cordium start %s", name))
+	h.StreamWorkspaceLogs(t, ws)
 	h.WaitWorkspaceRunning(t, ws)
 
 	t.Run("Exec", func(t *testing.T) {

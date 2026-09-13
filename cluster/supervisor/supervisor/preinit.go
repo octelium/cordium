@@ -381,6 +381,7 @@ func (s *Server) runOuterPodman(ctx context.Context) error {
 		// "-d",
 		"--root=/octelium-root",
 		"--name=inner",
+		"--replace",
 
 		// `--entrypoint="tini","--"`,
 		"--init",
