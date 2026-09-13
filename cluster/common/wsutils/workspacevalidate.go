@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/octelium/cordium/cluster/common/netpolicy"
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/cluster/apiserver/apiserver/serr"
@@ -374,6 +375,12 @@ func ValidateWorkspace(ctx context.Context, req *ValidateWorkspaceReq) error {
 				if err := apivalidation.ValidateName(svc, 0, 2); err != nil {
 					return serr.InvalidArg("Invalid serveService: %s", err.Error())
 				}
+			}
+		}
+
+		if spec.Runtime.Network != nil {
+			if err := netpolicy.ValidateEgress(spec.Runtime.Network.GetEgress()); err != nil {
+				return serr.InvalidArg("Invalid network egress: %s", err.Error())
 			}
 		}
 	}

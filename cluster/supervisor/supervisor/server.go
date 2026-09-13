@@ -147,6 +147,12 @@ type Server struct {
 	shutdownReq *ccordiumv1.ShutdownRequest
 
 	mountBinaries []string
+
+	netPolicyMu       sync.Mutex
+	netPolicyLis      net.Listener
+	netPolicyApplied  bool
+	netPolicyPath     string
+	netPolicyScriptFn func(context.Context, string) error
 }
 
 func NewServer(ctx context.Context) (*Server, error) {
@@ -171,9 +177,10 @@ func NewServer(ctx context.Context) (*Server, error) {
 		eventPublisher: &eventPublisher{
 			subMap: make(map[string]*eventSubscription),
 		},
-		cgSuffix: utilrand.GetRandomStringLowercase(6),
-		myPID:    os.Getpid(),
-		isInner:  os.Getenv("OCTELIUM_RUN_LAYER") == "INNER0",
+		cgSuffix:      utilrand.GetRandomStringLowercase(6),
+		myPID:         os.Getpid(),
+		isInner:       os.Getenv("OCTELIUM_RUN_LAYER") == "INNER0",
+		netPolicyPath: netPolicySocketPath,
 	}
 
 	if ret.isInner {
@@ -248,6 +255,9 @@ func (s *Server) doRunOuter(ctx context.Context) error {
 	zap.L().Debug("Starting running outer")
 	if err := s.prepareCgroupsOuter(ctx); err != nil {
 		return errors.Errorf("Could not prepare outer cgroup: %+v", err)
+	}
+	if err := s.runNetworkPolicyServer(ctx); err != nil {
+		return errors.Errorf("Could not run the network policy server: %+v", err)
 	}
 	if err := s.runOuterPodman(ctx); err != nil {
 		return errors.Errorf("Could not run outer podman: %+v", err)

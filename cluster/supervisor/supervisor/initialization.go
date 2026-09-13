@@ -181,6 +181,19 @@ func (s *Server) doInitialize() error {
 		}
 	}
 
+	if err := s.startPod(ctx); err != nil {
+		return errors.Errorf("Could not start the Workspace pod: %+v", err)
+	}
+
+	if err := s.setNetworkPolicy(ctx); err != nil {
+		s.setFailure(&cordiumv1.Workspace_Status_Failure{
+			Type: &cordiumv1.Workspace_Status_Failure_NetworkPolicy_{
+				NetworkPolicy: &cordiumv1.Workspace_Status_Failure_NetworkPolicy{},
+			},
+		})
+		return errors.Errorf("Could not set the Workspace network policy: %+v", err)
+	}
+
 	if s.isFreshRun {
 		if err := s.podmanRunImage(ctx); err != nil {
 			return errors.Errorf("Could not run Workspace container image: %+v", err)

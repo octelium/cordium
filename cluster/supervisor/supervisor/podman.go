@@ -28,7 +28,6 @@ import (
 	"strings"
 	"time"
 
-	workspacecommon "github.com/octelium/cordium/cluster/common"
 	"github.com/octelium/cordium/cluster/common/components"
 	"github.com/octelium/cordium/cluster/supervisor/supervisor/oproxy"
 	"github.com/octelium/cordium/cluster/supervisor/supervisor/sshagent"
@@ -96,30 +95,50 @@ func (s *Server) createPod(ctx context.Context) error {
 		return nil
 	}
 
-	const wsPort = 35921
-	tunPort := workspacecommon.GetWorkspaceTunnelPort()
-	const eSSHPort = 2022
-
 	args := []string{
 		"pod", "create",
 		"--name", "ws",
 		"--dns", "8.8.8.8",
 		"--dns-search=.",
 		"--hostname", "cordium",
-		"-p", fmt.Sprintf("%d:%d", wsPort, wsPort),
-		"-p", fmt.Sprintf("%d:%d/udp", tunPort, tunPort),
-		"-p", fmt.Sprintf("%d:%d", eSSHPort, eSSHPort),
+	}
 
+	for _, port := range getReservedPorts() {
+		switch port.protocol {
+		case "udp":
+			args = append(args, "-p", fmt.Sprintf("%d:%d/udp", port.port, port.port))
+		default:
+			args = append(args, "-p", fmt.Sprintf("%d:%d", port.port, port.port))
+		}
+	}
+
+	args = append(args,
 		fmt.Sprintf("--memory=%dm", s.getLimitMemoryMegabytes()*95/100),
-		"--network=slirp4netns",
+		"--network=slirp4netns:allow_host_loopback=false",
 		// "--network=slirp4netns:mtu=10000",
 		// "--network=slirp4netns:port_handler=rootlesskit",
 		// fmt.Sprintf("--network=slirp4netns:outbound_addr=%s", brIP),
-	}
+	)
 
 	cmd := s.getCommandAsOctelium(ctx, "podman", args...)
 
 	return cmd.Run()
+}
+
+func (s *Server) startPod(ctx context.Context) error {
+	if ldflags.IsTest() {
+		return nil
+	}
+
+	zap.L().Debug("Starting the Workspace pod")
+
+	if err := s.getCommandAsOctelium(ctx, "podman", "pod", "start", "ws").Run(); err != nil {
+		return errors.Errorf("Could not start the Workspace pod: %+v", err)
+	}
+
+	zap.L().Debug("Successfully started the Workspace pod")
+
+	return nil
 }
 
 /*

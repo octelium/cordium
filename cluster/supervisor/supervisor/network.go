@@ -17,193 +17,328 @@
 package supervisor
 
 import (
-	"bufio"
 	"context"
-	"fmt"
+	"encoding/json"
+	"io"
+	"net"
+	"net/netip"
 	"os"
 	"os/exec"
-	"path/filepath"
+	"path"
 	"strings"
-	"syscall"
+	"time"
 
+	workspacecommon "github.com/octelium/cordium/cluster/common"
+	"github.com/octelium/cordium/cluster/common/netpolicy"
+	"github.com/octelium/octelium/apis/main/cordiumv1"
+	"github.com/octelium/octelium/pkg/utils/ldflags"
 	"github.com/pkg/errors"
+	"github.com/vishvananda/netlink"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
 )
 
-type egressCtl struct {
-	wsName    string
-	chainName string
-	cgroupID  uint64
-	s         *Server
+const netPolicyDir = "/octelium-net"
 
-	blockedIPv4CIDRs []string
-	blockedIPv6CIDRs []string
+const netPolicySocketPath = "/octelium-net/policy.sock"
+
+const netPolicyTimeout = 30 * time.Second
+
+const maxNetPolicyRequestBytes = 1024 * 1024
+
+type reservedPort struct {
+	protocol string
+	port     int
 }
 
-func newEgessCtl(s *Server) *egressCtl {
-	return &egressCtl{
-		s:      s,
-		wsName: s.initReq.Workspace.Metadata.Name,
+func getReservedPorts() []*reservedPort {
+	return []*reservedPort{
+		{protocol: "tcp", port: 35921},
+		{protocol: "tcp", port: 2022},
+		{protocol: "udp", port: workspacecommon.GetWorkspaceTunnelPort()},
 	}
 }
 
-func (e *egressCtl) needsSetup() bool {
-	return len(e.blockedIPv4CIDRs) > 0 || len(e.blockedIPv6CIDRs) > 0
+func getSystemSourcePorts() []*netpolicy.SystemPort {
+	var ret []*netpolicy.SystemPort
+	for _, port := range getReservedPorts() {
+		ret = append(ret, &netpolicy.SystemPort{
+			Protocol: port.protocol,
+			Port:     uint32(port.port),
+		})
+	}
+	return ret
 }
 
-func (e *egressCtl) setup(ctx context.Context, containerID string) error {
-	if !e.needsSetup() {
+type netPolicyRequest struct {
+	Network []byte `json:"network"`
+}
+
+type netPolicyResponse struct {
+	Error string `json:"error"`
+}
+
+func (s *Server) runNetworkPolicyServer(ctx context.Context) error {
+	if ldflags.IsTest() {
+		return nil
+	}
+	return s.doRunNetworkPolicyServer(ctx)
+}
+
+func (s *Server) doRunNetworkPolicyServer(ctx context.Context) error {
+
+	dir := path.Dir(s.netPolicyPath)
+
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return err
+	}
+
+	if err := os.Chmod(dir, 0700); err != nil {
+		return err
+	}
+
+	if err := os.Remove(s.netPolicyPath); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+
+	lis, err := net.Listen("unix", s.netPolicyPath)
+	if err != nil {
+		return errors.Errorf("Could not listen on the network policy socket: %+v", err)
+	}
+
+	if err := os.Chmod(s.netPolicyPath, 0600); err != nil {
+		lis.Close()
+		return err
+	}
+
+	s.netPolicyLis = lis
+
+	zap.L().Debug("The network policy server is now listening",
+		zap.String("path", s.netPolicyPath))
+
+	go func() {
+		for {
+			conn, err := lis.Accept()
+			if err != nil {
+				zap.L().Debug("The network policy listener exited", zap.Error(err))
+				return
+			}
+
+			go s.handleNetworkPolicyConn(ctx, conn)
+		}
+	}()
+
+	return nil
+}
+
+func (s *Server) handleNetworkPolicyConn(ctx context.Context, conn net.Conn) {
+	defer conn.Close()
+
+	conn.SetDeadline(time.Now().Add(netPolicyTimeout))
+
+	resp := &netPolicyResponse{}
+
+	if err := s.doHandleNetworkPolicyConn(ctx, conn); err != nil {
+		zap.L().Error("Could not handle the network policy request", zap.Error(err))
+		resp.Error = err.Error()
+	}
+
+	if err := json.NewEncoder(conn).Encode(resp); err != nil {
+		zap.L().Error("Could not send the network policy response", zap.Error(err))
+	}
+}
+
+func (s *Server) doHandleNetworkPolicyConn(ctx context.Context, conn net.Conn) error {
+	req := &netPolicyRequest{}
+	if err := json.NewDecoder(io.LimitReader(conn, maxNetPolicyRequestBytes)).Decode(req); err != nil {
+		return errors.Errorf("Could not decode the network policy request: %+v", err)
+	}
+
+	policy, err := s.compileNetworkPolicy(req)
+	if err != nil {
+		return err
+	}
+
+	return s.applyNetworkPolicy(ctx, policy)
+}
+
+func (s *Server) compileNetworkPolicy(req *netPolicyRequest) (*netpolicy.Policy, error) {
+	network := &cordiumv1.Workspace_Spec_Runtime_Network{}
+	if len(req.Network) > 0 {
+		if err := proto.Unmarshal(req.Network, network); err != nil {
+			return nil, errors.Errorf("Could not unmarshal the network spec: %+v", err)
+		}
+	}
+
+	return netpolicy.Compile(&netpolicy.CompileReq{
+		Network:           network,
+		UID:               s.octeliumUID,
+		Protected:         getLocalProtectedPrefixes(),
+		SystemSourcePorts: getSystemSourcePorts(),
+	})
+}
+
+func (s *Server) applyNetworkPolicy(ctx context.Context, policy *netpolicy.Policy) error {
+	script, err := netpolicy.RenderNFT(policy)
+	if err != nil {
+		return err
+	}
+
+	s.netPolicyMu.Lock()
+	defer s.netPolicyMu.Unlock()
+
+	zap.L().Debug("Applying the Workspace network policy",
+		zap.String("defaultAction", string(policy.DefaultAction)),
+		zap.Int("rules", len(policy.Rules)),
+		zap.Int("protected", len(policy.Protected)))
+
+	if err := s.runNetworkPolicyScript(ctx, script); err != nil {
+		return err
+	}
+
+	s.netPolicyApplied = true
+
+	zap.L().Debug("Successfully applied the Workspace network policy")
+
+	return nil
+}
+
+func (s *Server) teardownNetworkPolicy(ctx context.Context) error {
+	s.netPolicyMu.Lock()
+	defer s.netPolicyMu.Unlock()
+
+	if !s.netPolicyApplied {
 		return nil
 	}
 
-	e.chainName = fmt.Sprintf("CRD-%s", e.wsName)
+	zap.L().Debug("Tearing down the Workspace network policy")
 
-	pastaPID, err := findNetworkProxyPID(containerID)
-	if err != nil {
-		return errors.Errorf("finding pasta pid for container %s: %+v", containerID, err)
+	if err := s.runNetworkPolicyScript(ctx, netpolicy.RenderNFTTeardown()); err != nil {
+		return err
 	}
 
-	zap.L().Debug("Found pasta process",
-		zap.String("workspace", e.wsName),
-		zap.Int("pid", pastaPID),
-	)
+	s.netPolicyApplied = false
 
-	cgroupPath, err := getCgroupV2Path(pastaPID)
-	if err != nil {
-		return errors.Errorf("getting cgroup path for pid %d: %+v", pastaPID, err)
-	}
-
-	cgroupID, err := getCgroupID(cgroupPath)
-	if err != nil {
-		return errors.Errorf("getting cgroup id for %s: %+v", cgroupPath, err)
-	}
-	e.cgroupID = cgroupID
-
-	zap.L().Debug("Got cgroup id for workspace pasta process",
-		zap.String("workspace", e.wsName),
-		zap.String("cgroupPath", cgroupPath),
-		zap.Uint64("cgroupID", cgroupID),
-	)
-
-	return e.applyRules(ctx)
+	return nil
 }
 
-func findNetworkProxyPID(containerID string) (int, error) {
-	entries, err := os.ReadDir("/proc")
-	if err != nil {
-		return 0, err
+func (s *Server) runNetworkPolicyScript(ctx context.Context, script string) error {
+	if s.netPolicyScriptFn != nil {
+		return s.netPolicyScriptFn(ctx, script)
 	}
-
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			continue
-		}
-		pid := 0
-		if _, err := fmt.Sscanf(entry.Name(), "%d", &pid); err != nil || pid == 0 {
-			continue
-		}
-
-		cmdlineBytes, err := os.ReadFile(fmt.Sprintf("/proc/%d/cmdline", pid))
-		if err != nil {
-			continue
-		}
-
-		cmdline := strings.ReplaceAll(string(cmdlineBytes), "\x00", " ")
-
-		if (strings.Contains(cmdline, "pasta") ||
-			strings.Contains(cmdline, "slirp4netns")) &&
-			strings.Contains(cmdline, containerID[:12]) {
-			return pid, nil
-		}
-	}
-
-	return 0, errors.Errorf("no pasta/slirp4netns process found for container %s", containerID[:12])
+	return runNFT(ctx, script)
 }
 
-func getCgroupV2Path(pid int) (string, error) {
-	f, err := os.Open(fmt.Sprintf("/proc/%d/cgroup", pid))
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		line := scanner.Text()
-		parts := strings.SplitN(line, ":", 3)
-		if len(parts) == 3 && parts[0] == "0" {
-			return parts[2], nil
-		}
+func (s *Server) closeNetworkPolicyServer() {
+	if s.netPolicyLis == nil {
+		return
 	}
 
-	return "", errors.Errorf("no cgroup v2 entry found for pid %d", pid)
+	s.netPolicyLis.Close()
+	os.Remove(s.netPolicyPath)
 }
 
-func getCgroupID(cgroupPath string) (uint64, error) {
-	fullPath := filepath.Join("/sys/fs/cgroup", cgroupPath)
-	var stat syscall.Stat_t
-	if err := syscall.Stat(fullPath, &stat); err != nil {
-		return 0, err
+func runNFT(ctx context.Context, script string) error {
+	if _, err := exec.LookPath("nft"); err != nil {
+		return errors.Errorf("Could not find the nft binary: %+v", err)
 	}
-
-	return stat.Ino, nil
-}
-
-func (e *egressCtl) applyRules(ctx context.Context) error {
-	tableName := fmt.Sprintf("cordium_%s", e.wsName)
-
-	script := fmt.Sprintf(`
-table inet %s {
-    chain output {
-        type filter hook output priority filter; policy accept;
-
-        meta cgroup != %d accept
-
-        ct state established,related accept
-
-        ip daddr { %s } drop
-
-        ip6 daddr { %s } drop
-
-        accept
-    }
-}
-`, tableName, e.cgroupID,
-		strings.Join(e.blockedIPv4CIDRs, ", "),
-		strings.Join(e.blockedIPv6CIDRs, ", "),
-	)
 
 	cmd := exec.CommandContext(ctx, "nft", "-f", "-")
 	cmd.Stdin = strings.NewReader(script)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 
-	if err := cmd.Run(); err != nil {
-		return errors.Errorf("Could not run nft cmd: %+v", err)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		zap.L().Error("Could not run the nft cmd",
+			zap.String("script", script), zap.String("out", string(out)), zap.Error(err))
+		return errors.Errorf("Could not run the nft cmd: %s: %+v", string(out), err)
 	}
-
-	zap.L().Debug("Applied egress rules for Workspace",
-		zap.String("workspace", e.wsName),
-		zap.String("table", tableName),
-		zap.Uint64("cgroupID", e.cgroupID),
-	)
 
 	return nil
 }
 
-func (e *egressCtl) teardown(ctx context.Context) error {
-	if !e.needsSetup() {
+func (s *Server) setNetworkPolicy(ctx context.Context) error {
+	if ldflags.IsTest() {
 		return nil
 	}
+	return s.doSetNetworkPolicy(ctx)
+}
 
-	tableName := fmt.Sprintf("cordium_%s", e.wsName)
-	cmd := exec.CommandContext(ctx, "nft", "delete", "table", "inet", tableName)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+func (s *Server) doSetNetworkPolicy(ctx context.Context) error {
 
-	if err := cmd.Run(); err != nil {
-		zap.L().Warn("Failed to delete nftables table", zap.String("table", tableName), zap.Error(err))
+	network := s.spec.GetRuntime().GetNetwork()
+	if network == nil {
+		network = &cordiumv1.Workspace_Spec_Runtime_Network{}
 	}
 
+	networkBytes, err := proto.Marshal(network)
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, netPolicyTimeout)
+	defer cancel()
+
+	var d net.Dialer
+	conn, err := d.DialContext(ctx, "unix", s.netPolicyPath)
+	if err != nil {
+		return errors.Errorf("Could not dial the network policy socket: %+v", err)
+	}
+	defer conn.Close()
+
+	if deadline, ok := ctx.Deadline(); ok {
+		conn.SetDeadline(deadline)
+	}
+
+	if err := json.NewEncoder(conn).Encode(&netPolicyRequest{
+		Network: networkBytes,
+	}); err != nil {
+		return errors.Errorf("Could not send the network policy request: %+v", err)
+	}
+
+	resp := &netPolicyResponse{}
+	if err := json.NewDecoder(io.LimitReader(conn, maxNetPolicyRequestBytes)).Decode(resp); err != nil {
+		return errors.Errorf("Could not read the network policy response: %+v", err)
+	}
+
+	if resp.Error != "" {
+		return errors.Errorf("Could not set the network policy: %s", resp.Error)
+	}
+
+	zap.L().Debug("The Workspace network policy is now enforced")
+
 	return nil
+}
+
+func getLocalProtectedPrefixes() []netip.Prefix {
+	var ret []netip.Prefix
+
+	iface, err := getDefaultIface()
+	if err != nil {
+		zap.L().Warn("Could not get the default interface", zap.Error(err))
+		return ret
+	}
+
+	addrs, err := netlink.AddrList(iface, netlink.FAMILY_ALL)
+	if err != nil {
+		zap.L().Warn("Could not list the default interface addrs", zap.Error(err))
+		return ret
+	}
+
+	for _, addr := range addrs {
+		if ip, ok := netip.AddrFromSlice(addr.IP); ok {
+			ip = ip.Unmap()
+			ret = append(ret, netip.PrefixFrom(ip, ip.BitLen()))
+		}
+	}
+
+	if route, err := getDefaultRoute(); err == nil && route.Gw != nil {
+		if ip, ok := netip.AddrFromSlice(route.Gw); ok {
+			ip = ip.Unmap()
+			ret = append(ret, netip.PrefixFrom(ip, ip.BitLen()))
+		}
+	}
+
+	zap.L().Debug("Local protected prefixes", zap.Any("prefixes", ret))
+
+	return ret
 }

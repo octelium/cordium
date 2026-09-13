@@ -409,6 +409,7 @@ func (s *Server) runOuterPodman(ctx context.Context) error {
 		// "-v /octelium/outer/runtime:/octelium-runtime",
 
 		"-v", "/octelium:/octelium:nosuid",
+		"-v", fmt.Sprintf("%s:%s:noexec,nosuid", netPolicyDir, netPolicyDir),
 		"-v", "/tmp/podman-conf/containers:/etc/containers:ro",
 
 		"--device=/dev/net/tun",

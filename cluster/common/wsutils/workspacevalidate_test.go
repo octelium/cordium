@@ -17,10 +17,77 @@
 package wsutils
 
 import (
+	"context"
 	"testing"
 
+	"github.com/octelium/octelium/apis/main/cordiumv1"
+	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestValidateWorkspaceNetwork(t *testing.T) {
+	ctx := context.Background()
+
+	newReq := func(egress *cordiumv1.Workspace_Spec_Runtime_Network_Egress) *ValidateWorkspaceReq {
+		return &ValidateWorkspaceReq{
+			Workspace: &cordiumv1.Workspace{
+				Metadata: &metav1.Metadata{Name: "ws"},
+				Spec: &cordiumv1.Workspace_Spec{
+					Runtime: &cordiumv1.Workspace_Spec_Runtime{
+						Network: &cordiumv1.Workspace_Spec_Runtime_Network{
+							Egress: egress,
+						},
+					},
+				},
+				Status: &cordiumv1.Workspace_Status{
+					SpaceRef: &metav1.ObjectReference{Uid: "spc"},
+				},
+			},
+			Space: &cordiumv1.Space{
+				Metadata: &metav1.Metadata{Name: "spc", Uid: "spc"},
+				Status:   &cordiumv1.Space_Status{},
+			},
+		}
+	}
+
+	assert.Nil(t, ValidateWorkspace(ctx, newReq(nil)))
+
+	assert.Nil(t, ValidateWorkspace(ctx, newReq(&cordiumv1.Workspace_Spec_Runtime_Network_Egress{
+		DefaultAction: cordiumv1.Workspace_Spec_Runtime_Network_Egress_DENY,
+		Rules: []*cordiumv1.Workspace_Spec_Runtime_Network_Rule{
+			{
+				Action: cordiumv1.Workspace_Spec_Runtime_Network_Rule_ALLOW,
+				Cidrs:  []string{"203.0.113.0/24"},
+				Ports:  []uint32{443},
+			},
+		},
+	})))
+
+	assert.NotNil(t, ValidateWorkspace(ctx, newReq(&cordiumv1.Workspace_Spec_Runtime_Network_Egress{
+		Rules: []*cordiumv1.Workspace_Spec_Runtime_Network_Rule{
+			{
+				Cidrs: []string{"203.0.113.0/24"},
+			},
+		},
+	})))
+
+	assert.NotNil(t, ValidateWorkspace(ctx, newReq(&cordiumv1.Workspace_Spec_Runtime_Network_Egress{
+		Rules: []*cordiumv1.Workspace_Spec_Runtime_Network_Rule{
+			{
+				Action: cordiumv1.Workspace_Spec_Runtime_Network_Rule_DENY,
+				Cidrs:  []string{"203.0.113.0"},
+			},
+		},
+	})))
+
+	assert.NotNil(t, ValidateWorkspace(ctx, newReq(&cordiumv1.Workspace_Spec_Runtime_Network_Egress{
+		Rules: []*cordiumv1.Workspace_Spec_Runtime_Network_Rule{
+			{
+				Action: cordiumv1.Workspace_Spec_Runtime_Network_Rule_DENY,
+			},
+		},
+	})))
+}
 
 func TestCheckGitRef(t *testing.T) {
 

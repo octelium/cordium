@@ -56,6 +56,12 @@ func (s *Server) doShutdownOuter() error {
 		zap.L().Warn("Outer podman exited with an error", zap.Error(err))
 	}
 
+	if err := s.teardownNetworkPolicy(ctx); err != nil {
+		zap.L().Error("Could not tear down the network policy", zap.Error(err))
+	}
+
+	s.closeNetworkPolicyServer()
+
 	/*
 
 		if err := s.unsetIPTablesRules(ctx); err != nil {
