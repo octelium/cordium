@@ -21,15 +21,21 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/containerd/cgroups/v3/cgroup2"
 	"github.com/octelium/octelium/pkg/utils/ldflags"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
 const cgSystemRoot = "/sys/fs/cgroup"
+
+const cgInitLeaf = "init"
+
+var cgOuterControllers = []string{"cpu", "io", "memory", "pids"}
 
 func (s *Server) getCGroupRoot() string {
 	return "/sys/fs/cgroup/cordium.slice"
@@ -62,6 +68,96 @@ func (s *Server) returnToMyCgroup(ctx context.Context) error {
 
 func writeCgroupFile(path, value string) error {
 	return os.WriteFile(path, []byte(value), 0644)
+}
+
+func readCgroupFields(cgPath, name string) ([]string, error) {
+	out, err := os.ReadFile(path.Join(cgPath, name))
+	if err != nil {
+		return nil, err
+	}
+
+	return strings.Fields(string(out)), nil
+}
+
+func isCgroupNamespaceRoot() (bool, error) {
+	out, err := os.ReadFile("/proc/self/cgroup")
+	if err != nil {
+		return false, err
+	}
+
+	for _, line := range strings.Split(strings.TrimSpace(string(out)), "\n") {
+		parts := strings.SplitN(line, ":", 3)
+		if len(parts) != 3 || parts[0] != "0" {
+			continue
+		}
+
+		return parts[2] == "/", nil
+	}
+
+	return false, errors.Errorf("Could not find the cgroup v2 entry in /proc/self/cgroup")
+}
+
+func moveCgroupProcs(src, dst string) error {
+	pids, err := readCgroupFields(src, "cgroup.procs")
+	if err != nil {
+		return err
+	}
+
+	if len(pids) == 0 {
+		return nil
+	}
+
+	zap.L().Debug("Moving the cgroup processes to the leaf cgroup",
+		zap.String("src", src), zap.String("dst", dst), zap.Int("pids", len(pids)))
+
+	if err := os.MkdirAll(dst, 0755); err != nil {
+		return err
+	}
+
+	for _, pid := range pids {
+		if err := writeCgroupFile(path.Join(dst, "cgroup.procs"), pid); err != nil {
+			zap.L().Warn("Could not move the process to the leaf cgroup",
+				zap.String("pid", pid), zap.Error(err))
+		}
+	}
+
+	return nil
+}
+
+func delegateCgroupControllers(cgPath string) error {
+	available, err := readCgroupFields(cgPath, "cgroup.controllers")
+	if err != nil {
+		return err
+	}
+
+	enabled, err := readCgroupFields(cgPath, "cgroup.subtree_control")
+	if err != nil {
+		return err
+	}
+
+	for _, controller := range available {
+		if slices.Contains(enabled, controller) {
+			continue
+		}
+
+		if err := writeCgroupFile(path.Join(cgPath, "cgroup.subtree_control"),
+			fmt.Sprintf("+%s", controller)); err != nil {
+			return errors.Errorf("Could not enable the cgroup controller %s at %s: %+v",
+				controller, cgPath, err)
+		}
+	}
+
+	for _, controller := range cgOuterControllers {
+		if !slices.Contains(available, controller) {
+			zap.L().Warn("The cgroup controller is not delegated by the parent cgroup",
+				zap.String("cgPath", cgPath), zap.String("controller", controller))
+		}
+	}
+
+	zap.L().Debug("Successfully delegated the cgroup controllers",
+		zap.String("cgPath", cgPath), zap.Strings("controllers", available))
+
+	return nil
 }
 
 func (s *Server) createInitCgroup(ctx context.Context) error {
@@ -195,37 +291,61 @@ func (s *Server) prepareCgroups(ctx context.Context) error {
 	return nil
 }
 
+func (s *Server) prepareCgroupRootOuter(ctx context.Context) error {
+
+	zap.L().Debug("Preparing the outer cgroup root")
+
+	isOwnRoot, err := isCgroupNamespaceRoot()
+	if err != nil {
+		return err
+	}
+
+	if isOwnRoot {
+		if err := moveCgroupProcs(cgSystemRoot, path.Join(cgSystemRoot, cgInitLeaf)); err != nil {
+			return err
+		}
+
+		if err := delegateCgroupControllers(cgSystemRoot); err != nil {
+			return err
+		}
+	} else {
+		zap.L().Debug("The cgroup mount root is not owned by the supervisor. " +
+			"Skipping the cgroup root delegation")
+	}
+
+	if err := os.MkdirAll(s.getCGroupRoot(), 0755); err != nil {
+		return err
+	}
+
+	if err := delegateCgroupControllers(s.getCGroupRoot()); err != nil {
+		return err
+	}
+
+	zap.L().Debug("Successfully prepared the outer cgroup root")
+
+	return nil
+}
+
 func (s *Server) prepareCgroupsOuter(ctx context.Context) error {
 
 	zap.L().Debug("Preparing outer cgroups")
 
+	if ldflags.IsTest() {
+		return nil
+	}
+
+	if err := s.prepareCgroupRootOuter(ctx); err != nil {
+		return err
+	}
+
 	cgParentPath := s.getCgroupParentOuter()
 
-	getFile := func(name string) string {
-		return path.Join(cgParentPath, name)
+	if err := os.MkdirAll(cgParentPath, 0755); err != nil {
+		return err
 	}
 
-	cmds := []string{
-		fmt.Sprintf("mkdir -p %s", cgParentPath),
-		fmt.Sprintf(`echo "+memory +cpu +io +pids" > %s`, getFile("cgroup.subtree_control")),
-	}
-
-	for _, cmdStr := range cmds {
-		zap.L().Debug("running cmd", zap.String("cmd", cmdStr))
-		cmd := getShellCommand(ctx, cmdStr)
-
-		if ldflags.IsDev() {
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-		}
-
-		if ldflags.IsTest() {
-			continue
-		}
-
-		if err := cmd.Run(); err != nil {
-			zap.S().Errorf("Could not run cmd: %s: %+v", cmdStr, err)
-		}
+	if err := delegateCgroupControllers(cgParentPath); err != nil {
+		return err
 	}
 
 	zap.L().Debug("Done preparing cgroups")

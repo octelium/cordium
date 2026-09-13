@@ -23,7 +23,6 @@ import (
 	"net"
 	"os"
 	"os/exec"
-	"path"
 
 	"github.com/octelium/octelium/pkg/utils/ldflags"
 	"github.com/opencontainers/runtime-spec/specs-go"
@@ -164,10 +163,6 @@ func (s *Server) runPreInitCommandsRoot(ctx context.Context) error {
 		"chmod 1777 /octelium/podman/tmp/tmp",
 		"chmod 1777 /octelium/podman/tmp/var/tmp",
 
-		fmt.Sprintf("mkdir -p %s", s.getCGroupRoot()),
-		fmt.Sprintf(`echo "+memory +cpu +io +pids" > %s`, path.Join(s.getCGroupRoot(), "cgroup.subtree_control")),
-		// fmt.Sprintf("mount -t cgroup2 none %s", s.getCGroupRoot()),
-
 		// `echo "unqualified-search-registries = [\"docker.io\"]" >> /etc/containers/registries.conf`,
 
 		"mkdir -p /dev/net",
@@ -200,7 +195,6 @@ func (s *Server) runPreInitCommandsRoot(ctx context.Context) error {
 			"find /bin -perm -4000",
 			"find /usr/bin -perm -4000",
 			"find /sbin -perm -4000",
-			fmt.Sprintf("ls -la %s", s.getCGroupRoot()),
 		}
 		cmds = append(cmds, devCmds...)
 	}
@@ -466,7 +460,7 @@ func (s *Server) runOuterPodman(ctx context.Context) error {
 			zap.L().Debug("Outer podman exited with code", zap.Int("code", exiterr.ExitCode()))
 		}
 
-		s.innerContainerCh <- struct{}{}
+		s.innerContainerCh <- err
 	}()
 
 	zap.L().Debug("Successfully ran outer podman run")

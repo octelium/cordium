@@ -19,6 +19,7 @@ package suite
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -187,6 +188,32 @@ func testWorkspaceRuntime(t *testing.T, ch *harness.H) {
 		require.Nil(t, err)
 		assert.Equal(t, int64(2000*1024*1024),
 			pvc.Spec.Resources.Requests.Storage().Value())
+	})
+
+	t.Run("TheCgroupControllersReachTheWorkspace", func(t *testing.T) {
+		controllers := strings.Fields(h.MustExec(t, ws, "cat /sys/fs/cgroup/cgroup.controllers"))
+
+		for _, controller := range []string{"cpu", "memory", "pids"} {
+			assert.Contains(t, controllers, controller,
+				"the cgroup controller %q is not delegated down to the Workspace", controller)
+		}
+	})
+
+	t.Run("TheMemoryLimitIsEnforcedByTheCgroup", func(t *testing.T) {
+		out := h.MustExec(t, ws, "cat /sys/fs/cgroup/memory.max")
+		require.NotEqual(t, "max", out, "the Workspace runs without a cgroup memory limit")
+
+		limit, err := strconv.ParseInt(out, 10, 64)
+		require.Nil(t, err, "unexpected memory.max %q", out)
+		assert.Greater(t, limit, int64(0))
+		assert.LessOrEqual(t, limit, int64(1024)*1024*1024)
+	})
+
+	t.Run("TheWorkspacePodDoesNotRestart", func(t *testing.T) {
+		restarts, err := h.WorkspacePodRestarts(ctx, ws)
+		require.Nil(t, err)
+		assert.Zero(t, restarts,
+			"the Workspace container restarted %d time(s) while running", restarts)
 	})
 
 	t.Run("TheLogStreamDeliversTheTaskOutput", func(t *testing.T) {

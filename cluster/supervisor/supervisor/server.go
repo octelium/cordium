@@ -105,7 +105,7 @@ type Server struct {
 	initializationCh  chan error
 	storageExceededCh chan struct{}
 
-	innerContainerCh chan struct{}
+	innerContainerCh chan error
 	healthCheckCh    chan error
 	shutdownAckCh    chan struct{}
 
@@ -160,7 +160,7 @@ func NewServer(ctx context.Context) (*Server, error) {
 
 		apiShutdownCh:     make(chan struct{}, 10),
 		storageExceededCh: make(chan struct{}, 10),
-		innerContainerCh:  make(chan struct{}, 10),
+		innerContainerCh:  make(chan error, 10),
 		shutdownAckCh:     make(chan struct{}, 10),
 		wsAgentExitCh:     make(chan error, 10),
 		initializationCh:  make(chan error, 10),
@@ -389,14 +389,17 @@ func (s *Server) waitForTermInner(ctx context.Context) error {
 
 func (s *Server) waitForTermOuter(ctx context.Context) error {
 
+	var innerErr error
+
 	select {
 	case <-ctx.Done():
 		zap.L().Debug("Workspace supervisor received TERM signal in outer", zap.Error(ctx.Err()))
 		if err := s.doShutdown(); err != nil {
 			zap.L().Error("Could not doShutdown for outer supervisor", zap.Error(err))
 		}
-	case <-s.innerContainerCh:
-		zap.L().Debug("Inner container exited...")
+	case err := <-s.innerContainerCh:
+		zap.L().Debug("Inner container exited...", zap.Error(err))
+		innerErr = err
 		if err := s.doShutdown(); err != nil {
 			zap.L().Error("Could not doShutdown for outer supervisor", zap.Error(err))
 		}
@@ -415,6 +418,10 @@ func (s *Server) waitForTermOuter(ctx context.Context) error {
 	}
 
 	zap.L().Debug("Exiting outer supervisor...")
+
+	if innerErr != nil {
+		return errors.Errorf("The inner container exited unexpectedly: %+v", innerErr)
+	}
 
 	return nil
 }

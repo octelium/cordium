@@ -281,6 +281,25 @@ func (h *H) CheckWorkspacePodRestarts(ctx context.Context, ws *cordiumv1.Workspa
 	return nil
 }
 
+func (h *H) WorkspacePodRestarts(ctx context.Context, ws *cordiumv1.Workspace) (int32, error) {
+	pods, err := h.WorkspacePods(ctx, ws)
+	if err != nil {
+		return 0, err
+	}
+
+	var ret int32
+	for i := range pods {
+		cs := containerStatus(&pods[i], workspaceContainer)
+		if cs == nil {
+			continue
+		}
+
+		ret = ret + cs.RestartCount
+	}
+
+	return ret, nil
+}
+
 func (h *H) WorkspaceDiagnostics(ctx context.Context, ws *cordiumv1.Workspace) string {
 	var b strings.Builder
 
