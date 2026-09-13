@@ -29,7 +29,7 @@ on:
         required: false
         default: ""
 env:
-  GO_VERSION: "1.26.6"
+  GO_VERSION: "1.26.8"
   OCTELIUM_E2E_SUITE: ${{ inputs.suite || 'cordium' }}
   OCTELIUM_E2E_PACKAGE_VERSION: ${{ inputs.packageVersion }}
   OCTELIUM_E2E_CORE_VERSION: ${{ inputs.coreVersion }}
