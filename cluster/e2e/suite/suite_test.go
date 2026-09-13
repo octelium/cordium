@@ -51,6 +51,18 @@ func TestCordiumPhases(t *testing.T) {
 	}
 
 	assert.Less(t, slices.Index(got, "WorkspaceAPI"), slices.Index(got, "WorkspaceLifecycle"))
+	assert.Less(t, slices.Index(got, "WorkspaceValidation"),
+		slices.Index(got, "WorkspaceNetworkValidation"))
+	assert.Less(t, slices.Index(got, "WorkspaceNetworkValidation"),
+		slices.Index(got, "WorkspaceLifecycle"))
+	assert.Less(t, slices.Index(got, "WorkspaceSandbox"),
+		slices.Index(got, "WorkspaceNetwork"))
+	assert.Less(t, slices.Index(got, "WorkspaceNetwork"),
+		slices.Index(got, "WorkspaceNetworkPolicy"))
+	assert.Less(t, slices.Index(got, "WorkspaceTasks"),
+		slices.Index(got, "WorkspaceTaskFailure"))
+	assert.Less(t, slices.Index(got, "WorkspaceEphemeral"),
+		slices.Index(got, "WorkspaceStorage"))
 	assert.Less(t, slices.Index(got, "WorkspaceLifecycle"),
 		slices.Index(got, "WorkspaceIsolation"))
 	assert.Less(t, slices.Index(got, "WorkspaceIsolation"),

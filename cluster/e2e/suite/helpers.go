@@ -36,6 +36,15 @@ const (
 
 const workspaceDir = "/workspace"
 
+const netProbeSeconds = 8
+
+const (
+	publicDNSAddr   = "8.8.8.8"
+	publicAltAddr   = "1.1.1.1"
+	metadataAddr    = "169.254.169.254"
+	unroutedRFC1918 = "10.213.77.91"
+)
+
 func registryImage(url string) *cordiumv1.Workspace_Spec_Image {
 	return &cordiumv1.Workspace_Spec_Image{
 		Type: &cordiumv1.Workspace_Spec_Image_Registry_{
@@ -74,6 +83,66 @@ func application(name string, port int32, isDefault bool) *cordiumv1.Workspace_S
 		Port:      port,
 		IsDefault: isDefault,
 	}
+}
+
+func egressRule(action cordiumv1.Workspace_Spec_Runtime_Network_Rule_Action,
+	cidrs []string, ports ...uint32) *cordiumv1.Workspace_Spec_Runtime_Network_Rule {
+	return &cordiumv1.Workspace_Spec_Runtime_Network_Rule{
+		Action: action,
+		Cidrs:  cidrs,
+		Ports:  ports,
+	}
+}
+
+func allowEgress(cidrs []string, ports ...uint32) *cordiumv1.Workspace_Spec_Runtime_Network_Rule {
+	return egressRule(cordiumv1.Workspace_Spec_Runtime_Network_Rule_ALLOW, cidrs, ports...)
+}
+
+func denyEgress(cidrs []string, ports ...uint32) *cordiumv1.Workspace_Spec_Runtime_Network_Rule {
+	return egressRule(cordiumv1.Workspace_Spec_Runtime_Network_Rule_DENY, cidrs, ports...)
+}
+
+func egressNetwork(defaultAction cordiumv1.Workspace_Spec_Runtime_Network_Egress_DefaultAction,
+	rules ...*cordiumv1.Workspace_Spec_Runtime_Network_Rule) *cordiumv1.Workspace_Spec_Runtime_Network {
+	return &cordiumv1.Workspace_Spec_Runtime_Network{
+		Egress: &cordiumv1.Workspace_Spec_Runtime_Network_Egress{
+			DefaultAction: defaultAction,
+			Rules:         rules,
+		},
+	}
+}
+
+func readOnlyFilesystem() *cordiumv1.Workspace_Spec_Runtime_Filesystem {
+	return &cordiumv1.Workspace_Spec_Runtime_Filesystem{ReadOnly: true}
+}
+
+func capabilities(add, drop []string) *cordiumv1.Workspace_Spec_Runtime_Capabilities {
+	return &cordiumv1.Workspace_Spec_Runtime_Capabilities{
+		Add:  add,
+		Drop: drop,
+	}
+}
+
+func onCreateTask(name, run string) *cordiumv1.Workspace_Spec_Runtime_Task {
+	return &cordiumv1.Workspace_Spec_Runtime_Task{
+		Name: name,
+		Run:  run,
+		Type: cordiumv1.Workspace_Spec_Runtime_Task_ON_CREATE,
+	}
+}
+
+func tcpProbe(addr string, port int32) string {
+	return fmt.Sprintf("timeout %d bash -c 'exec 3<>/dev/tcp/%s/%d'",
+		netProbeSeconds, addr, port)
+}
+
+func workspaceHome(elems ...string) string {
+	ret := "${HOME}"
+	for _, elem := range elems {
+		ret = fmt.Sprintf("%s/%s", ret, elem)
+	}
+
+	return ret
 }
 
 func workspacePath(elems ...string) string {
