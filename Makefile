@@ -175,6 +175,7 @@ tidy:
 	cd apis; $(CMD_TIDY)
 	cd pkg; $(CMD_TIDY)
 	cd client/cordium; $(CMD_TIDY)
+	cd cordium-go; $(CMD_TIDY)
 	cd cluster/common; $(CMD_TIDY)
 	cd cluster/rscserver; $(CMD_TIDY)
 	cd cluster/workspace; $(CMD_TIDY)

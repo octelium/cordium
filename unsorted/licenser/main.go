@@ -51,6 +51,7 @@ var (
 	additionalApacheModules = []string{
 		"apis",
 		"pkg",
+		"cordium-go",
 	}
 
 	headerRoots = []string{
@@ -58,6 +59,7 @@ var (
 		"./pkg",
 		"./client",
 		"./cluster",
+		"./cordium-go",
 	}
 )
 

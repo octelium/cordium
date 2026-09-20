@@ -5,6 +5,7 @@
 !/apis/
 !/client/
 !/cluster/
+!/cordium-go/
 !/unsorted/
 !/pkg/
 !/.github/

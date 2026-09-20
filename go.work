@@ -14,5 +14,6 @@ use (
 	./cluster/supervisor
 	./cluster/vigil
 	./cluster/workspace
+	./cordium-go
 	./pkg
 )
