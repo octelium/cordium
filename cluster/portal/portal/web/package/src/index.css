@@ -282,6 +282,7 @@ body {
 
 .terminal-host .xterm .xterm-viewport {
   overflow-y: auto;
+  overscroll-behavior: contain;
   background-color: transparent !important;
 }
 

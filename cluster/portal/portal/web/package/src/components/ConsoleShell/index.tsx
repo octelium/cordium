@@ -25,11 +25,11 @@ export const consoleToolbarButtonClass =
 
 export const consoleToolbarButtonVars = () => ({
   root: {
-    "--ai-bg": "rgb(30 41 59 / 0.95)",
-    "--ai-hover": "rgb(51 65 85)",
-    "--ai-color": "rgb(203 213 225)",
-    "--ai-hover-color": "rgb(248 250 252)",
-    "--ai-bd": "1px solid rgb(71 85 105 / 0.8)",
+    "--ai-bg": "rgb(39 39 42 / 0.95)",
+    "--ai-hover": "rgb(63 63 70)",
+    "--ai-color": "rgb(212 212 216)",
+    "--ai-hover-color": "rgb(250 250 250)",
+    "--ai-bd": "1px solid rgb(82 82 91 / 0.8)",
   },
 });
 
@@ -53,6 +53,7 @@ const ConsoleShell = (props: {
   const dispatch = useAppDispatch();
   const fullscreen = useAppSelector((s) => s.settings.terminalFullscreen);
   const fontSize = useAppSelector((s) => s.settings.terminalFontSize);
+  const shellRef = React.useRef<HTMLDivElement>(null);
 
   useHotkeys([
     ["Escape", () => fullscreen && dispatch(setTerminalFullscreen({ value: false }))],
@@ -63,6 +64,26 @@ const ConsoleShell = (props: {
       dispatch(setTerminalFullscreen({ value: false }));
     };
   }, [dispatch]);
+
+  React.useEffect(() => {
+    const shell = shellRef.current;
+    if (!shell) return;
+
+    const onWheel = (event: WheelEvent) => {
+      let node = event.target as HTMLElement | null;
+      while (node && node !== shell) {
+        if (node.scrollHeight > node.clientHeight) {
+          const overflowY = getComputedStyle(node).overflowY;
+          if (overflowY === "auto" || overflowY === "scroll") return;
+        }
+        node = node.parentElement;
+      }
+      event.preventDefault();
+    };
+
+    shell.addEventListener("wheel", onWheel, { passive: false });
+    return () => shell.removeEventListener("wheel", onWheel);
+  }, [fullscreen]);
 
   const toolbar = (
     <div className="flex items-center gap-2 border-b border-zinc-800 bg-console-chrome px-3 py-2">
@@ -151,7 +172,10 @@ const ConsoleShell = (props: {
   if (fullscreen) {
     return (
       <RemoveScroll>
-        <div className="console-surface fixed inset-0 z-[400] flex flex-col bg-console">
+        <div
+          ref={shellRef}
+          className="console-surface fixed inset-0 z-[400] flex flex-col bg-console"
+        >
           {toolbar}
           <div className="min-h-0 flex-1 px-2 py-2">{props.children}</div>
         </div>
@@ -161,15 +185,19 @@ const ConsoleShell = (props: {
 
   return (
     <div
+      ref={shellRef}
       className={twMerge(
         "console-surface overflow-hidden rounded-xl border border-zinc-800 bg-console",
         "shadow-console",
+        "sticky top-[calc(var(--app-header-height)+0.75rem)] z-10",
       )}
     >
       {toolbar}
       <div
         className="px-2 py-2"
-        style={{ height: props.height ?? 520 }}
+        style={{
+          height: `clamp(240px, calc(100vh - 22rem), ${props.height ?? 520}px)`,
+        }}
       >
         {props.children}
       </div>

@@ -16,6 +16,7 @@ import { useAppDispatch, useAppSelector } from "@/utils/hooks";
 import { getResourceRef } from "@/utils/pb";
 import TerminalT from "@/utils/types/terminal";
 import { ActionIcon, Button, Tooltip } from "@mantine/core";
+import { useHotkeys, useOs } from "@mantine/hooks";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import {
   IconPlus,
@@ -29,16 +30,28 @@ import { twMerge } from "tailwind-merge";
 import { useContextWorkspace } from "../utils";
 import { canUseTerminals } from "./utils";
 
+const WHEEL_STEP_DELTA = 40;
+const WHEEL_STEP_COOLDOWN_MS = 90;
+
 const TabStrip = (props: {
   workspace: WsPB.Workspace;
   onCreate: () => void;
   creating: boolean;
   devMode: boolean;
+  newTerminalHint: string;
+  newTerminalKeys: string;
 }) => {
   const dispatch = useAppDispatch();
   const tg = useAppSelector((state) => state.terminalGroup);
   const wsC = getClientWorkspaceSvc(props.workspace.status?.regionRef);
   const scrollRef = React.useRef<HTMLDivElement>(null);
+  const wheelDelta = React.useRef(0);
+  const lastStepAt = React.useRef(0);
+
+  const groupRef = React.useRef(tg);
+  React.useEffect(() => {
+    groupRef.current = tg;
+  }, [tg]);
 
   const handleRemove = async (id: string) => {
     if (!props.devMode) {
@@ -47,23 +60,51 @@ const TabStrip = (props: {
     dispatch(removeTerminal({ id }));
   };
 
-  const handleTabWheel = React.useCallback((event: WheelEvent) => {
-    const container = scrollRef.current;
-    if (!container) return;
+  const stepTerminal = React.useCallback(
+    (direction: number) => {
+      const { terminals, activeTerminal } = groupRef.current;
+      if (terminals.length < 2) return;
 
-    event.preventDefault();
-    const delta =
-      Math.abs(event.deltaX) > Math.abs(event.deltaY)
-        ? event.deltaX
-        : event.deltaY;
-    const maxScrollLeft = container.scrollWidth - container.clientWidth;
-    const nextScrollLeft = Math.min(
-      maxScrollLeft,
-      Math.max(0, container.scrollLeft + delta),
-    );
+      const idx = terminals.findIndex((x) => x.id === activeTerminal);
+      if (idx < 0) return;
 
-    container.scrollLeft = nextScrollLeft;
-  }, []);
+      const next = Math.min(terminals.length - 1, Math.max(0, idx + direction));
+      if (next === idx) return;
+
+      dispatch(setActiveTerminal({ id: terminals[next].id }));
+    },
+    [dispatch],
+  );
+
+  const handleTabWheel = React.useCallback(
+    (event: WheelEvent) => {
+      event.preventDefault();
+
+      const raw =
+        Math.abs(event.deltaX) > Math.abs(event.deltaY)
+          ? event.deltaX
+          : event.deltaY;
+      if (!raw) return;
+
+      const delta = event.deltaMode === 0 ? raw : raw * 16;
+
+      if (Math.sign(delta) !== Math.sign(wheelDelta.current)) {
+        wheelDelta.current = 0;
+      }
+      wheelDelta.current += delta;
+
+      if (Math.abs(wheelDelta.current) < WHEEL_STEP_DELTA) return;
+
+      const direction = Math.sign(wheelDelta.current);
+      wheelDelta.current = 0;
+
+      if (event.timeStamp - lastStepAt.current < WHEEL_STEP_COOLDOWN_MS) return;
+      lastStepAt.current = event.timeStamp;
+
+      stepTerminal(direction);
+    },
+    [stepTerminal],
+  );
 
   React.useEffect(() => {
     const container = scrollRef.current;
@@ -73,10 +114,22 @@ const TabStrip = (props: {
     return () => container.removeEventListener("wheel", handleTabWheel);
   }, [handleTabWheel]);
 
+  React.useEffect(() => {
+    const container = scrollRef.current;
+    if (!container || !tg.activeTerminal) return;
+
+    const tab = container.querySelector<HTMLElement>(
+      `[data-terminal-tab="${CSS.escape(tg.activeTerminal)}"]`,
+    );
+    tab?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [tg.activeTerminal, tg.terminals.length]);
+
   return (
     <div className="flex min-w-0 flex-1 items-center gap-1">
       <div
         ref={scrollRef}
+        role="tablist"
+        aria-label="Terminal sessions"
         className="scrollbar-none flex min-w-0 flex-1 items-center gap-1 overflow-x-auto overscroll-none"
       >
         {tg.terminals.map((t) => {
@@ -85,6 +138,7 @@ const TabStrip = (props: {
             <div
               key={t.id}
               role="tab"
+              data-terminal-tab={t.id}
               aria-selected={isActive}
               onClick={() => dispatch(setActiveTerminal({ id: t.id }))}
               className={twMerge(
@@ -134,12 +188,19 @@ const TabStrip = (props: {
           }}
         />
 
-        <div className="sticky right-0 z-10 shrink-0 self-stretch bg-console-chrome pl-1">
-          <Tooltip label="New terminal">
+        <div
+          className={twMerge(
+            "sticky right-0 z-10 shrink-0 self-stretch bg-console-chrome pl-1",
+            "before:pointer-events-none before:absolute before:right-full before:top-0",
+            "before:h-full before:w-6 before:bg-gradient-to-l before:from-console-chrome before:to-transparent",
+          )}
+        >
+          <Tooltip label={`New terminal (${props.newTerminalHint})`}>
             <ActionIcon
               size={27}
               variant="transparent"
               aria-label="New terminal"
+              aria-keyshortcuts={props.newTerminalKeys}
               className={consoleToolbarButtonClass}
               vars={consoleToolbarButtonVars}
               loading={props.creating}
@@ -162,6 +223,9 @@ const TerminalGroup = (props: { workspace: WsPB.Workspace }) => {
   const dispatch = useAppDispatch();
   const ready = canUseTerminals(item);
   const devMode = isDev();
+  const isMac = useOs() === "macos";
+  const newTerminalHint = isMac ? "⌘+⌥+T" : "Ctrl+Alt+T";
+  const newTerminalKeys = isMac ? "Meta+Alt+T" : "Control+Alt+T";
 
   const qryListTerm = useQuery({
     queryKey: ["workspace/ws/listTerminal", item.metadata!.uid],
@@ -218,6 +282,19 @@ const TerminalGroup = (props: { workspace: WsPB.Workspace }) => {
     onError,
   });
 
+  useHotkeys(
+    [
+      [
+        "mod+alt+T",
+        () => {
+          if (ready && !mutationCreate.isPending) mutationCreate.mutate();
+        },
+        { preventDefault: true, usePhysicalKeys: true },
+      ],
+    ],
+    [],
+  );
+
   if (!ready) {
     return (
       <Empty
@@ -237,13 +314,15 @@ const TerminalGroup = (props: { workspace: WsPB.Workspace }) => {
         title="No terminal sessions"
         description="Open a shell to interact with your workspace."
         action={
-          <Button
-            leftSection={<IconPlus size={15} />}
-            loading={mutationCreate.isPending}
-            onClick={() => mutationCreate.mutate()}
-          >
-            New terminal
-          </Button>
+          <Tooltip label={`New terminal (${newTerminalHint})`}>
+            <Button
+              leftSection={<IconPlus size={15} />}
+              loading={mutationCreate.isPending}
+              onClick={() => mutationCreate.mutate()}
+            >
+              New terminal
+            </Button>
+          </Tooltip>
         }
       />
     );
@@ -258,6 +337,8 @@ const TerminalGroup = (props: { workspace: WsPB.Workspace }) => {
           creating={mutationCreate.isPending}
           onCreate={() => mutationCreate.mutate()}
           devMode={devMode}
+          newTerminalHint={newTerminalHint}
+          newTerminalKeys={newTerminalKeys}
         />
       }
     >
