@@ -47,17 +47,17 @@ const fontFamilyMonospace = [
   "monospace",
 ].join(",");
 
-const slate: MantineColorsTuple = [
-  "#f8fafc",
-  "#f1f5f9",
-  "#e2e8f0",
-  "#cbd5e1",
-  "#94a3b8",
-  "#64748b",
-  "#475569",
-  "#334155",
-  "#1e293b",
-  "#0f172a",
+const zinc: MantineColorsTuple = [
+  "#fafafa",
+  "#f4f4f5",
+  "#e4e4e7",
+  "#d4d4d8",
+  "#a1a1aa",
+  "#71717a",
+  "#52525b",
+  "#3f3f46",
+  "#27272a",
+  "#18181b",
 ];
 
 export const cssVariablesResolver: CSSVariablesResolver = () => ({
@@ -117,8 +117,8 @@ const theme = createTheme({
   fontFamily,
   fontFamilyMonospace,
   colors: {
-    slate,
-    primary: virtualColor({ name: "primary", light: "dark", dark: "slate" }),
+    zinc,
+    primary: virtualColor({ name: "primary", light: "dark", dark: "zinc" }),
   },
   primaryColor: "primary",
   autoContrast: true,

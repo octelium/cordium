@@ -33,7 +33,7 @@ const Page = () => {
     <ConsoleShell
       height={fullscreen ? undefined : 560}
       tabs={
-        <Text size="xs" fw={600} className="px-2 text-slate-400">
+        <Text size="xs" fw={600} className="px-2 text-zinc-400">
           Startup and task logs · live
         </Text>
       }

@@ -91,21 +91,21 @@ const TabStrip = (props: {
                 "flex max-w-[11rem] shrink-0 cursor-pointer select-none items-center gap-1.5",
                 "rounded-md border px-2.5 py-1 transition-colors duration-150",
                 isActive
-                  ? "border-slate-600 bg-slate-700/70"
-                  : "border-transparent hover:bg-slate-700/40",
+                  ? "border-zinc-600 bg-zinc-700/70"
+                  : "border-transparent hover:bg-zinc-700/40",
               )}
             >
               <IconTerminal2
                 size={12}
                 className={twMerge(
                   "shrink-0",
-                  isActive ? "text-emerald-300" : "text-slate-500",
+                  isActive ? "text-emerald-300" : "text-zinc-500",
                 )}
               />
               <span
                 className={twMerge(
                   "truncate font-mono text-[0.72rem] font-semibold",
-                  isActive ? "text-slate-100" : "text-slate-400",
+                  isActive ? "text-zinc-100" : "text-zinc-400",
                 )}
               >
                 {truncateUtf8(t.title, 24, { suffix: "…" })}
@@ -114,7 +114,7 @@ const TabStrip = (props: {
                 size={16}
                 variant="transparent"
                 aria-label="Close terminal"
-                className="shrink-0 text-slate-500 transition-colors hover:bg-slate-600/70 hover:text-rose-300"
+                className="shrink-0 text-zinc-500 transition-colors hover:bg-zinc-600/70 hover:text-rose-300"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleRemove(t.id);

@@ -24,7 +24,7 @@ const CodeEditor = (props: {
   }, [props.mode]);
 
   return (
-    <div className="console-surface rounded-lg border border-slate-800 overflow-hidden">
+    <div className="console-surface rounded-lg border border-zinc-800 overflow-hidden">
       <CodeMirror
         value={props.value}
         readOnly={props.readOnly}
