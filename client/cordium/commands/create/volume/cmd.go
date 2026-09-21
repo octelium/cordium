@@ -40,7 +40,7 @@ func init() {
 	Cmd.PersistentFlags().Uint32VarP(&cmdArgs.Size, "size", "", 0, "The size of the Volume in megabytes")
 	Cmd.PersistentFlags().BoolVarP(&cmdArgs.Shared, "shared", "", false,
 		"Allow the Volume to be mounted by several Workspaces at the same time")
-	Cmd.PersistentFlags().StringVarP(&cmdArgs.Region, "region", "", "", "The Region that hosts the Volume")
+	Cmd.PersistentFlags().StringVarP(&cmdArgs.Region, "region", "", "", "The Region that hosts the Volume. It defaults to your preferred Region")
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Out, "out", "o", "", "Output format")
 }
 

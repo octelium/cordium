@@ -21,6 +21,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"syscall"
 	"testing"
 
 	workspacecommon "github.com/octelium/cordium/cluster/common"
@@ -42,6 +43,30 @@ func TestGetVolumeRootMountArg(t *testing.T) {
 	for _, opt := range []string{"rbind", "nodev", "nosuid"} {
 		assert.Contains(t, strings.Split(parts[2], ","), opt)
 	}
+}
+
+func TestIsMappedID(t *testing.T) {
+
+	srv := &Server{octeliumUID: 543210, octeliumGID: 543210}
+
+	t.Run("the Workspace container root is mapped", func(t *testing.T) {
+		assert.True(t, srv.isMappedID(543210))
+	})
+
+	t.Run("an unprivileged Workspace user is mapped", func(t *testing.T) {
+		for _, containerUID := range []uint32{1, 1000, 65536} {
+			assert.True(t, srv.isMappedID(543210+containerUID),
+				"the container uid %d must be recognized as already owned by the Workspace",
+				containerUID)
+		}
+	})
+
+	t.Run("the IDs outside of the namespace are not mapped", func(t *testing.T) {
+		assert.False(t, srv.isMappedID(0))
+		assert.False(t, srv.isMappedID(1000))
+		assert.False(t, srv.isMappedID(543209))
+		assert.False(t, srv.isMappedID(543210+1+subordinateIDCount))
+	})
 }
 
 func TestPrepareVolumeRoots(t *testing.T) {
@@ -72,6 +97,29 @@ func TestPrepareVolumeRoots(t *testing.T) {
 		entries, err := os.ReadDir(root)
 		require.Nil(t, err, "%+v", err)
 		assert.Equal(t, 4, len(entries))
+	})
+
+	t.Run("an already initialized Volume is never re-owned", func(t *testing.T) {
+		root := t.TempDir()
+
+		oldRoot := volumeRootDir
+		t.Cleanup(func() { volumeRootDir = oldRoot })
+		volumeRootDir = root
+
+		initialized := path.Join(root, "vol0")
+		require.Nil(t, os.MkdirAll(initialized, 0775))
+		require.Nil(t, os.WriteFile(path.Join(initialized, "f"), []byte("x"), 0644))
+
+		before, err := os.Stat(initialized)
+		require.Nil(t, err, "%+v", err)
+
+		srv := &Server{octeliumUID: uid + 100000, octeliumGID: gid + 100000}
+		srv.prepareVolumeRoots()
+
+		after, err := os.Stat(initialized)
+		require.Nil(t, err, "%+v", err)
+		assert.Equal(t, before.Sys().(*syscall.Stat_t).Uid, after.Sys().(*syscall.Stat_t).Uid)
+		assert.Equal(t, before.Mode().Perm(), after.Mode().Perm())
 	})
 
 	t.Run("an unownable Volume dir does not abort the initialization", func(t *testing.T) {

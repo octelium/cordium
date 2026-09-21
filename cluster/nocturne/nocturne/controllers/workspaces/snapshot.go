@@ -27,6 +27,7 @@ import (
 	"github.com/octelium/octelium/pkg/common/pbutils"
 	"github.com/octelium/octelium/pkg/grpcerr"
 	"go.uber.org/zap"
+	k8scorev1 "k8s.io/api/core/v1"
 	k8serr "k8s.io/apimachinery/pkg/api/errors"
 	k8smetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -118,6 +119,8 @@ func (c *Controller) reconcileWorkspaceSnapshot(ctx context.Context, snapshot *c
 			})
 	}
 
+	old := pbutils.Clone(snapshot).(*cordiumv1.WorkspaceSnapshot)
+
 	k8sSnapshot, err := c.snapshotC.SnapshotV1().VolumeSnapshots(ns).
 		Get(ctx, getWorkspaceSnapshotK8sName(snapshot), k8smetav1.GetOptions{})
 	if err != nil {
@@ -135,7 +138,7 @@ func (c *Controller) reconcileWorkspaceSnapshot(ctx context.Context, snapshot *c
 		}
 	}
 
-	return c.setWorkspaceSnapshotStatus(ctx, snapshot, k8sSnapshot)
+	return c.setWorkspaceSnapshotStatus(ctx, old, snapshot, k8sSnapshot)
 }
 
 func (c *Controller) doCreateWorkspaceSnapshot(ctx context.Context,
@@ -160,6 +163,13 @@ func (c *Controller) doCreateWorkspaceSnapshot(ctx context.Context,
 
 	ws, tmpl := c.getWorkspaceSnapshotSources(ctx, snapshot)
 
+	if snapshot.Status.Consistency == cordiumv1.WorkspaceSnapshot_Status_CONSISTENCY_CLEAN &&
+		!ucordiumv1.ToWorkspace(ws).IsStopped() {
+		zap.L().Debug("The Workspace is not stopped anymore. Downgrading the consistency of the WorkspaceSnapshot",
+			zap.String("name", snapshot.Metadata.Name))
+		snapshot.Status.Consistency = cordiumv1.WorkspaceSnapshot_Status_CONSISTENCY_CRASH
+	}
+
 	zap.L().Debug("Creating the volume snapshot of the WorkspaceSnapshot",
 		zap.String("name", snapshot.Metadata.Name), zap.String("pvc", pvcName))
 
@@ -174,7 +184,7 @@ func (c *Controller) doCreateWorkspaceSnapshot(ctx context.Context,
 		template:  tmpl,
 	})
 	if err != nil {
-		if !k8serr.IsNotFound(err) {
+		if !isVolumeSnapshotUnsupportedErr(err) {
 			return nil, err
 		}
 
@@ -222,9 +232,7 @@ func (c *Controller) getWorkspaceSnapshotSources(ctx context.Context,
 }
 
 func (c *Controller) setWorkspaceSnapshotStatus(ctx context.Context,
-	snapshot *cordiumv1.WorkspaceSnapshot, k8sSnapshot *v1.VolumeSnapshot) error {
-
-	old := pbutils.Clone(snapshot).(*cordiumv1.WorkspaceSnapshot)
+	old, snapshot *cordiumv1.WorkspaceSnapshot, k8sSnapshot *v1.VolumeSnapshot) error {
 
 	if k8sSnapshot.Status != nil {
 		if k8sSnapshot.Status.CreationTime != nil {
@@ -236,6 +244,10 @@ func (c *Controller) setWorkspaceSnapshotStatus(ctx context.Context,
 				snapshot.Status.RestoreSizeBytes = uint64(restoreSize)
 			}
 		}
+	}
+
+	if snapshot.Status.RestoreSizeBytes == 0 {
+		snapshot.Status.RestoreSizeBytes = c.getSourcePVCSizeBytes(ctx, snapshot)
 	}
 
 	switch {
@@ -268,6 +280,31 @@ func (c *Controller) setWorkspaceSnapshotStatus(ctx context.Context,
 	}
 
 	return nil
+}
+
+func (c *Controller) getSourcePVCSizeBytes(ctx context.Context,
+	snapshot *cordiumv1.WorkspaceSnapshot) uint64 {
+
+	pvc, err := c.k8sC.CoreV1().PersistentVolumeClaims(ns).
+		Get(ctx, getPVCNameByWorkspaceUID(snapshot.Status.WorkspaceRef.Uid), k8smetav1.GetOptions{})
+	if err != nil {
+		return 0
+	}
+
+	for _, quantity := range []k8scorev1.ResourceList{
+		pvc.Status.Capacity, pvc.Spec.Resources.Requests,
+	} {
+		if val, ok := quantity["storage"]; ok && val.Value() > 0 {
+			return uint64(val.Value())
+		}
+	}
+
+	return 0
+}
+
+func isVolumeSnapshotUnsupportedErr(err error) bool {
+	return k8serr.IsNotFound(err) || k8serr.IsForbidden(err) ||
+		k8serr.IsInvalid(err) || k8serr.IsMethodNotSupported(err)
 }
 
 func (c *Controller) isWorkspaceSnapshotTimedOut(snapshot *cordiumv1.WorkspaceSnapshot) bool {

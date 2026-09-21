@@ -180,6 +180,79 @@ func TestReconcileWorkspaceSnapshot(t *testing.T) {
 		assert.True(t, k8serr.IsNotFound(err), "%+v", err)
 	})
 
+	t.Run("a clean snapshot of a Workspace that started again is downgraded", func(t *testing.T) {
+		ws := c.createWorkspace(ctx, t)
+		c.createPVC(ctx, t, ws)
+
+		snapshot := c.createSnapshot(ctx, t, ws, c.regionRef)
+		snapshot.Status.Consistency = cordiumv1.WorkspaceSnapshot_Status_CONSISTENCY_CLEAN
+		snapshot, err := c.fakeC.OcteliumC.CordiumC().UpdateWorkspaceSnapshot(ctx, snapshot)
+		assert.Nil(t, err, "%+v", err)
+
+		ws.Status.State = cordiumv1.Workspace_Status_RUNNING
+		_, err = c.fakeC.OcteliumC.CordiumC().UpdateWorkspace(ctx, ws)
+		assert.Nil(t, err, "%+v", err)
+
+		assert.Nil(t, c.ctl.reconcileWorkspaceSnapshot(ctx, snapshot))
+
+		cur, err := c.fakeC.OcteliumC.CordiumC().GetWorkspaceSnapshot(ctx, &rmetav1.GetOptions{
+			Uid: snapshot.Metadata.Uid,
+		})
+		assert.Nil(t, err, "%+v", err)
+		assert.Equal(t, cordiumv1.WorkspaceSnapshot_Status_CONSISTENCY_CRASH,
+			cur.Status.Consistency,
+			"a clean snapshot was promised while the Workspace was running at the storage cut")
+	})
+
+	t.Run("a clean snapshot of a stopped Workspace keeps its guarantee", func(t *testing.T) {
+		ws := c.createWorkspace(ctx, t)
+		c.createPVC(ctx, t, ws)
+
+		snapshot := c.createSnapshot(ctx, t, ws, c.regionRef)
+		snapshot.Status.Consistency = cordiumv1.WorkspaceSnapshot_Status_CONSISTENCY_CLEAN
+		snapshot, err := c.fakeC.OcteliumC.CordiumC().UpdateWorkspaceSnapshot(ctx, snapshot)
+		assert.Nil(t, err, "%+v", err)
+
+		assert.Nil(t, c.ctl.reconcileWorkspaceSnapshot(ctx, snapshot))
+
+		cur, err := c.fakeC.OcteliumC.CordiumC().GetWorkspaceSnapshot(ctx, &rmetav1.GetOptions{
+			Uid: snapshot.Metadata.Uid,
+		})
+		assert.Nil(t, err, "%+v", err)
+		assert.Equal(t, cordiumv1.WorkspaceSnapshot_Status_CONSISTENCY_CLEAN, cur.Status.Consistency)
+	})
+
+	t.Run("the restore size falls back to the size of the source volume", func(t *testing.T) {
+		ws := c.createWorkspace(ctx, t)
+
+		_, err := c.ctl.k8sC.CoreV1().PersistentVolumeClaims(ns).Create(ctx,
+			&k8scorev1.PersistentVolumeClaim{
+				ObjectMeta: k8smetav1.ObjectMeta{
+					Name:      c.ctl.getPVCName(ws),
+					Namespace: ns,
+				},
+				Spec: k8scorev1.PersistentVolumeClaimSpec{
+					Resources: k8scorev1.VolumeResourceRequirements{
+						Requests: k8scorev1.ResourceList{
+							"storage": *resource.NewQuantity(7*1000*1000*1000, resource.BinarySI),
+						},
+					},
+				},
+			}, k8smetav1.CreateOptions{})
+		assert.Nil(t, err, "%+v", err)
+
+		snapshot := c.createSnapshot(ctx, t, ws, c.regionRef)
+
+		assert.Nil(t, c.ctl.reconcileWorkspaceSnapshot(ctx, snapshot))
+
+		cur, err := c.fakeC.OcteliumC.CordiumC().GetWorkspaceSnapshot(ctx, &rmetav1.GetOptions{
+			Uid: snapshot.Metadata.Uid,
+		})
+		assert.Nil(t, err, "%+v", err)
+		assert.Equal(t, uint64(7*1000*1000*1000), cur.Status.RestoreSizeBytes,
+			"a snapshot whose driver reports no restore size must fall back to the source volume size")
+	})
+
 	t.Run("a snapshot without a source volume fails", func(t *testing.T) {
 		ws := c.createWorkspace(ctx, t)
 		snapshot := c.createSnapshot(ctx, t, ws, c.regionRef)

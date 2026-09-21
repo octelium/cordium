@@ -72,8 +72,9 @@ func SharedVolume() VolumeOption {
 	}
 }
 
-// InVolumeRegion pins the Volume to a specific Region. Only the Workspaces
-// that run in that Region can mount it.
+// InVolumeRegion pins the Volume to a specific Region by name or by UID. Only
+// the Workspaces that run in that Region can mount it. It defaults to the
+// calling User's preferred Region.
 func InVolumeRegion(name string) VolumeOption {
 	return func(vol *cordiumv1.Volume) error {
 		if name == "" {

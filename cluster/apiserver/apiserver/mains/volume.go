@@ -22,6 +22,7 @@ import (
 	"github.com/octelium/cordium/cluster/apiserver/apiserver/commonw"
 	"github.com/octelium/cordium/cluster/common/ourscsrv"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
+	"github.com/octelium/octelium/apis/main/corev1"
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/apis/rsc/rmetav1"
 	"github.com/octelium/octelium/cluster/apiserver/apiserver/common"
@@ -102,6 +103,10 @@ func (s *Server) CreateVolume(ctx context.Context, req *cordiumv1.Volume) (*cord
 		}
 	}
 
+	if !isValidVolumeAccessMode(req.Spec.AccessMode) {
+		return nil, grpcutils.InvalidArg("Invalid Volume accessMode")
+	}
+
 	item := &cordiumv1.Volume{
 		Metadata: common.MetadataFrom(req.Metadata),
 		Spec: &cordiumv1.Volume_Spec{
@@ -126,14 +131,14 @@ func (s *Server) CreateVolume(ctx context.Context, req *cordiumv1.Volume) (*cord
 		return nil, err
 	}
 
-	region, err := s.chooseRegion(ctx, nil, func() *metav1.ObjectReference {
+	region, err := s.chooseVolumeRegion(ctx, func() *metav1.ObjectReference {
 		if req.Status == nil {
 			return nil
 		}
 		return req.Status.RegionRef
 	}())
 	if err != nil {
-		return nil, serr.K8sNotFoundOrInternalWithErr(err)
+		return nil, err
 	}
 
 	item.Status.RegionRef = umetav1.GetObjectReference(region)
@@ -176,6 +181,10 @@ func (s *Server) UpdateVolume(ctx context.Context, req *cordiumv1.Volume) (*cord
 	cc, err := s.octeliumC.CordiumV1Utils().GetClusterConfig(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	if !isValidVolumeAccessMode(req.Spec.AccessMode) {
+		return nil, grpcutils.InvalidArg("Invalid Volume accessMode")
 	}
 
 	if req.Spec.AccessMode != cordiumv1.Volume_ACCESS_MODE_UNSET &&
@@ -284,6 +293,34 @@ func (s *Server) DeleteVolume(ctx context.Context,
 	return &metav1.OperationResult{}, nil
 }
 
+func (s *Server) chooseVolumeRegion(ctx context.Context,
+	req *metav1.ObjectReference) (*corev1.Region, error) {
+
+	if req == nil || (req.Name == "" && req.Uid == "") {
+		region, err := s.chooseRegion(ctx, nil, nil)
+		if err != nil {
+			return nil, serr.K8sNotFoundOrInternalWithErr(err)
+		}
+		return region, nil
+	}
+
+	if err := apivalidation.CheckObjectRef(req, &apivalidation.CheckGetOptionsOpts{}); err != nil {
+		return nil, err
+	}
+
+	region, err := s.octeliumC.CoreC().GetRegion(ctx, apivalidation.ObjectReferenceToRGetOptions(req))
+	if err != nil {
+		return nil, serr.K8sNotFoundOrInternalWithErr(err)
+	}
+
+	if !regionHasCordium(region) {
+		return nil, grpcutils.InvalidArg("The Region: %s does not accept Workspaces",
+			region.Metadata.Name)
+	}
+
+	return region, nil
+}
+
 func (s *Server) checkVolumeIsNotMounted(ctx context.Context, vol *cordiumv1.Volume) error {
 
 	tmplList, err := s.octeliumC.CordiumC().ListTemplate(ctx, ourscsrv.FilterBySpaceRef(vol.Status.SpaceRef))
@@ -326,6 +363,17 @@ func hasVolumeMount(mounts []*cordiumv1.Workspace_Spec_Runtime_VolumeMount, vol 
 	}
 
 	return false
+}
+
+func isValidVolumeAccessMode(accessMode cordiumv1.Volume_AccessMode) bool {
+	switch accessMode {
+	case cordiumv1.Volume_ACCESS_MODE_UNSET,
+		cordiumv1.Volume_ACCESS_MODE_EXCLUSIVE,
+		cordiumv1.Volume_ACCESS_MODE_SHARED:
+		return true
+	default:
+		return false
+	}
 }
 
 func (s *Server) getMaxVolumesPerSpace(cc *cordiumv1.ClusterConfig) int {

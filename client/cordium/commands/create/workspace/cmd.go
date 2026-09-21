@@ -85,7 +85,7 @@ func init() {
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Space, "space", "", "", "Parent Space name (e.g. my-project)")
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Template, "template", "", "", "Parent Template name (e.g. ml-env.my-project)")
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Snapshot, "snapshot", "", "",
-		"Restore the Workspace storage from a WorkspaceSnapshot (e.g. before-upgrade). The Workspace is created inside the Space of the snapshot")
+		"Restore the Workspace storage from a WorkspaceSnapshot (e.g. before-upgrade). The Workspace is created from the Template of the snapshotted Workspace unless --template or --space is set")
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.File, "file", "", "", "Path to a Workspace YAML spec file")
 	Cmd.PersistentFlags().BoolVarP(&cmdArgs.Start, "start", "", false, "Start the Workspace immediately after creation")
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Repo, "repository", "", "", "Primary repository URL to clone into /workspace/repo")

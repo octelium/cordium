@@ -51,8 +51,13 @@ func (s *Server) prepareVolumeRoots() {
 			continue
 		}
 
-		if stat, ok := info.Sys().(*syscall.Stat_t); ok &&
-			stat.Uid == uint32(s.octeliumUID) && stat.Gid == uint32(s.octeliumGID) {
+		if stat, ok := info.Sys().(*syscall.Stat_t); ok && s.isMappedID(stat.Uid) {
+			continue
+		}
+
+		if !isEmptyDir(pth) {
+			zap.L().Debug("The Volume is already initialized. Leaving its ownership alone",
+				zap.String("path", pth))
 			continue
 		}
 
@@ -63,6 +68,20 @@ func (s *Server) prepareVolumeRoots() {
 				zap.String("path", pth), zap.Error(err))
 		}
 	}
+}
+
+func (s *Server) isMappedID(id uint32) bool {
+	return id >= uint32(s.octeliumUID) &&
+		id < uint32(s.octeliumUID)+1+subordinateIDCount
+}
+
+func isEmptyDir(pth string) bool {
+	entries, err := os.ReadDir(pth)
+	if err != nil {
+		return false
+	}
+
+	return len(entries) == 0
 }
 
 func getVolumeRootMountArg() string {

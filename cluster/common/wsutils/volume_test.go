@@ -32,8 +32,9 @@ func TestCheckVolumeMountPath(t *testing.T) {
 		"/mnt/datasets",
 		"/home/octelium/data",
 		"/workspace-data",
-		"/var/lib/my-app",
 		"/opt/models",
+		"/var/lib/my-app",
+		"/etc/my-app",
 	}
 
 	for _, pth := range valid {
@@ -63,6 +64,15 @@ func TestCheckVolumeMountPath(t *testing.T) {
 		"/workspace",
 		"/cordium-volumes",
 		"/cordium-volumes/abc",
+		"/proc/self",
+		"/sys/fs/cgroup",
+		"/dev/shm",
+		"/run/octelium",
+		"/var/run/octelium-proxy.sock",
+		"/var/lib/docker/overlay",
+		"/var/lib/containers/storage",
+		"/octelium",
+		"/octelium/workspace",
 		`/data\x`,
 	}
 

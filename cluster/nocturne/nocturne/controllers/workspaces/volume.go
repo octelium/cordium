@@ -29,6 +29,7 @@ import (
 	"github.com/octelium/octelium/pkg/common/pbutils"
 	"github.com/octelium/octelium/pkg/grpcerr"
 	utils_types "github.com/octelium/octelium/pkg/utils/types"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	k8serr "k8s.io/apimachinery/pkg/api/errors"
@@ -110,7 +111,40 @@ func (c *Controller) reconcileVolume(ctx context.Context, vol *cordiumv1.Volume)
 		return err
 	}
 
+	if pvc == nil {
+		return nil
+	}
+
 	return c.setVolumeStatus(ctx, vol, pvc)
+}
+
+func volumeWasProvisioned(vol *cordiumv1.Volume) bool {
+	return vol.Status.ReadyAt.IsValid() ||
+		vol.Status.State == cordiumv1.Volume_Status_STATE_READY
+}
+
+func (c *Controller) setVolumeFailure(ctx context.Context,
+	vol *cordiumv1.Volume, failure *cordiumv1.Volume_Status_Failure) error {
+
+	if vol.Status.State == cordiumv1.Volume_Status_STATE_FAILED &&
+		pbutils.IsEqual(vol.Status.Failure, failure) {
+		return nil
+	}
+
+	zap.L().Warn("Setting the Volume as failed",
+		zap.String("name", vol.Metadata.Name), zap.Any("failure", failure))
+
+	vol.Status.State = cordiumv1.Volume_Status_STATE_FAILED
+	vol.Status.Failure = failure
+
+	if _, err := c.octeliumC.CordiumC().UpdateVolume(ctx, vol); err != nil {
+		if grpcerr.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+
+	return nil
 }
 
 func (c *Controller) setVolumePersistentVolumeClaim(ctx context.Context,
@@ -119,10 +153,29 @@ func (c *Controller) setVolumePersistentVolumeClaim(ctx context.Context,
 	pvc, err := c.k8sC.CoreV1().PersistentVolumeClaims(ns).
 		Get(ctx, getVolumePVCName(vol), k8smetav1.GetOptions{})
 	if err == nil {
+		if pvc.Labels["octelium.com/volume-uid"] != vol.Metadata.Uid {
+			return nil, errors.Errorf(
+				"The PVC: %s does not belong to the Volume: %s", pvc.Name, vol.Metadata.Name)
+		}
+
 		return c.setVolumePersistentVolumeClaimSize(ctx, vol, pvc)
 	}
 
 	if !k8serr.IsNotFound(err) {
+		return nil, err
+	}
+
+	if volumeWasProvisioned(vol) {
+		return nil, c.setVolumeFailure(ctx, vol, &cordiumv1.Volume_Status_Failure{
+			Message: "The underlying storage of the Volume does not exist anymore",
+			Type: &cordiumv1.Volume_Status_Failure_Storage_{
+				Storage: &cordiumv1.Volume_Status_Failure_Storage{},
+			},
+		})
+	}
+
+	storageClassName, err := c.getVolumeStorageClassName(ctx, vol)
+	if err != nil {
 		return nil, err
 	}
 
@@ -147,7 +200,7 @@ func (c *Controller) setVolumePersistentVolumeClaim(ctx context.Context,
 					"storage": *getVolumeStorageQuantity(vol),
 				},
 			},
-			StorageClassName: c.getVolumeStorageClassName(ctx, vol),
+			StorageClassName: storageClassName,
 		},
 	}, k8smetav1.CreateOptions{})
 	if err != nil {
@@ -239,17 +292,18 @@ func (c *Controller) setVolumeStatus(ctx context.Context,
 	return nil
 }
 
-func (c *Controller) getVolumeStorageClassName(ctx context.Context, vol *cordiumv1.Volume) *string {
+func (c *Controller) getVolumeStorageClassName(ctx context.Context,
+	vol *cordiumv1.Volume) (*string, error) {
 
 	cc, err := c.octeliumC.CordiumV1Utils().GetClusterConfig(ctx)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	if cc.Spec.Volume == nil || cc.Spec.Volume.Storage == nil ||
 		cc.Spec.Volume.Storage.StorageClass == nil ||
 		len(cc.Spec.Volume.Storage.StorageClass.Rules) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	reqCtxMap := map[string]any{
@@ -265,20 +319,22 @@ func (c *Controller) getVolumeStorageClassName(ctx context.Context, vol *cordium
 
 		cond, err := ovutils.ToCoreCondition(rule.Condition)
 		if err != nil {
-			continue
+			return nil, errors.Errorf(
+				"Could not read the storageClass rules of the Cluster: %+v", err)
 		}
 
 		isMatched, err := c.celEngine.EvalCondition(ctx, cond, reqCtxMap)
 		if err != nil {
-			continue
+			return nil, errors.Errorf(
+				"Could not evaluate the storageClass rules of the Cluster: %+v", err)
 		}
 
 		if isMatched {
-			return utils_types.StrToPtr(rule.StorageClass)
+			return utils_types.StrToPtr(rule.StorageClass), nil
 		}
 	}
 
-	return nil
+	return nil, nil
 }
 
 func getVolumeAccessModes(vol *cordiumv1.Volume) []corev1.PersistentVolumeAccessMode {
@@ -291,7 +347,7 @@ func getVolumeAccessModes(vol *cordiumv1.Volume) []corev1.PersistentVolumeAccess
 }
 
 func getVolumeStorageQuantity(vol *cordiumv1.Volume) *resource.Quantity {
-	return getResourceQuantity(fmt.Sprintf("%dMi", vol.Spec.Size.GetMegabytes()))
+	return getResourceQuantity(fmt.Sprintf("%dM", vol.Spec.Size.GetMegabytes()))
 }
 
 func getVolumePVCName(vol *cordiumv1.Volume) string {

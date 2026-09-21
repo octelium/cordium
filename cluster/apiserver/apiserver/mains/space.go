@@ -40,6 +40,7 @@ import (
 	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"github.com/octelium/octelium/pkg/common/pbutils"
 	"github.com/octelium/octelium/pkg/grpcerr"
+	"go.uber.org/zap"
 )
 
 const maxSpacesPerUser = 150
@@ -294,19 +295,14 @@ func (s *Server) DeleteSpace(ctx context.Context, req *metav1.DeleteOptions) (*m
 	}
 
 	{
-		memList, err := s.octeliumC.CordiumC().ListMembership(ctx, ourscsrv.FilterBySpace(itm))
+		itmList, err := s.octeliumC.CordiumC().ListWorkspace(ctx, ourscsrv.FilterBySpace(itm))
 		if err != nil {
 			return nil, err
 		}
 
-		for _, item := range memList.Items {
-			_, err := s.octeliumC.CordiumC().DeleteMembership(ctx, &rmetav1.DeleteOptions{
-				Uid: item.Metadata.Uid,
-			})
-			if err != nil {
-				if !grpcerr.IsNotFound(err) {
-					return nil, grpcutils.InternalWithErr(err)
-				}
+		for _, item := range itmList.Items {
+			if err := s.deleteSpaceWorkspace(ctx, item); err != nil {
+				return nil, err
 			}
 		}
 	}
@@ -401,11 +397,54 @@ func (s *Server) DeleteSpace(ctx context.Context, req *metav1.DeleteOptions) (*m
 		}
 	}
 
+	{
+		memList, err := s.octeliumC.CordiumC().ListMembership(ctx, ourscsrv.FilterBySpace(itm))
+		if err != nil {
+			return nil, err
+		}
+
+		for _, item := range memList.Items {
+			_, err := s.octeliumC.CordiumC().DeleteMembership(ctx, &rmetav1.DeleteOptions{
+				Uid: item.Metadata.Uid,
+			})
+			if err != nil {
+				if !grpcerr.IsNotFound(err) {
+					return nil, grpcutils.InternalWithErr(err)
+				}
+			}
+		}
+	}
+
 	if _, err := s.octeliumC.CordiumC().DeleteSpace(ctx, &rmetav1.DeleteOptions{Uid: itm.Metadata.Uid}); err != nil {
 		return nil, serr.InternalWithErr(err)
 	}
 
 	return &metav1.OperationResult{}, nil
+}
+
+func (s *Server) deleteSpaceWorkspace(ctx context.Context, ws *cordiumv1.Workspace) error {
+
+	zap.L().Debug("Deleting the Workspace of the Space that is being deleted",
+		zap.String("name", ws.Metadata.Name), zap.String("state", ws.Status.State.String()))
+
+	if _, err := s.octeliumC.CordiumC().DeleteWorkspace(ctx, &rmetav1.DeleteOptions{
+		Uid: ws.Metadata.Uid,
+	}); err != nil {
+		if !grpcerr.IsNotFound(err) {
+			return grpcutils.InternalWithErr(err)
+		}
+		return nil
+	}
+
+	if ws.Status.SessionRef != nil {
+		if _, err := s.octeliumC.CoreC().DeleteSession(ctx, &rmetav1.DeleteOptions{
+			Uid: ws.Status.SessionRef.Uid,
+		}); err != nil && !grpcerr.IsNotFound(err) {
+			return grpcutils.InternalWithErr(err)
+		}
+	}
+
+	return nil
 }
 
 func (s *Server) GetSpace(ctx context.Context, req *metav1.GetOptions) (*cordiumv1.Space, error) {

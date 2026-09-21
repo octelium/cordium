@@ -125,13 +125,13 @@ func (c *Controller) OnAdd(ctx context.Context, ws *cordiumv1.Workspace) error {
 		return c.ResumeWorkspace(ctx, ws)
 	}
 
-	if err := c.setPersistentVolumeClaim(ctx, ws); err != nil {
-		return errors.Errorf("Could not set persistentVolumeClaim: %+v", err)
-	}
-
 	if !c.isMyRegion(ws) {
 		zap.L().Debug("Workspace is not in my region. No onAdd needed", zap.String("uid", ws.Metadata.Uid))
 		return nil
+	}
+
+	if err := c.setPersistentVolumeClaim(ctx, ws); err != nil {
+		return errors.Errorf("Could not set persistentVolumeClaim: %+v", err)
 	}
 
 	if ws.Status.State != cordiumv1.Workspace_Status_INIT_REQUEST {

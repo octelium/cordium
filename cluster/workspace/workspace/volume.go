@@ -42,8 +42,9 @@ func (s *Server) setVolumeMounts() error {
 
 	zap.L().Debug("Setting the Volume mounts", zap.Int("mounts", len(mounts)))
 
-	if err := s.removeStaleVolumeMounts(mounts); err != nil {
-		zap.L().Warn("Could not remove the stale Volume mounts", zap.Error(err))
+	stale, err := s.removeStaleVolumeMounts(mounts)
+	if err != nil {
+		zap.L().Warn("Could not remove every stale Volume mount", zap.Error(err))
 	}
 
 	for _, mount := range mounts {
@@ -52,7 +53,7 @@ func (s *Server) setVolumeMounts() error {
 		}
 	}
 
-	return s.setVolumeMountState(mounts)
+	return s.setVolumeMountState(mounts, stale)
 }
 
 func (s *Server) setVolumeMount(mount *ccordiumv1.ResolvedVolumeMount) error {
@@ -130,7 +131,7 @@ func (s *Server) initVolumeOwnership(src string, mount *ccordiumv1.ResolvedVolum
 	return os.Chmod(src, 0775)
 }
 
-func (s *Server) removeStaleVolumeMounts(mounts []*ccordiumv1.ResolvedVolumeMount) error {
+func (s *Server) removeStaleVolumeMounts(mounts []*ccordiumv1.ResolvedVolumeMount) ([]string, error) {
 
 	isCurrent := func(mountPath, target string) bool {
 		for _, mount := range mounts {
@@ -141,6 +142,9 @@ func (s *Server) removeStaleVolumeMounts(mounts []*ccordiumv1.ResolvedVolumeMoun
 		}
 		return false
 	}
+
+	var ret []string
+	var retErr error
 
 	for _, mountPath := range getVolumeMountState() {
 		target, err := os.Readlink(mountPath)
@@ -160,25 +164,32 @@ func (s *Server) removeStaleVolumeMounts(mounts []*ccordiumv1.ResolvedVolumeMoun
 			zap.String("mountPath", mountPath))
 
 		if err := os.Remove(mountPath); err != nil {
-			return err
+			ret = append(ret, mountPath)
+			retErr = err
+			continue
 		}
 	}
 
-	return nil
+	return ret, retErr
 }
 
-func (s *Server) setVolumeMountState(mounts []*ccordiumv1.ResolvedVolumeMount) error {
+func (s *Server) setVolumeMountState(mounts []*ccordiumv1.ResolvedVolumeMount, stale []string) error {
 
-	if len(mounts) == 0 {
+	if len(mounts) == 0 && len(stale) == 0 {
 		if err := os.Remove(volumeStatePath); err != nil && !os.IsNotExist(err) {
 			return err
 		}
 		return nil
 	}
 
-	paths := make([]string, 0, len(mounts))
+	paths := make([]string, 0, len(mounts)+len(stale))
 	for _, mount := range mounts {
 		paths = append(paths, mount.MountPath)
+	}
+	for _, mountPath := range stale {
+		if !slices.Contains(paths, mountPath) {
+			paths = append(paths, mountPath)
+		}
 	}
 	slices.Sort(paths)
 

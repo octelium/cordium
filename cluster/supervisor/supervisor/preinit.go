@@ -33,6 +33,8 @@ import (
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 )
 
+const subordinateIDCount = 65536
+
 func (s *Server) runPreInitCommands(ctx context.Context) error {
 
 	if s.isInner || ldflags.IsTest() {
@@ -113,8 +115,8 @@ func (s *Server) runPreInitCommandsRoot(ctx context.Context) error {
 		"setcap cap_setgid+ep /usr/bin/newgidmap",
 		fmt.Sprintf("groupadd -g %d octelium", s.octeliumGID),
 		fmt.Sprintf("useradd -g octelium -u %d -m -d /home/octelium octelium", s.octeliumUID),
-		fmt.Sprintf("echo octelium:%d:65536 > /etc/subuid", s.octeliumUID+1),
-		fmt.Sprintf("echo octelium:%d:65536 > /etc/subgid", s.octeliumGID+1),
+		fmt.Sprintf("echo octelium:%d:%d > /etc/subuid", s.octeliumUID+1, subordinateIDCount),
+		fmt.Sprintf("echo octelium:%d:%d > /etc/subgid", s.octeliumGID+1, subordinateIDCount),
 		"mkdir -p /home/octelium/.local/share/containers",
 		// "chown -R octelium:octelium /home/octelium",
 		"mkdir -p /octelium/workspace",

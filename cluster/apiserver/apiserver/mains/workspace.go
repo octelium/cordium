@@ -92,8 +92,38 @@ func (s *Server) CreateWorkspace(ctx context.Context, req *cordiumv1.Workspace) 
 
 	ws.Status.Limit = &cordiumv1.Workspace_Spec_Limit{}
 
+	var snapshot *cordiumv1.WorkspaceSnapshot
+	if req.Status.WorkspaceSnapshotRef != nil {
+		snapshot, err = s.getWorkspaceSnapshotForRestore(ctx, req.Status.WorkspaceSnapshotRef)
+		if err != nil {
+			return nil, err
+		}
+
+		if snapshot.Status.SpaceRef == nil {
+			return nil, serr.InvalidArg("The WorkspaceSnapshot: %s does not belong to a Space",
+				snapshot.Metadata.Name)
+		}
+	}
+
 	var template *cordiumv1.Template
-	if req.Status.TemplateRef == nil {
+	if req.Status.TemplateRef == nil && snapshot != nil {
+		if snapshot.Status.TemplateRef == nil {
+			return nil, serr.InvalidArg(
+				"The WorkspaceSnapshot: %s does not have a Template to restore into. Set an explicit Template instead",
+				snapshot.Metadata.Name)
+		}
+
+		template, err = s.octeliumC.CordiumC().GetTemplate(ctx,
+			apivalidation.ObjectReferenceToRGetOptions(snapshot.Status.TemplateRef))
+		if err != nil {
+			if grpcerr.IsNotFound(err) {
+				return nil, serr.InvalidArg(
+					"The Template of the WorkspaceSnapshot: %s does not exist anymore. Set an explicit Template instead",
+					snapshot.Metadata.Name)
+			}
+			return nil, serr.InternalWithErr(err)
+		}
+	} else if req.Status.TemplateRef == nil {
 		template, err = s.octeliumC.CordiumC().GetTemplate(ctx, &rmetav1.GetOptions{
 			Name: fmt.Sprintf("default.default.%s", i.User.Metadata.Name),
 		})
@@ -168,15 +198,8 @@ func (s *Server) CreateWorkspace(ctx context.Context, req *cordiumv1.Workspace) 
 		return nil, err
 	}
 
-	var snapshot *cordiumv1.WorkspaceSnapshot
-	if req.Status.WorkspaceSnapshotRef != nil {
-		snapshot, err = s.getWorkspaceSnapshotForRestore(ctx, req.Status.WorkspaceSnapshotRef)
-		if err != nil {
-			return nil, err
-		}
-
-		if snapshot.Status.SpaceRef == nil ||
-			snapshot.Status.SpaceRef.Uid != ws.Status.SpaceRef.Uid {
+	if snapshot != nil {
+		if snapshot.Status.SpaceRef.Uid != ws.Status.SpaceRef.Uid {
 			return nil, serr.InvalidArg(
 				"The WorkspaceSnapshot: %s belongs to another Space", snapshot.Metadata.Name)
 		}
@@ -565,21 +588,32 @@ func (s *Server) StartWorkspace(ctx context.Context, req *cordiumv1.StartWorkspa
 		return nil, err
 	}
 
-	region, err := func() (*corev1.Region, error) {
-		if snapshot != nil {
-			if volumeRegionRef != nil && volumeRegionRef.Uid != snapshot.Status.RegionRef.Uid {
-				return nil, serr.InvalidArg(
-					"The mounted Volumes are hosted in another Region than the WorkspaceSnapshot: %s",
-					snapshot.Metadata.Name)
-			}
-
-			return s.octeliumC.CoreC().GetRegion(ctx,
-				apivalidation.ObjectReferenceToRGetOptions(snapshot.Status.RegionRef))
+	storageRegionRef, storageRegionReason := func() (*metav1.ObjectReference, string) {
+		switch {
+		case snapshot != nil:
+			return snapshot.Status.RegionRef,
+				fmt.Sprintf("the WorkspaceSnapshot: %s", snapshot.Metadata.Name)
+		case !ws.Spec.IsEphemeral && ws.Status.SuccessfulRuns > 0 && ws.Status.LastRegionRef != nil:
+			return ws.Status.LastRegionRef, "the persistent storage of the Workspace"
+		default:
+			return nil, ""
 		}
+	}()
 
-		if volumeRegionRef != nil {
+	if storageRegionRef != nil && volumeRegionRef != nil &&
+		storageRegionRef.Uid != volumeRegionRef.Uid {
+		return nil, serr.InvalidArg(
+			"The mounted Volumes are hosted in another Region than %s", storageRegionReason)
+	}
+
+	if storageRegionRef == nil {
+		storageRegionRef = volumeRegionRef
+	}
+
+	region, err := func() (*corev1.Region, error) {
+		if storageRegionRef != nil {
 			return s.octeliumC.CoreC().GetRegion(ctx,
-				apivalidation.ObjectReferenceToRGetOptions(volumeRegionRef))
+				apivalidation.ObjectReferenceToRGetOptions(storageRegionRef))
 		}
 
 		return s.chooseRegion(ctx, ws, func() *metav1.ObjectReference {

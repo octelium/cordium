@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/octelium/cordium/cluster/common/ovutils"
 	otests "github.com/octelium/cordium/cluster/common/tests"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/corev1"
@@ -30,9 +31,11 @@ import (
 	"github.com/octelium/octelium/cluster/common/tests/tstuser"
 	"github.com/octelium/octelium/cluster/common/vutils"
 	"github.com/octelium/octelium/pkg/apiutils/umetav1"
+	"github.com/octelium/octelium/pkg/common/pbutils"
 	"github.com/octelium/octelium/pkg/grpcerr"
 	"github.com/octelium/octelium/pkg/utils/utilrand"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 func TestVolume(t *testing.T) {
@@ -491,6 +494,110 @@ func TestVolume(t *testing.T) {
 		assert.Nil(t, err, "%+v", err)
 	})
 
+	t.Run("an unknown accessMode is rejected", func(t *testing.T) {
+		_, err := createVolumeWithName(t, utilrand.GetRandomStringCanonical(8),
+			&cordiumv1.Volume_Spec{
+				AccessMode: cordiumv1.Volume_AccessMode(4242),
+			})
+		assert.NotNil(t, err)
+		assert.True(t, grpcerr.IsInvalidArg(err), "%+v", err)
+	})
+
+	t.Run("a nil Volume mount is rejected", func(t *testing.T) {
+		_, err := createWorkspace(t, nil)
+		assert.NotNil(t, err)
+		assert.True(t, grpcerr.IsInvalidArg(err), "%+v", err)
+	})
+
+	t.Run("an explicit Region is honored", func(t *testing.T) {
+		regionList, err := fakeC.OcteliumC.CoreC().ListRegion(ctx, &rmetav1.ListOptions{})
+		assert.Nil(t, err, "%+v", err)
+		assert.True(t, len(regionList.Items) > 0)
+
+		region := regionList.Items[0]
+
+		ext, err := pbutils.MessageToStruct(&cordiumv1.RegionExtInfo{IsEnabled: true})
+		assert.Nil(t, err, "%+v", err)
+
+		if region.Status.Ext == nil {
+			region.Status.Ext = make(map[string]*structpb.Struct)
+		}
+		region.Status.Ext[ovutils.ExtInfoLabel] = ext
+
+		region, err = fakeC.OcteliumC.CoreC().UpdateRegion(ctx, region)
+		assert.Nil(t, err, "%+v", err)
+
+		vol, err := srv.CreateVolume(usr.Ctx(), &cordiumv1.Volume{
+			Metadata: &metav1.Metadata{
+				Name: utilrand.GetRandomStringCanonical(8),
+			},
+			Spec: &cordiumv1.Volume_Spec{},
+			Status: &cordiumv1.Volume_Status{
+				RegionRef: &metav1.ObjectReference{Name: region.Metadata.Name},
+			},
+		})
+		assert.Nil(t, err, "%+v", err)
+		assert.Equal(t, region.Metadata.Uid, vol.Status.RegionRef.Uid)
+
+		_, err = srv.CreateVolume(usr.Ctx(), &cordiumv1.Volume{
+			Metadata: &metav1.Metadata{
+				Name: utilrand.GetRandomStringCanonical(8),
+			},
+			Spec: &cordiumv1.Volume_Spec{},
+			Status: &cordiumv1.Volume_Status{
+				RegionRef: &metav1.ObjectReference{
+					Name: utilrand.GetRandomStringCanonical(8),
+				},
+			},
+		})
+		assert.NotNil(t, err)
+	})
+
+	t.Run("a Workspace that has run is restarted in the Region of its own storage", func(t *testing.T) {
+		ws, err := createWorkspace(t)
+		assert.Nil(t, err, "%+v", err)
+
+		_, err = srv.StartWorkspace(usr.Ctx(), &cordiumv1.StartWorkspaceRequest{
+			WorkspaceRef: umetav1.GetObjectReference(ws),
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		cur, err := fakeC.OcteliumC.CordiumC().GetWorkspace(ctx, &rmetav1.GetOptions{
+			Uid: ws.Metadata.Uid,
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		storageRegionRef := cur.Status.RegionRef
+		assert.NotNil(t, storageRegionRef)
+
+		otherRegionRef := &metav1.ObjectReference{
+			Name: utilrand.GetRandomStringCanonical(8),
+			Uid:  vutils.UUIDv4(),
+		}
+
+		cur.Status.State = cordiumv1.Workspace_Status_STOPPED
+		cur.Status.SuccessfulRuns = 1
+		cur.Status.RegionRef = nil
+		cur.Status.LastRegionRef = storageRegionRef
+		_, err = fakeC.OcteliumC.CordiumC().UpdateWorkspace(ctx, cur)
+		assert.Nil(t, err, "%+v", err)
+
+		_, err = srv.StartWorkspace(usr.Ctx(), &cordiumv1.StartWorkspaceRequest{
+			WorkspaceRef: umetav1.GetObjectReference(ws),
+			Config: &cordiumv1.StartWorkspaceRequest_Config{
+				RegionRef: otherRegionRef,
+			},
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		cur, err = fakeC.OcteliumC.CordiumC().GetWorkspace(ctx, &rmetav1.GetOptions{
+			Uid: ws.Metadata.Uid,
+		})
+		assert.Nil(t, err, "%+v", err)
+		assert.Equal(t, storageRegionRef.Uid, cur.Status.RegionRef.Uid,
+			"a Workspace that already has persistent storage was moved to another Region")
+	})
+
 	t.Run("the Volumes of a Space are deleted along with it", func(t *testing.T) {
 		usr2, err := tstuser.NewUserWithType(fakeC.OcteliumC,
 			adminSrv, nil, nil, corev1.User_Spec_HUMAN, corev1.Session_Status_CLIENTLESS)
@@ -523,6 +630,63 @@ func TestVolume(t *testing.T) {
 
 		_, err = fakeC.OcteliumC.CordiumC().GetVolume(ctx, &rmetav1.GetOptions{
 			Uid: vol.Metadata.Uid,
+		})
+		assert.NotNil(t, err)
+		assert.True(t, grpcerr.IsNotFound(err), "%+v", err)
+	})
+
+	t.Run("the Workspaces of a Space are deleted along with it", func(t *testing.T) {
+		usr2, err := tstuser.NewUserWithType(fakeC.OcteliumC,
+			adminSrv, nil, nil, corev1.User_Spec_HUMAN, corev1.Session_Status_CLIENTLESS)
+		assert.Nil(t, err)
+
+		spc, err := srv.CreateSpace(usr2.Ctx(), &cordiumv1.Space{
+			Metadata: &metav1.Metadata{
+				Name: fmt.Sprintf("%s.cordium", utilrand.GetRandomStringCanonical(8)),
+			},
+			Spec: &cordiumv1.Space_Spec{},
+			Status: &cordiumv1.Space_Status{
+				Type: cordiumv1.Space_Status_ORGANIZATION,
+			},
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		ws, err := srv.CreateWorkspace(usr2.Ctx(), &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{},
+			Spec:     &cordiumv1.Workspace_Spec{},
+			Status: &cordiumv1.Workspace_Status{
+				TemplateRef: &metav1.ObjectReference{
+					Name: fmt.Sprintf("default.%s", spc.Metadata.Name),
+				},
+			},
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		_, err = srv.StartWorkspace(usr2.Ctx(), &cordiumv1.StartWorkspaceRequest{
+			WorkspaceRef: umetav1.GetObjectReference(ws),
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		cur, err := fakeC.OcteliumC.CordiumC().GetWorkspace(ctx, &rmetav1.GetOptions{
+			Uid: ws.Metadata.Uid,
+		})
+		assert.Nil(t, err, "%+v", err)
+		sessionRef := cur.Status.SessionRef
+		assert.NotNil(t, sessionRef)
+
+		_, err = srv.DeleteSpace(usr2.Ctx(), &metav1.DeleteOptions{
+			Uid: spc.Metadata.Uid,
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		_, err = fakeC.OcteliumC.CordiumC().GetWorkspace(ctx, &rmetav1.GetOptions{
+			Uid: ws.Metadata.Uid,
+		})
+		assert.NotNil(t, err, "the Workspace outlived the Space that owned it")
+		assert.True(t, grpcerr.IsNotFound(err), "%+v", err)
+
+		_, err = fakeC.OcteliumC.CoreC().GetSession(ctx, &rmetav1.GetOptions{
+			Uid: sessionRef.Uid,
 		})
 		assert.NotNil(t, err)
 		assert.True(t, grpcerr.IsNotFound(err), "%+v", err)

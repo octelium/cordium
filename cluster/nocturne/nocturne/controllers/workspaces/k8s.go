@@ -385,6 +385,9 @@ func (c *Controller) newDeployment(ws *cordiumv1.Workspace, ownerCM *corev1.Conf
 			},
 		},
 		Spec: appsv1.DeploymentSpec{
+			Strategy: appsv1.DeploymentStrategy{
+				Type: appsv1.RecreateDeploymentStrategyType,
+			},
 			Selector: &metav1.LabelSelector{
 				MatchLabels: getLabels(ws),
 			},
@@ -790,6 +793,11 @@ type createVolumeSnapshotReq struct {
 func (c *Controller) createVolumeSnapshot(ctx context.Context,
 	req *createVolumeSnapshotReq) (*v1.VolumeSnapshot, error) {
 
+	snapshotClassName, err := c.getVolumeSnapshotClassName(ctx, req.workspace, req.template)
+	if err != nil {
+		return nil, err
+	}
+
 	snapshot := &v1.VolumeSnapshot{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      req.name,
@@ -797,7 +805,7 @@ func (c *Controller) createVolumeSnapshot(ctx context.Context,
 			Labels:    req.labels,
 		},
 		Spec: v1.VolumeSnapshotSpec{
-			VolumeSnapshotClassName: c.getVolumeSnapshotClassName(ctx, req.workspace, req.template),
+			VolumeSnapshotClassName: snapshotClassName,
 			Source: v1.VolumeSnapshotSource{
 				PersistentVolumeClaimName: utils_types.StrToPtr(req.pvcName),
 			},
@@ -823,17 +831,17 @@ func (c *Controller) createVolumeSnapshot(ctx context.Context,
 }
 
 func (c *Controller) getVolumeSnapshotClassName(ctx context.Context,
-	ws *cordiumv1.Workspace, tmpl *cordiumv1.Template) *string {
+	ws *cordiumv1.Workspace, tmpl *cordiumv1.Template) (*string, error) {
 
 	cc, err := c.octeliumC.CordiumV1Utils().GetClusterConfig(ctx)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	if cc.Spec.Workspace == nil || cc.Spec.Workspace.Storage == nil ||
 		cc.Spec.Workspace.Storage.VolumeSnapshotClass == nil ||
 		len(cc.Spec.Workspace.Storage.VolumeSnapshotClass.Rules) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	ctxMap := make(map[string]any)
@@ -855,20 +863,22 @@ func (c *Controller) getVolumeSnapshotClassName(ctx context.Context,
 
 		cond, err := ovutils.ToCoreCondition(rule.Condition)
 		if err != nil {
-			continue
+			return nil, errors.Errorf(
+				"Could not read the volumeSnapshotClass rules of the Cluster: %+v", err)
 		}
 
 		isMatched, err := c.celEngine.EvalCondition(ctx, cond, reqCtxMap)
 		if err != nil {
-			continue
+			return nil, errors.Errorf(
+				"Could not evaluate the volumeSnapshotClass rules of the Cluster: %+v", err)
 		}
 
 		if isMatched {
-			return utils_types.StrToPtr(rule.VolumeSnapshotClass)
+			return utils_types.StrToPtr(rule.VolumeSnapshotClass), nil
 		}
 	}
 
-	return nil
+	return nil, nil
 }
 
 func isVolumeSnapshotReady(snapshot *v1.VolumeSnapshot) bool {

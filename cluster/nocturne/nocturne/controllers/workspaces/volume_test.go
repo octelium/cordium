@@ -159,7 +159,7 @@ func TestReconcileVolume(t *testing.T) {
 		assert.Equal(t, vol.Metadata.Uid, pvc.Labels["octelium.com/volume-uid"])
 
 		req := pvc.Spec.Resources.Requests["storage"]
-		expected := resource.MustParse("3000Mi")
+		expected := resource.MustParse("3000M")
 		assert.Equal(t, expected.Value(), req.Value())
 
 		assert.Equal(t, cordiumv1.Volume_Status_STATE_PENDING,
@@ -246,7 +246,7 @@ func TestReconcileVolume(t *testing.T) {
 		assert.Nil(t, err, "%+v", err)
 
 		req := pvc.Spec.Resources.Requests["storage"]
-		expected := resource.MustParse("8000Mi")
+		expected := resource.MustParse("8000M")
 		assert.Equal(t, expected.Value(), req.Value())
 	})
 
@@ -263,6 +263,91 @@ func TestReconcileVolume(t *testing.T) {
 		assert.True(t, k8serr.IsNotFound(err), "%+v", err)
 
 		assert.Nil(t, c.ctl.OnDeleteVolume(ctx, vol))
+	})
+
+	t.Run("a Volume that lost its PVC is never silently reprovisioned", func(t *testing.T) {
+		vol := c.createVolume(ctx, t, spaceRef, c.regionRef,
+			cordiumv1.Volume_ACCESS_MODE_EXCLUSIVE, 2000)
+
+		assert.Nil(t, c.ctl.reconcileVolume(ctx, vol))
+		c.setPVCPhase(ctx, t, vol, k8scorev1.ClaimBound, 2*1000*1000*1000)
+		assert.Nil(t, c.ctl.reconcileVolume(ctx, c.getVolume(ctx, t, vol)))
+		assert.Equal(t, cordiumv1.Volume_Status_STATE_READY, c.getVolume(ctx, t, vol).Status.State)
+
+		assert.Nil(t, c.ctl.k8sC.CoreV1().PersistentVolumeClaims(ns).
+			Delete(ctx, getVolumePVCName(vol), k8smetav1.DeleteOptions{}))
+
+		assert.Nil(t, c.ctl.reconcileVolume(ctx, c.getVolume(ctx, t, vol)))
+
+		cur := c.getVolume(ctx, t, vol)
+		assert.Equal(t, cordiumv1.Volume_Status_STATE_FAILED, cur.Status.State)
+		assert.NotNil(t, cur.Status.Failure.GetStorage())
+
+		_, err := c.ctl.k8sC.CoreV1().PersistentVolumeClaims(ns).
+			Get(ctx, getVolumePVCName(vol), k8smetav1.GetOptions{})
+		assert.True(t, k8serr.IsNotFound(err),
+			"the controller provisioned a blank replacement for an established Volume")
+	})
+
+	t.Run("a PVC that belongs to another Volume is never adopted", func(t *testing.T) {
+		vol := c.createVolume(ctx, t, spaceRef, c.regionRef,
+			cordiumv1.Volume_ACCESS_MODE_EXCLUSIVE, 2000)
+
+		_, err := c.ctl.k8sC.CoreV1().PersistentVolumeClaims(ns).Create(ctx,
+			&k8scorev1.PersistentVolumeClaim{
+				ObjectMeta: k8smetav1.ObjectMeta{
+					Name:      getVolumePVCName(vol),
+					Namespace: ns,
+					Labels: map[string]string{
+						"octelium.com/volume-uid": vutils.UUIDv4(),
+					},
+				},
+			}, k8smetav1.CreateOptions{})
+		assert.Nil(t, err, "%+v", err)
+
+		assert.NotNil(t, c.ctl.reconcileVolume(ctx, vol))
+	})
+
+	t.Run("an unevaluable storage class policy fails closed", func(t *testing.T) {
+		cc, err := c.fakeC.OcteliumC.CordiumV1Utils().GetClusterConfig(ctx)
+		assert.Nil(t, err, "%+v", err)
+
+		cc.Spec.Volume = &cordiumv1.ClusterConfig_Spec_Volume{
+			Storage: &cordiumv1.ClusterConfig_Spec_Volume_Storage{
+				StorageClass: &cordiumv1.ClusterConfig_Spec_Volume_Storage_StorageClass{
+					Rules: []*cordiumv1.ClusterConfig_Spec_Volume_Storage_StorageClass_Rule{
+						{
+							StorageClass: "block",
+							Condition: &cordiumv1.Condition{
+								Type: &cordiumv1.Condition_Match{
+									Match: `ctx.volume.spec.thisIsNotValidCEL(((`,
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		_, err = c.fakeC.OcteliumC.CordiumC().UpdateClusterConfig(ctx, cc)
+		assert.Nil(t, err, "%+v", err)
+
+		vol := c.createVolume(ctx, t, spaceRef, c.regionRef,
+			cordiumv1.Volume_ACCESS_MODE_EXCLUSIVE, 2000)
+
+		_, err = c.ctl.getVolumeStorageClassName(ctx, vol)
+		assert.NotNil(t, err, "an invalid storageClass policy fell back to the Kubernetes default")
+
+		assert.NotNil(t, c.ctl.reconcileVolume(ctx, vol))
+
+		_, err = c.ctl.k8sC.CoreV1().PersistentVolumeClaims(ns).
+			Get(ctx, getVolumePVCName(vol), k8smetav1.GetOptions{})
+		assert.True(t, k8serr.IsNotFound(err))
+
+		cc, err = c.fakeC.OcteliumC.CordiumV1Utils().GetClusterConfig(ctx)
+		assert.Nil(t, err, "%+v", err)
+		cc.Spec.Volume = nil
+		_, err = c.fakeC.OcteliumC.CordiumC().UpdateClusterConfig(ctx, cc)
+		assert.Nil(t, err, "%+v", err)
 	})
 
 	t.Run("the storage class is chosen by the Cluster rules", func(t *testing.T) {
@@ -298,11 +383,15 @@ func TestReconcileVolume(t *testing.T) {
 
 		shared := c.createVolume(ctx, t, spaceRef, c.regionRef,
 			cordiumv1.Volume_ACCESS_MODE_SHARED, 2000)
-		assert.Equal(t, "shared-fs", *c.ctl.getVolumeStorageClassName(ctx, shared))
+		sharedClass, err := c.ctl.getVolumeStorageClassName(ctx, shared)
+		assert.Nil(t, err, "%+v", err)
+		assert.Equal(t, "shared-fs", *sharedClass)
 
 		exclusive := c.createVolume(ctx, t, spaceRef, c.regionRef,
 			cordiumv1.Volume_ACCESS_MODE_EXCLUSIVE, 2000)
-		assert.Equal(t, "block", *c.ctl.getVolumeStorageClassName(ctx, exclusive))
+		exclusiveClass, err := c.ctl.getVolumeStorageClassName(ctx, exclusive)
+		assert.Nil(t, err, "%+v", err)
+		assert.Equal(t, "block", *exclusiveClass)
 
 		assert.Nil(t, c.ctl.reconcileVolume(ctx, shared))
 		pvc, err := c.ctl.k8sC.CoreV1().PersistentVolumeClaims(ns).

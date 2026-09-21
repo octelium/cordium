@@ -280,11 +280,19 @@ func (s *Server) DeleteWorkspaceSnapshot(ctx context.Context,
 		}
 
 		for _, ws := range wsList.Items {
-			if ws.Status.SuccessfulRuns == 0 {
+			if !workspaceRestoresFromSnapshot(ws) {
+				continue
+			}
+
+			if ws.Spec.IsEphemeral {
 				return nil, grpcutils.InvalidArg(
-					"The WorkspaceSnapshot cannot be deleted while the Workspace: %s that is restored from it has not run yet",
+					"The WorkspaceSnapshot cannot be deleted while the ephemeral Workspace: %s restores its storage from it on every run",
 					ws.Metadata.Name)
 			}
+
+			return nil, grpcutils.InvalidArg(
+				"The WorkspaceSnapshot cannot be deleted while the Workspace: %s that is restored from it has not run yet",
+				ws.Metadata.Name)
 		}
 	}
 

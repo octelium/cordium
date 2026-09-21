@@ -335,6 +335,108 @@ func TestWorkspaceSnapshot(t *testing.T) {
 		assert.True(t, grpcerr.IsInvalidArg(err), "%+v", err)
 	})
 
+	t.Run("an ephemeral Workspace keeps its WorkspaceSnapshot alive", func(t *testing.T) {
+		ws := setWorkspaceRan(t, createWorkspace(t))
+		snapshot := setSnapshotReady(t, createSnapshot(t, ws), 0)
+
+		eph, err := srv.CreateWorkspace(usr.Ctx(), &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{},
+			Spec: &cordiumv1.Workspace_Spec{
+				IsEphemeral: true,
+			},
+			Status: &cordiumv1.Workspace_Status{
+				WorkspaceSnapshotRef: umetav1.GetObjectReference(snapshot),
+			},
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		eph.Status.SuccessfulRuns = 3
+		_, err = fakeC.OcteliumC.CordiumC().UpdateWorkspace(ctx, eph)
+		assert.Nil(t, err, "%+v", err)
+
+		_, err = srv.DeleteWorkspaceSnapshot(usr.Ctx(), &metav1.DeleteOptions{
+			Uid: snapshot.Metadata.Uid,
+		})
+		assert.NotNil(t, err,
+			"an ephemeral Workspace restores from its snapshot on every single run")
+		assert.True(t, grpcerr.IsInvalidArg(err), "%+v", err)
+
+		_, err = srv.DeleteWorkspace(usr.Ctx(), &metav1.DeleteOptions{
+			Uid: eph.Metadata.Uid,
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		_, err = srv.DeleteWorkspaceSnapshot(usr.Ctx(), &metav1.DeleteOptions{
+			Uid: snapshot.Metadata.Uid,
+		})
+		assert.Nil(t, err, "%+v", err)
+	})
+
+	t.Run("a persistent Workspace releases its WorkspaceSnapshot once it has run", func(t *testing.T) {
+		ws := setWorkspaceRan(t, createWorkspace(t))
+		snapshot := setSnapshotReady(t, createSnapshot(t, ws), 0)
+
+		restored, err := srv.CreateWorkspace(usr.Ctx(), &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{},
+			Spec:     &cordiumv1.Workspace_Spec{},
+			Status: &cordiumv1.Workspace_Status{
+				WorkspaceSnapshotRef: umetav1.GetObjectReference(snapshot),
+			},
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		restored.Status.SuccessfulRuns = 1
+		_, err = fakeC.OcteliumC.CordiumC().UpdateWorkspace(ctx, restored)
+		assert.Nil(t, err, "%+v", err)
+
+		_, err = srv.DeleteWorkspaceSnapshot(usr.Ctx(), &metav1.DeleteOptions{
+			Uid: snapshot.Metadata.Uid,
+		})
+		assert.Nil(t, err, "%+v", err)
+	})
+
+	t.Run("a snapshot restore defaults to the Space of the snapshot", func(t *testing.T) {
+		spc, err := srv.CreateSpace(usr.Ctx(), &cordiumv1.Space{
+			Metadata: &metav1.Metadata{
+				Name: fmt.Sprintf("%s.%s",
+					utilrand.GetRandomStringCanonical(8), usr.Usr.Metadata.Name),
+			},
+			Spec: &cordiumv1.Space_Spec{},
+			Status: &cordiumv1.Space_Status{
+				Type: cordiumv1.Space_Status_ORGANIZATION,
+			},
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		source, err := srv.CreateWorkspace(usr.Ctx(), &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{},
+			Spec:     &cordiumv1.Workspace_Spec{},
+			Status: &cordiumv1.Workspace_Status{
+				TemplateRef: &metav1.ObjectReference{
+					Name: fmt.Sprintf("default.%s", spc.Metadata.Name),
+				},
+			},
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		source = setWorkspaceRan(t, source)
+		snapshot := setSnapshotReady(t, createSnapshot(t, source), 0)
+
+		restored, err := srv.CreateWorkspace(usr.Ctx(), &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{},
+			Spec:     &cordiumv1.Workspace_Spec{},
+			Status: &cordiumv1.Workspace_Status{
+				WorkspaceSnapshotRef: umetav1.GetObjectReference(snapshot),
+			},
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		assert.Equal(t, spc.Metadata.Uid, restored.Status.SpaceRef.Uid,
+			"a snapshot restore was not created inside the Space of the snapshot")
+		assert.Equal(t, source.Status.TemplateRef.Uid, restored.Status.TemplateRef.Uid)
+		assert.Equal(t, snapshot.Metadata.Uid, restored.Status.WorkspaceSnapshotRef.Uid)
+	})
+
 	t.Run("a snapshot that a Workspace has not been restored from yet cannot be deleted", func(t *testing.T) {
 		ws := setWorkspaceRan(t, createWorkspace(t))
 		snapshot := setSnapshotReady(t, createSnapshot(t, ws), 0)

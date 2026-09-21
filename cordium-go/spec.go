@@ -171,8 +171,10 @@ func WithTemplate(name string) WorkspaceOption {
 
 // FromSnapshot restores the Workspace's persistent storage from a
 // WorkspaceSnapshot instead of initializing it from scratch. The snapshot must
-// be READY and the Workspace must belong to the Space of the snapshot's source
-// Workspace. The restored Workspace runs in the Region that holds the snapshot.
+// be READY. Unless [WithTemplate] or [WithSpace] is also given, the Workspace
+// is created from the Template of the snapshot's source Workspace, and an
+// explicit Template must belong to the Space of that source Workspace. The
+// restored Workspace runs in the Region that holds the snapshot.
 func FromSnapshot(name string) WorkspaceOption {
 	return func(b *specBuilder) error {
 		if name == "" {

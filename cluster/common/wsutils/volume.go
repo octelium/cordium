@@ -31,24 +31,28 @@ var reservedVolumeMountPaths = []string{
 	"/",
 	"/bin",
 	"/boot",
-	"/dev",
 	"/etc",
 	"/lib",
 	"/lib32",
 	"/lib64",
-	"/proc",
 	"/root",
-	"/run",
 	"/sbin",
-	"/sys",
 	"/tmp",
 	"/usr",
 	"/var",
+	"/var/tmp",
+	"/workspace",
+}
+
+var reservedVolumeMountTrees = []string{
+	"/dev",
+	"/octelium",
+	"/proc",
+	"/run",
+	"/sys",
 	"/var/lib/containers",
 	"/var/lib/docker",
 	"/var/run",
-	"/var/tmp",
-	"/workspace",
 	workspacecommon.VolumeRootDir,
 }
 
@@ -76,8 +80,10 @@ func CheckVolumeMountPath(arg string) error {
 		}
 	}
 
-	if isSubPath(workspacecommon.VolumeRootDir, arg) {
-		return serr.InvalidArg("The Volume mountPath: %s is reserved by the Cluster", arg)
+	for _, reserved := range reservedVolumeMountTrees {
+		if arg == reserved || isSubPath(reserved, arg) {
+			return serr.InvalidArg("The Volume mountPath: %s is reserved by the Cluster", arg)
+		}
 	}
 
 	return nil
@@ -100,6 +106,10 @@ func ValidateVolumeMounts(mounts []*cordiumv1.Workspace_Spec_Runtime_VolumeMount
 	var volumes []string
 
 	for _, mount := range mounts {
+		if mount == nil {
+			return serr.InvalidArg("A Volume mount is not set")
+		}
+
 		if mount.VolumeRef == nil || (mount.VolumeRef.Name == "" && mount.VolumeRef.Uid == "") {
 			return serr.InvalidArg("The volumeRef of a Volume mount is not set")
 		}
