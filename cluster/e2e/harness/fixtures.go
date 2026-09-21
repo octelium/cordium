@@ -23,6 +23,7 @@ import (
 
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
+	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"go.uber.org/zap"
 )
 
@@ -212,6 +213,39 @@ func (h *H) CreateUserSecret(t *testing.T, value string) *cordiumv1.UserSecret {
 	})
 
 	zap.L().Debug("Created UserSecret fixture", zap.String("name", ret.Metadata.Name))
+
+	return ret
+}
+
+func (h *H) CreateWorkspaceSnapshot(t *testing.T,
+	ws *cordiumv1.Workspace, name string) *cordiumv1.WorkspaceSnapshot {
+	t.Helper()
+
+	ctx, cancel := h.Ctx(t)
+	defer cancel()
+
+	ret, err := h.CordiumC().CreateWorkspaceSnapshot(ctx, &cordiumv1.WorkspaceSnapshot{
+		Metadata: &metav1.Metadata{
+			Name: name,
+		},
+		Spec: &cordiumv1.WorkspaceSnapshot_Spec{},
+		Status: &cordiumv1.WorkspaceSnapshot_Status{
+			WorkspaceRef: umetav1.GetObjectReference(ws),
+		},
+	})
+	if err != nil {
+		t.Fatalf("Could not create the WorkspaceSnapshot: %+v", err)
+	}
+
+	t.Cleanup(func() {
+		h.deleteQuietly(t, "WorkspaceSnapshot", ret.Metadata.Name, func(ctx context.Context) error {
+			_, err := h.CordiumC().DeleteWorkspaceSnapshot(ctx,
+				&metav1.DeleteOptions{Uid: ret.Metadata.Uid})
+			return err
+		})
+	})
+
+	zap.L().Debug("Created WorkspaceSnapshot fixture", zap.String("name", ret.Metadata.Name))
 
 	return ret
 }

@@ -48,6 +48,8 @@ var cmdArgs args
 func init() {
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Space, "space", "", "", "Parent Space name (e.g. my-project)")
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Template, "template", "", "", "Parent Template name (e.g. ml-env.my-project)")
+	Cmd.PersistentFlags().StringVarP(&cmdArgs.Snapshot, "snapshot", "", "",
+		"Restore the Workspace storage from a WorkspaceSnapshot (e.g. before-upgrade). The Workspace is created inside the Space of the snapshot")
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.File, "file", "", "", "Path to a Workspace YAML spec file")
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Repo, "repository", "", "", "Primary repository URL to clone into /workspace/repo")
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Image, "image", "", "", `Container image URL (e.g. "ubuntu:24.04", "python:3.11-slim")`)
@@ -202,6 +204,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		ws, err = workspace.DoCreateWorkspace(ctx, c, &workspace.DoCreateWorkspaceOpts{
 			Space:             cmdArgs.Space,
 			Template:          cmdArgs.Template,
+			Snapshot:          cmdArgs.Snapshot,
 			File:              cmdArgs.File,
 			Repo:              cmdArgs.Repo,
 			Image:             cmdArgs.Image,

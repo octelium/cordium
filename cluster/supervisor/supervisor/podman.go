@@ -32,6 +32,7 @@ import (
 	"github.com/octelium/cordium/cluster/supervisor/supervisor/oproxy"
 	"github.com/octelium/cordium/cluster/supervisor/supervisor/sshagent"
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
+	"github.com/octelium/octelium/apis/cluster/ccordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/pkg/utils/ldflags"
 	"github.com/pkg/errors"
@@ -486,6 +487,8 @@ func (s *Server) doStartContainer(ctx context.Context) error {
 			zap.L().Warn("Could not migrate podman", zap.Error(err))
 		}
 
+		s.recoverContainerState(ctx)
+
 		if err := s.getCommandAsOctelium(ctx, "podman", "init", "workspace").Run(); err != nil {
 			zap.L().Warn("podman init err", zap.Error(err))
 		}
@@ -892,6 +895,24 @@ func (s *Server) getContainerStats(ctx context.Context) ([]containerStats, error
 	}
 
 	return ret, nil
+}
+
+func (s *Server) recoverContainerState(ctx context.Context) {
+	if s.persistentStateSource !=
+		ccordiumv1.PersistentStateSource_PERSISTENT_STATE_SOURCE_WORKSPACE_SNAPSHOT {
+		return
+	}
+
+	zap.L().Debug("Recovering the Workspace container state of a restored storage snapshot")
+
+	if err := s.getCommandAsOctelium(ctx, "podman", "ps", "-a", "--sync").Run(); err != nil {
+		zap.L().Warn("Could not sync the podman container state", zap.Error(err))
+	}
+
+	if err := s.getCommandAsOctelium(ctx,
+		"podman", "container", "cleanup", "workspace").Run(); err != nil {
+		zap.L().Warn("Could not cleanup the Workspace container", zap.Error(err))
+	}
 }
 
 func (s *Server) podmanMigrate(ctx context.Context) error {

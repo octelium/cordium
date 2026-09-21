@@ -69,10 +69,22 @@ func (s *Server) doInitialize() error {
 
 	ws := req.Workspace
 
+	s.persistentStateSource = req.PersistentStateSource
+
 	s.isFreshRun = func() bool {
 		if ldflags.IsTest() {
 			return true
 		}
+
+		switch req.PersistentStateSource {
+		case ccordiumv1.PersistentStateSource_PERSISTENT_STATE_SOURCE_EMPTY:
+			return true
+		case ccordiumv1.PersistentStateSource_PERSISTENT_STATE_SOURCE_EXISTING,
+			ccordiumv1.PersistentStateSource_PERSISTENT_STATE_SOURCE_TEMPLATE_SNAPSHOT,
+			ccordiumv1.PersistentStateSource_PERSISTENT_STATE_SOURCE_WORKSPACE_SNAPSHOT:
+			return false
+		}
+
 		if ws.Status.IsBuild {
 			return true
 		}
@@ -86,6 +98,7 @@ func (s *Server) doInitialize() error {
 	zap.L().Debug("Initializing Workspace",
 		zap.String("wsName", ws.GetMetadata().GetName()),
 		zap.String("space", req.Space.GetMetadata().GetName()),
+		zap.String("persistentStateSource", s.persistentStateSource.String()),
 		zap.Bool("isFreshRun", s.isFreshRun))
 
 	if s.isFreshRun {
@@ -244,6 +257,8 @@ func (s *Server) doInitialize() error {
 		GitProviderInfo:     req.GitProviderInfo,
 		Ssh:                 req.Ssh,
 		TemplateHasSnapshot: req.TemplateHasSnapshot,
+
+		PersistentStateSource: req.PersistentStateSource,
 	}
 
 	zap.L().Debug("sending prepare request")

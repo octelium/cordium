@@ -53,6 +53,16 @@ func ToUserSecretList(a *cordiumv1.UserSecretList) *UserSecretList {
 	}
 }
 
+type WorkspaceSnapshot struct {
+	*cordiumv1.WorkspaceSnapshot
+}
+
+func ToWorkspaceSnapshot(a *cordiumv1.WorkspaceSnapshot) *WorkspaceSnapshot {
+	return &WorkspaceSnapshot{
+		WorkspaceSnapshot: a,
+	}
+}
+
 type Template struct {
 	*cordiumv1.Template
 }
@@ -84,16 +94,17 @@ func ToUserSecret(a *cordiumv1.UserSecret) *UserSecret {
 }
 
 const (
-	KindWorkspace     = "Workspace"
-	KindSecret        = "Secret"
-	KindTemplate      = "Template"
-	KindEnvironment   = "Environment"
-	KindSpace         = "Space"
-	KindMembership    = "Membership"
-	KindGitProvider   = "GitProvider"
-	KindUserSecret    = "UserSecret"
-	KindUserConfig    = "UserConfig"
-	KindClusterConfig = "ClusterConfig"
+	KindWorkspace         = "Workspace"
+	KindWorkspaceSnapshot = "WorkspaceSnapshot"
+	KindSecret            = "Secret"
+	KindTemplate          = "Template"
+	KindEnvironment       = "Environment"
+	KindSpace             = "Space"
+	KindMembership        = "Membership"
+	KindGitProvider       = "GitProvider"
+	KindUserSecret        = "UserSecret"
+	KindUserConfig        = "UserConfig"
+	KindClusterConfig     = "ClusterConfig"
 )
 
 func NewObjectList(kind string) (umetav1.ObjectI, error) {
@@ -101,6 +112,8 @@ func NewObjectList(kind string) (umetav1.ObjectI, error) {
 	switch kind {
 	case KindWorkspace:
 		return &cordiumv1.WorkspaceList{}, nil
+	case KindWorkspaceSnapshot:
+		return &cordiumv1.WorkspaceSnapshotList{}, nil
 	case KindSecret:
 		return &cordiumv1.SecretList{}, nil
 	case KindTemplate:
@@ -123,6 +136,8 @@ func NewObjectListOptions(kind string) (proto.Message, error) {
 	switch kind {
 	case KindWorkspace:
 		return &cordiumv1.ListWorkspaceOptions{}, nil
+	case KindWorkspaceSnapshot:
+		return &cordiumv1.ListWorkspaceSnapshotOptions{}, nil
 	case KindTemplate:
 		return &cordiumv1.ListTemplateOptions{}, nil
 	case KindSecret:
@@ -149,6 +164,8 @@ func NewObject(kind string) (umetav1.ResourceObjectI, error) {
 	switch kind {
 	case KindWorkspace:
 		return &cordiumv1.Workspace{}, nil
+	case KindWorkspaceSnapshot:
+		return &cordiumv1.WorkspaceSnapshot{}, nil
 	case KindTemplate:
 		return &cordiumv1.Template{}, nil
 	case KindSecret:
@@ -176,7 +193,7 @@ func NewObject(kind string) (umetav1.ResourceObjectI, error) {
 }
 
 type ResourceObjectRefG interface {
-	*cordiumv1.Workspace | *cordiumv1.Secret | *cordiumv1.Template |
+	*cordiumv1.Workspace | *cordiumv1.WorkspaceSnapshot | *cordiumv1.Secret | *cordiumv1.Template |
 		*cordiumv1.Space | *cordiumv1.Membership | *cordiumv1.GitProvider | *cordiumv1.UserSecret | *cordiumv1.UserConfig
 }
 
@@ -327,5 +344,15 @@ func (w *Workspace) GetCurrentRun() *cordiumv1.Workspace_Status_Run {
 }
 
 func (t *Template) HasReadyBuild() bool {
-	return t != nil && t.Status.BuildInfo != nil && t.Status.BuildInfo.CurrentReadyBuildID != ""
+	return t != nil && t.GetStatus().GetBuildInfo().GetCurrentReadyBuildID() != ""
+}
+
+func (s *WorkspaceSnapshot) IsReady() bool {
+	return s != nil && s.Status != nil &&
+		s.Status.State == cordiumv1.WorkspaceSnapshot_Status_STATE_READY
+}
+
+func (s *WorkspaceSnapshot) IsCreating() bool {
+	return s != nil && s.Status != nil &&
+		s.Status.State == cordiumv1.WorkspaceSnapshot_Status_STATE_CREATING
 }

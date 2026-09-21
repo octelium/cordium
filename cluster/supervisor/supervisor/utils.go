@@ -46,6 +46,7 @@ func redactInitializeRequest(req *ccordiumv1.InitializeRequest) []zap.Field {
 		zap.String("template", req.Template.GetMetadata().GetName()),
 		zap.Bool("isBuild", req.Workspace.GetStatus().GetIsBuild()),
 		zap.Bool("templateHasSnapshot", req.TemplateHasSnapshot),
+		zap.String("persistentStateSource", req.PersistentStateSource.String()),
 		zap.Int("secrets", len(req.SecretList.GetItems())),
 		zap.Int("userSecrets", len(req.UserSecretList.GetItems())),
 		zap.Bool("hasGitProviderInfo", req.GitProviderInfo != nil),

@@ -62,7 +62,8 @@ func (wc *WorkspaceClient) Create(ctx context.Context, opts ...WorkspaceOption) 
 		},
 		Spec: builder.spec,
 		Status: &cordiumv1.Workspace_Status{
-			TemplateRef: builder.templateRef,
+			TemplateRef:          builder.templateRef,
+			WorkspaceSnapshotRef: builder.snapshotRef,
 		},
 	}
 

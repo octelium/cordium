@@ -54,6 +54,7 @@ func Phases() []suite.Phase {
 		{Name: "WorkspaceImage", Run: testWorkspaceImage},
 		{Name: "WorkspaceEphemeral", Run: testWorkspaceEphemeral},
 		{Name: "WorkspaceStorage", Run: testWorkspaceStorage},
+		{Name: "WorkspaceSnapshot", Run: testWorkspaceSnapshot},
 		{Name: "WorkspaceIsolation", Run: testWorkspaceIsolation},
 
 		{Name: "CordiumCLI", Run: testCordiumCLI},

@@ -46,6 +46,16 @@ func (c *CordiumV1Watcher) Workspace(
 	return runWatcherCordiumV1(ctx, c.octeliumC, opts, ucordiumv1.KindWorkspace, onCreate, onUpdate, onDelete)
 }
 
+func (c *CordiumV1Watcher) WorkspaceSnapshot(
+	ctx context.Context,
+	opts *watchers.Opts,
+	onCreate func(ctx context.Context, item *cordiumv1.WorkspaceSnapshot) error,
+	onUpdate func(ctx context.Context, new, old *cordiumv1.WorkspaceSnapshot) error,
+	onDelete func(ctx context.Context, item *cordiumv1.WorkspaceSnapshot) error,
+) error {
+	return runWatcherCordiumV1(ctx, c.octeliumC, opts, ucordiumv1.KindWorkspaceSnapshot, onCreate, onUpdate, onDelete)
+}
+
 func (c *CordiumV1Watcher) Secret(
 	ctx context.Context,
 	opts *watchers.Opts,

@@ -24,6 +24,7 @@ import (
 
 	"github.com/octelium/cordium/cluster/common/gitutils"
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
+	"github.com/octelium/octelium/apis/cluster/ccordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"go.uber.org/zap"
 )
@@ -36,6 +37,13 @@ func (s *Server) setupDotFiles(ctx context.Context) error {
 
 	if s.ws.Status.IsBuild {
 		zap.L().Debug("No need to setup dotfiles. This is a prebuild")
+		return nil
+	}
+
+	switch s.initReq.PersistentStateSource {
+	case ccordiumv1.PersistentStateSource_PERSISTENT_STATE_SOURCE_EXISTING,
+		ccordiumv1.PersistentStateSource_PERSISTENT_STATE_SOURCE_WORKSPACE_SNAPSHOT:
+		zap.L().Debug("No need to setup dotfiles. The persistent storage already contains them")
 		return nil
 	}
 

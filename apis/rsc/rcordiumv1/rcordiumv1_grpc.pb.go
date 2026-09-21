@@ -52,55 +52,61 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ResourceService_CreateWorkspace_FullMethodName     = "/octelium.api.rsc.cordium.v1.ResourceService/CreateWorkspace"
-	ResourceService_UpdateWorkspace_FullMethodName     = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateWorkspace"
-	ResourceService_GetWorkspace_FullMethodName        = "/octelium.api.rsc.cordium.v1.ResourceService/GetWorkspace"
-	ResourceService_ListWorkspace_FullMethodName       = "/octelium.api.rsc.cordium.v1.ResourceService/ListWorkspace"
-	ResourceService_DeleteWorkspace_FullMethodName     = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteWorkspace"
-	ResourceService_WatchWorkspace_FullMethodName      = "/octelium.api.rsc.cordium.v1.ResourceService/WatchWorkspace"
-	ResourceService_CreateSecret_FullMethodName        = "/octelium.api.rsc.cordium.v1.ResourceService/CreateSecret"
-	ResourceService_UpdatSecret_FullMethodName         = "/octelium.api.rsc.cordium.v1.ResourceService/UpdatSecret"
-	ResourceService_GetSecret_FullMethodName           = "/octelium.api.rsc.cordium.v1.ResourceService/GetSecret"
-	ResourceService_ListSecret_FullMethodName          = "/octelium.api.rsc.cordium.v1.ResourceService/ListSecret"
-	ResourceService_DeleteSecret_FullMethodName        = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteSecret"
-	ResourceService_WatchSecret_FullMethodName         = "/octelium.api.rsc.cordium.v1.ResourceService/WatchSecret"
-	ResourceService_CreateTemplate_FullMethodName      = "/octelium.api.rsc.cordium.v1.ResourceService/CreateTemplate"
-	ResourceService_UpdateTemplate_FullMethodName      = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateTemplate"
-	ResourceService_GetTemplate_FullMethodName         = "/octelium.api.rsc.cordium.v1.ResourceService/GetTemplate"
-	ResourceService_ListTemplate_FullMethodName        = "/octelium.api.rsc.cordium.v1.ResourceService/ListTemplate"
-	ResourceService_DeleteTemplate_FullMethodName      = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteTemplate"
-	ResourceService_WatchTemplate_FullMethodName       = "/octelium.api.rsc.cordium.v1.ResourceService/WatchTemplate"
-	ResourceService_CreateSpace_FullMethodName         = "/octelium.api.rsc.cordium.v1.ResourceService/CreateSpace"
-	ResourceService_UpdateSpace_FullMethodName         = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateSpace"
-	ResourceService_GetSpace_FullMethodName            = "/octelium.api.rsc.cordium.v1.ResourceService/GetSpace"
-	ResourceService_ListSpace_FullMethodName           = "/octelium.api.rsc.cordium.v1.ResourceService/ListSpace"
-	ResourceService_DeleteSpace_FullMethodName         = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteSpace"
-	ResourceService_WatchSpace_FullMethodName          = "/octelium.api.rsc.cordium.v1.ResourceService/WatchSpace"
-	ResourceService_CreateMembership_FullMethodName    = "/octelium.api.rsc.cordium.v1.ResourceService/CreateMembership"
-	ResourceService_UpdateMembership_FullMethodName    = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateMembership"
-	ResourceService_GetMembership_FullMethodName       = "/octelium.api.rsc.cordium.v1.ResourceService/GetMembership"
-	ResourceService_ListMembership_FullMethodName      = "/octelium.api.rsc.cordium.v1.ResourceService/ListMembership"
-	ResourceService_DeleteMembership_FullMethodName    = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteMembership"
-	ResourceService_CreateGitProvider_FullMethodName   = "/octelium.api.rsc.cordium.v1.ResourceService/CreateGitProvider"
-	ResourceService_UpdateGitProvider_FullMethodName   = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateGitProvider"
-	ResourceService_GetGitProvider_FullMethodName      = "/octelium.api.rsc.cordium.v1.ResourceService/GetGitProvider"
-	ResourceService_ListGitProvider_FullMethodName     = "/octelium.api.rsc.cordium.v1.ResourceService/ListGitProvider"
-	ResourceService_DeleteGitProvider_FullMethodName   = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteGitProvider"
-	ResourceService_WatchGitProvider_FullMethodName    = "/octelium.api.rsc.cordium.v1.ResourceService/WatchGitProvider"
-	ResourceService_CreateUserSecret_FullMethodName    = "/octelium.api.rsc.cordium.v1.ResourceService/CreateUserSecret"
-	ResourceService_UpdateUserSecret_FullMethodName    = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateUserSecret"
-	ResourceService_GetUserSecret_FullMethodName       = "/octelium.api.rsc.cordium.v1.ResourceService/GetUserSecret"
-	ResourceService_ListUserSecret_FullMethodName      = "/octelium.api.rsc.cordium.v1.ResourceService/ListUserSecret"
-	ResourceService_DeleteUserSecret_FullMethodName    = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteUserSecret"
-	ResourceService_WatchUserSecret_FullMethodName     = "/octelium.api.rsc.cordium.v1.ResourceService/WatchUserSecret"
-	ResourceService_CreateUserConfig_FullMethodName    = "/octelium.api.rsc.cordium.v1.ResourceService/CreateUserConfig"
-	ResourceService_UpdateUserConfig_FullMethodName    = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateUserConfig"
-	ResourceService_GetUserConfig_FullMethodName       = "/octelium.api.rsc.cordium.v1.ResourceService/GetUserConfig"
-	ResourceService_DeleteUserConfig_FullMethodName    = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteUserConfig"
-	ResourceService_WatchUserConfig_FullMethodName     = "/octelium.api.rsc.cordium.v1.ResourceService/WatchUserConfig"
-	ResourceService_GetClusterConfig_FullMethodName    = "/octelium.api.rsc.cordium.v1.ResourceService/GetClusterConfig"
-	ResourceService_UpdateClusterConfig_FullMethodName = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateClusterConfig"
-	ResourceService_WatchClusterConfig_FullMethodName  = "/octelium.api.rsc.cordium.v1.ResourceService/WatchClusterConfig"
+	ResourceService_CreateWorkspace_FullMethodName         = "/octelium.api.rsc.cordium.v1.ResourceService/CreateWorkspace"
+	ResourceService_UpdateWorkspace_FullMethodName         = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateWorkspace"
+	ResourceService_GetWorkspace_FullMethodName            = "/octelium.api.rsc.cordium.v1.ResourceService/GetWorkspace"
+	ResourceService_ListWorkspace_FullMethodName           = "/octelium.api.rsc.cordium.v1.ResourceService/ListWorkspace"
+	ResourceService_DeleteWorkspace_FullMethodName         = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteWorkspace"
+	ResourceService_WatchWorkspace_FullMethodName          = "/octelium.api.rsc.cordium.v1.ResourceService/WatchWorkspace"
+	ResourceService_CreateWorkspaceSnapshot_FullMethodName = "/octelium.api.rsc.cordium.v1.ResourceService/CreateWorkspaceSnapshot"
+	ResourceService_UpdateWorkspaceSnapshot_FullMethodName = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateWorkspaceSnapshot"
+	ResourceService_GetWorkspaceSnapshot_FullMethodName    = "/octelium.api.rsc.cordium.v1.ResourceService/GetWorkspaceSnapshot"
+	ResourceService_ListWorkspaceSnapshot_FullMethodName   = "/octelium.api.rsc.cordium.v1.ResourceService/ListWorkspaceSnapshot"
+	ResourceService_DeleteWorkspaceSnapshot_FullMethodName = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteWorkspaceSnapshot"
+	ResourceService_WatchWorkspaceSnapshot_FullMethodName  = "/octelium.api.rsc.cordium.v1.ResourceService/WatchWorkspaceSnapshot"
+	ResourceService_CreateSecret_FullMethodName            = "/octelium.api.rsc.cordium.v1.ResourceService/CreateSecret"
+	ResourceService_UpdatSecret_FullMethodName             = "/octelium.api.rsc.cordium.v1.ResourceService/UpdatSecret"
+	ResourceService_GetSecret_FullMethodName               = "/octelium.api.rsc.cordium.v1.ResourceService/GetSecret"
+	ResourceService_ListSecret_FullMethodName              = "/octelium.api.rsc.cordium.v1.ResourceService/ListSecret"
+	ResourceService_DeleteSecret_FullMethodName            = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteSecret"
+	ResourceService_WatchSecret_FullMethodName             = "/octelium.api.rsc.cordium.v1.ResourceService/WatchSecret"
+	ResourceService_CreateTemplate_FullMethodName          = "/octelium.api.rsc.cordium.v1.ResourceService/CreateTemplate"
+	ResourceService_UpdateTemplate_FullMethodName          = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateTemplate"
+	ResourceService_GetTemplate_FullMethodName             = "/octelium.api.rsc.cordium.v1.ResourceService/GetTemplate"
+	ResourceService_ListTemplate_FullMethodName            = "/octelium.api.rsc.cordium.v1.ResourceService/ListTemplate"
+	ResourceService_DeleteTemplate_FullMethodName          = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteTemplate"
+	ResourceService_WatchTemplate_FullMethodName           = "/octelium.api.rsc.cordium.v1.ResourceService/WatchTemplate"
+	ResourceService_CreateSpace_FullMethodName             = "/octelium.api.rsc.cordium.v1.ResourceService/CreateSpace"
+	ResourceService_UpdateSpace_FullMethodName             = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateSpace"
+	ResourceService_GetSpace_FullMethodName                = "/octelium.api.rsc.cordium.v1.ResourceService/GetSpace"
+	ResourceService_ListSpace_FullMethodName               = "/octelium.api.rsc.cordium.v1.ResourceService/ListSpace"
+	ResourceService_DeleteSpace_FullMethodName             = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteSpace"
+	ResourceService_WatchSpace_FullMethodName              = "/octelium.api.rsc.cordium.v1.ResourceService/WatchSpace"
+	ResourceService_CreateMembership_FullMethodName        = "/octelium.api.rsc.cordium.v1.ResourceService/CreateMembership"
+	ResourceService_UpdateMembership_FullMethodName        = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateMembership"
+	ResourceService_GetMembership_FullMethodName           = "/octelium.api.rsc.cordium.v1.ResourceService/GetMembership"
+	ResourceService_ListMembership_FullMethodName          = "/octelium.api.rsc.cordium.v1.ResourceService/ListMembership"
+	ResourceService_DeleteMembership_FullMethodName        = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteMembership"
+	ResourceService_CreateGitProvider_FullMethodName       = "/octelium.api.rsc.cordium.v1.ResourceService/CreateGitProvider"
+	ResourceService_UpdateGitProvider_FullMethodName       = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateGitProvider"
+	ResourceService_GetGitProvider_FullMethodName          = "/octelium.api.rsc.cordium.v1.ResourceService/GetGitProvider"
+	ResourceService_ListGitProvider_FullMethodName         = "/octelium.api.rsc.cordium.v1.ResourceService/ListGitProvider"
+	ResourceService_DeleteGitProvider_FullMethodName       = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteGitProvider"
+	ResourceService_WatchGitProvider_FullMethodName        = "/octelium.api.rsc.cordium.v1.ResourceService/WatchGitProvider"
+	ResourceService_CreateUserSecret_FullMethodName        = "/octelium.api.rsc.cordium.v1.ResourceService/CreateUserSecret"
+	ResourceService_UpdateUserSecret_FullMethodName        = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateUserSecret"
+	ResourceService_GetUserSecret_FullMethodName           = "/octelium.api.rsc.cordium.v1.ResourceService/GetUserSecret"
+	ResourceService_ListUserSecret_FullMethodName          = "/octelium.api.rsc.cordium.v1.ResourceService/ListUserSecret"
+	ResourceService_DeleteUserSecret_FullMethodName        = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteUserSecret"
+	ResourceService_WatchUserSecret_FullMethodName         = "/octelium.api.rsc.cordium.v1.ResourceService/WatchUserSecret"
+	ResourceService_CreateUserConfig_FullMethodName        = "/octelium.api.rsc.cordium.v1.ResourceService/CreateUserConfig"
+	ResourceService_UpdateUserConfig_FullMethodName        = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateUserConfig"
+	ResourceService_GetUserConfig_FullMethodName           = "/octelium.api.rsc.cordium.v1.ResourceService/GetUserConfig"
+	ResourceService_DeleteUserConfig_FullMethodName        = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteUserConfig"
+	ResourceService_WatchUserConfig_FullMethodName         = "/octelium.api.rsc.cordium.v1.ResourceService/WatchUserConfig"
+	ResourceService_GetClusterConfig_FullMethodName        = "/octelium.api.rsc.cordium.v1.ResourceService/GetClusterConfig"
+	ResourceService_UpdateClusterConfig_FullMethodName     = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateClusterConfig"
+	ResourceService_WatchClusterConfig_FullMethodName      = "/octelium.api.rsc.cordium.v1.ResourceService/WatchClusterConfig"
 )
 
 // ResourceServiceClient is the client API for ResourceService service.
@@ -113,6 +119,12 @@ type ResourceServiceClient interface {
 	ListWorkspace(ctx context.Context, in *rmetav1.ListOptions, opts ...grpc.CallOption) (*cordiumv1.WorkspaceList, error)
 	DeleteWorkspace(ctx context.Context, in *rmetav1.DeleteOptions, opts ...grpc.CallOption) (*rmetav1.OperationResult, error)
 	WatchWorkspace(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error)
+	CreateWorkspaceSnapshot(ctx context.Context, in *cordiumv1.WorkspaceSnapshot, opts ...grpc.CallOption) (*cordiumv1.WorkspaceSnapshot, error)
+	UpdateWorkspaceSnapshot(ctx context.Context, in *cordiumv1.WorkspaceSnapshot, opts ...grpc.CallOption) (*cordiumv1.WorkspaceSnapshot, error)
+	GetWorkspaceSnapshot(ctx context.Context, in *rmetav1.GetOptions, opts ...grpc.CallOption) (*cordiumv1.WorkspaceSnapshot, error)
+	ListWorkspaceSnapshot(ctx context.Context, in *rmetav1.ListOptions, opts ...grpc.CallOption) (*cordiumv1.WorkspaceSnapshotList, error)
+	DeleteWorkspaceSnapshot(ctx context.Context, in *rmetav1.DeleteOptions, opts ...grpc.CallOption) (*rmetav1.OperationResult, error)
+	WatchWorkspaceSnapshot(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error)
 	CreateSecret(ctx context.Context, in *cordiumv1.Secret, opts ...grpc.CallOption) (*cordiumv1.Secret, error)
 	UpdatSecret(ctx context.Context, in *cordiumv1.Secret, opts ...grpc.CallOption) (*cordiumv1.Secret, error)
 	GetSecret(ctx context.Context, in *rmetav1.GetOptions, opts ...grpc.CallOption) (*cordiumv1.Secret, error)
@@ -235,6 +247,75 @@ func (c *resourceServiceClient) WatchWorkspace(ctx context.Context, in *rmetav1.
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type ResourceService_WatchWorkspaceClient = grpc.ServerStreamingClient[rmetav1.WatchEvent]
 
+func (c *resourceServiceClient) CreateWorkspaceSnapshot(ctx context.Context, in *cordiumv1.WorkspaceSnapshot, opts ...grpc.CallOption) (*cordiumv1.WorkspaceSnapshot, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(cordiumv1.WorkspaceSnapshot)
+	err := c.cc.Invoke(ctx, ResourceService_CreateWorkspaceSnapshot_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *resourceServiceClient) UpdateWorkspaceSnapshot(ctx context.Context, in *cordiumv1.WorkspaceSnapshot, opts ...grpc.CallOption) (*cordiumv1.WorkspaceSnapshot, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(cordiumv1.WorkspaceSnapshot)
+	err := c.cc.Invoke(ctx, ResourceService_UpdateWorkspaceSnapshot_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *resourceServiceClient) GetWorkspaceSnapshot(ctx context.Context, in *rmetav1.GetOptions, opts ...grpc.CallOption) (*cordiumv1.WorkspaceSnapshot, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(cordiumv1.WorkspaceSnapshot)
+	err := c.cc.Invoke(ctx, ResourceService_GetWorkspaceSnapshot_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *resourceServiceClient) ListWorkspaceSnapshot(ctx context.Context, in *rmetav1.ListOptions, opts ...grpc.CallOption) (*cordiumv1.WorkspaceSnapshotList, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(cordiumv1.WorkspaceSnapshotList)
+	err := c.cc.Invoke(ctx, ResourceService_ListWorkspaceSnapshot_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *resourceServiceClient) DeleteWorkspaceSnapshot(ctx context.Context, in *rmetav1.DeleteOptions, opts ...grpc.CallOption) (*rmetav1.OperationResult, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(rmetav1.OperationResult)
+	err := c.cc.Invoke(ctx, ResourceService_DeleteWorkspaceSnapshot_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *resourceServiceClient) WatchWorkspaceSnapshot(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[1], ResourceService_WatchWorkspaceSnapshot_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[rmetav1.WatchOptions, rmetav1.WatchEvent]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ResourceService_WatchWorkspaceSnapshotClient = grpc.ServerStreamingClient[rmetav1.WatchEvent]
+
 func (c *resourceServiceClient) CreateSecret(ctx context.Context, in *cordiumv1.Secret, opts ...grpc.CallOption) (*cordiumv1.Secret, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(cordiumv1.Secret)
@@ -287,7 +368,7 @@ func (c *resourceServiceClient) DeleteSecret(ctx context.Context, in *rmetav1.De
 
 func (c *resourceServiceClient) WatchSecret(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[1], ResourceService_WatchSecret_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[2], ResourceService_WatchSecret_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -356,7 +437,7 @@ func (c *resourceServiceClient) DeleteTemplate(ctx context.Context, in *rmetav1.
 
 func (c *resourceServiceClient) WatchTemplate(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[2], ResourceService_WatchTemplate_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[3], ResourceService_WatchTemplate_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -425,7 +506,7 @@ func (c *resourceServiceClient) DeleteSpace(ctx context.Context, in *rmetav1.Del
 
 func (c *resourceServiceClient) WatchSpace(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[3], ResourceService_WatchSpace_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[4], ResourceService_WatchSpace_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -544,7 +625,7 @@ func (c *resourceServiceClient) DeleteGitProvider(ctx context.Context, in *rmeta
 
 func (c *resourceServiceClient) WatchGitProvider(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[4], ResourceService_WatchGitProvider_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[5], ResourceService_WatchGitProvider_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -613,7 +694,7 @@ func (c *resourceServiceClient) DeleteUserSecret(ctx context.Context, in *rmetav
 
 func (c *resourceServiceClient) WatchUserSecret(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[5], ResourceService_WatchUserSecret_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[6], ResourceService_WatchUserSecret_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -672,7 +753,7 @@ func (c *resourceServiceClient) DeleteUserConfig(ctx context.Context, in *rmetav
 
 func (c *resourceServiceClient) WatchUserConfig(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[6], ResourceService_WatchUserConfig_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[7], ResourceService_WatchUserConfig_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -711,7 +792,7 @@ func (c *resourceServiceClient) UpdateClusterConfig(ctx context.Context, in *cor
 
 func (c *resourceServiceClient) WatchClusterConfig(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[7], ResourceService_WatchClusterConfig_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[8], ResourceService_WatchClusterConfig_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -738,6 +819,12 @@ type ResourceServiceServer interface {
 	ListWorkspace(context.Context, *rmetav1.ListOptions) (*cordiumv1.WorkspaceList, error)
 	DeleteWorkspace(context.Context, *rmetav1.DeleteOptions) (*rmetav1.OperationResult, error)
 	WatchWorkspace(*rmetav1.WatchOptions, grpc.ServerStreamingServer[rmetav1.WatchEvent]) error
+	CreateWorkspaceSnapshot(context.Context, *cordiumv1.WorkspaceSnapshot) (*cordiumv1.WorkspaceSnapshot, error)
+	UpdateWorkspaceSnapshot(context.Context, *cordiumv1.WorkspaceSnapshot) (*cordiumv1.WorkspaceSnapshot, error)
+	GetWorkspaceSnapshot(context.Context, *rmetav1.GetOptions) (*cordiumv1.WorkspaceSnapshot, error)
+	ListWorkspaceSnapshot(context.Context, *rmetav1.ListOptions) (*cordiumv1.WorkspaceSnapshotList, error)
+	DeleteWorkspaceSnapshot(context.Context, *rmetav1.DeleteOptions) (*rmetav1.OperationResult, error)
+	WatchWorkspaceSnapshot(*rmetav1.WatchOptions, grpc.ServerStreamingServer[rmetav1.WatchEvent]) error
 	CreateSecret(context.Context, *cordiumv1.Secret) (*cordiumv1.Secret, error)
 	UpdatSecret(context.Context, *cordiumv1.Secret) (*cordiumv1.Secret, error)
 	GetSecret(context.Context, *rmetav1.GetOptions) (*cordiumv1.Secret, error)
@@ -808,6 +895,24 @@ func (UnimplementedResourceServiceServer) DeleteWorkspace(context.Context, *rmet
 }
 func (UnimplementedResourceServiceServer) WatchWorkspace(*rmetav1.WatchOptions, grpc.ServerStreamingServer[rmetav1.WatchEvent]) error {
 	return status.Errorf(codes.Unimplemented, "method WatchWorkspace not implemented")
+}
+func (UnimplementedResourceServiceServer) CreateWorkspaceSnapshot(context.Context, *cordiumv1.WorkspaceSnapshot) (*cordiumv1.WorkspaceSnapshot, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateWorkspaceSnapshot not implemented")
+}
+func (UnimplementedResourceServiceServer) UpdateWorkspaceSnapshot(context.Context, *cordiumv1.WorkspaceSnapshot) (*cordiumv1.WorkspaceSnapshot, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateWorkspaceSnapshot not implemented")
+}
+func (UnimplementedResourceServiceServer) GetWorkspaceSnapshot(context.Context, *rmetav1.GetOptions) (*cordiumv1.WorkspaceSnapshot, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetWorkspaceSnapshot not implemented")
+}
+func (UnimplementedResourceServiceServer) ListWorkspaceSnapshot(context.Context, *rmetav1.ListOptions) (*cordiumv1.WorkspaceSnapshotList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListWorkspaceSnapshot not implemented")
+}
+func (UnimplementedResourceServiceServer) DeleteWorkspaceSnapshot(context.Context, *rmetav1.DeleteOptions) (*rmetav1.OperationResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteWorkspaceSnapshot not implemented")
+}
+func (UnimplementedResourceServiceServer) WatchWorkspaceSnapshot(*rmetav1.WatchOptions, grpc.ServerStreamingServer[rmetav1.WatchEvent]) error {
+	return status.Errorf(codes.Unimplemented, "method WatchWorkspaceSnapshot not implemented")
 }
 func (UnimplementedResourceServiceServer) CreateSecret(context.Context, *cordiumv1.Secret) (*cordiumv1.Secret, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateSecret not implemented")
@@ -1059,6 +1164,107 @@ func _ResourceService_WatchWorkspace_Handler(srv interface{}, stream grpc.Server
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type ResourceService_WatchWorkspaceServer = grpc.ServerStreamingServer[rmetav1.WatchEvent]
+
+func _ResourceService_CreateWorkspaceSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(cordiumv1.WorkspaceSnapshot)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResourceServiceServer).CreateWorkspaceSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ResourceService_CreateWorkspaceSnapshot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResourceServiceServer).CreateWorkspaceSnapshot(ctx, req.(*cordiumv1.WorkspaceSnapshot))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ResourceService_UpdateWorkspaceSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(cordiumv1.WorkspaceSnapshot)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResourceServiceServer).UpdateWorkspaceSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ResourceService_UpdateWorkspaceSnapshot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResourceServiceServer).UpdateWorkspaceSnapshot(ctx, req.(*cordiumv1.WorkspaceSnapshot))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ResourceService_GetWorkspaceSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rmetav1.GetOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResourceServiceServer).GetWorkspaceSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ResourceService_GetWorkspaceSnapshot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResourceServiceServer).GetWorkspaceSnapshot(ctx, req.(*rmetav1.GetOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ResourceService_ListWorkspaceSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rmetav1.ListOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResourceServiceServer).ListWorkspaceSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ResourceService_ListWorkspaceSnapshot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResourceServiceServer).ListWorkspaceSnapshot(ctx, req.(*rmetav1.ListOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ResourceService_DeleteWorkspaceSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rmetav1.DeleteOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResourceServiceServer).DeleteWorkspaceSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ResourceService_DeleteWorkspaceSnapshot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResourceServiceServer).DeleteWorkspaceSnapshot(ctx, req.(*rmetav1.DeleteOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ResourceService_WatchWorkspaceSnapshot_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(rmetav1.WatchOptions)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ResourceServiceServer).WatchWorkspaceSnapshot(m, &grpc.GenericServerStream[rmetav1.WatchOptions, rmetav1.WatchEvent]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ResourceService_WatchWorkspaceSnapshotServer = grpc.ServerStreamingServer[rmetav1.WatchEvent]
 
 func _ResourceService_CreateSecret_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(cordiumv1.Secret)
@@ -1813,6 +2019,26 @@ var ResourceService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ResourceService_DeleteWorkspace_Handler,
 		},
 		{
+			MethodName: "CreateWorkspaceSnapshot",
+			Handler:    _ResourceService_CreateWorkspaceSnapshot_Handler,
+		},
+		{
+			MethodName: "UpdateWorkspaceSnapshot",
+			Handler:    _ResourceService_UpdateWorkspaceSnapshot_Handler,
+		},
+		{
+			MethodName: "GetWorkspaceSnapshot",
+			Handler:    _ResourceService_GetWorkspaceSnapshot_Handler,
+		},
+		{
+			MethodName: "ListWorkspaceSnapshot",
+			Handler:    _ResourceService_ListWorkspaceSnapshot_Handler,
+		},
+		{
+			MethodName: "DeleteWorkspaceSnapshot",
+			Handler:    _ResourceService_DeleteWorkspaceSnapshot_Handler,
+		},
+		{
 			MethodName: "CreateSecret",
 			Handler:    _ResourceService_CreateSecret_Handler,
 		},
@@ -1961,6 +2187,11 @@ var ResourceService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "WatchWorkspace",
 			Handler:       _ResourceService_WatchWorkspace_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "WatchWorkspaceSnapshot",
+			Handler:       _ResourceService_WatchWorkspaceSnapshot_Handler,
 			ServerStreams: true,
 		},
 		{

@@ -729,6 +729,15 @@ func (s *Server) doPrepare(ctx context.Context, req *ccordiumv1.PrepareRequest) 
 			}
 			ws := s.ws
 
+			switch req.PersistentStateSource {
+			case ccordiumv1.PersistentStateSource_PERSISTENT_STATE_SOURCE_EMPTY:
+				return true
+			case ccordiumv1.PersistentStateSource_PERSISTENT_STATE_SOURCE_EXISTING,
+				ccordiumv1.PersistentStateSource_PERSISTENT_STATE_SOURCE_TEMPLATE_SNAPSHOT,
+				ccordiumv1.PersistentStateSource_PERSISTENT_STATE_SOURCE_WORKSPACE_SNAPSHOT:
+				return false
+			}
+
 			if ws.Status.IsBuild {
 				return true
 			}

@@ -283,6 +283,9 @@ func templateSpecFrom(b *specBuilder) (*cordiumv1.Template_Spec, error) {
 			"a Template cannot be ephemeral; set Ephemeral() on the Workspaces that it creates")
 	case b.templateRef != nil:
 		return nil, invalidArgumentf("a Template cannot be created from another Template")
+	case b.snapshotRef != nil:
+		return nil, invalidArgumentf(
+			"a Template cannot be restored from a WorkspaceSnapshot; set FromSnapshot on the Workspaces that it creates")
 	}
 
 	return &cordiumv1.Template_Spec{

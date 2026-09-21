@@ -93,6 +93,11 @@ func Run(ctx context.Context) error {
 		return err
 	}
 
+	if err := wswatchers.NewCordiumV1(octeliumC).WorkspaceSnapshot(ctx, nil,
+		ctl.OnAddWorkspaceSnapshot, ctl.OnUpdateWorkspaceSnapshot, ctl.OnDeleteWorkspaceSnapshot); err != nil {
+		return err
+	}
+
 	if err := wswatchers.NewCordiumV1(octeliumC).Template(ctx,
 		nil, tmplCtl.OnAdd, tmplCtl.OnUpdate, tmplCtl.OnDelete); err != nil {
 		return err

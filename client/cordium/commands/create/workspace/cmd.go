@@ -35,6 +35,7 @@ import (
 type CreateWorkspaceArgs struct {
 	Space      string
 	Template   string
+	Snapshot   string
 	File       string
 	Start      bool
 	Repo       string
@@ -81,6 +82,8 @@ var cmdArgs args
 func init() {
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Space, "space", "", "", "Parent Space name (e.g. my-project)")
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Template, "template", "", "", "Parent Template name (e.g. ml-env.my-project)")
+	Cmd.PersistentFlags().StringVarP(&cmdArgs.Snapshot, "snapshot", "", "",
+		"Restore the Workspace storage from a WorkspaceSnapshot (e.g. before-upgrade). The Workspace is created inside the Space of the snapshot")
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.File, "file", "", "", "Path to a Workspace YAML spec file")
 	Cmd.PersistentFlags().BoolVarP(&cmdArgs.Start, "start", "", false, "Start the Workspace immediately after creation")
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Repo, "repository", "", "", "Primary repository URL to clone into /workspace/repo")
@@ -129,6 +132,7 @@ func init() {
 		"Drop a Linux capability from the Workspace container (repeatable: --cap-drop NET_RAW)")
 
 	Cmd.MarkFlagsMutuallyExclusive("space", "template")
+	Cmd.MarkFlagsMutuallyExclusive("snapshot", "ephemeral")
 	Cmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
 }
 
@@ -156,6 +160,9 @@ values from the YAML spec.`,
 
   # Create a Workspace from a YAML spec file
   cordium create ws --file workspace.yaml
+
+  # Restore a new Workspace out of a WorkspaceSnapshot
+  cordium create ws --snapshot before-upgrade --start
 
   # Create and show Workspace as YAML
   cordium create ws --out yaml
@@ -226,6 +233,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 	ws, err := DoCreateWorkspace(ctx, c, &DoCreateWorkspaceOpts{
 		Space:             cmdArgs.Space,
 		Template:          cmdArgs.Template,
+		Snapshot:          cmdArgs.Snapshot,
 		File:              cmdArgs.File,
 		Start:             cmdArgs.Start,
 		Repo:              cmdArgs.Repo,
@@ -277,6 +285,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 type DoCreateWorkspaceOpts struct {
 	Space      string
 	Template   string
+	Snapshot   string
 	File       string
 	Start      bool
 	Repo       string
@@ -512,6 +521,13 @@ func DoCreateWorkspace(ctx context.Context, c pb.MainServiceClient, o *DoCreateW
 	ws.Spec.IsEphemeral = o.Ephemeral
 
 	ws.Metadata = &metav1.Metadata{}
+	ws.Status = &pb.Workspace_Status{}
+
+	if o.Snapshot != "" {
+		ws.Status.WorkspaceSnapshotRef = &metav1.ObjectReference{
+			Name: o.Snapshot,
+		}
+	}
 
 	if o.Template != "" {
 		ws.Status.TemplateRef = &metav1.ObjectReference{

@@ -315,6 +315,9 @@ func (c *Controller) stopWorkspace(ctx context.Context, ws *cordiumv1.Workspace)
 		ws.Status.LastState = ws.Status.State
 
 		ws.Status.SessionRef = nil
+		if ws.Status.RegionRef != nil {
+			ws.Status.LastRegionRef = ws.Status.RegionRef
+		}
 		ws.Status.RegionRef = nil
 		ws.Status.LastStoppedAt = pbutils.Now()
 		ws.Status.State = cordiumv1.Workspace_Status_STOPPED

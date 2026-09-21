@@ -51,52 +51,56 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MainService_CreateSecret_FullMethodName         = "/octelium.api.main.cordium.v1.MainService/CreateSecret"
-	MainService_ListSecret_FullMethodName           = "/octelium.api.main.cordium.v1.MainService/ListSecret"
-	MainService_DeleteSecret_FullMethodName         = "/octelium.api.main.cordium.v1.MainService/DeleteSecret"
-	MainService_GetSecret_FullMethodName            = "/octelium.api.main.cordium.v1.MainService/GetSecret"
-	MainService_CreateTemplate_FullMethodName       = "/octelium.api.main.cordium.v1.MainService/CreateTemplate"
-	MainService_UpdateTemplate_FullMethodName       = "/octelium.api.main.cordium.v1.MainService/UpdateTemplate"
-	MainService_DeleteTemplate_FullMethodName       = "/octelium.api.main.cordium.v1.MainService/DeleteTemplate"
-	MainService_BuildTemplate_FullMethodName        = "/octelium.api.main.cordium.v1.MainService/BuildTemplate"
-	MainService_CancelBuildTemplate_FullMethodName  = "/octelium.api.main.cordium.v1.MainService/CancelBuildTemplate"
-	MainService_CreateSpace_FullMethodName          = "/octelium.api.main.cordium.v1.MainService/CreateSpace"
-	MainService_UpdateSpace_FullMethodName          = "/octelium.api.main.cordium.v1.MainService/UpdateSpace"
-	MainService_DeleteSpace_FullMethodName          = "/octelium.api.main.cordium.v1.MainService/DeleteSpace"
-	MainService_CreateMembership_FullMethodName     = "/octelium.api.main.cordium.v1.MainService/CreateMembership"
-	MainService_DeleteMembership_FullMethodName     = "/octelium.api.main.cordium.v1.MainService/DeleteMembership"
-	MainService_GetSpaceMembership_FullMethodName   = "/octelium.api.main.cordium.v1.MainService/GetSpaceMembership"
-	MainService_UpdateMembership_FullMethodName     = "/octelium.api.main.cordium.v1.MainService/UpdateMembership"
-	MainService_CreateGitProvider_FullMethodName    = "/octelium.api.main.cordium.v1.MainService/CreateGitProvider"
-	MainService_UpdateGitProvider_FullMethodName    = "/octelium.api.main.cordium.v1.MainService/UpdateGitProvider"
-	MainService_DeleteGitProvider_FullMethodName    = "/octelium.api.main.cordium.v1.MainService/DeleteGitProvider"
-	MainService_CreateWorkspace_FullMethodName      = "/octelium.api.main.cordium.v1.MainService/CreateWorkspace"
-	MainService_UpdateWorkspace_FullMethodName      = "/octelium.api.main.cordium.v1.MainService/UpdateWorkspace"
-	MainService_DeleteWorkspace_FullMethodName      = "/octelium.api.main.cordium.v1.MainService/DeleteWorkspace"
-	MainService_ListWorkspace_FullMethodName        = "/octelium.api.main.cordium.v1.MainService/ListWorkspace"
-	MainService_StartWorkspace_FullMethodName       = "/octelium.api.main.cordium.v1.MainService/StartWorkspace"
-	MainService_StopWorkspace_FullMethodName        = "/octelium.api.main.cordium.v1.MainService/StopWorkspace"
-	MainService_ShareWorkspacePort_FullMethodName   = "/octelium.api.main.cordium.v1.MainService/ShareWorkspacePort"
-	MainService_UnshareWorkspacePort_FullMethodName = "/octelium.api.main.cordium.v1.MainService/UnshareWorkspacePort"
-	MainService_ListSpace_FullMethodName            = "/octelium.api.main.cordium.v1.MainService/ListSpace"
-	MainService_ListTemplate_FullMethodName         = "/octelium.api.main.cordium.v1.MainService/ListTemplate"
-	MainService_ListMembership_FullMethodName       = "/octelium.api.main.cordium.v1.MainService/ListMembership"
-	MainService_ListGitProvider_FullMethodName      = "/octelium.api.main.cordium.v1.MainService/ListGitProvider"
-	MainService_GetSpace_FullMethodName             = "/octelium.api.main.cordium.v1.MainService/GetSpace"
-	MainService_GetWorkspace_FullMethodName         = "/octelium.api.main.cordium.v1.MainService/GetWorkspace"
-	MainService_GetTemplate_FullMethodName          = "/octelium.api.main.cordium.v1.MainService/GetTemplate"
-	MainService_GetGitProvider_FullMethodName       = "/octelium.api.main.cordium.v1.MainService/GetGitProvider"
-	MainService_GetMembership_FullMethodName        = "/octelium.api.main.cordium.v1.MainService/GetMembership"
-	MainService_LeaveSpace_FullMethodName           = "/octelium.api.main.cordium.v1.MainService/LeaveSpace"
-	MainService_CreateUserSecret_FullMethodName     = "/octelium.api.main.cordium.v1.MainService/CreateUserSecret"
-	MainService_UpdateUserSecret_FullMethodName     = "/octelium.api.main.cordium.v1.MainService/UpdateUserSecret"
-	MainService_DeleteUserSecret_FullMethodName     = "/octelium.api.main.cordium.v1.MainService/DeleteUserSecret"
-	MainService_ListUserSecret_FullMethodName       = "/octelium.api.main.cordium.v1.MainService/ListUserSecret"
-	MainService_GetUserSecret_FullMethodName        = "/octelium.api.main.cordium.v1.MainService/GetUserSecret"
-	MainService_GetUserConfig_FullMethodName        = "/octelium.api.main.cordium.v1.MainService/GetUserConfig"
-	MainService_UpdateUserConfig_FullMethodName     = "/octelium.api.main.cordium.v1.MainService/UpdateUserConfig"
-	MainService_ListRegion_FullMethodName           = "/octelium.api.main.cordium.v1.MainService/ListRegion"
-	MainService_WatchWorkspace_FullMethodName       = "/octelium.api.main.cordium.v1.MainService/WatchWorkspace"
+	MainService_CreateSecret_FullMethodName            = "/octelium.api.main.cordium.v1.MainService/CreateSecret"
+	MainService_ListSecret_FullMethodName              = "/octelium.api.main.cordium.v1.MainService/ListSecret"
+	MainService_DeleteSecret_FullMethodName            = "/octelium.api.main.cordium.v1.MainService/DeleteSecret"
+	MainService_GetSecret_FullMethodName               = "/octelium.api.main.cordium.v1.MainService/GetSecret"
+	MainService_CreateTemplate_FullMethodName          = "/octelium.api.main.cordium.v1.MainService/CreateTemplate"
+	MainService_UpdateTemplate_FullMethodName          = "/octelium.api.main.cordium.v1.MainService/UpdateTemplate"
+	MainService_DeleteTemplate_FullMethodName          = "/octelium.api.main.cordium.v1.MainService/DeleteTemplate"
+	MainService_BuildTemplate_FullMethodName           = "/octelium.api.main.cordium.v1.MainService/BuildTemplate"
+	MainService_CancelBuildTemplate_FullMethodName     = "/octelium.api.main.cordium.v1.MainService/CancelBuildTemplate"
+	MainService_CreateSpace_FullMethodName             = "/octelium.api.main.cordium.v1.MainService/CreateSpace"
+	MainService_UpdateSpace_FullMethodName             = "/octelium.api.main.cordium.v1.MainService/UpdateSpace"
+	MainService_DeleteSpace_FullMethodName             = "/octelium.api.main.cordium.v1.MainService/DeleteSpace"
+	MainService_CreateMembership_FullMethodName        = "/octelium.api.main.cordium.v1.MainService/CreateMembership"
+	MainService_DeleteMembership_FullMethodName        = "/octelium.api.main.cordium.v1.MainService/DeleteMembership"
+	MainService_GetSpaceMembership_FullMethodName      = "/octelium.api.main.cordium.v1.MainService/GetSpaceMembership"
+	MainService_UpdateMembership_FullMethodName        = "/octelium.api.main.cordium.v1.MainService/UpdateMembership"
+	MainService_CreateGitProvider_FullMethodName       = "/octelium.api.main.cordium.v1.MainService/CreateGitProvider"
+	MainService_UpdateGitProvider_FullMethodName       = "/octelium.api.main.cordium.v1.MainService/UpdateGitProvider"
+	MainService_DeleteGitProvider_FullMethodName       = "/octelium.api.main.cordium.v1.MainService/DeleteGitProvider"
+	MainService_CreateWorkspace_FullMethodName         = "/octelium.api.main.cordium.v1.MainService/CreateWorkspace"
+	MainService_UpdateWorkspace_FullMethodName         = "/octelium.api.main.cordium.v1.MainService/UpdateWorkspace"
+	MainService_DeleteWorkspace_FullMethodName         = "/octelium.api.main.cordium.v1.MainService/DeleteWorkspace"
+	MainService_ListWorkspace_FullMethodName           = "/octelium.api.main.cordium.v1.MainService/ListWorkspace"
+	MainService_CreateWorkspaceSnapshot_FullMethodName = "/octelium.api.main.cordium.v1.MainService/CreateWorkspaceSnapshot"
+	MainService_DeleteWorkspaceSnapshot_FullMethodName = "/octelium.api.main.cordium.v1.MainService/DeleteWorkspaceSnapshot"
+	MainService_ListWorkspaceSnapshot_FullMethodName   = "/octelium.api.main.cordium.v1.MainService/ListWorkspaceSnapshot"
+	MainService_GetWorkspaceSnapshot_FullMethodName    = "/octelium.api.main.cordium.v1.MainService/GetWorkspaceSnapshot"
+	MainService_StartWorkspace_FullMethodName          = "/octelium.api.main.cordium.v1.MainService/StartWorkspace"
+	MainService_StopWorkspace_FullMethodName           = "/octelium.api.main.cordium.v1.MainService/StopWorkspace"
+	MainService_ShareWorkspacePort_FullMethodName      = "/octelium.api.main.cordium.v1.MainService/ShareWorkspacePort"
+	MainService_UnshareWorkspacePort_FullMethodName    = "/octelium.api.main.cordium.v1.MainService/UnshareWorkspacePort"
+	MainService_ListSpace_FullMethodName               = "/octelium.api.main.cordium.v1.MainService/ListSpace"
+	MainService_ListTemplate_FullMethodName            = "/octelium.api.main.cordium.v1.MainService/ListTemplate"
+	MainService_ListMembership_FullMethodName          = "/octelium.api.main.cordium.v1.MainService/ListMembership"
+	MainService_ListGitProvider_FullMethodName         = "/octelium.api.main.cordium.v1.MainService/ListGitProvider"
+	MainService_GetSpace_FullMethodName                = "/octelium.api.main.cordium.v1.MainService/GetSpace"
+	MainService_GetWorkspace_FullMethodName            = "/octelium.api.main.cordium.v1.MainService/GetWorkspace"
+	MainService_GetTemplate_FullMethodName             = "/octelium.api.main.cordium.v1.MainService/GetTemplate"
+	MainService_GetGitProvider_FullMethodName          = "/octelium.api.main.cordium.v1.MainService/GetGitProvider"
+	MainService_GetMembership_FullMethodName           = "/octelium.api.main.cordium.v1.MainService/GetMembership"
+	MainService_LeaveSpace_FullMethodName              = "/octelium.api.main.cordium.v1.MainService/LeaveSpace"
+	MainService_CreateUserSecret_FullMethodName        = "/octelium.api.main.cordium.v1.MainService/CreateUserSecret"
+	MainService_UpdateUserSecret_FullMethodName        = "/octelium.api.main.cordium.v1.MainService/UpdateUserSecret"
+	MainService_DeleteUserSecret_FullMethodName        = "/octelium.api.main.cordium.v1.MainService/DeleteUserSecret"
+	MainService_ListUserSecret_FullMethodName          = "/octelium.api.main.cordium.v1.MainService/ListUserSecret"
+	MainService_GetUserSecret_FullMethodName           = "/octelium.api.main.cordium.v1.MainService/GetUserSecret"
+	MainService_GetUserConfig_FullMethodName           = "/octelium.api.main.cordium.v1.MainService/GetUserConfig"
+	MainService_UpdateUserConfig_FullMethodName        = "/octelium.api.main.cordium.v1.MainService/UpdateUserConfig"
+	MainService_ListRegion_FullMethodName              = "/octelium.api.main.cordium.v1.MainService/ListRegion"
+	MainService_WatchWorkspace_FullMethodName          = "/octelium.api.main.cordium.v1.MainService/WatchWorkspace"
 )
 
 // MainServiceClient is the client API for MainService service.
@@ -186,6 +190,20 @@ type MainServiceClient interface {
 	DeleteWorkspace(ctx context.Context, in *metav1.DeleteOptions, opts ...grpc.CallOption) (*metav1.OperationResult, error)
 	// ListWorkspace lists the Workspaces owned by the User.
 	ListWorkspace(ctx context.Context, in *ListWorkspaceOptions, opts ...grpc.CallOption) (*WorkspaceList, error)
+	// CreateWorkspaceSnapshot creates a WorkspaceSnapshot out of the persistent
+	// storage of a Workspace owned by the User. The Workspace is neither stopped
+	// nor restarted and it remains fully usable while the snapshot is being
+	// taken. The snapshot is created in the CREATING state and the snapshotting
+	// itself is asynchronous.
+	CreateWorkspaceSnapshot(ctx context.Context, in *WorkspaceSnapshot, opts ...grpc.CallOption) (*WorkspaceSnapshot, error)
+	// DeleteWorkspaceSnapshot deletes a WorkspaceSnapshot owned by the User
+	// together with its underlying storage snapshot.
+	DeleteWorkspaceSnapshot(ctx context.Context, in *metav1.DeleteOptions, opts ...grpc.CallOption) (*metav1.OperationResult, error)
+	// ListWorkspaceSnapshot lists the WorkspaceSnapshots owned by the User.
+	ListWorkspaceSnapshot(ctx context.Context, in *ListWorkspaceSnapshotOptions, opts ...grpc.CallOption) (*WorkspaceSnapshotList, error)
+	// GetWorkspaceSnapshot retrieves a specific WorkspaceSnapshot owned by the
+	// User.
+	GetWorkspaceSnapshot(ctx context.Context, in *metav1.GetOptions, opts ...grpc.CallOption) (*WorkspaceSnapshot, error)
 	// StartWorkspace starts a stopped Workspace. The Cluster creates a dedicated
 	// Octelium Session for the run and moves the Workspace to the INIT_REQUEST
 	// state. The actual initialization is asynchronous and can be followed via
@@ -491,6 +509,46 @@ func (c *mainServiceClient) ListWorkspace(ctx context.Context, in *ListWorkspace
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(WorkspaceList)
 	err := c.cc.Invoke(ctx, MainService_ListWorkspace_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mainServiceClient) CreateWorkspaceSnapshot(ctx context.Context, in *WorkspaceSnapshot, opts ...grpc.CallOption) (*WorkspaceSnapshot, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(WorkspaceSnapshot)
+	err := c.cc.Invoke(ctx, MainService_CreateWorkspaceSnapshot_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mainServiceClient) DeleteWorkspaceSnapshot(ctx context.Context, in *metav1.DeleteOptions, opts ...grpc.CallOption) (*metav1.OperationResult, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(metav1.OperationResult)
+	err := c.cc.Invoke(ctx, MainService_DeleteWorkspaceSnapshot_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mainServiceClient) ListWorkspaceSnapshot(ctx context.Context, in *ListWorkspaceSnapshotOptions, opts ...grpc.CallOption) (*WorkspaceSnapshotList, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(WorkspaceSnapshotList)
+	err := c.cc.Invoke(ctx, MainService_ListWorkspaceSnapshot_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mainServiceClient) GetWorkspaceSnapshot(ctx context.Context, in *metav1.GetOptions, opts ...grpc.CallOption) (*WorkspaceSnapshot, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(WorkspaceSnapshot)
+	err := c.cc.Invoke(ctx, MainService_GetWorkspaceSnapshot_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -823,6 +881,20 @@ type MainServiceServer interface {
 	DeleteWorkspace(context.Context, *metav1.DeleteOptions) (*metav1.OperationResult, error)
 	// ListWorkspace lists the Workspaces owned by the User.
 	ListWorkspace(context.Context, *ListWorkspaceOptions) (*WorkspaceList, error)
+	// CreateWorkspaceSnapshot creates a WorkspaceSnapshot out of the persistent
+	// storage of a Workspace owned by the User. The Workspace is neither stopped
+	// nor restarted and it remains fully usable while the snapshot is being
+	// taken. The snapshot is created in the CREATING state and the snapshotting
+	// itself is asynchronous.
+	CreateWorkspaceSnapshot(context.Context, *WorkspaceSnapshot) (*WorkspaceSnapshot, error)
+	// DeleteWorkspaceSnapshot deletes a WorkspaceSnapshot owned by the User
+	// together with its underlying storage snapshot.
+	DeleteWorkspaceSnapshot(context.Context, *metav1.DeleteOptions) (*metav1.OperationResult, error)
+	// ListWorkspaceSnapshot lists the WorkspaceSnapshots owned by the User.
+	ListWorkspaceSnapshot(context.Context, *ListWorkspaceSnapshotOptions) (*WorkspaceSnapshotList, error)
+	// GetWorkspaceSnapshot retrieves a specific WorkspaceSnapshot owned by the
+	// User.
+	GetWorkspaceSnapshot(context.Context, *metav1.GetOptions) (*WorkspaceSnapshot, error)
 	// StartWorkspace starts a stopped Workspace. The Cluster creates a dedicated
 	// Octelium Session for the run and moves the Workspace to the INIT_REQUEST
 	// state. The actual initialization is asynchronous and can be followed via
@@ -972,6 +1044,18 @@ func (UnimplementedMainServiceServer) DeleteWorkspace(context.Context, *metav1.D
 }
 func (UnimplementedMainServiceServer) ListWorkspace(context.Context, *ListWorkspaceOptions) (*WorkspaceList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListWorkspace not implemented")
+}
+func (UnimplementedMainServiceServer) CreateWorkspaceSnapshot(context.Context, *WorkspaceSnapshot) (*WorkspaceSnapshot, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateWorkspaceSnapshot not implemented")
+}
+func (UnimplementedMainServiceServer) DeleteWorkspaceSnapshot(context.Context, *metav1.DeleteOptions) (*metav1.OperationResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteWorkspaceSnapshot not implemented")
+}
+func (UnimplementedMainServiceServer) ListWorkspaceSnapshot(context.Context, *ListWorkspaceSnapshotOptions) (*WorkspaceSnapshotList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListWorkspaceSnapshot not implemented")
+}
+func (UnimplementedMainServiceServer) GetWorkspaceSnapshot(context.Context, *metav1.GetOptions) (*WorkspaceSnapshot, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetWorkspaceSnapshot not implemented")
 }
 func (UnimplementedMainServiceServer) StartWorkspace(context.Context, *StartWorkspaceRequest) (*StartWorkspaceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StartWorkspace not implemented")
@@ -1473,6 +1557,78 @@ func _MainService_ListWorkspace_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MainServiceServer).ListWorkspace(ctx, req.(*ListWorkspaceOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MainService_CreateWorkspaceSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(WorkspaceSnapshot)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MainServiceServer).CreateWorkspaceSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MainService_CreateWorkspaceSnapshot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MainServiceServer).CreateWorkspaceSnapshot(ctx, req.(*WorkspaceSnapshot))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MainService_DeleteWorkspaceSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(metav1.DeleteOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MainServiceServer).DeleteWorkspaceSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MainService_DeleteWorkspaceSnapshot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MainServiceServer).DeleteWorkspaceSnapshot(ctx, req.(*metav1.DeleteOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MainService_ListWorkspaceSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListWorkspaceSnapshotOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MainServiceServer).ListWorkspaceSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MainService_ListWorkspaceSnapshot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MainServiceServer).ListWorkspaceSnapshot(ctx, req.(*ListWorkspaceSnapshotOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MainService_GetWorkspaceSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(metav1.GetOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MainServiceServer).GetWorkspaceSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MainService_GetWorkspaceSnapshot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MainServiceServer).GetWorkspaceSnapshot(ctx, req.(*metav1.GetOptions))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1982,6 +2138,22 @@ var MainService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListWorkspace",
 			Handler:    _MainService_ListWorkspace_Handler,
+		},
+		{
+			MethodName: "CreateWorkspaceSnapshot",
+			Handler:    _MainService_CreateWorkspaceSnapshot_Handler,
+		},
+		{
+			MethodName: "DeleteWorkspaceSnapshot",
+			Handler:    _MainService_DeleteWorkspaceSnapshot_Handler,
+		},
+		{
+			MethodName: "ListWorkspaceSnapshot",
+			Handler:    _MainService_ListWorkspaceSnapshot_Handler,
+		},
+		{
+			MethodName: "GetWorkspaceSnapshot",
+			Handler:    _MainService_GetWorkspaceSnapshot_Handler,
 		},
 		{
 			MethodName: "StartWorkspace",

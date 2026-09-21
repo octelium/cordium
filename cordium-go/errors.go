@@ -137,6 +137,52 @@ func FailureReason(failure *cordiumv1.Workspace_Status_Failure) string {
 	}
 }
 
+// SnapshotFailureError reports that a WorkspaceSnapshot could not be taken. It
+// carries the Cluster's own structured failure so that callers can branch on
+// the exact reason.
+type SnapshotFailureError struct {
+	// Snapshot is the WorkspaceSnapshot that failed.
+	Snapshot *cordiumv1.WorkspaceSnapshot
+}
+
+func (e *SnapshotFailureError) Error() string {
+	if e == nil {
+		return "cordium: WorkspaceSnapshot failed"
+	}
+	ret := fmt.Sprintf("cordium: WorkspaceSnapshot %q failed",
+		e.Snapshot.GetMetadata().GetName())
+	if reason := SnapshotFailureReason(e.Snapshot.GetStatus().GetFailure()); reason != "" {
+		ret += ": " + reason
+	}
+	if msg := e.Snapshot.GetStatus().GetFailure().GetMessage(); msg != "" {
+		ret += ": " + truncateForError(msg)
+	}
+	return ret
+}
+
+// SnapshotFailureReason returns a short, stable, human readable identifier of
+// the reason of a WorkspaceSnapshot failure (e.g. "Storage" or "Unsupported").
+// It returns an empty string when the failure is nil or carries no specific
+// reason.
+func SnapshotFailureReason(failure *cordiumv1.WorkspaceSnapshot_Status_Failure) string {
+	if failure == nil {
+		return ""
+	}
+
+	switch failure.GetType().(type) {
+	case *cordiumv1.WorkspaceSnapshot_Status_Failure_Unsupported_:
+		return "Unsupported"
+	case *cordiumv1.WorkspaceSnapshot_Status_Failure_SourceNotFound_:
+		return "SourceNotFound"
+	case *cordiumv1.WorkspaceSnapshot_Status_Failure_Storage_:
+		return "Storage"
+	case *cordiumv1.WorkspaceSnapshot_Status_Failure_Unknown_:
+		return "Unknown"
+	default:
+		return ""
+	}
+}
+
 // IsNotFound reports whether err is a Cluster NOT_FOUND error.
 func IsNotFound(err error) bool { return hasCode(err, codes.NotFound) }
 

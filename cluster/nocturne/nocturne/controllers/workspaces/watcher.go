@@ -483,6 +483,9 @@ func (c *statusWatcher) doUpdateStatusOnce(ctx context.Context, st cordiumv1.Wor
 		}
 	case cordiumv1.Workspace_Status_STOPPED:
 		ws.Status.SessionRef = nil
+		if ws.Status.RegionRef != nil {
+			ws.Status.LastRegionRef = ws.Status.RegionRef
+		}
 		ws.Status.RegionRef = nil
 		ws.Status.LastStoppedAt = ws.Status.CurrentStateSetAt
 		ws.Status.State = cordiumv1.Workspace_Status_STOPPED
@@ -662,10 +665,10 @@ func (c *statusWatcher) onReadyInit(ctx context.Context) error {
 			return err
 		}
 
-		if _, err := c.ctl.snapshotC.SnapshotV1().
+		if k8sSnapshot, err := c.ctl.snapshotC.SnapshotV1().
 			VolumeSnapshots(ns).
 			Get(ctx, c.ctl.getTemplateBuildName(project), k8smetav1.GetOptions{}); err == nil {
-			templateHasSnapshot = true
+			templateHasSnapshot = isVolumeSnapshotReady(k8sSnapshot)
 		}
 
 		if project.Spec.GitProvider != "" && ws.Status.UserRef != nil {
@@ -776,6 +779,8 @@ func (c *statusWatcher) onReadyInit(ctx context.Context) error {
 		UserConfig:          userConfig,
 		TemplateHasSnapshot: templateHasSnapshot,
 		ClusterConfig:       cco,
+
+		PersistentStateSource: getPersistentStateSource(ws, template, templateHasSnapshot),
 	}
 
 	zap.L().Debug("Sending an Initialize call", zap.String("name", c.name))
@@ -796,6 +801,23 @@ func (c *statusWatcher) onReadyInit(ctx context.Context) error {
 
 	zap.L().Debug("Workspace successfully initialized", zap.String("name", c.name))
 	return nil
+}
+
+func getPersistentStateSource(ws *cordiumv1.Workspace,
+	tmpl *cordiumv1.Template, templateHasSnapshot bool) ccordiumv1.PersistentStateSource {
+
+	switch {
+	case ws.Status.IsBuild:
+		return ccordiumv1.PersistentStateSource_PERSISTENT_STATE_SOURCE_EMPTY
+	case !ws.Spec.IsEphemeral && ws.Status.SuccessfulRuns > 0:
+		return ccordiumv1.PersistentStateSource_PERSISTENT_STATE_SOURCE_EXISTING
+	case ws.Status.WorkspaceSnapshotRef != nil:
+		return ccordiumv1.PersistentStateSource_PERSISTENT_STATE_SOURCE_WORKSPACE_SNAPSHOT
+	case ucordiumv1.ToTemplate(tmpl).HasReadyBuild() && templateHasSnapshot:
+		return ccordiumv1.PersistentStateSource_PERSISTENT_STATE_SOURCE_TEMPLATE_SNAPSHOT
+	default:
+		return ccordiumv1.PersistentStateSource_PERSISTENT_STATE_SOURCE_EMPTY
+	}
 }
 
 func (c *statusWatcher) doInitialize(ctx context.Context, req *ccordiumv1.InitializeRequest) error {

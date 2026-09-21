@@ -112,6 +112,46 @@ func FilterByTemplateRef(u *metav1.ObjectReference) *rmetav1.ListOptions {
 	}
 }
 
+func FilterStatusWorkspaceUID(uid string) *rmetav1.ListOptions_Filter {
+	return &rmetav1.ListOptions_Filter{
+		Field: "status.workspaceRef.uid",
+		Op:    rmetav1.ListOptions_Filter_OP_EQ,
+		Value: &structpb.Value{
+			Kind: &structpb.Value_StringValue{
+				StringValue: uid,
+			},
+		},
+	}
+}
+
+func FilterByWorkspace(u *cordiumv1.Workspace) *rmetav1.ListOptions {
+	return &rmetav1.ListOptions{
+		Filters: []*rmetav1.ListOptions_Filter{
+			FilterStatusWorkspaceUID(u.Metadata.Uid),
+		},
+	}
+}
+
+func FilterByWorkspaceRef(u *metav1.ObjectReference) *rmetav1.ListOptions {
+	return &rmetav1.ListOptions{
+		Filters: []*rmetav1.ListOptions_Filter{
+			FilterStatusWorkspaceUID(u.Uid),
+		},
+	}
+}
+
+func FilterStatusWorkspaceSnapshotUID(uid string) *rmetav1.ListOptions_Filter {
+	return &rmetav1.ListOptions_Filter{
+		Field: "status.workspaceSnapshotRef.uid",
+		Op:    rmetav1.ListOptions_Filter_OP_EQ,
+		Value: &structpb.Value{
+			Kind: &structpb.Value_StringValue{
+				StringValue: uid,
+			},
+		},
+	}
+}
+
 func SetCountOnly(opts *rmetav1.ListOptions) *rmetav1.ListOptions {
 	opts.Paginate = true
 	opts.ItemsPerPage = 1

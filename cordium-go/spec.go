@@ -36,6 +36,7 @@ type specBuilder struct {
 	spec        *cordiumv1.Workspace_Spec
 	displayName string
 	templateRef *metav1.ObjectReference
+	snapshotRef *metav1.ObjectReference
 	gitProvider string
 }
 
@@ -163,6 +164,20 @@ func WithTemplate(name string) WorkspaceOption {
 			return invalidArgumentf("empty Template name")
 		}
 		b.templateRef = &metav1.ObjectReference{Name: name}
+		return nil
+	}
+}
+
+// FromSnapshot restores the Workspace's persistent storage from a
+// WorkspaceSnapshot instead of initializing it from scratch. The snapshot must
+// be READY and the Workspace must belong to the Space of the snapshot's source
+// Workspace. The restored Workspace runs in the Region that holds the snapshot.
+func FromSnapshot(name string) WorkspaceOption {
+	return func(b *specBuilder) error {
+		if name == "" {
+			return invalidArgumentf("empty WorkspaceSnapshot name")
+		}
+		b.snapshotRef = &metav1.ObjectReference{Name: name}
 		return nil
 	}
 }

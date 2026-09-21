@@ -19,6 +19,7 @@ package delete
 import (
 	"github.com/octelium/cordium/client/cordium/commands/delete/gitprovider"
 	"github.com/octelium/cordium/client/cordium/commands/delete/secret"
+	"github.com/octelium/cordium/client/cordium/commands/delete/snapshot"
 	"github.com/octelium/cordium/client/cordium/commands/delete/space"
 	"github.com/octelium/cordium/client/cordium/commands/delete/template"
 	"github.com/octelium/cordium/client/cordium/commands/delete/usersecret"
@@ -34,6 +35,7 @@ var Cmd = &cobra.Command{
 
 func AddSubcommands() {
 	Cmd.AddCommand(workspace.Cmd)
+	Cmd.AddCommand(snapshot.Cmd)
 	Cmd.AddCommand(usersecret.Cmd)
 	Cmd.AddCommand(secret.Cmd)
 	Cmd.AddCommand(space.Cmd)

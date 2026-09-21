@@ -34,8 +34,9 @@ type listConfig struct {
 	orderByType  metav1.CommonListOptions_OrderBy_Type
 	orderByMode  metav1.CommonListOptions_OrderBy_Mode
 
-	spaceRef    *metav1.ObjectReference
-	templateRef *metav1.ObjectReference
+	spaceRef     *metav1.ObjectReference
+	templateRef  *metav1.ObjectReference
+	workspaceRef *metav1.ObjectReference
 
 	spaceType cordiumv1.Space_Status_Type
 	spaceMode cordiumv1.ListSpaceOptions_Mode
@@ -136,6 +137,18 @@ func OfTemplate(name string) ListOption {
 			return invalidArgumentf("empty Template name")
 		}
 		l.templateRef = &metav1.ObjectReference{Name: name}
+		return nil
+	}
+}
+
+// OfWorkspace restricts the list to the WorkspaceSnapshots that were taken
+// from a Workspace.
+func OfWorkspace(name string) ListOption {
+	return func(l *listConfig) error {
+		if name == "" {
+			return invalidArgumentf("empty Workspace name")
+		}
+		l.workspaceRef = &metav1.ObjectReference{Name: name}
 		return nil
 	}
 }

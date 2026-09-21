@@ -167,8 +167,30 @@ func (s *Server) CreateWorkspace(ctx context.Context, req *cordiumv1.Workspace) 
 		return nil, err
 	}
 
+	var snapshot *cordiumv1.WorkspaceSnapshot
+	if req.Status.WorkspaceSnapshotRef != nil {
+		snapshot, err = s.getWorkspaceSnapshotForRestore(ctx, req.Status.WorkspaceSnapshotRef)
+		if err != nil {
+			return nil, err
+		}
+
+		if snapshot.Status.SpaceRef == nil ||
+			snapshot.Status.SpaceRef.Uid != ws.Status.SpaceRef.Uid {
+			return nil, serr.InvalidArg(
+				"The WorkspaceSnapshot: %s belongs to another Space", snapshot.Metadata.Name)
+		}
+
+		ws.Status.WorkspaceSnapshotRef = umetav1.GetObjectReference(snapshot)
+	}
+
 	if err := s.setWorkspaceLimit(ctx, ws, org, cc); err != nil {
 		return nil, grpcutils.InternalWithErr(err)
+	}
+
+	if snapshot != nil {
+		if err := s.setWorkspaceRestoreLimit(ws, snapshot); err != nil {
+			return nil, err
+		}
 	}
 
 	ws, err = s.octeliumC.CordiumC().CreateWorkspace(ctx, ws)
@@ -524,14 +546,34 @@ func (s *Server) StartWorkspace(ctx context.Context, req *cordiumv1.StartWorkspa
 		return nil, serr.InvalidArg("Workspace cannot be started as it is not stopped")
 	}
 
-	region, err := s.chooseRegion(ctx, ws, func() *metav1.ObjectReference {
-		if req.Config == nil || req.Config.RegionRef == nil {
-			return nil
+	var snapshot *cordiumv1.WorkspaceSnapshot
+	if workspaceRestoresFromSnapshot(ws) {
+		snapshot, err = s.getWorkspaceSnapshotForRestore(ctx, ws.Status.WorkspaceSnapshotRef)
+		if err != nil {
+			return nil, err
 		}
-		return req.Config.RegionRef
-	}())
+
+		if snapshot.Status.RegionRef == nil {
+			return nil, serr.InvalidArg("The WorkspaceSnapshot: %s does not belong to a Region",
+				snapshot.Metadata.Name)
+		}
+	}
+
+	region, err := func() (*corev1.Region, error) {
+		if snapshot != nil {
+			return s.octeliumC.CoreC().GetRegion(ctx,
+				apivalidation.ObjectReferenceToRGetOptions(snapshot.Status.RegionRef))
+		}
+
+		return s.chooseRegion(ctx, ws, func() *metav1.ObjectReference {
+			if req.Config == nil || req.Config.RegionRef == nil {
+				return nil
+			}
+			return req.Config.RegionRef
+		}())
+	}()
 	if err != nil {
-		return nil, err
+		return nil, serr.K8sNotFoundOrInternalWithErr(err)
 	}
 
 	cc, err := s.octeliumC.CoreV1Utils().GetClusterConfig(ctx)
@@ -549,6 +591,7 @@ func (s *Server) StartWorkspace(ctx context.Context, req *cordiumv1.StartWorkspa
 	ws.Status.StoppingReason = cordiumv1.Workspace_Status_STOPPING_REASON_UNSET
 
 	ws.Status.RegionRef = umetav1.GetObjectReference(region)
+	ws.Status.LastRegionRef = ws.Status.RegionRef
 	ws.Status.LastActivityAt = nowRFC3339
 	ws.Status.Hostname = commonw.GetWorkspaceHostname(ws.Metadata.Name, region, cc)
 
@@ -570,6 +613,12 @@ func (s *Server) StartWorkspace(ctx context.Context, req *cordiumv1.StartWorkspa
 
 	if err := s.setWorkspaceLimit(ctx, ws, spc, cco); err != nil {
 		return nil, err
+	}
+
+	if snapshot != nil {
+		if err := s.setWorkspaceRestoreLimit(ws, snapshot); err != nil {
+			return nil, err
+		}
 	}
 
 	wsSession, err := s.createWorkspaceSession(ctx, i, ws)

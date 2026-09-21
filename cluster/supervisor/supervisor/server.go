@@ -129,6 +129,8 @@ type Server struct {
 	isFreshRun bool
 	wsUID      string
 
+	persistentStateSource ccordiumv1.PersistentStateSource
+
 	failureWrp struct {
 		mu      sync.RWMutex
 		failure *cordiumv1.Workspace_Status_Failure

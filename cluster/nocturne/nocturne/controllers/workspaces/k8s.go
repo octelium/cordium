@@ -24,12 +24,14 @@ import (
 	workspacecommon "github.com/octelium/cordium/cluster/common"
 	"github.com/octelium/cordium/cluster/common/components"
 	"github.com/octelium/cordium/cluster/common/ovutils"
+	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/rsc/rmetav1"
 	"github.com/octelium/octelium/cluster/common/k8sutils"
 	"github.com/octelium/octelium/pkg/common/pbutils"
 	"github.com/octelium/octelium/pkg/utils/ldflags"
 	utils_types "github.com/octelium/octelium/pkg/utils/types"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -41,6 +43,8 @@ import (
 )
 
 const ns = workspacecommon.K8sNS
+
+const volumeSnapshotAPIGroup = "snapshot.storage.k8s.io"
 
 func (c *Controller) doOnAdd(ctx context.Context, ws *cordiumv1.Workspace) error {
 
@@ -499,22 +503,14 @@ func DoDeleteWorkspaceOwner(ctx context.Context, ws *cordiumv1.Workspace, k8sC k
 
 func (c *Controller) setPersistentVolumeClaim(ctx context.Context, ws *cordiumv1.Workspace) error {
 
-	storageLimit := func() int64 {
+	dataSource, err := c.getPVCDataSource(ctx, ws)
+	if err != nil {
+		return err
+	}
 
-		if ws.Status.Limit != nil && ws.Status.Limit.Storage != nil &&
-			ws.Status.Limit.Storage.Megabytes > 0 &&
-			ws.Status.Limit.Storage.Megabytes < 5000000 {
-			return int64(ws.Status.Limit.Storage.Megabytes)
-		}
+	storageLimit := c.getPVCStorageMegabytes(ctx, ws)
 
-		if ldflags.IsDev() {
-			return 50 * 1000
-		}
-
-		return 10 * 1000
-	}()
-
-	storageReq := getResourceQuantity(fmt.Sprintf("%dMi", int64((storageLimit))))
+	storageReq := getResourceQuantity(fmt.Sprintf("%dMi", storageLimit))
 
 	zap.L().Debug("Setting PVC", zap.String("name", ws.Metadata.Name), zap.Int64("sizeMB", storageLimit))
 
@@ -539,39 +535,7 @@ func (c *Controller) setPersistentVolumeClaim(ctx context.Context, ws *cordiumv1
 				}
 				return nil
 			}(),
-			DataSource: func() *corev1.TypedLocalObjectReference {
-				if ws.Status.IsBuild {
-					return nil
-				}
-				if !ws.Spec.IsEphemeral && ws.Status.SuccessfulRuns > 0 {
-					return nil
-				}
-
-				tmpl, err := c.octeliumC.CordiumC().GetTemplate(ctx, &rmetav1.GetOptions{
-					Uid: ws.Status.TemplateRef.Uid,
-				})
-				if err != nil {
-					return nil
-				}
-
-				if tmpl.Status.BuildInfo == nil || tmpl.Status.BuildInfo.CurrentReadyBuildID == "" {
-					return nil
-				}
-
-				if _, err := c.snapshotC.SnapshotV1().
-					VolumeSnapshots(ns).
-					Get(ctx, c.getTemplateBuildName(tmpl), metav1.GetOptions{}); err != nil {
-					zap.L().Debug("Could not get the template snapshot",
-						zap.Any("ws", ws), zap.Any("tmpl", tmpl), zap.Error(err))
-					return nil
-				}
-
-				return &corev1.TypedLocalObjectReference{
-					APIGroup: utils_types.StrToPtr("snapshot.storage.k8s.io"),
-					Kind:     "VolumeSnapshot",
-					Name:     c.getTemplateBuildName(tmpl),
-				}
-			}(),
+			DataSource: dataSource,
 		},
 	}, metav1.CreateOptions{}); err != nil {
 		if !k8serr.IsAlreadyExists(err) {
@@ -585,8 +549,136 @@ func (c *Controller) setPersistentVolumeClaim(ctx context.Context, ws *cordiumv1
 	return nil
 }
 
+func (c *Controller) getPVCStorageMegabytes(ctx context.Context, ws *cordiumv1.Workspace) int64 {
+
+	ret := func() int64 {
+
+		if ws.Status.Limit != nil && ws.Status.Limit.Storage != nil &&
+			ws.Status.Limit.Storage.Megabytes > 0 &&
+			ws.Status.Limit.Storage.Megabytes < 5000000 {
+			return int64(ws.Status.Limit.Storage.Megabytes)
+		}
+
+		if ldflags.IsDev() {
+			return 50 * 1000
+		}
+
+		return 10 * 1000
+	}()
+
+	if ws.Status.WorkspaceSnapshotRef == nil {
+		return ret
+	}
+
+	snapshot, err := c.octeliumC.CordiumC().GetWorkspaceSnapshot(ctx, &rmetav1.GetOptions{
+		Uid: ws.Status.WorkspaceSnapshotRef.Uid,
+	})
+	if err != nil {
+		return ret
+	}
+
+	if restoreMB := getRestoreSizeMegabytes(snapshot); restoreMB > ret {
+		zap.L().Debug("Using the restore size of the WorkspaceSnapshot as the PVC size",
+			zap.String("wsName", ws.Metadata.Name), zap.Int64("sizeMB", restoreMB))
+		return restoreMB
+	}
+
+	return ret
+}
+
+func getRestoreSizeMegabytes(snapshot *cordiumv1.WorkspaceSnapshot) int64 {
+	if snapshot.Status.RestoreSizeBytes == 0 {
+		return 0
+	}
+
+	return int64((snapshot.Status.RestoreSizeBytes + 1000*1000 - 1) / (1000 * 1000))
+}
+
+func (c *Controller) getPVCDataSource(ctx context.Context,
+	ws *cordiumv1.Workspace) (*corev1.TypedLocalObjectReference, error) {
+
+	if ws.Status.IsBuild {
+		return nil, nil
+	}
+
+	if !ws.Spec.IsEphemeral && ws.Status.SuccessfulRuns > 0 {
+		return nil, nil
+	}
+
+	if ws.Status.WorkspaceSnapshotRef != nil {
+		snapshot, err := c.octeliumC.CordiumC().GetWorkspaceSnapshot(ctx, &rmetav1.GetOptions{
+			Uid: ws.Status.WorkspaceSnapshotRef.Uid,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		if !ucordiumv1.ToWorkspaceSnapshot(snapshot).IsReady() {
+			return nil, errors.Errorf("The WorkspaceSnapshot: %s is not ready to be restored from",
+				snapshot.Metadata.Name)
+		}
+
+		k8sSnapshot, err := c.snapshotC.SnapshotV1().VolumeSnapshots(ns).
+			Get(ctx, getWorkspaceSnapshotK8sName(snapshot), metav1.GetOptions{})
+		if err != nil {
+			return nil, err
+		}
+
+		if !isVolumeSnapshotReady(k8sSnapshot) {
+			return nil, errors.Errorf("The volume snapshot of the WorkspaceSnapshot: %s is not readyToUse",
+				snapshot.Metadata.Name)
+		}
+
+		return getVolumeSnapshotDataSource(k8sSnapshot.Name), nil
+	}
+
+	if ws.Status.TemplateRef == nil {
+		return nil, nil
+	}
+
+	tmpl, err := c.octeliumC.CordiumC().GetTemplate(ctx, &rmetav1.GetOptions{
+		Uid: ws.Status.TemplateRef.Uid,
+	})
+	if err != nil {
+		return nil, nil
+	}
+
+	if !ucordiumv1.ToTemplate(tmpl).HasReadyBuild() {
+		return nil, nil
+	}
+
+	k8sSnapshot, err := c.snapshotC.SnapshotV1().
+		VolumeSnapshots(ns).
+		Get(ctx, c.getTemplateBuildName(tmpl), metav1.GetOptions{})
+	if err != nil {
+		zap.L().Debug("Could not get the template snapshot",
+			zap.Any("ws", ws), zap.Any("tmpl", tmpl), zap.Error(err))
+		return nil, nil
+	}
+
+	if !isVolumeSnapshotReady(k8sSnapshot) {
+		zap.L().Debug("The template snapshot is not readyToUse yet",
+			zap.String("wsName", ws.Metadata.Name), zap.String("tmplName", tmpl.Metadata.Name))
+		return nil, nil
+	}
+
+	return getVolumeSnapshotDataSource(k8sSnapshot.Name), nil
+}
+
+func getVolumeSnapshotDataSource(name string) *corev1.TypedLocalObjectReference {
+	return &corev1.TypedLocalObjectReference{
+		APIGroup: utils_types.StrToPtr(volumeSnapshotAPIGroup),
+		Kind:     "VolumeSnapshot",
+		Name:     name,
+	}
+}
+
 func (c *Controller) getPVCName(ws *cordiumv1.Workspace) string {
-	return fmt.Sprintf("ws-%s", ws.Metadata.Uid)
+	return getPVCNameByWorkspaceUID(ws.Metadata.Uid)
+}
+
+func getPVCNameByWorkspaceUID(uid string) string {
+	return fmt.Sprintf("ws-%s", uid)
 }
 
 func (c *Controller) getTemplateBuildName(tmpl *cordiumv1.Template) string {
@@ -639,79 +731,132 @@ func (c *Controller) createTemplateSnapshot(ctx context.Context,
 		return nil
 	}
 
-	if tmpl.Status.BuildInfo == nil || tmpl.Status.BuildInfo.CurrentReadyBuildID == "" {
+	if !ucordiumv1.ToTemplate(tmpl).HasReadyBuild() {
 		return nil
 	}
 
-	var volumeSnapshotClassName *string
-	if cc, err := c.octeliumC.CordiumV1Utils().GetClusterConfig(ctx); err == nil {
-		if cc.Spec.Workspace != nil && cc.Spec.Workspace.Storage != nil &&
-			cc.Spec.Workspace.Storage.VolumeSnapshotClass != nil &&
-			len(cc.Spec.Workspace.Storage.VolumeSnapshotClass.Rules) > 0 {
+	zap.L().Debug("Creating template volume snapshot", zap.Any("tmpl", tmpl))
 
-			reqCtxMap := map[string]any{
-				"ctx": map[string]any{
-					"workspace": pbutils.MustConvertToMap(ws),
-					"template":  pbutils.MustConvertToMap(tmpl),
-				},
-			}
+	_, err := c.createVolumeSnapshot(ctx, &createVolumeSnapshotReq{
+		name:    c.getTemplateBuildName(tmpl),
+		pvcName: c.getPVCName(ws),
+		labels: map[string]string{
+			"octelium.com/template-uid":  tmpl.Metadata.Uid,
+			"octelium.com/parent-ws-uid": ws.Metadata.Uid,
+		},
+		workspace: ws,
+		template:  tmpl,
+	})
 
-			func() {
-				for _, rule := range cc.Spec.Workspace.Storage.VolumeSnapshotClass.Rules {
+	return err
+}
 
-					cond, err := ovutils.ToCoreCondition(rule.Condition)
-					if err != nil {
-						continue
-					}
+type createVolumeSnapshotReq struct {
+	name      string
+	pvcName   string
+	labels    map[string]string
+	workspace *cordiumv1.Workspace
+	template  *cordiumv1.Template
+}
 
-					isMatched, err := c.celEngine.EvalCondition(ctx, cond, reqCtxMap)
-					if err != nil {
-						continue
-					}
-
-					if isMatched {
-						volumeSnapshotClassName = utils_types.StrToPtr(rule.VolumeSnapshotClass)
-						return
-					}
-				}
-			}()
-
-		}
-	}
+func (c *Controller) createVolumeSnapshot(ctx context.Context,
+	req *createVolumeSnapshotReq) (*v1.VolumeSnapshot, error) {
 
 	snapshot := &v1.VolumeSnapshot{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      c.getTemplateBuildName(tmpl),
+			Name:      req.name,
 			Namespace: ns,
-			Labels: map[string]string{
-				"octelium.com/template-uid":  tmpl.Metadata.Uid,
-				"octelium.com/parent-ws-uid": ws.Metadata.Uid,
-			},
+			Labels:    req.labels,
 		},
 		Spec: v1.VolumeSnapshotSpec{
-			VolumeSnapshotClassName: volumeSnapshotClassName,
+			VolumeSnapshotClassName: c.getVolumeSnapshotClassName(ctx, req.workspace, req.template),
 			Source: v1.VolumeSnapshotSource{
-				PersistentVolumeClaimName: utils_types.StrToPtr(c.getPVCName(ws)),
+				PersistentVolumeClaimName: utils_types.StrToPtr(req.pvcName),
 			},
 		},
 	}
 
-	zap.L().Debug("Creating template volume snapshot", zap.Any("tmpl", tmpl))
-	if snapshot, err := c.snapshotC.SnapshotV1().
-		VolumeSnapshots(ns).Create(ctx, snapshot, metav1.CreateOptions{}); err != nil {
+	ret, err := c.snapshotC.SnapshotV1().VolumeSnapshots(ns).Create(ctx, snapshot, metav1.CreateOptions{})
+	if err != nil {
 		switch {
-		case k8serr.IsNotFound(err):
-			zap.L().Debug("Could not create template volume snapshot. CRD likely unhandled",
-				zap.Any("tmpl", tmpl), zap.Error(err))
 		case k8serr.IsAlreadyExists(err):
-			zap.L().Debug("Could not create template volume snapshot. Already exists",
-				zap.Any("tmpl", tmpl), zap.Error(err))
+			zap.L().Debug("The volume snapshot already exists",
+				zap.String("name", req.name))
+			return c.snapshotC.SnapshotV1().VolumeSnapshots(ns).
+				Get(ctx, req.name, metav1.GetOptions{})
 		default:
-			return err
+			return nil, err
 		}
-	} else {
-		zap.L().Debug("Snapshot successfully created", zap.Any("snapshot", snapshot))
+	}
+
+	zap.L().Debug("Volume snapshot successfully created", zap.Any("snapshot", ret))
+
+	return ret, nil
+}
+
+func (c *Controller) getVolumeSnapshotClassName(ctx context.Context,
+	ws *cordiumv1.Workspace, tmpl *cordiumv1.Template) *string {
+
+	cc, err := c.octeliumC.CordiumV1Utils().GetClusterConfig(ctx)
+	if err != nil {
+		return nil
+	}
+
+	if cc.Spec.Workspace == nil || cc.Spec.Workspace.Storage == nil ||
+		cc.Spec.Workspace.Storage.VolumeSnapshotClass == nil ||
+		len(cc.Spec.Workspace.Storage.VolumeSnapshotClass.Rules) == 0 {
+		return nil
+	}
+
+	ctxMap := make(map[string]any)
+	if ws != nil {
+		ctxMap["workspace"] = pbutils.MustConvertToMap(ws)
+	}
+	if tmpl != nil {
+		ctxMap["template"] = pbutils.MustConvertToMap(tmpl)
+	}
+
+	reqCtxMap := map[string]any{
+		"ctx": ctxMap,
+	}
+
+	for _, rule := range cc.Spec.Workspace.Storage.VolumeSnapshotClass.Rules {
+		if rule.VolumeSnapshotClass == "" {
+			continue
+		}
+
+		cond, err := ovutils.ToCoreCondition(rule.Condition)
+		if err != nil {
+			continue
+		}
+
+		isMatched, err := c.celEngine.EvalCondition(ctx, cond, reqCtxMap)
+		if err != nil {
+			continue
+		}
+
+		if isMatched {
+			return utils_types.StrToPtr(rule.VolumeSnapshotClass)
+		}
 	}
 
 	return nil
+}
+
+func isVolumeSnapshotReady(snapshot *v1.VolumeSnapshot) bool {
+	return snapshot != nil && snapshot.Status != nil &&
+		snapshot.Status.ReadyToUse != nil && *snapshot.Status.ReadyToUse
+}
+
+func getVolumeSnapshotErrMsg(snapshot *v1.VolumeSnapshot) string {
+	if snapshot == nil || snapshot.Status == nil || snapshot.Status.Error == nil ||
+		snapshot.Status.Error.Message == nil {
+		return ""
+	}
+
+	return *snapshot.Status.Error.Message
+}
+
+func getWorkspaceSnapshotK8sName(snapshot *cordiumv1.WorkspaceSnapshot) string {
+	return fmt.Sprintf("wss-%s", snapshot.Metadata.Uid)
 }

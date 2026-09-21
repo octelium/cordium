@@ -228,6 +228,24 @@ func getFullNameGetOptionsUserChild(ctx context.Context, req *metav1.GetOptions)
 	return req
 }
 
+func getFullNameDeleteOptionsUserChild(ctx context.Context, req *metav1.DeleteOptions) *metav1.DeleteOptions {
+	if req == nil || req.Name == "" {
+		return req
+	}
+
+	if isNameFQDN(req.Name, 1) {
+		return req
+	}
+
+	i, err := commonw.GetUserCtx(ctx)
+	if err != nil {
+		return req
+	}
+
+	req.Name = getFullGetOptionsUserCtx(i, req.Name, 1)
+	return req
+}
+
 func getFullNamResourceUserChild(ctx context.Context, req umetav1.ResourceObjectI) umetav1.ResourceObjectI {
 	if req == nil || req.GetMetadata() == nil || req.GetMetadata().Name == "" {
 		return req
