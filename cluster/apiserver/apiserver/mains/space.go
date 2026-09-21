@@ -348,6 +348,24 @@ func (s *Server) DeleteSpace(ctx context.Context, req *metav1.DeleteOptions) (*m
 	}
 
 	{
+		memList, err := s.octeliumC.CordiumC().ListVolume(ctx, ourscsrv.FilterBySpace(itm))
+		if err != nil {
+			return nil, err
+		}
+
+		for _, item := range memList.Items {
+			_, err := s.octeliumC.CordiumC().DeleteVolume(ctx, &rmetav1.DeleteOptions{
+				Uid: item.Metadata.Uid,
+			})
+			if err != nil {
+				if !grpcerr.IsNotFound(err) {
+					return nil, grpcutils.InternalWithErr(err)
+				}
+			}
+		}
+	}
+
+	{
 		memList, err := s.octeliumC.CordiumC().ListWorkspaceSnapshot(ctx, ourscsrv.FilterBySpace(itm))
 		if err != nil {
 			return nil, err

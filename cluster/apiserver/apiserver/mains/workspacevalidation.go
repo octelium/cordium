@@ -18,14 +18,18 @@ package mains
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/octelium/cordium/cluster/common/ourscsrv"
 	"github.com/octelium/cordium/cluster/common/wsutils"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
+	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/apis/rsc/rmetav1"
 	"github.com/octelium/octelium/cluster/apiserver/apiserver/serr"
 	"github.com/octelium/octelium/cluster/common/grpcutils"
 	"github.com/octelium/octelium/cluster/common/urscsrv"
+	"github.com/octelium/octelium/pkg/apiutils/umetav1"
+	"github.com/octelium/octelium/pkg/grpcerr"
 )
 
 func (s *Server) validateAndSetWorkspace(ctx context.Context, req *cordiumv1.Workspace) error {
@@ -66,5 +70,72 @@ func (s *Server) validateAndSetWorkspace(ctx context.Context, req *cordiumv1.Wor
 		}
 	}
 
-	return wsutils.ValidateWorkspace(ctx, validateReq)
+	if err := wsutils.ValidateWorkspace(ctx, validateReq); err != nil {
+		return err
+	}
+
+	return s.setWorkspaceVolumeMounts(ctx, req)
+}
+
+func (s *Server) setWorkspaceVolumeMounts(ctx context.Context, req *cordiumv1.Workspace) error {
+
+	mounts := req.GetSpec().GetRuntime().GetVolumeMounts()
+	if len(mounts) == 0 {
+		return nil
+	}
+
+	cc, err := s.octeliumC.CordiumV1Utils().GetClusterConfig(ctx)
+	if err != nil {
+		return err
+	}
+
+	if cc.Spec.Volume != nil && cc.Spec.Volume.Limit != nil &&
+		cc.Spec.Volume.Limit.MaxMountsPerWorkspace != 0 &&
+		uint32(len(mounts)) > cc.Spec.Volume.Limit.MaxMountsPerWorkspace {
+		return grpcutils.InvalidArg("A Workspace can mount at most %d Volumes",
+			cc.Spec.Volume.Limit.MaxMountsPerWorkspace)
+	}
+
+	for _, mount := range mounts {
+		vol, err := s.octeliumC.CordiumC().GetVolume(ctx, &rmetav1.GetOptions{
+			Uid:  mount.VolumeRef.Uid,
+			Name: getFullVolumeName(mount.VolumeRef.Name, req.Status.SpaceRef),
+		})
+		if err != nil {
+			if grpcerr.IsNotFound(err) {
+				return grpcutils.InvalidArg("The Volume does not exist: %s",
+					getVolumeRefName(mount.VolumeRef))
+			}
+			return serr.InternalWithErr(err)
+		}
+
+		if vol.Status.SpaceRef == nil || vol.Status.SpaceRef.Uid != req.Status.SpaceRef.Uid {
+			return grpcutils.InvalidArg("The Volume does not exist: %s",
+				getVolumeRefName(mount.VolumeRef))
+		}
+
+		mount.VolumeRef = umetav1.GetObjectReference(vol)
+	}
+
+	return nil
+}
+
+func getFullVolumeName(name string, spaceRef *metav1.ObjectReference) string {
+	if name == "" || isNameFQDN(name, 2) {
+		return name
+	}
+
+	if spaceRef == nil || spaceRef.Name == "" {
+		return name
+	}
+
+	return fmt.Sprintf("%s.%s", name, spaceRef.Name)
+}
+
+func getVolumeRefName(ref *metav1.ObjectReference) string {
+	if ref.Name != "" {
+		return ref.Name
+	}
+
+	return ref.Uid
 }

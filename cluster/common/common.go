@@ -48,3 +48,9 @@ func GetInternalRegistryAddr() string {
 func CleanupCmdString(arg string) string {
 	return strings.TrimSpace(arg)
 }
+
+const VolumeRootDir = "/cordium-volumes"
+
+func GetVolumePathByUID(uid string) string {
+	return fmt.Sprintf("%s/%s", VolumeRootDir, uid)
+}

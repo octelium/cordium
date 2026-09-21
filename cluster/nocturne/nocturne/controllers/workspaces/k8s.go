@@ -25,6 +25,7 @@ import (
 	"github.com/octelium/cordium/cluster/common/components"
 	"github.com/octelium/cordium/cluster/common/ovutils"
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
+	"github.com/octelium/octelium/apis/cluster/ccordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/rsc/rmetav1"
 	"github.com/octelium/octelium/cluster/common/k8sutils"
@@ -50,6 +51,11 @@ func (c *Controller) doOnAdd(ctx context.Context, ws *cordiumv1.Workspace) error
 
 	zap.S().Debugf("Creating Workspace deployment for: %s", ws.Metadata.Name)
 
+	volumeMounts, err := c.resolveVolumeMounts(ctx, ws)
+	if err != nil {
+		return err
+	}
+
 	if err := c.k8sC.CoreV1().ConfigMaps(ns).Delete(ctx, getK8sRscName(ws), metav1.DeleteOptions{}); err != nil {
 		if !k8serr.IsNotFound(err) {
 			return err
@@ -63,7 +69,7 @@ func (c *Controller) doOnAdd(ctx context.Context, ws *cordiumv1.Workspace) error
 
 	if _, err := c.k8sC.AppsV1().
 		Deployments(ns).
-		Create(ctx, c.newDeployment(ws, ownerCM), metav1.CreateOptions{}); err != nil {
+		Create(ctx, c.newDeployment(ws, ownerCM, volumeMounts), metav1.CreateOptions{}); err != nil {
 		return err
 	}
 
@@ -79,7 +85,8 @@ func getResourceQuantity(arg string) *resource.Quantity {
 	return &ret
 }
 
-func (c *Controller) newPodSpec(ws *cordiumv1.Workspace) corev1.PodSpec {
+func (c *Controller) newPodSpec(ws *cordiumv1.Workspace,
+	volumeMounts []*ccordiumv1.ResolvedVolumeMount) corev1.PodSpec {
 
 	storageLimit := func() int64 {
 
@@ -151,6 +158,18 @@ func (c *Controller) newPodSpec(ws *cordiumv1.Workspace) corev1.PodSpec {
 						},
 					},
 				},
+			}
+
+			for _, mount := range volumeMounts {
+				ret = append(ret, corev1.Volume{
+					Name: getK8sVolumeName(mount),
+					VolumeSource: corev1.VolumeSource{
+						PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+							ClaimName: getVolumePVCNameByUID(mount.VolumeRef.Uid),
+							ReadOnly:  mount.ReadOnly,
+						},
+					},
+				})
 			}
 
 			return ret
@@ -339,6 +358,14 @@ func (c *Controller) newPodSpec(ws *cordiumv1.Workspace) corev1.PodSpec {
 						*/
 					}
 
+					for _, mount := range volumeMounts {
+						ret = append(ret, corev1.VolumeMount{
+							Name:      getK8sVolumeName(mount),
+							MountPath: getK8sVolumeMountPath(mount),
+							ReadOnly:  mount.ReadOnly,
+						})
+					}
+
 					return ret
 				}(),
 			},
@@ -346,7 +373,8 @@ func (c *Controller) newPodSpec(ws *cordiumv1.Workspace) corev1.PodSpec {
 	}
 }
 
-func (c *Controller) newDeployment(ws *cordiumv1.Workspace, ownerCM *corev1.ConfigMap) *appsv1.Deployment {
+func (c *Controller) newDeployment(ws *cordiumv1.Workspace, ownerCM *corev1.ConfigMap,
+	volumeMounts []*ccordiumv1.ResolvedVolumeMount) *appsv1.Deployment {
 
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -365,7 +393,7 @@ func (c *Controller) newDeployment(ws *cordiumv1.Workspace, ownerCM *corev1.Conf
 					Labels:      getLabels(ws),
 					Annotations: c.getAnnotations(ws),
 				},
-				Spec: c.newPodSpec(ws),
+				Spec: c.newPodSpec(ws, volumeMounts),
 			},
 		},
 	}

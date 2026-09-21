@@ -383,6 +383,10 @@ func ValidateWorkspace(ctx context.Context, req *ValidateWorkspaceReq) error {
 				return serr.InvalidArg("Invalid network egress: %s", err.Error())
 			}
 		}
+
+		if err := ValidateVolumeMounts(spec.Runtime.VolumeMounts); err != nil {
+			return err
+		}
 	}
 
 	checkRepo := func(repo *cordiumv1.Workspace_Spec_Repository, mustHaveURL bool) error {

@@ -217,6 +217,41 @@ func (h *H) CreateUserSecret(t *testing.T, value string) *cordiumv1.UserSecret {
 	return ret
 }
 
+func (h *H) CreateVolume(t *testing.T,
+	spc *cordiumv1.Space, spec *cordiumv1.Volume_Spec) *cordiumv1.Volume {
+	t.Helper()
+
+	ctx, cancel := h.Ctx(t)
+	defer cancel()
+
+	if spec == nil {
+		spec = &cordiumv1.Volume_Spec{}
+	}
+
+	ret, err := h.CordiumC().CreateVolume(ctx, &cordiumv1.Volume{
+		Metadata: &metav1.Metadata{
+			Name: fmt.Sprintf("%s.%s", h.Name(), spc.Metadata.Name),
+		},
+		Spec:   spec,
+		Status: &cordiumv1.Volume_Status{},
+	})
+	if err != nil {
+		t.Fatalf("Could not create the Volume: %+v", err)
+	}
+
+	t.Cleanup(func() {
+		h.deleteQuietly(t, "Volume", ret.Metadata.Name, func(ctx context.Context) error {
+			_, err := h.CordiumC().DeleteVolume(ctx,
+				&metav1.DeleteOptions{Uid: ret.Metadata.Uid})
+			return err
+		})
+	})
+
+	zap.L().Debug("Created Volume fixture", zap.String("name", ret.Metadata.Name))
+
+	return ret
+}
+
 func (h *H) CreateWorkspaceSnapshot(t *testing.T,
 	ws *cordiumv1.Workspace, name string) *cordiumv1.WorkspaceSnapshot {
 	t.Helper()

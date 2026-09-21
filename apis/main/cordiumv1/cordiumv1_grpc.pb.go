@@ -78,6 +78,11 @@ const (
 	MainService_DeleteWorkspaceSnapshot_FullMethodName = "/octelium.api.main.cordium.v1.MainService/DeleteWorkspaceSnapshot"
 	MainService_ListWorkspaceSnapshot_FullMethodName   = "/octelium.api.main.cordium.v1.MainService/ListWorkspaceSnapshot"
 	MainService_GetWorkspaceSnapshot_FullMethodName    = "/octelium.api.main.cordium.v1.MainService/GetWorkspaceSnapshot"
+	MainService_CreateVolume_FullMethodName            = "/octelium.api.main.cordium.v1.MainService/CreateVolume"
+	MainService_UpdateVolume_FullMethodName            = "/octelium.api.main.cordium.v1.MainService/UpdateVolume"
+	MainService_DeleteVolume_FullMethodName            = "/octelium.api.main.cordium.v1.MainService/DeleteVolume"
+	MainService_ListVolume_FullMethodName              = "/octelium.api.main.cordium.v1.MainService/ListVolume"
+	MainService_GetVolume_FullMethodName               = "/octelium.api.main.cordium.v1.MainService/GetVolume"
 	MainService_StartWorkspace_FullMethodName          = "/octelium.api.main.cordium.v1.MainService/StartWorkspace"
 	MainService_StopWorkspace_FullMethodName           = "/octelium.api.main.cordium.v1.MainService/StopWorkspace"
 	MainService_ShareWorkspacePort_FullMethodName      = "/octelium.api.main.cordium.v1.MainService/ShareWorkspacePort"
@@ -204,6 +209,23 @@ type MainServiceClient interface {
 	// GetWorkspaceSnapshot retrieves a specific WorkspaceSnapshot owned by the
 	// User.
 	GetWorkspaceSnapshot(ctx context.Context, in *metav1.GetOptions, opts ...grpc.CallOption) (*WorkspaceSnapshot, error)
+	// CreateVolume creates a Volume inside a Space. Volumes are provisioned
+	// asynchronously and they can be mounted by the Workspaces of the Space
+	// while they are still being provisioned.
+	CreateVolume(ctx context.Context, in *Volume, opts ...grpc.CallOption) (*Volume, error)
+	// UpdateVolume updates a Volume. Only growing the Volume's size is
+	// supported and it additionally requires the underlying storage backend to
+	// support the expansion of the already provisioned volumes.
+	UpdateVolume(ctx context.Context, in *Volume, opts ...grpc.CallOption) (*Volume, error)
+	// DeleteVolume deletes a Volume together with its underlying storage. It is
+	// rejected while the Volume is still mounted by a Workspace or a Template of
+	// the Space regardless of whether those Workspaces are running.
+	DeleteVolume(ctx context.Context, in *metav1.DeleteOptions, opts ...grpc.CallOption) (*metav1.OperationResult, error)
+	// ListVolume lists the Volumes of a Space that the User is a Member of.
+	ListVolume(ctx context.Context, in *ListVolumeOptions, opts ...grpc.CallOption) (*VolumeList, error)
+	// GetVolume retrieves a specific Volume of a Space that the User is a Member
+	// of.
+	GetVolume(ctx context.Context, in *metav1.GetOptions, opts ...grpc.CallOption) (*Volume, error)
 	// StartWorkspace starts a stopped Workspace. The Cluster creates a dedicated
 	// Octelium Session for the run and moves the Workspace to the INIT_REQUEST
 	// state. The actual initialization is asynchronous and can be followed via
@@ -555,6 +577,56 @@ func (c *mainServiceClient) GetWorkspaceSnapshot(ctx context.Context, in *metav1
 	return out, nil
 }
 
+func (c *mainServiceClient) CreateVolume(ctx context.Context, in *Volume, opts ...grpc.CallOption) (*Volume, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Volume)
+	err := c.cc.Invoke(ctx, MainService_CreateVolume_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mainServiceClient) UpdateVolume(ctx context.Context, in *Volume, opts ...grpc.CallOption) (*Volume, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Volume)
+	err := c.cc.Invoke(ctx, MainService_UpdateVolume_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mainServiceClient) DeleteVolume(ctx context.Context, in *metav1.DeleteOptions, opts ...grpc.CallOption) (*metav1.OperationResult, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(metav1.OperationResult)
+	err := c.cc.Invoke(ctx, MainService_DeleteVolume_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mainServiceClient) ListVolume(ctx context.Context, in *ListVolumeOptions, opts ...grpc.CallOption) (*VolumeList, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VolumeList)
+	err := c.cc.Invoke(ctx, MainService_ListVolume_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *mainServiceClient) GetVolume(ctx context.Context, in *metav1.GetOptions, opts ...grpc.CallOption) (*Volume, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Volume)
+	err := c.cc.Invoke(ctx, MainService_GetVolume_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *mainServiceClient) StartWorkspace(ctx context.Context, in *StartWorkspaceRequest, opts ...grpc.CallOption) (*StartWorkspaceResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(StartWorkspaceResponse)
@@ -895,6 +967,23 @@ type MainServiceServer interface {
 	// GetWorkspaceSnapshot retrieves a specific WorkspaceSnapshot owned by the
 	// User.
 	GetWorkspaceSnapshot(context.Context, *metav1.GetOptions) (*WorkspaceSnapshot, error)
+	// CreateVolume creates a Volume inside a Space. Volumes are provisioned
+	// asynchronously and they can be mounted by the Workspaces of the Space
+	// while they are still being provisioned.
+	CreateVolume(context.Context, *Volume) (*Volume, error)
+	// UpdateVolume updates a Volume. Only growing the Volume's size is
+	// supported and it additionally requires the underlying storage backend to
+	// support the expansion of the already provisioned volumes.
+	UpdateVolume(context.Context, *Volume) (*Volume, error)
+	// DeleteVolume deletes a Volume together with its underlying storage. It is
+	// rejected while the Volume is still mounted by a Workspace or a Template of
+	// the Space regardless of whether those Workspaces are running.
+	DeleteVolume(context.Context, *metav1.DeleteOptions) (*metav1.OperationResult, error)
+	// ListVolume lists the Volumes of a Space that the User is a Member of.
+	ListVolume(context.Context, *ListVolumeOptions) (*VolumeList, error)
+	// GetVolume retrieves a specific Volume of a Space that the User is a Member
+	// of.
+	GetVolume(context.Context, *metav1.GetOptions) (*Volume, error)
 	// StartWorkspace starts a stopped Workspace. The Cluster creates a dedicated
 	// Octelium Session for the run and moves the Workspace to the INIT_REQUEST
 	// state. The actual initialization is asynchronous and can be followed via
@@ -1056,6 +1145,21 @@ func (UnimplementedMainServiceServer) ListWorkspaceSnapshot(context.Context, *Li
 }
 func (UnimplementedMainServiceServer) GetWorkspaceSnapshot(context.Context, *metav1.GetOptions) (*WorkspaceSnapshot, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetWorkspaceSnapshot not implemented")
+}
+func (UnimplementedMainServiceServer) CreateVolume(context.Context, *Volume) (*Volume, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateVolume not implemented")
+}
+func (UnimplementedMainServiceServer) UpdateVolume(context.Context, *Volume) (*Volume, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateVolume not implemented")
+}
+func (UnimplementedMainServiceServer) DeleteVolume(context.Context, *metav1.DeleteOptions) (*metav1.OperationResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolume not implemented")
+}
+func (UnimplementedMainServiceServer) ListVolume(context.Context, *ListVolumeOptions) (*VolumeList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListVolume not implemented")
+}
+func (UnimplementedMainServiceServer) GetVolume(context.Context, *metav1.GetOptions) (*Volume, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVolume not implemented")
 }
 func (UnimplementedMainServiceServer) StartWorkspace(context.Context, *StartWorkspaceRequest) (*StartWorkspaceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StartWorkspace not implemented")
@@ -1633,6 +1737,96 @@ func _MainService_GetWorkspaceSnapshot_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MainService_CreateVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Volume)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MainServiceServer).CreateVolume(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MainService_CreateVolume_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MainServiceServer).CreateVolume(ctx, req.(*Volume))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MainService_UpdateVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Volume)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MainServiceServer).UpdateVolume(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MainService_UpdateVolume_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MainServiceServer).UpdateVolume(ctx, req.(*Volume))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MainService_DeleteVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(metav1.DeleteOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MainServiceServer).DeleteVolume(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MainService_DeleteVolume_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MainServiceServer).DeleteVolume(ctx, req.(*metav1.DeleteOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MainService_ListVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListVolumeOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MainServiceServer).ListVolume(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MainService_ListVolume_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MainServiceServer).ListVolume(ctx, req.(*ListVolumeOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MainService_GetVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(metav1.GetOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MainServiceServer).GetVolume(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MainService_GetVolume_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MainServiceServer).GetVolume(ctx, req.(*metav1.GetOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _MainService_StartWorkspace_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(StartWorkspaceRequest)
 	if err := dec(in); err != nil {
@@ -2154,6 +2348,26 @@ var MainService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetWorkspaceSnapshot",
 			Handler:    _MainService_GetWorkspaceSnapshot_Handler,
+		},
+		{
+			MethodName: "CreateVolume",
+			Handler:    _MainService_CreateVolume_Handler,
+		},
+		{
+			MethodName: "UpdateVolume",
+			Handler:    _MainService_UpdateVolume_Handler,
+		},
+		{
+			MethodName: "DeleteVolume",
+			Handler:    _MainService_DeleteVolume_Handler,
+		},
+		{
+			MethodName: "ListVolume",
+			Handler:    _MainService_ListVolume_Handler,
+		},
+		{
+			MethodName: "GetVolume",
+			Handler:    _MainService_GetVolume_Handler,
 		},
 		{
 			MethodName: "StartWorkspace",

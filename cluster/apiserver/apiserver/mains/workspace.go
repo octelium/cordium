@@ -24,6 +24,7 @@ import (
 	"github.com/octelium/cordium/cluster/apiserver/apiserver/commonw"
 	"github.com/octelium/cordium/cluster/common/ourscsrv"
 	"github.com/octelium/cordium/cluster/common/ovutils"
+	"github.com/octelium/cordium/cluster/common/wsutils"
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/corev1"
@@ -559,10 +560,26 @@ func (s *Server) StartWorkspace(ctx context.Context, req *cordiumv1.StartWorkspa
 		}
 	}
 
+	volumeRegionRef, err := s.getWorkspaceVolumeRegionRef(ctx, ws)
+	if err != nil {
+		return nil, err
+	}
+
 	region, err := func() (*corev1.Region, error) {
 		if snapshot != nil {
+			if volumeRegionRef != nil && volumeRegionRef.Uid != snapshot.Status.RegionRef.Uid {
+				return nil, serr.InvalidArg(
+					"The mounted Volumes are hosted in another Region than the WorkspaceSnapshot: %s",
+					snapshot.Metadata.Name)
+			}
+
 			return s.octeliumC.CoreC().GetRegion(ctx,
 				apivalidation.ObjectReferenceToRGetOptions(snapshot.Status.RegionRef))
+		}
+
+		if volumeRegionRef != nil {
+			return s.octeliumC.CoreC().GetRegion(ctx,
+				apivalidation.ObjectReferenceToRGetOptions(volumeRegionRef))
 		}
 
 		return s.chooseRegion(ctx, ws, func() *metav1.ObjectReference {
@@ -885,6 +902,99 @@ func (s *Server) UnshareWorkspacePort(ctx context.Context, req *cordiumv1.Unshar
 	}
 
 	return &cordiumv1.UnshareWorkspacePortResponse{}, nil
+}
+
+func (s *Server) getWorkspaceVolumeRegionRef(ctx context.Context,
+	ws *cordiumv1.Workspace) (*metav1.ObjectReference, error) {
+
+	var tmpl *cordiumv1.Template
+	if ws.Status.TemplateRef != nil {
+		var err error
+		tmpl, err = s.octeliumC.CordiumC().GetTemplate(ctx, &rmetav1.GetOptions{
+			Uid: ws.Status.TemplateRef.Uid,
+		})
+		if err != nil {
+			return nil, serr.K8sNotFoundOrInternalWithErr(err)
+		}
+	}
+
+	resolved, err := wsutils.ResolveVolumeMounts(ctx, s.octeliumC, &wsutils.ResolveVolumeMountsReq{
+		Workspace: ws,
+		Template:  tmpl,
+	})
+	if err != nil {
+		if _, ok := err.(*wsutils.VolumeMountError); ok {
+			return nil, grpcutils.InvalidArg("%s", err.Error())
+		}
+		return nil, serr.InternalWithErr(err)
+	}
+
+	regionRef, err := resolved.GetRegionRef()
+	if err != nil {
+		return nil, grpcutils.InvalidArg("%s", err.Error())
+	}
+
+	if err := s.checkExclusiveVolumes(ctx, ws, resolved.Volumes); err != nil {
+		return nil, err
+	}
+
+	return regionRef, nil
+}
+
+func (s *Server) checkExclusiveVolumes(ctx context.Context,
+	ws *cordiumv1.Workspace, volumes []*cordiumv1.Volume) error {
+
+	var exclusive []*cordiumv1.Volume
+	for _, vol := range volumes {
+		if !ucordiumv1.ToVolume(vol).IsShared() {
+			exclusive = append(exclusive, vol)
+		}
+	}
+
+	if len(exclusive) == 0 {
+		return nil
+	}
+
+	wsList, err := s.octeliumC.CordiumC().ListWorkspace(ctx,
+		ourscsrv.FilterBySpaceRef(ws.Status.SpaceRef))
+	if err != nil {
+		return serr.InternalWithErr(err)
+	}
+
+	tmplList, err := s.octeliumC.CordiumC().ListTemplate(ctx,
+		ourscsrv.FilterBySpaceRef(ws.Status.SpaceRef))
+	if err != nil {
+		return serr.InternalWithErr(err)
+	}
+
+	tmplMounts := make(map[string][]*cordiumv1.Workspace_Spec_Runtime_VolumeMount)
+	for _, tmpl := range tmplList.Items {
+		tmplMounts[tmpl.Metadata.Uid] = tmpl.GetSpec().GetRuntime().GetVolumeMounts()
+	}
+
+	for _, cur := range wsList.Items {
+		if cur.Metadata.Uid == ws.Metadata.Uid {
+			continue
+		}
+		if ucordiumv1.ToWorkspace(cur).IsStopped() {
+			continue
+		}
+
+		mounts := cur.GetSpec().GetRuntime().GetVolumeMounts()
+		if cur.Status.TemplateRef != nil {
+			mounts = append(mounts, tmplMounts[cur.Status.TemplateRef.Uid]...)
+		}
+
+		for _, vol := range exclusive {
+			if hasVolumeMount(mounts, vol) {
+				return grpcutils.InvalidArg(
+					"The Volume: %s is EXCLUSIVE and it is currently mounted by the Workspace: %s",
+					vol.Metadata.Name, cur.Metadata.Name)
+			}
+		}
+	}
+
+	return nil
 }
 
 func (s *Server) getMaxWorkspacesPerUser(cc *cordiumv1.ClusterConfig) int {

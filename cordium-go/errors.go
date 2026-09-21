@@ -183,6 +183,48 @@ func SnapshotFailureReason(failure *cordiumv1.WorkspaceSnapshot_Status_Failure) 
 	}
 }
 
+// VolumeFailureError reports that the underlying storage of a Volume could not
+// be provisioned or that it was lost. It carries the Cluster's own structured
+// failure so that callers can branch on the exact reason.
+type VolumeFailureError struct {
+	// Volume is the Volume that failed.
+	Volume *cordiumv1.Volume
+}
+
+func (e *VolumeFailureError) Error() string {
+	if e == nil {
+		return "cordium: Volume failed"
+	}
+	ret := fmt.Sprintf("cordium: Volume %q failed", e.Volume.GetMetadata().GetName())
+	if reason := VolumeFailureReason(e.Volume.GetStatus().GetFailure()); reason != "" {
+		ret += ": " + reason
+	}
+	if msg := e.Volume.GetStatus().GetFailure().GetMessage(); msg != "" {
+		ret += ": " + truncateForError(msg)
+	}
+	return ret
+}
+
+// VolumeFailureReason returns a short, stable, human readable identifier of the
+// reason of a Volume failure (e.g. "Storage" or "Unsupported"). It returns an
+// empty string when the failure is nil or carries no specific reason.
+func VolumeFailureReason(failure *cordiumv1.Volume_Status_Failure) string {
+	if failure == nil {
+		return ""
+	}
+
+	switch failure.GetType().(type) {
+	case *cordiumv1.Volume_Status_Failure_Unsupported_:
+		return "Unsupported"
+	case *cordiumv1.Volume_Status_Failure_Storage_:
+		return "Storage"
+	case *cordiumv1.Volume_Status_Failure_Unknown_:
+		return "Unknown"
+	default:
+		return ""
+	}
+}
+
 // IsNotFound reports whether err is a Cluster NOT_FOUND error.
 func IsNotFound(err error) bool { return hasCode(err, codes.NotFound) }
 

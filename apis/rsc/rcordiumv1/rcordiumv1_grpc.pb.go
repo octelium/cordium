@@ -64,6 +64,12 @@ const (
 	ResourceService_ListWorkspaceSnapshot_FullMethodName   = "/octelium.api.rsc.cordium.v1.ResourceService/ListWorkspaceSnapshot"
 	ResourceService_DeleteWorkspaceSnapshot_FullMethodName = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteWorkspaceSnapshot"
 	ResourceService_WatchWorkspaceSnapshot_FullMethodName  = "/octelium.api.rsc.cordium.v1.ResourceService/WatchWorkspaceSnapshot"
+	ResourceService_CreateVolume_FullMethodName            = "/octelium.api.rsc.cordium.v1.ResourceService/CreateVolume"
+	ResourceService_UpdateVolume_FullMethodName            = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateVolume"
+	ResourceService_GetVolume_FullMethodName               = "/octelium.api.rsc.cordium.v1.ResourceService/GetVolume"
+	ResourceService_ListVolume_FullMethodName              = "/octelium.api.rsc.cordium.v1.ResourceService/ListVolume"
+	ResourceService_DeleteVolume_FullMethodName            = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteVolume"
+	ResourceService_WatchVolume_FullMethodName             = "/octelium.api.rsc.cordium.v1.ResourceService/WatchVolume"
 	ResourceService_CreateSecret_FullMethodName            = "/octelium.api.rsc.cordium.v1.ResourceService/CreateSecret"
 	ResourceService_UpdatSecret_FullMethodName             = "/octelium.api.rsc.cordium.v1.ResourceService/UpdatSecret"
 	ResourceService_GetSecret_FullMethodName               = "/octelium.api.rsc.cordium.v1.ResourceService/GetSecret"
@@ -125,6 +131,12 @@ type ResourceServiceClient interface {
 	ListWorkspaceSnapshot(ctx context.Context, in *rmetav1.ListOptions, opts ...grpc.CallOption) (*cordiumv1.WorkspaceSnapshotList, error)
 	DeleteWorkspaceSnapshot(ctx context.Context, in *rmetav1.DeleteOptions, opts ...grpc.CallOption) (*rmetav1.OperationResult, error)
 	WatchWorkspaceSnapshot(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error)
+	CreateVolume(ctx context.Context, in *cordiumv1.Volume, opts ...grpc.CallOption) (*cordiumv1.Volume, error)
+	UpdateVolume(ctx context.Context, in *cordiumv1.Volume, opts ...grpc.CallOption) (*cordiumv1.Volume, error)
+	GetVolume(ctx context.Context, in *rmetav1.GetOptions, opts ...grpc.CallOption) (*cordiumv1.Volume, error)
+	ListVolume(ctx context.Context, in *rmetav1.ListOptions, opts ...grpc.CallOption) (*cordiumv1.VolumeList, error)
+	DeleteVolume(ctx context.Context, in *rmetav1.DeleteOptions, opts ...grpc.CallOption) (*rmetav1.OperationResult, error)
+	WatchVolume(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error)
 	CreateSecret(ctx context.Context, in *cordiumv1.Secret, opts ...grpc.CallOption) (*cordiumv1.Secret, error)
 	UpdatSecret(ctx context.Context, in *cordiumv1.Secret, opts ...grpc.CallOption) (*cordiumv1.Secret, error)
 	GetSecret(ctx context.Context, in *rmetav1.GetOptions, opts ...grpc.CallOption) (*cordiumv1.Secret, error)
@@ -316,6 +328,75 @@ func (c *resourceServiceClient) WatchWorkspaceSnapshot(ctx context.Context, in *
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type ResourceService_WatchWorkspaceSnapshotClient = grpc.ServerStreamingClient[rmetav1.WatchEvent]
 
+func (c *resourceServiceClient) CreateVolume(ctx context.Context, in *cordiumv1.Volume, opts ...grpc.CallOption) (*cordiumv1.Volume, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(cordiumv1.Volume)
+	err := c.cc.Invoke(ctx, ResourceService_CreateVolume_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *resourceServiceClient) UpdateVolume(ctx context.Context, in *cordiumv1.Volume, opts ...grpc.CallOption) (*cordiumv1.Volume, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(cordiumv1.Volume)
+	err := c.cc.Invoke(ctx, ResourceService_UpdateVolume_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *resourceServiceClient) GetVolume(ctx context.Context, in *rmetav1.GetOptions, opts ...grpc.CallOption) (*cordiumv1.Volume, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(cordiumv1.Volume)
+	err := c.cc.Invoke(ctx, ResourceService_GetVolume_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *resourceServiceClient) ListVolume(ctx context.Context, in *rmetav1.ListOptions, opts ...grpc.CallOption) (*cordiumv1.VolumeList, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(cordiumv1.VolumeList)
+	err := c.cc.Invoke(ctx, ResourceService_ListVolume_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *resourceServiceClient) DeleteVolume(ctx context.Context, in *rmetav1.DeleteOptions, opts ...grpc.CallOption) (*rmetav1.OperationResult, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(rmetav1.OperationResult)
+	err := c.cc.Invoke(ctx, ResourceService_DeleteVolume_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *resourceServiceClient) WatchVolume(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[2], ResourceService_WatchVolume_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[rmetav1.WatchOptions, rmetav1.WatchEvent]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ResourceService_WatchVolumeClient = grpc.ServerStreamingClient[rmetav1.WatchEvent]
+
 func (c *resourceServiceClient) CreateSecret(ctx context.Context, in *cordiumv1.Secret, opts ...grpc.CallOption) (*cordiumv1.Secret, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(cordiumv1.Secret)
@@ -368,7 +449,7 @@ func (c *resourceServiceClient) DeleteSecret(ctx context.Context, in *rmetav1.De
 
 func (c *resourceServiceClient) WatchSecret(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[2], ResourceService_WatchSecret_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[3], ResourceService_WatchSecret_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -437,7 +518,7 @@ func (c *resourceServiceClient) DeleteTemplate(ctx context.Context, in *rmetav1.
 
 func (c *resourceServiceClient) WatchTemplate(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[3], ResourceService_WatchTemplate_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[4], ResourceService_WatchTemplate_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -506,7 +587,7 @@ func (c *resourceServiceClient) DeleteSpace(ctx context.Context, in *rmetav1.Del
 
 func (c *resourceServiceClient) WatchSpace(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[4], ResourceService_WatchSpace_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[5], ResourceService_WatchSpace_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -625,7 +706,7 @@ func (c *resourceServiceClient) DeleteGitProvider(ctx context.Context, in *rmeta
 
 func (c *resourceServiceClient) WatchGitProvider(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[5], ResourceService_WatchGitProvider_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[6], ResourceService_WatchGitProvider_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -694,7 +775,7 @@ func (c *resourceServiceClient) DeleteUserSecret(ctx context.Context, in *rmetav
 
 func (c *resourceServiceClient) WatchUserSecret(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[6], ResourceService_WatchUserSecret_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[7], ResourceService_WatchUserSecret_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -753,7 +834,7 @@ func (c *resourceServiceClient) DeleteUserConfig(ctx context.Context, in *rmetav
 
 func (c *resourceServiceClient) WatchUserConfig(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[7], ResourceService_WatchUserConfig_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[8], ResourceService_WatchUserConfig_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -792,7 +873,7 @@ func (c *resourceServiceClient) UpdateClusterConfig(ctx context.Context, in *cor
 
 func (c *resourceServiceClient) WatchClusterConfig(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[8], ResourceService_WatchClusterConfig_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[9], ResourceService_WatchClusterConfig_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -825,6 +906,12 @@ type ResourceServiceServer interface {
 	ListWorkspaceSnapshot(context.Context, *rmetav1.ListOptions) (*cordiumv1.WorkspaceSnapshotList, error)
 	DeleteWorkspaceSnapshot(context.Context, *rmetav1.DeleteOptions) (*rmetav1.OperationResult, error)
 	WatchWorkspaceSnapshot(*rmetav1.WatchOptions, grpc.ServerStreamingServer[rmetav1.WatchEvent]) error
+	CreateVolume(context.Context, *cordiumv1.Volume) (*cordiumv1.Volume, error)
+	UpdateVolume(context.Context, *cordiumv1.Volume) (*cordiumv1.Volume, error)
+	GetVolume(context.Context, *rmetav1.GetOptions) (*cordiumv1.Volume, error)
+	ListVolume(context.Context, *rmetav1.ListOptions) (*cordiumv1.VolumeList, error)
+	DeleteVolume(context.Context, *rmetav1.DeleteOptions) (*rmetav1.OperationResult, error)
+	WatchVolume(*rmetav1.WatchOptions, grpc.ServerStreamingServer[rmetav1.WatchEvent]) error
 	CreateSecret(context.Context, *cordiumv1.Secret) (*cordiumv1.Secret, error)
 	UpdatSecret(context.Context, *cordiumv1.Secret) (*cordiumv1.Secret, error)
 	GetSecret(context.Context, *rmetav1.GetOptions) (*cordiumv1.Secret, error)
@@ -913,6 +1000,24 @@ func (UnimplementedResourceServiceServer) DeleteWorkspaceSnapshot(context.Contex
 }
 func (UnimplementedResourceServiceServer) WatchWorkspaceSnapshot(*rmetav1.WatchOptions, grpc.ServerStreamingServer[rmetav1.WatchEvent]) error {
 	return status.Errorf(codes.Unimplemented, "method WatchWorkspaceSnapshot not implemented")
+}
+func (UnimplementedResourceServiceServer) CreateVolume(context.Context, *cordiumv1.Volume) (*cordiumv1.Volume, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateVolume not implemented")
+}
+func (UnimplementedResourceServiceServer) UpdateVolume(context.Context, *cordiumv1.Volume) (*cordiumv1.Volume, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateVolume not implemented")
+}
+func (UnimplementedResourceServiceServer) GetVolume(context.Context, *rmetav1.GetOptions) (*cordiumv1.Volume, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVolume not implemented")
+}
+func (UnimplementedResourceServiceServer) ListVolume(context.Context, *rmetav1.ListOptions) (*cordiumv1.VolumeList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListVolume not implemented")
+}
+func (UnimplementedResourceServiceServer) DeleteVolume(context.Context, *rmetav1.DeleteOptions) (*rmetav1.OperationResult, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteVolume not implemented")
+}
+func (UnimplementedResourceServiceServer) WatchVolume(*rmetav1.WatchOptions, grpc.ServerStreamingServer[rmetav1.WatchEvent]) error {
+	return status.Errorf(codes.Unimplemented, "method WatchVolume not implemented")
 }
 func (UnimplementedResourceServiceServer) CreateSecret(context.Context, *cordiumv1.Secret) (*cordiumv1.Secret, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateSecret not implemented")
@@ -1265,6 +1370,107 @@ func _ResourceService_WatchWorkspaceSnapshot_Handler(srv interface{}, stream grp
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type ResourceService_WatchWorkspaceSnapshotServer = grpc.ServerStreamingServer[rmetav1.WatchEvent]
+
+func _ResourceService_CreateVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(cordiumv1.Volume)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResourceServiceServer).CreateVolume(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ResourceService_CreateVolume_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResourceServiceServer).CreateVolume(ctx, req.(*cordiumv1.Volume))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ResourceService_UpdateVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(cordiumv1.Volume)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResourceServiceServer).UpdateVolume(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ResourceService_UpdateVolume_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResourceServiceServer).UpdateVolume(ctx, req.(*cordiumv1.Volume))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ResourceService_GetVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rmetav1.GetOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResourceServiceServer).GetVolume(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ResourceService_GetVolume_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResourceServiceServer).GetVolume(ctx, req.(*rmetav1.GetOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ResourceService_ListVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rmetav1.ListOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResourceServiceServer).ListVolume(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ResourceService_ListVolume_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResourceServiceServer).ListVolume(ctx, req.(*rmetav1.ListOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ResourceService_DeleteVolume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rmetav1.DeleteOptions)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResourceServiceServer).DeleteVolume(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ResourceService_DeleteVolume_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResourceServiceServer).DeleteVolume(ctx, req.(*rmetav1.DeleteOptions))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ResourceService_WatchVolume_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(rmetav1.WatchOptions)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ResourceServiceServer).WatchVolume(m, &grpc.GenericServerStream[rmetav1.WatchOptions, rmetav1.WatchEvent]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ResourceService_WatchVolumeServer = grpc.ServerStreamingServer[rmetav1.WatchEvent]
 
 func _ResourceService_CreateSecret_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(cordiumv1.Secret)
@@ -2039,6 +2245,26 @@ var ResourceService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ResourceService_DeleteWorkspaceSnapshot_Handler,
 		},
 		{
+			MethodName: "CreateVolume",
+			Handler:    _ResourceService_CreateVolume_Handler,
+		},
+		{
+			MethodName: "UpdateVolume",
+			Handler:    _ResourceService_UpdateVolume_Handler,
+		},
+		{
+			MethodName: "GetVolume",
+			Handler:    _ResourceService_GetVolume_Handler,
+		},
+		{
+			MethodName: "ListVolume",
+			Handler:    _ResourceService_ListVolume_Handler,
+		},
+		{
+			MethodName: "DeleteVolume",
+			Handler:    _ResourceService_DeleteVolume_Handler,
+		},
+		{
 			MethodName: "CreateSecret",
 			Handler:    _ResourceService_CreateSecret_Handler,
 		},
@@ -2192,6 +2418,11 @@ var ResourceService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "WatchWorkspaceSnapshot",
 			Handler:       _ResourceService_WatchWorkspaceSnapshot_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "WatchVolume",
+			Handler:       _ResourceService_WatchVolume_Handler,
 			ServerStreams: true,
 		},
 		{

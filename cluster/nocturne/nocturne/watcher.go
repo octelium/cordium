@@ -52,11 +52,11 @@ func newWatcher(octeliumC octeliumc.ClientInterface, k8sC kubernetes.Interface,
 
 func (c *watcher) run(ctx context.Context) error {
 	go c.startWSLoop(ctx)
-	go c.startSnapshotLoop(ctx)
+	go c.startStorageLoop(ctx)
 	return nil
 }
 
-func (c *watcher) startSnapshotLoop(ctx context.Context) {
+func (c *watcher) startStorageLoop(ctx context.Context) {
 	tickerCh := time.NewTicker(20 * time.Second)
 	defer tickerCh.Stop()
 
@@ -68,6 +68,10 @@ func (c *watcher) startSnapshotLoop(ctx context.Context) {
 			if err := c.handleWorkspaceSnapshots(ctx); err != nil {
 				zap.L().Error("Could not handle WorkspaceSnapshots by watcher", zap.Error(err))
 			}
+
+			if err := c.handleVolumes(ctx); err != nil {
+				zap.L().Error("Could not handle Volumes by watcher", zap.Error(err))
+			}
 		}
 	}
 }
@@ -78,6 +82,14 @@ func (c *watcher) handleWorkspaceSnapshots(ctx context.Context) error {
 	}
 
 	return c.ctl.ReconcileWorkspaceSnapshots(ctx)
+}
+
+func (c *watcher) handleVolumes(ctx context.Context) error {
+	if c.ctl == nil {
+		return nil
+	}
+
+	return c.ctl.ReconcileVolumes(ctx)
 }
 
 func (c *watcher) startWSLoop(ctx context.Context) {

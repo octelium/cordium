@@ -338,6 +338,7 @@ func (s *Server) podmanRunImage(ctx context.Context) error {
 		"--volume", "/octelium/podman/dind/docker:/var/lib/docker",
 		"--volume", "/octelium/podman/dind/containers:/var/lib/containers",
 		"--volume", "/octelium/sockets:/run/octelium",
+		"--volume", getVolumeRootMountArg(),
 		"--volume", "/octelium/podman/tmp/var/tmp:/var/tmp",
 		"--volume", "/octelium/podman/tmp/tmp:/tmp",
 

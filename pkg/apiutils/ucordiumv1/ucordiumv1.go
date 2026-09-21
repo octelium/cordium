@@ -63,6 +63,16 @@ func ToWorkspaceSnapshot(a *cordiumv1.WorkspaceSnapshot) *WorkspaceSnapshot {
 	}
 }
 
+type Volume struct {
+	*cordiumv1.Volume
+}
+
+func ToVolume(a *cordiumv1.Volume) *Volume {
+	return &Volume{
+		Volume: a,
+	}
+}
+
 type Template struct {
 	*cordiumv1.Template
 }
@@ -96,6 +106,7 @@ func ToUserSecret(a *cordiumv1.UserSecret) *UserSecret {
 const (
 	KindWorkspace         = "Workspace"
 	KindWorkspaceSnapshot = "WorkspaceSnapshot"
+	KindVolume            = "Volume"
 	KindSecret            = "Secret"
 	KindTemplate          = "Template"
 	KindEnvironment       = "Environment"
@@ -114,6 +125,8 @@ func NewObjectList(kind string) (umetav1.ObjectI, error) {
 		return &cordiumv1.WorkspaceList{}, nil
 	case KindWorkspaceSnapshot:
 		return &cordiumv1.WorkspaceSnapshotList{}, nil
+	case KindVolume:
+		return &cordiumv1.VolumeList{}, nil
 	case KindSecret:
 		return &cordiumv1.SecretList{}, nil
 	case KindTemplate:
@@ -138,6 +151,8 @@ func NewObjectListOptions(kind string) (proto.Message, error) {
 		return &cordiumv1.ListWorkspaceOptions{}, nil
 	case KindWorkspaceSnapshot:
 		return &cordiumv1.ListWorkspaceSnapshotOptions{}, nil
+	case KindVolume:
+		return &cordiumv1.ListVolumeOptions{}, nil
 	case KindTemplate:
 		return &cordiumv1.ListTemplateOptions{}, nil
 	case KindSecret:
@@ -166,6 +181,8 @@ func NewObject(kind string) (umetav1.ResourceObjectI, error) {
 		return &cordiumv1.Workspace{}, nil
 	case KindWorkspaceSnapshot:
 		return &cordiumv1.WorkspaceSnapshot{}, nil
+	case KindVolume:
+		return &cordiumv1.Volume{}, nil
 	case KindTemplate:
 		return &cordiumv1.Template{}, nil
 	case KindSecret:
@@ -193,8 +210,9 @@ func NewObject(kind string) (umetav1.ResourceObjectI, error) {
 }
 
 type ResourceObjectRefG interface {
-	*cordiumv1.Workspace | *cordiumv1.WorkspaceSnapshot | *cordiumv1.Secret | *cordiumv1.Template |
-		*cordiumv1.Space | *cordiumv1.Membership | *cordiumv1.GitProvider | *cordiumv1.UserSecret | *cordiumv1.UserConfig
+	*cordiumv1.Workspace | *cordiumv1.WorkspaceSnapshot | *cordiumv1.Volume | *cordiumv1.Secret |
+		*cordiumv1.Template | *cordiumv1.Space | *cordiumv1.Membership | *cordiumv1.GitProvider |
+		*cordiumv1.UserSecret | *cordiumv1.UserConfig
 }
 
 const API = "cordium"
@@ -355,4 +373,26 @@ func (s *WorkspaceSnapshot) IsReady() bool {
 func (s *WorkspaceSnapshot) IsCreating() bool {
 	return s != nil && s.Status != nil &&
 		s.Status.State == cordiumv1.WorkspaceSnapshot_Status_STATE_CREATING
+}
+
+func (v *Volume) IsFailed() bool {
+	return v != nil && v.Status != nil &&
+		v.Status.State == cordiumv1.Volume_Status_STATE_FAILED
+}
+
+func (v *Volume) IsShared() bool {
+	return v != nil && v.Spec != nil &&
+		v.Spec.AccessMode == cordiumv1.Volume_ACCESS_MODE_SHARED
+}
+
+func (v *Volume) GetSizeMegabytes() uint32 {
+	return v.GetSpec().GetSize().GetMegabytes()
+}
+
+func (w *Workspace) GetVolumeMounts() []*cordiumv1.Workspace_Spec_Runtime_VolumeMount {
+	if w == nil || w.Spec == nil || w.Spec.Runtime == nil {
+		return nil
+	}
+
+	return w.Spec.Runtime.VolumeMounts
 }

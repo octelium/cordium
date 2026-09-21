@@ -98,6 +98,11 @@ func Run(ctx context.Context) error {
 		return err
 	}
 
+	if err := wswatchers.NewCordiumV1(octeliumC).Volume(ctx, nil,
+		ctl.OnAddVolume, ctl.OnUpdateVolume, ctl.OnDeleteVolume); err != nil {
+		return err
+	}
+
 	if err := wswatchers.NewCordiumV1(octeliumC).Template(ctx,
 		nil, tmplCtl.OnAdd, tmplCtl.OnUpdate, tmplCtl.OnDelete); err != nil {
 		return err

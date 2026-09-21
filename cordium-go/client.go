@@ -53,6 +53,7 @@ type Client struct {
 	spaces        *SpaceClient
 	templates     *TemplateClient
 	snapshots     *SnapshotClient
+	volumes       *VolumeClient
 	secrets       *SecretClient
 	userSecrets   *UserSecretClient
 	gitProviders  *GitProviderClient
@@ -146,6 +147,7 @@ func New(ctx context.Context, opts ...Option) (*Client, error) {
 	ret.spaces = &SpaceClient{c: ret}
 	ret.templates = &TemplateClient{c: ret}
 	ret.snapshots = &SnapshotClient{c: ret}
+	ret.volumes = &VolumeClient{c: ret}
 	ret.secrets = &SecretClient{c: ret}
 	ret.userSecrets = &UserSecretClient{c: ret}
 	ret.gitProviders = &GitProviderClient{c: ret}
@@ -176,6 +178,9 @@ func (c *Client) Templates() *TemplateClient { return c.templates }
 
 // Snapshots returns the WorkspaceSnapshot API.
 func (c *Client) Snapshots() *SnapshotClient { return c.snapshots }
+
+// Volumes returns the Space scoped Volume API.
+func (c *Client) Volumes() *VolumeClient { return c.volumes }
 
 // Secrets returns the Space scoped Secret API.
 func (c *Client) Secrets() *SecretClient { return c.secrets }

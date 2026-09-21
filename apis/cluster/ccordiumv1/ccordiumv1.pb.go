@@ -801,6 +801,66 @@ type StartTerminalResponse_Stdout_ struct {
 
 func (*StartTerminalResponse_Stdout_) isStartTerminalResponse_Type() {}
 
+type ResolvedVolumeMount struct {
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	VolumeRef     *metav1.ObjectReference `protobuf:"bytes,1,opt,name=volumeRef,proto3" json:"volumeRef,omitempty"`
+	MountPath     string                  `protobuf:"bytes,2,opt,name=mountPath,proto3" json:"mountPath,omitempty"`
+	ReadOnly      bool                    `protobuf:"varint,3,opt,name=readOnly,proto3" json:"readOnly,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ResolvedVolumeMount) Reset() {
+	*x = ResolvedVolumeMount{}
+	mi := &file_ccordiumv1_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResolvedVolumeMount) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResolvedVolumeMount) ProtoMessage() {}
+
+func (x *ResolvedVolumeMount) ProtoReflect() protoreflect.Message {
+	mi := &file_ccordiumv1_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResolvedVolumeMount.ProtoReflect.Descriptor instead.
+func (*ResolvedVolumeMount) Descriptor() ([]byte, []int) {
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *ResolvedVolumeMount) GetVolumeRef() *metav1.ObjectReference {
+	if x != nil {
+		return x.VolumeRef
+	}
+	return nil
+}
+
+func (x *ResolvedVolumeMount) GetMountPath() string {
+	if x != nil {
+		return x.MountPath
+	}
+	return ""
+}
+
+func (x *ResolvedVolumeMount) GetReadOnly() bool {
+	if x != nil {
+		return x.ReadOnly
+	}
+	return false
+}
+
 type PrepareRequest struct {
 	state                 protoimpl.MessageState    `protogen:"open.v1"`
 	Domain                string                    `protobuf:"bytes,1,opt,name=domain,proto3" json:"domain,omitempty"`
@@ -816,13 +876,14 @@ type PrepareRequest struct {
 	UserConfig            *cordiumv1.UserConfig     `protobuf:"bytes,11,opt,name=userConfig,proto3" json:"userConfig,omitempty"`
 	TemplateHasSnapshot   bool                      `protobuf:"varint,12,opt,name=templateHasSnapshot,proto3" json:"templateHasSnapshot,omitempty"`
 	PersistentStateSource PersistentStateSource     `protobuf:"varint,13,opt,name=persistentStateSource,proto3,enum=octelium.api.cluster.cordium.v1.PersistentStateSource" json:"persistentStateSource,omitempty"`
+	VolumeMounts          []*ResolvedVolumeMount    `protobuf:"bytes,14,rep,name=volumeMounts,proto3" json:"volumeMounts,omitempty"`
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }
 
 func (x *PrepareRequest) Reset() {
 	*x = PrepareRequest{}
-	mi := &file_ccordiumv1_proto_msgTypes[14]
+	mi := &file_ccordiumv1_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -834,7 +895,7 @@ func (x *PrepareRequest) String() string {
 func (*PrepareRequest) ProtoMessage() {}
 
 func (x *PrepareRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[14]
+	mi := &file_ccordiumv1_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -847,7 +908,7 @@ func (x *PrepareRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PrepareRequest.ProtoReflect.Descriptor instead.
 func (*PrepareRequest) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{14}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *PrepareRequest) GetDomain() string {
@@ -941,6 +1002,13 @@ func (x *PrepareRequest) GetPersistentStateSource() PersistentStateSource {
 	return PersistentStateSource_PERSISTENT_STATE_SOURCE_UNSET
 }
 
+func (x *PrepareRequest) GetVolumeMounts() []*ResolvedVolumeMount {
+	if x != nil {
+		return x.VolumeMounts
+	}
+	return nil
+}
+
 type PrepareResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -949,7 +1017,7 @@ type PrepareResponse struct {
 
 func (x *PrepareResponse) Reset() {
 	*x = PrepareResponse{}
-	mi := &file_ccordiumv1_proto_msgTypes[15]
+	mi := &file_ccordiumv1_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -961,7 +1029,7 @@ func (x *PrepareResponse) String() string {
 func (*PrepareResponse) ProtoMessage() {}
 
 func (x *PrepareResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[15]
+	mi := &file_ccordiumv1_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -974,7 +1042,7 @@ func (x *PrepareResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PrepareResponse.ProtoReflect.Descriptor instead.
 func (*PrepareResponse) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{15}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{16}
 }
 
 type GetStateRequest struct {
@@ -985,7 +1053,7 @@ type GetStateRequest struct {
 
 func (x *GetStateRequest) Reset() {
 	*x = GetStateRequest{}
-	mi := &file_ccordiumv1_proto_msgTypes[16]
+	mi := &file_ccordiumv1_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -997,7 +1065,7 @@ func (x *GetStateRequest) String() string {
 func (*GetStateRequest) ProtoMessage() {}
 
 func (x *GetStateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[16]
+	mi := &file_ccordiumv1_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1010,7 +1078,7 @@ func (x *GetStateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetStateRequest.ProtoReflect.Descriptor instead.
 func (*GetStateRequest) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{16}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{17}
 }
 
 type GetStateResponse struct {
@@ -1022,7 +1090,7 @@ type GetStateResponse struct {
 
 func (x *GetStateResponse) Reset() {
 	*x = GetStateResponse{}
-	mi := &file_ccordiumv1_proto_msgTypes[17]
+	mi := &file_ccordiumv1_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1034,7 +1102,7 @@ func (x *GetStateResponse) String() string {
 func (*GetStateResponse) ProtoMessage() {}
 
 func (x *GetStateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[17]
+	mi := &file_ccordiumv1_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1047,7 +1115,7 @@ func (x *GetStateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetStateResponse.ProtoReflect.Descriptor instead.
 func (*GetStateResponse) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{17}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *GetStateResponse) GetState() cordiumv1.Workspace_Status_State {
@@ -1066,7 +1134,7 @@ type ShutdownRequest struct {
 
 func (x *ShutdownRequest) Reset() {
 	*x = ShutdownRequest{}
-	mi := &file_ccordiumv1_proto_msgTypes[18]
+	mi := &file_ccordiumv1_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1078,7 +1146,7 @@ func (x *ShutdownRequest) String() string {
 func (*ShutdownRequest) ProtoMessage() {}
 
 func (x *ShutdownRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[18]
+	mi := &file_ccordiumv1_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1091,7 +1159,7 @@ func (x *ShutdownRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ShutdownRequest.ProtoReflect.Descriptor instead.
 func (*ShutdownRequest) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{18}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *ShutdownRequest) GetWorkspace() *cordiumv1.Workspace {
@@ -1109,7 +1177,7 @@ type ShutdownResponse struct {
 
 func (x *ShutdownResponse) Reset() {
 	*x = ShutdownResponse{}
-	mi := &file_ccordiumv1_proto_msgTypes[19]
+	mi := &file_ccordiumv1_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1121,7 +1189,7 @@ func (x *ShutdownResponse) String() string {
 func (*ShutdownResponse) ProtoMessage() {}
 
 func (x *ShutdownResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[19]
+	mi := &file_ccordiumv1_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1134,7 +1202,7 @@ func (x *ShutdownResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ShutdownResponse.ProtoReflect.Descriptor instead.
 func (*ShutdownResponse) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{19}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{20}
 }
 
 type GetTunnelPublicKeyRequest struct {
@@ -1145,7 +1213,7 @@ type GetTunnelPublicKeyRequest struct {
 
 func (x *GetTunnelPublicKeyRequest) Reset() {
 	*x = GetTunnelPublicKeyRequest{}
-	mi := &file_ccordiumv1_proto_msgTypes[20]
+	mi := &file_ccordiumv1_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1157,7 +1225,7 @@ func (x *GetTunnelPublicKeyRequest) String() string {
 func (*GetTunnelPublicKeyRequest) ProtoMessage() {}
 
 func (x *GetTunnelPublicKeyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[20]
+	mi := &file_ccordiumv1_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1170,7 +1238,7 @@ func (x *GetTunnelPublicKeyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTunnelPublicKeyRequest.ProtoReflect.Descriptor instead.
 func (*GetTunnelPublicKeyRequest) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{20}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{21}
 }
 
 type GetTunnelPublicKeyResponse struct {
@@ -1182,7 +1250,7 @@ type GetTunnelPublicKeyResponse struct {
 
 func (x *GetTunnelPublicKeyResponse) Reset() {
 	*x = GetTunnelPublicKeyResponse{}
-	mi := &file_ccordiumv1_proto_msgTypes[21]
+	mi := &file_ccordiumv1_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1194,7 +1262,7 @@ func (x *GetTunnelPublicKeyResponse) String() string {
 func (*GetTunnelPublicKeyResponse) ProtoMessage() {}
 
 func (x *GetTunnelPublicKeyResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[21]
+	mi := &file_ccordiumv1_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1207,7 +1275,7 @@ func (x *GetTunnelPublicKeyResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTunnelPublicKeyResponse.ProtoReflect.Descriptor instead.
 func (*GetTunnelPublicKeyResponse) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{21}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *GetTunnelPublicKeyResponse) GetPublicKey() string {
@@ -1232,13 +1300,14 @@ type InitializeRequest struct {
 	TemplateHasSnapshot   bool                          `protobuf:"varint,11,opt,name=templateHasSnapshot,proto3" json:"templateHasSnapshot,omitempty"`
 	ClusterConfig         *cordiumv1.ClusterConfig      `protobuf:"bytes,12,opt,name=clusterConfig,proto3" json:"clusterConfig,omitempty"`
 	PersistentStateSource PersistentStateSource         `protobuf:"varint,13,opt,name=persistentStateSource,proto3,enum=octelium.api.cluster.cordium.v1.PersistentStateSource" json:"persistentStateSource,omitempty"`
+	VolumeMounts          []*ResolvedVolumeMount        `protobuf:"bytes,14,rep,name=volumeMounts,proto3" json:"volumeMounts,omitempty"`
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }
 
 func (x *InitializeRequest) Reset() {
 	*x = InitializeRequest{}
-	mi := &file_ccordiumv1_proto_msgTypes[22]
+	mi := &file_ccordiumv1_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1250,7 +1319,7 @@ func (x *InitializeRequest) String() string {
 func (*InitializeRequest) ProtoMessage() {}
 
 func (x *InitializeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[22]
+	mi := &file_ccordiumv1_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1263,7 +1332,7 @@ func (x *InitializeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InitializeRequest.ProtoReflect.Descriptor instead.
 func (*InitializeRequest) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{22}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *InitializeRequest) GetWorkspace() *cordiumv1.Workspace {
@@ -1357,6 +1426,13 @@ func (x *InitializeRequest) GetPersistentStateSource() PersistentStateSource {
 	return PersistentStateSource_PERSISTENT_STATE_SOURCE_UNSET
 }
 
+func (x *InitializeRequest) GetVolumeMounts() []*ResolvedVolumeMount {
+	if x != nil {
+		return x.VolumeMounts
+	}
+	return nil
+}
+
 type InitializeResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -1365,7 +1441,7 @@ type InitializeResponse struct {
 
 func (x *InitializeResponse) Reset() {
 	*x = InitializeResponse{}
-	mi := &file_ccordiumv1_proto_msgTypes[23]
+	mi := &file_ccordiumv1_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1377,7 +1453,7 @@ func (x *InitializeResponse) String() string {
 func (*InitializeResponse) ProtoMessage() {}
 
 func (x *InitializeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[23]
+	mi := &file_ccordiumv1_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1390,7 +1466,7 @@ func (x *InitializeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InitializeResponse.ProtoReflect.Descriptor instead.
 func (*InitializeResponse) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{23}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{24}
 }
 
 type GetGitCredsRequest struct {
@@ -1403,7 +1479,7 @@ type GetGitCredsRequest struct {
 
 func (x *GetGitCredsRequest) Reset() {
 	*x = GetGitCredsRequest{}
-	mi := &file_ccordiumv1_proto_msgTypes[24]
+	mi := &file_ccordiumv1_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1415,7 +1491,7 @@ func (x *GetGitCredsRequest) String() string {
 func (*GetGitCredsRequest) ProtoMessage() {}
 
 func (x *GetGitCredsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[24]
+	mi := &file_ccordiumv1_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1428,7 +1504,7 @@ func (x *GetGitCredsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetGitCredsRequest.ProtoReflect.Descriptor instead.
 func (*GetGitCredsRequest) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{24}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *GetGitCredsRequest) GetRequest() map[string]string {
@@ -1454,7 +1530,7 @@ type GetGitCredsResponse struct {
 
 func (x *GetGitCredsResponse) Reset() {
 	*x = GetGitCredsResponse{}
-	mi := &file_ccordiumv1_proto_msgTypes[25]
+	mi := &file_ccordiumv1_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1466,7 +1542,7 @@ func (x *GetGitCredsResponse) String() string {
 func (*GetGitCredsResponse) ProtoMessage() {}
 
 func (x *GetGitCredsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[25]
+	mi := &file_ccordiumv1_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1479,7 +1555,7 @@ func (x *GetGitCredsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetGitCredsResponse.ProtoReflect.Descriptor instead.
 func (*GetGitCredsResponse) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{25}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *GetGitCredsResponse) GetResponse() map[string]string {
@@ -1499,7 +1575,7 @@ type StoreGitCredsRequest struct {
 
 func (x *StoreGitCredsRequest) Reset() {
 	*x = StoreGitCredsRequest{}
-	mi := &file_ccordiumv1_proto_msgTypes[26]
+	mi := &file_ccordiumv1_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1511,7 +1587,7 @@ func (x *StoreGitCredsRequest) String() string {
 func (*StoreGitCredsRequest) ProtoMessage() {}
 
 func (x *StoreGitCredsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[26]
+	mi := &file_ccordiumv1_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1524,7 +1600,7 @@ func (x *StoreGitCredsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StoreGitCredsRequest.ProtoReflect.Descriptor instead.
 func (*StoreGitCredsRequest) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{26}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *StoreGitCredsRequest) GetRequest() map[string]string {
@@ -1549,7 +1625,7 @@ type StoreGitCredsResponse struct {
 
 func (x *StoreGitCredsResponse) Reset() {
 	*x = StoreGitCredsResponse{}
-	mi := &file_ccordiumv1_proto_msgTypes[27]
+	mi := &file_ccordiumv1_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1561,7 +1637,7 @@ func (x *StoreGitCredsResponse) String() string {
 func (*StoreGitCredsResponse) ProtoMessage() {}
 
 func (x *StoreGitCredsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[27]
+	mi := &file_ccordiumv1_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1574,7 +1650,7 @@ func (x *StoreGitCredsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StoreGitCredsResponse.ProtoReflect.Descriptor instead.
 func (*StoreGitCredsResponse) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{27}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{28}
 }
 
 type EraseGitCredsRequest struct {
@@ -1587,7 +1663,7 @@ type EraseGitCredsRequest struct {
 
 func (x *EraseGitCredsRequest) Reset() {
 	*x = EraseGitCredsRequest{}
-	mi := &file_ccordiumv1_proto_msgTypes[28]
+	mi := &file_ccordiumv1_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1599,7 +1675,7 @@ func (x *EraseGitCredsRequest) String() string {
 func (*EraseGitCredsRequest) ProtoMessage() {}
 
 func (x *EraseGitCredsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[28]
+	mi := &file_ccordiumv1_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1612,7 +1688,7 @@ func (x *EraseGitCredsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EraseGitCredsRequest.ProtoReflect.Descriptor instead.
 func (*EraseGitCredsRequest) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{28}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *EraseGitCredsRequest) GetRequest() map[string]string {
@@ -1637,7 +1713,7 @@ type EraseGitCredsResponse struct {
 
 func (x *EraseGitCredsResponse) Reset() {
 	*x = EraseGitCredsResponse{}
-	mi := &file_ccordiumv1_proto_msgTypes[29]
+	mi := &file_ccordiumv1_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1649,7 +1725,7 @@ func (x *EraseGitCredsResponse) String() string {
 func (*EraseGitCredsResponse) ProtoMessage() {}
 
 func (x *EraseGitCredsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[29]
+	mi := &file_ccordiumv1_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1662,7 +1738,7 @@ func (x *EraseGitCredsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EraseGitCredsResponse.ProtoReflect.Descriptor instead.
 func (*EraseGitCredsResponse) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{29}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{30}
 }
 
 type ListenStateRequest struct {
@@ -1673,7 +1749,7 @@ type ListenStateRequest struct {
 
 func (x *ListenStateRequest) Reset() {
 	*x = ListenStateRequest{}
-	mi := &file_ccordiumv1_proto_msgTypes[30]
+	mi := &file_ccordiumv1_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1685,7 +1761,7 @@ func (x *ListenStateRequest) String() string {
 func (*ListenStateRequest) ProtoMessage() {}
 
 func (x *ListenStateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[30]
+	mi := &file_ccordiumv1_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1698,7 +1774,7 @@ func (x *ListenStateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListenStateRequest.ProtoReflect.Descriptor instead.
 func (*ListenStateRequest) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{30}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{31}
 }
 
 type ListenStateResponse struct {
@@ -1710,7 +1786,7 @@ type ListenStateResponse struct {
 
 func (x *ListenStateResponse) Reset() {
 	*x = ListenStateResponse{}
-	mi := &file_ccordiumv1_proto_msgTypes[31]
+	mi := &file_ccordiumv1_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1722,7 +1798,7 @@ func (x *ListenStateResponse) String() string {
 func (*ListenStateResponse) ProtoMessage() {}
 
 func (x *ListenStateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[31]
+	mi := &file_ccordiumv1_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1735,7 +1811,7 @@ func (x *ListenStateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListenStateResponse.ProtoReflect.Descriptor instead.
 func (*ListenStateResponse) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{31}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *ListenStateResponse) GetState() cordiumv1.Workspace_Status_State {
@@ -1753,7 +1829,7 @@ type ListenEventRequest struct {
 
 func (x *ListenEventRequest) Reset() {
 	*x = ListenEventRequest{}
-	mi := &file_ccordiumv1_proto_msgTypes[32]
+	mi := &file_ccordiumv1_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1765,7 +1841,7 @@ func (x *ListenEventRequest) String() string {
 func (*ListenEventRequest) ProtoMessage() {}
 
 func (x *ListenEventRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[32]
+	mi := &file_ccordiumv1_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1778,7 +1854,7 @@ func (x *ListenEventRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListenEventRequest.ProtoReflect.Descriptor instead.
 func (*ListenEventRequest) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{32}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{33}
 }
 
 type GetFailureRequest struct {
@@ -1789,7 +1865,7 @@ type GetFailureRequest struct {
 
 func (x *GetFailureRequest) Reset() {
 	*x = GetFailureRequest{}
-	mi := &file_ccordiumv1_proto_msgTypes[33]
+	mi := &file_ccordiumv1_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1801,7 +1877,7 @@ func (x *GetFailureRequest) String() string {
 func (*GetFailureRequest) ProtoMessage() {}
 
 func (x *GetFailureRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[33]
+	mi := &file_ccordiumv1_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1814,7 +1890,7 @@ func (x *GetFailureRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFailureRequest.ProtoReflect.Descriptor instead.
 func (*GetFailureRequest) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{33}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{34}
 }
 
 type GetFailureResponse struct {
@@ -1826,7 +1902,7 @@ type GetFailureResponse struct {
 
 func (x *GetFailureResponse) Reset() {
 	*x = GetFailureResponse{}
-	mi := &file_ccordiumv1_proto_msgTypes[34]
+	mi := &file_ccordiumv1_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1838,7 +1914,7 @@ func (x *GetFailureResponse) String() string {
 func (*GetFailureResponse) ProtoMessage() {}
 
 func (x *GetFailureResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[34]
+	mi := &file_ccordiumv1_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1851,7 +1927,7 @@ func (x *GetFailureResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFailureResponse.ProtoReflect.Descriptor instead.
 func (*GetFailureResponse) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{34}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *GetFailureResponse) GetFailure() *cordiumv1.Workspace_Status_Failure {
@@ -1877,7 +1953,7 @@ type GitProviderInfo struct {
 
 func (x *GitProviderInfo) Reset() {
 	*x = GitProviderInfo{}
-	mi := &file_ccordiumv1_proto_msgTypes[35]
+	mi := &file_ccordiumv1_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1889,7 +1965,7 @@ func (x *GitProviderInfo) String() string {
 func (*GitProviderInfo) ProtoMessage() {}
 
 func (x *GitProviderInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[35]
+	mi := &file_ccordiumv1_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1902,7 +1978,7 @@ func (x *GitProviderInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GitProviderInfo.ProtoReflect.Descriptor instead.
 func (*GitProviderInfo) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{35}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *GitProviderInfo) GetGitProviderRef() *metav1.ObjectReference {
@@ -1974,7 +2050,7 @@ type ListenStatsResponse struct {
 
 func (x *ListenStatsResponse) Reset() {
 	*x = ListenStatsResponse{}
-	mi := &file_ccordiumv1_proto_msgTypes[36]
+	mi := &file_ccordiumv1_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1986,7 +2062,7 @@ func (x *ListenStatsResponse) String() string {
 func (*ListenStatsResponse) ProtoMessage() {}
 
 func (x *ListenStatsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[36]
+	mi := &file_ccordiumv1_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1999,7 +2075,7 @@ func (x *ListenStatsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListenStatsResponse.ProtoReflect.Descriptor instead.
 func (*ListenStatsResponse) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{36}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *ListenStatsResponse) GetCpu() *ListenStatsResponse_CPU {
@@ -2051,7 +2127,7 @@ type ListenEventResponse struct {
 
 func (x *ListenEventResponse) Reset() {
 	*x = ListenEventResponse{}
-	mi := &file_ccordiumv1_proto_msgTypes[37]
+	mi := &file_ccordiumv1_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2063,7 +2139,7 @@ func (x *ListenEventResponse) String() string {
 func (*ListenEventResponse) ProtoMessage() {}
 
 func (x *ListenEventResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[37]
+	mi := &file_ccordiumv1_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2076,7 +2152,7 @@ func (x *ListenEventResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListenEventResponse.ProtoReflect.Descriptor instead.
 func (*ListenEventResponse) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{37}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *ListenEventResponse) GetType() isListenEventResponse_Type {
@@ -2143,7 +2219,7 @@ type ShutdownAckRequest struct {
 
 func (x *ShutdownAckRequest) Reset() {
 	*x = ShutdownAckRequest{}
-	mi := &file_ccordiumv1_proto_msgTypes[38]
+	mi := &file_ccordiumv1_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2155,7 +2231,7 @@ func (x *ShutdownAckRequest) String() string {
 func (*ShutdownAckRequest) ProtoMessage() {}
 
 func (x *ShutdownAckRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[38]
+	mi := &file_ccordiumv1_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2168,7 +2244,7 @@ func (x *ShutdownAckRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ShutdownAckRequest.ProtoReflect.Descriptor instead.
 func (*ShutdownAckRequest) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{38}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{39}
 }
 
 type ShutdownAckResponse struct {
@@ -2179,7 +2255,7 @@ type ShutdownAckResponse struct {
 
 func (x *ShutdownAckResponse) Reset() {
 	*x = ShutdownAckResponse{}
-	mi := &file_ccordiumv1_proto_msgTypes[39]
+	mi := &file_ccordiumv1_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2191,7 +2267,7 @@ func (x *ShutdownAckResponse) String() string {
 func (*ShutdownAckResponse) ProtoMessage() {}
 
 func (x *ShutdownAckResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[39]
+	mi := &file_ccordiumv1_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2204,7 +2280,7 @@ func (x *ShutdownAckResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ShutdownAckResponse.ProtoReflect.Descriptor instead.
 func (*ShutdownAckResponse) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{39}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{40}
 }
 
 type WaitUntilReadyRequest struct {
@@ -2215,7 +2291,7 @@ type WaitUntilReadyRequest struct {
 
 func (x *WaitUntilReadyRequest) Reset() {
 	*x = WaitUntilReadyRequest{}
-	mi := &file_ccordiumv1_proto_msgTypes[40]
+	mi := &file_ccordiumv1_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2227,7 +2303,7 @@ func (x *WaitUntilReadyRequest) String() string {
 func (*WaitUntilReadyRequest) ProtoMessage() {}
 
 func (x *WaitUntilReadyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[40]
+	mi := &file_ccordiumv1_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2240,7 +2316,7 @@ func (x *WaitUntilReadyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WaitUntilReadyRequest.ProtoReflect.Descriptor instead.
 func (*WaitUntilReadyRequest) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{40}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{41}
 }
 
 type WaitUntilReadyResponse struct {
@@ -2251,7 +2327,7 @@ type WaitUntilReadyResponse struct {
 
 func (x *WaitUntilReadyResponse) Reset() {
 	*x = WaitUntilReadyResponse{}
-	mi := &file_ccordiumv1_proto_msgTypes[41]
+	mi := &file_ccordiumv1_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2263,7 +2339,7 @@ func (x *WaitUntilReadyResponse) String() string {
 func (*WaitUntilReadyResponse) ProtoMessage() {}
 
 func (x *WaitUntilReadyResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[41]
+	mi := &file_ccordiumv1_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2276,7 +2352,7 @@ func (x *WaitUntilReadyResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WaitUntilReadyResponse.ProtoReflect.Descriptor instead.
 func (*WaitUntilReadyResponse) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{41}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{42}
 }
 
 type ListenTerminalResponse_Stdout struct {
@@ -2288,7 +2364,7 @@ type ListenTerminalResponse_Stdout struct {
 
 func (x *ListenTerminalResponse_Stdout) Reset() {
 	*x = ListenTerminalResponse_Stdout{}
-	mi := &file_ccordiumv1_proto_msgTypes[42]
+	mi := &file_ccordiumv1_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2300,7 +2376,7 @@ func (x *ListenTerminalResponse_Stdout) String() string {
 func (*ListenTerminalResponse_Stdout) ProtoMessage() {}
 
 func (x *ListenTerminalResponse_Stdout) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[42]
+	mi := &file_ccordiumv1_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2333,7 +2409,7 @@ type ListenTerminalResponse_WindowSize struct {
 
 func (x *ListenTerminalResponse_WindowSize) Reset() {
 	*x = ListenTerminalResponse_WindowSize{}
-	mi := &file_ccordiumv1_proto_msgTypes[43]
+	mi := &file_ccordiumv1_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2345,7 +2421,7 @@ func (x *ListenTerminalResponse_WindowSize) String() string {
 func (*ListenTerminalResponse_WindowSize) ProtoMessage() {}
 
 func (x *ListenTerminalResponse_WindowSize) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[43]
+	mi := &file_ccordiumv1_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2383,7 +2459,7 @@ type ListenTerminalResponse_Close struct {
 
 func (x *ListenTerminalResponse_Close) Reset() {
 	*x = ListenTerminalResponse_Close{}
-	mi := &file_ccordiumv1_proto_msgTypes[44]
+	mi := &file_ccordiumv1_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2395,7 +2471,7 @@ func (x *ListenTerminalResponse_Close) String() string {
 func (*ListenTerminalResponse_Close) ProtoMessage() {}
 
 func (x *ListenTerminalResponse_Close) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[44]
+	mi := &file_ccordiumv1_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2420,7 +2496,7 @@ type StartTerminalResponse_Stdout struct {
 
 func (x *StartTerminalResponse_Stdout) Reset() {
 	*x = StartTerminalResponse_Stdout{}
-	mi := &file_ccordiumv1_proto_msgTypes[45]
+	mi := &file_ccordiumv1_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2432,7 +2508,7 @@ func (x *StartTerminalResponse_Stdout) String() string {
 func (*StartTerminalResponse_Stdout) ProtoMessage() {}
 
 func (x *StartTerminalResponse_Stdout) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[45]
+	mi := &file_ccordiumv1_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2465,7 +2541,7 @@ type InitializeRequest_SSH struct {
 
 func (x *InitializeRequest_SSH) Reset() {
 	*x = InitializeRequest_SSH{}
-	mi := &file_ccordiumv1_proto_msgTypes[46]
+	mi := &file_ccordiumv1_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2477,7 +2553,7 @@ func (x *InitializeRequest_SSH) String() string {
 func (*InitializeRequest_SSH) ProtoMessage() {}
 
 func (x *InitializeRequest_SSH) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[46]
+	mi := &file_ccordiumv1_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2490,7 +2566,7 @@ func (x *InitializeRequest_SSH) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InitializeRequest_SSH.ProtoReflect.Descriptor instead.
 func (*InitializeRequest_SSH) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{22, 0}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{23, 0}
 }
 
 func (x *InitializeRequest_SSH) GetKnownHosts() []string {
@@ -2519,7 +2595,7 @@ type InitializeRequest_ClientInfo struct {
 
 func (x *InitializeRequest_ClientInfo) Reset() {
 	*x = InitializeRequest_ClientInfo{}
-	mi := &file_ccordiumv1_proto_msgTypes[47]
+	mi := &file_ccordiumv1_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2531,7 +2607,7 @@ func (x *InitializeRequest_ClientInfo) String() string {
 func (*InitializeRequest_ClientInfo) ProtoMessage() {}
 
 func (x *InitializeRequest_ClientInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[47]
+	mi := &file_ccordiumv1_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2544,7 +2620,7 @@ func (x *InitializeRequest_ClientInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InitializeRequest_ClientInfo.ProtoReflect.Descriptor instead.
 func (*InitializeRequest_ClientInfo) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{22, 1}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{23, 1}
 }
 
 func (x *InitializeRequest_ClientInfo) GetDomain() string {
@@ -2586,7 +2662,7 @@ type ListenStatsResponse_CPU struct {
 
 func (x *ListenStatsResponse_CPU) Reset() {
 	*x = ListenStatsResponse_CPU{}
-	mi := &file_ccordiumv1_proto_msgTypes[52]
+	mi := &file_ccordiumv1_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2598,7 +2674,7 @@ func (x *ListenStatsResponse_CPU) String() string {
 func (*ListenStatsResponse_CPU) ProtoMessage() {}
 
 func (x *ListenStatsResponse_CPU) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[52]
+	mi := &file_ccordiumv1_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2611,7 +2687,7 @@ func (x *ListenStatsResponse_CPU) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListenStatsResponse_CPU.ProtoReflect.Descriptor instead.
 func (*ListenStatsResponse_CPU) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{36, 0}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{37, 0}
 }
 
 func (x *ListenStatsResponse_CPU) GetTimeDuration() *metav1.Duration {
@@ -2645,7 +2721,7 @@ type ListenStatsResponse_Memory struct {
 
 func (x *ListenStatsResponse_Memory) Reset() {
 	*x = ListenStatsResponse_Memory{}
-	mi := &file_ccordiumv1_proto_msgTypes[53]
+	mi := &file_ccordiumv1_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2657,7 +2733,7 @@ func (x *ListenStatsResponse_Memory) String() string {
 func (*ListenStatsResponse_Memory) ProtoMessage() {}
 
 func (x *ListenStatsResponse_Memory) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[53]
+	mi := &file_ccordiumv1_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2670,7 +2746,7 @@ func (x *ListenStatsResponse_Memory) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListenStatsResponse_Memory.ProtoReflect.Descriptor instead.
 func (*ListenStatsResponse_Memory) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{36, 1}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{37, 1}
 }
 
 func (x *ListenStatsResponse_Memory) GetCurBytes() int64 {
@@ -2697,7 +2773,7 @@ type ListenStatsResponse_Network struct {
 
 func (x *ListenStatsResponse_Network) Reset() {
 	*x = ListenStatsResponse_Network{}
-	mi := &file_ccordiumv1_proto_msgTypes[54]
+	mi := &file_ccordiumv1_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2709,7 +2785,7 @@ func (x *ListenStatsResponse_Network) String() string {
 func (*ListenStatsResponse_Network) ProtoMessage() {}
 
 func (x *ListenStatsResponse_Network) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[54]
+	mi := &file_ccordiumv1_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2722,7 +2798,7 @@ func (x *ListenStatsResponse_Network) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListenStatsResponse_Network.ProtoReflect.Descriptor instead.
 func (*ListenStatsResponse_Network) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{36, 2}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{37, 2}
 }
 
 func (x *ListenStatsResponse_Network) GetUploadBytes() int64 {
@@ -2749,7 +2825,7 @@ type ListenStatsResponse_IO struct {
 
 func (x *ListenStatsResponse_IO) Reset() {
 	*x = ListenStatsResponse_IO{}
-	mi := &file_ccordiumv1_proto_msgTypes[55]
+	mi := &file_ccordiumv1_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2761,7 +2837,7 @@ func (x *ListenStatsResponse_IO) String() string {
 func (*ListenStatsResponse_IO) ProtoMessage() {}
 
 func (x *ListenStatsResponse_IO) ProtoReflect() protoreflect.Message {
-	mi := &file_ccordiumv1_proto_msgTypes[55]
+	mi := &file_ccordiumv1_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2774,7 +2850,7 @@ func (x *ListenStatsResponse_IO) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListenStatsResponse_IO.ProtoReflect.Descriptor instead.
 func (*ListenStatsResponse_IO) Descriptor() ([]byte, []int) {
-	return file_ccordiumv1_proto_rawDescGZIP(), []int{36, 3}
+	return file_ccordiumv1_proto_rawDescGZIP(), []int{37, 3}
 }
 
 func (x *ListenStatsResponse_IO) GetInputBytes() int64 {
@@ -2874,146 +2950,167 @@ var file_ccordiumv1_proto_rawDesc = []byte{
 	0x6f, 0x75, 0x74, 0x48, 0x00, 0x52, 0x06, 0x73, 0x74, 0x64, 0x6f, 0x75, 0x74, 0x1a, 0x1c, 0x0a,
 	0x06, 0x53, 0x74, 0x64, 0x6f, 0x75, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18,
 	0x01, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x42, 0x06, 0x0a, 0x04, 0x74,
-	0x79, 0x70, 0x65, 0x22, 0xfc, 0x06, 0x0a, 0x0e, 0x50, 0x72, 0x65, 0x70, 0x61, 0x72, 0x65, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x64, 0x6f, 0x6d, 0x61, 0x69, 0x6e,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x64, 0x6f, 0x6d, 0x61, 0x69, 0x6e, 0x12, 0x2a,
-	0x0a, 0x10, 0x74, 0x75, 0x6e, 0x6e, 0x65, 0x6c, 0x50, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x4b,
-	0x65, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x10, 0x74, 0x75, 0x6e, 0x6e, 0x65, 0x6c,
-	0x50, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x4b, 0x65, 0x79, 0x12, 0x30, 0x0a, 0x13, 0x74, 0x75,
-	0x6e, 0x6e, 0x65, 0x6c, 0x50, 0x65, 0x65, 0x72, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65,
-	0x79, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x13, 0x74, 0x75, 0x6e, 0x6e, 0x65, 0x6c, 0x50,
-	0x65, 0x65, 0x72, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x12, 0x48, 0x0a, 0x03,
-	0x73, 0x73, 0x68, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x36, 0x2e, 0x6f, 0x63, 0x74, 0x65,
-	0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72,
-	0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x49, 0x6e, 0x69, 0x74,
-	0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x53, 0x53,
-	0x48, 0x52, 0x03, 0x73, 0x73, 0x68, 0x12, 0x45, 0x0a, 0x09, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70,
-	0x61, 0x63, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e, 0x6f, 0x63, 0x74, 0x65,
-	0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f,
-	0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61,
-	0x63, 0x65, 0x52, 0x09, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x39, 0x0a,
-	0x05, 0x53, 0x70, 0x61, 0x63, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x6f,
-	0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e,
-	0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x70, 0x61, 0x63,
-	0x65, 0x52, 0x05, 0x53, 0x70, 0x61, 0x63, 0x65, 0x12, 0x42, 0x0a, 0x08, 0x74, 0x65, 0x6d, 0x70,
-	0x6c, 0x61, 0x74, 0x65, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x26, 0x2e, 0x6f, 0x63, 0x74,
-	0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63,
-	0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x54, 0x65, 0x6d, 0x70, 0x6c, 0x61,
-	0x74, 0x65, 0x52, 0x08, 0x74, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x12, 0x48, 0x0a, 0x0a,
-	0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x28, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e,
-	0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e,
-	0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x0a, 0x73, 0x65, 0x63, 0x72,
-	0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x54, 0x0a, 0x0e, 0x75, 0x73, 0x65, 0x72, 0x53, 0x65,
-	0x63, 0x72, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x18, 0x09, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2c,
+	0x79, 0x70, 0x65, 0x22, 0x99, 0x01, 0x0a, 0x13, 0x52, 0x65, 0x73, 0x6f, 0x6c, 0x76, 0x65, 0x64,
+	0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x4d, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x48, 0x0a, 0x09, 0x76,
+	0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x52, 0x65, 0x66, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2a,
 	0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61,
-	0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73,
-	0x65, 0x72, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x0e, 0x75, 0x73,
-	0x65, 0x72, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x5a, 0x0a, 0x0f,
-	0x67, 0x69, 0x74, 0x50, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x18,
-	0x0a, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x30, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d,
+	0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62, 0x6a, 0x65, 0x63,
+	0x74, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x09, 0x76, 0x6f, 0x6c, 0x75,
+	0x6d, 0x65, 0x52, 0x65, 0x66, 0x12, 0x1c, 0x0a, 0x09, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x50, 0x61,
+	0x74, 0x68, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x50,
+	0x61, 0x74, 0x68, 0x12, 0x1a, 0x0a, 0x08, 0x72, 0x65, 0x61, 0x64, 0x4f, 0x6e, 0x6c, 0x79, 0x18,
+	0x03, 0x20, 0x01, 0x28, 0x08, 0x52, 0x08, 0x72, 0x65, 0x61, 0x64, 0x4f, 0x6e, 0x6c, 0x79, 0x22,
+	0xd6, 0x07, 0x0a, 0x0e, 0x50, 0x72, 0x65, 0x70, 0x61, 0x72, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x64, 0x6f, 0x6d, 0x61, 0x69, 0x6e, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x06, 0x64, 0x6f, 0x6d, 0x61, 0x69, 0x6e, 0x12, 0x2a, 0x0a, 0x10, 0x74, 0x75,
+	0x6e, 0x6e, 0x65, 0x6c, 0x50, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x4b, 0x65, 0x79, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x10, 0x74, 0x75, 0x6e, 0x6e, 0x65, 0x6c, 0x50, 0x72, 0x69, 0x76,
+	0x61, 0x74, 0x65, 0x4b, 0x65, 0x79, 0x12, 0x30, 0x0a, 0x13, 0x74, 0x75, 0x6e, 0x6e, 0x65, 0x6c,
+	0x50, 0x65, 0x65, 0x72, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x13, 0x74, 0x75, 0x6e, 0x6e, 0x65, 0x6c, 0x50, 0x65, 0x65, 0x72, 0x50,
+	0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x12, 0x48, 0x0a, 0x03, 0x73, 0x73, 0x68, 0x18,
+	0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x36, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d,
 	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x2e, 0x63, 0x6f, 0x72,
-	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x69, 0x74, 0x50, 0x72, 0x6f, 0x76, 0x69,
-	0x64, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x0f, 0x67, 0x69, 0x74, 0x50, 0x72, 0x6f, 0x76,
-	0x69, 0x64, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x48, 0x0a, 0x0a, 0x75, 0x73, 0x65, 0x72,
-	0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x28, 0x2e, 0x6f,
+	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69,
+	0x7a, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x53, 0x53, 0x48, 0x52, 0x03, 0x73,
+	0x73, 0x68, 0x12, 0x45, 0x0a, 0x09, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x18,
+	0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d,
+	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75,
+	0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x09,
+	0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x39, 0x0a, 0x05, 0x53, 0x70, 0x61,
+	0x63, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
+	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72,
+	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x70, 0x61, 0x63, 0x65, 0x52, 0x05, 0x53,
+	0x70, 0x61, 0x63, 0x65, 0x12, 0x42, 0x0a, 0x08, 0x74, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65,
+	0x18, 0x07, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x26, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
+	0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69,
+	0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x54, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x52, 0x08,
+	0x74, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x12, 0x48, 0x0a, 0x0a, 0x73, 0x65, 0x63, 0x72,
+	0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x28, 0x2e, 0x6f,
 	0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e,
-	0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72,
-	0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x0a, 0x75, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66,
-	0x69, 0x67, 0x12, 0x30, 0x0a, 0x13, 0x74, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x48, 0x61,
-	0x73, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f, 0x74, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x08, 0x52,
-	0x13, 0x74, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x48, 0x61, 0x73, 0x53, 0x6e, 0x61, 0x70,
-	0x73, 0x68, 0x6f, 0x74, 0x12, 0x6c, 0x0a, 0x15, 0x70, 0x65, 0x72, 0x73, 0x69, 0x73, 0x74, 0x65,
-	0x6e, 0x74, 0x53, 0x74, 0x61, 0x74, 0x65, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x18, 0x0d, 0x20,
-	0x01, 0x28, 0x0e, 0x32, 0x36, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61,
-	0x70, 0x69, 0x2e, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69,
-	0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x65, 0x72, 0x73, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x74,
-	0x53, 0x74, 0x61, 0x74, 0x65, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x52, 0x15, 0x70, 0x65, 0x72,
-	0x73, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x74, 0x53, 0x74, 0x61, 0x74, 0x65, 0x53, 0x6f, 0x75, 0x72,
-	0x63, 0x65, 0x22, 0x11, 0x0a, 0x0f, 0x50, 0x72, 0x65, 0x70, 0x61, 0x72, 0x65, 0x52, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x11, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x53, 0x74, 0x61, 0x74,
-	0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x5e, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x53,
-	0x74, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x4a, 0x0a, 0x05,
-	0x73, 0x74, 0x61, 0x74, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x34, 0x2e, 0x6f, 0x63,
-	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
-	0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73,
-	0x70, 0x61, 0x63, 0x65, 0x2e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x2e, 0x53, 0x74, 0x61, 0x74,
-	0x65, 0x52, 0x05, 0x73, 0x74, 0x61, 0x74, 0x65, 0x22, 0x58, 0x0a, 0x0f, 0x53, 0x68, 0x75, 0x74,
-	0x64, 0x6f, 0x77, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x45, 0x0a, 0x09, 0x77,
+	0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x65, 0x63, 0x72,
+	0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x0a, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x4c, 0x69,
+	0x73, 0x74, 0x12, 0x54, 0x0a, 0x0e, 0x75, 0x73, 0x65, 0x72, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74,
+	0x4c, 0x69, 0x73, 0x74, 0x18, 0x09, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2c, 0x2e, 0x6f, 0x63, 0x74,
+	0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63,
+	0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x53, 0x65,
+	0x63, 0x72, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x0e, 0x75, 0x73, 0x65, 0x72, 0x53, 0x65,
+	0x63, 0x72, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x5a, 0x0a, 0x0f, 0x67, 0x69, 0x74, 0x50,
+	0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x18, 0x0a, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x30, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69,
+	0x2e, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d,
+	0x2e, 0x76, 0x31, 0x2e, 0x47, 0x69, 0x74, 0x50, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72, 0x49,
+	0x6e, 0x66, 0x6f, 0x52, 0x0f, 0x67, 0x69, 0x74, 0x50, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72,
+	0x49, 0x6e, 0x66, 0x6f, 0x12, 0x48, 0x0a, 0x0a, 0x75, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66,
+	0x69, 0x67, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x28, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
+	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72,
+	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66,
+	0x69, 0x67, 0x52, 0x0a, 0x75, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x30,
+	0x0a, 0x13, 0x74, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x48, 0x61, 0x73, 0x53, 0x6e, 0x61,
+	0x70, 0x73, 0x68, 0x6f, 0x74, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x08, 0x52, 0x13, 0x74, 0x65, 0x6d,
+	0x70, 0x6c, 0x61, 0x74, 0x65, 0x48, 0x61, 0x73, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f, 0x74,
+	0x12, 0x6c, 0x0a, 0x15, 0x70, 0x65, 0x72, 0x73, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x74, 0x53, 0x74,
+	0x61, 0x74, 0x65, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x18, 0x0d, 0x20, 0x01, 0x28, 0x0e, 0x32,
+	0x36, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x63,
+	0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76,
+	0x31, 0x2e, 0x50, 0x65, 0x72, 0x73, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x74, 0x53, 0x74, 0x61, 0x74,
+	0x65, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x52, 0x15, 0x70, 0x65, 0x72, 0x73, 0x69, 0x73, 0x74,
+	0x65, 0x6e, 0x74, 0x53, 0x74, 0x61, 0x74, 0x65, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x12, 0x58,
+	0x0a, 0x0c, 0x76, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x4d, 0x6f, 0x75, 0x6e, 0x74, 0x73, 0x18, 0x0e,
+	0x20, 0x03, 0x28, 0x0b, 0x32, 0x34, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e,
+	0x61, 0x70, 0x69, 0x2e, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x2e, 0x63, 0x6f, 0x72, 0x64,
+	0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x73, 0x6f, 0x6c, 0x76, 0x65, 0x64, 0x56,
+	0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x4d, 0x6f, 0x75, 0x6e, 0x74, 0x52, 0x0c, 0x76, 0x6f, 0x6c, 0x75,
+	0x6d, 0x65, 0x4d, 0x6f, 0x75, 0x6e, 0x74, 0x73, 0x22, 0x11, 0x0a, 0x0f, 0x50, 0x72, 0x65, 0x70,
+	0x61, 0x72, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x11, 0x0a, 0x0f, 0x47,
+	0x65, 0x74, 0x53, 0x74, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x5e,
+	0x0a, 0x10, 0x47, 0x65, 0x74, 0x53, 0x74, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x12, 0x4a, 0x0a, 0x05, 0x73, 0x74, 0x61, 0x74, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0e, 0x32, 0x34, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69,
+	0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31,
+	0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x53, 0x74, 0x61, 0x74, 0x75,
+	0x73, 0x2e, 0x53, 0x74, 0x61, 0x74, 0x65, 0x52, 0x05, 0x73, 0x74, 0x61, 0x74, 0x65, 0x22, 0x58,
+	0x0a, 0x0f, 0x53, 0x68, 0x75, 0x74, 0x64, 0x6f, 0x77, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x12, 0x45, 0x0a, 0x09, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e,
+	0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d,
+	0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x09, 0x77,
+	0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x22, 0x12, 0x0a, 0x10, 0x53, 0x68, 0x75, 0x74,
+	0x64, 0x6f, 0x77, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x1b, 0x0a, 0x19,
+	0x47, 0x65, 0x74, 0x54, 0x75, 0x6e, 0x6e, 0x65, 0x6c, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b,
+	0x65, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x3a, 0x0a, 0x1a, 0x47, 0x65, 0x74,
+	0x54, 0x75, 0x6e, 0x6e, 0x65, 0x6c, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x1c, 0x0a, 0x09, 0x70, 0x75, 0x62, 0x6c, 0x69,
+	0x63, 0x4b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x70, 0x75, 0x62, 0x6c,
+	0x69, 0x63, 0x4b, 0x65, 0x79, 0x22, 0xa1, 0x0a, 0x0a, 0x11, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61,
+	0x6c, 0x69, 0x7a, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x45, 0x0a, 0x09, 0x77,
 	0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x27,
 	0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61,
 	0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f,
 	0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x09, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61,
-	0x63, 0x65, 0x22, 0x12, 0x0a, 0x10, 0x53, 0x68, 0x75, 0x74, 0x64, 0x6f, 0x77, 0x6e, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x1b, 0x0a, 0x19, 0x47, 0x65, 0x74, 0x54, 0x75, 0x6e,
-	0x6e, 0x65, 0x6c, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x22, 0x3a, 0x0a, 0x1a, 0x47, 0x65, 0x74, 0x54, 0x75, 0x6e, 0x6e, 0x65, 0x6c,
-	0x50, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x12, 0x1c, 0x0a, 0x09, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x22,
-	0xc7, 0x09, 0x0a, 0x11, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x45, 0x0a, 0x09, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61,
-	0x63, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
-	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72,
-	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63,
-	0x65, 0x52, 0x09, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x39, 0x0a, 0x05,
-	0x73, 0x70, 0x61, 0x63, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x6f, 0x63,
-	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
-	0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x70, 0x61, 0x63, 0x65,
-	0x52, 0x05, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x42, 0x0a, 0x08, 0x74, 0x65, 0x6d, 0x70, 0x6c,
-	0x61, 0x74, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x26, 0x2e, 0x6f, 0x63, 0x74, 0x65,
-	0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f,
-	0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x54, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74,
-	0x65, 0x52, 0x08, 0x74, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x12, 0x5d, 0x0a, 0x0a, 0x63,
-	0x6c, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32,
-	0x3d, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x63,
+	0x63, 0x65, 0x12, 0x39, 0x0a, 0x05, 0x73, 0x70, 0x61, 0x63, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x23, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69,
+	0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31,
+	0x2e, 0x53, 0x70, 0x61, 0x63, 0x65, 0x52, 0x05, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x42, 0x0a,
+	0x08, 0x74, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x26, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d,
+	0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x54,
+	0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x52, 0x08, 0x74, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74,
+	0x65, 0x12, 0x5d, 0x0a, 0x0a, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x18,
+	0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x3d, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d,
+	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x2e, 0x63, 0x6f, 0x72,
+	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69,
+	0x7a, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74,
+	0x49, 0x6e, 0x66, 0x6f, 0x52, 0x0a, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x6e, 0x66, 0x6f,
+	0x12, 0x48, 0x0a, 0x03, 0x73, 0x73, 0x68, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x36, 0x2e,
+	0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x63, 0x6c, 0x75,
+	0x73, 0x74, 0x65, 0x72, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e,
+	0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x2e, 0x53, 0x53, 0x48, 0x52, 0x03, 0x73, 0x73, 0x68, 0x12, 0x30, 0x0a, 0x13, 0x74, 0x75,
+	0x6e, 0x6e, 0x65, 0x6c, 0x50, 0x65, 0x65, 0x72, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65,
+	0x79, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x13, 0x74, 0x75, 0x6e, 0x6e, 0x65, 0x6c, 0x50,
+	0x65, 0x65, 0x72, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x12, 0x48, 0x0a, 0x0a,
+	0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x28, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e,
+	0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e,
+	0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x0a, 0x73, 0x65, 0x63, 0x72,
+	0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x5a, 0x0a, 0x0f, 0x67, 0x69, 0x74, 0x50, 0x72, 0x6f,
+	0x76, 0x69, 0x64, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x30, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x63,
 	0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76,
-	0x31, 0x2e, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x2e, 0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x0a,
-	0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x48, 0x0a, 0x03, 0x73, 0x73,
-	0x68, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x36, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69,
-	0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x2e, 0x63,
-	0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61,
-	0x6c, 0x69, 0x7a, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x53, 0x53, 0x48, 0x52,
-	0x03, 0x73, 0x73, 0x68, 0x12, 0x30, 0x0a, 0x13, 0x74, 0x75, 0x6e, 0x6e, 0x65, 0x6c, 0x50, 0x65,
-	0x65, 0x72, 0x50, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x18, 0x06, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x13, 0x74, 0x75, 0x6e, 0x6e, 0x65, 0x6c, 0x50, 0x65, 0x65, 0x72, 0x50, 0x75, 0x62,
-	0x6c, 0x69, 0x63, 0x4b, 0x65, 0x79, 0x12, 0x48, 0x0a, 0x0a, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74,
-	0x4c, 0x69, 0x73, 0x74, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x28, 0x2e, 0x6f, 0x63, 0x74,
+	0x31, 0x2e, 0x47, 0x69, 0x74, 0x50, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72, 0x49, 0x6e, 0x66,
+	0x6f, 0x52, 0x0f, 0x67, 0x69, 0x74, 0x50, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72, 0x49, 0x6e,
+	0x66, 0x6f, 0x12, 0x54, 0x0a, 0x0e, 0x75, 0x73, 0x65, 0x72, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74,
+	0x4c, 0x69, 0x73, 0x74, 0x18, 0x09, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2c, 0x2e, 0x6f, 0x63, 0x74,
 	0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63,
-	0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74,
-	0x4c, 0x69, 0x73, 0x74, 0x52, 0x0a, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74,
-	0x12, 0x5a, 0x0a, 0x0f, 0x67, 0x69, 0x74, 0x50, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72, 0x49,
-	0x6e, 0x66, 0x6f, 0x18, 0x08, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x30, 0x2e, 0x6f, 0x63, 0x74, 0x65,
-	0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72,
-	0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x69, 0x74, 0x50,
-	0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x0f, 0x67, 0x69, 0x74,
-	0x50, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x54, 0x0a, 0x0e,
-	0x75, 0x73, 0x65, 0x72, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x18, 0x09,
-	0x20, 0x01, 0x28, 0x0b, 0x32, 0x2c, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e,
-	0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d,
-	0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x4c, 0x69,
-	0x73, 0x74, 0x52, 0x0e, 0x75, 0x73, 0x65, 0x72, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x4c, 0x69,
-	0x73, 0x74, 0x12, 0x48, 0x0a, 0x0a, 0x75, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67,
-	0x18, 0x0a, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x28, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
-	0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69,
-	0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67,
-	0x52, 0x0a, 0x75, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x30, 0x0a, 0x13,
-	0x74, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x48, 0x61, 0x73, 0x53, 0x6e, 0x61, 0x70, 0x73,
-	0x68, 0x6f, 0x74, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x08, 0x52, 0x13, 0x74, 0x65, 0x6d, 0x70, 0x6c,
-	0x61, 0x74, 0x65, 0x48, 0x61, 0x73, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f, 0x74, 0x12, 0x51,
-	0x0a, 0x0d, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x18,
-	0x0c, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2b, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d,
-	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75,
-	0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66,
-	0x69, 0x67, 0x52, 0x0d, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69,
-	0x67, 0x12, 0x6c, 0x0a, 0x15, 0x70, 0x65, 0x72, 0x73, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x74, 0x53,
-	0x74, 0x61, 0x74, 0x65, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x18, 0x0d, 0x20, 0x01, 0x28, 0x0e,
-	0x32, 0x36, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e,
-	0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e,
-	0x76, 0x31, 0x2e, 0x50, 0x65, 0x72, 0x73, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x74, 0x53, 0x74, 0x61,
-	0x74, 0x65, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x52, 0x15, 0x70, 0x65, 0x72, 0x73, 0x69, 0x73,
-	0x74, 0x65, 0x6e, 0x74, 0x53, 0x74, 0x61, 0x74, 0x65, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x1a,
+	0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x53, 0x65,
+	0x63, 0x72, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x0e, 0x75, 0x73, 0x65, 0x72, 0x53, 0x65,
+	0x63, 0x72, 0x65, 0x74, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x48, 0x0a, 0x0a, 0x75, 0x73, 0x65, 0x72,
+	0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x28, 0x2e, 0x6f,
+	0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e,
+	0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72,
+	0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x0a, 0x75, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66,
+	0x69, 0x67, 0x12, 0x30, 0x0a, 0x13, 0x74, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x48, 0x61,
+	0x73, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f, 0x74, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x08, 0x52,
+	0x13, 0x74, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x48, 0x61, 0x73, 0x53, 0x6e, 0x61, 0x70,
+	0x73, 0x68, 0x6f, 0x74, 0x12, 0x51, 0x0a, 0x0d, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43,
+	0x6f, 0x6e, 0x66, 0x69, 0x67, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2b, 0x2e, 0x6f, 0x63,
+	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
+	0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74,
+	0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x0d, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65,
+	0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x6c, 0x0a, 0x15, 0x70, 0x65, 0x72, 0x73, 0x69,
+	0x73, 0x74, 0x65, 0x6e, 0x74, 0x53, 0x74, 0x61, 0x74, 0x65, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65,
+	0x18, 0x0d, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x36, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
+	0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x63, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x2e, 0x63, 0x6f,
+	0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x50, 0x65, 0x72, 0x73, 0x69, 0x73, 0x74,
+	0x65, 0x6e, 0x74, 0x53, 0x74, 0x61, 0x74, 0x65, 0x53, 0x6f, 0x75, 0x72, 0x63, 0x65, 0x52, 0x15,
+	0x70, 0x65, 0x72, 0x73, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x74, 0x53, 0x74, 0x61, 0x74, 0x65, 0x53,
+	0x6f, 0x75, 0x72, 0x63, 0x65, 0x12, 0x58, 0x0a, 0x0c, 0x76, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x4d,
+	0x6f, 0x75, 0x6e, 0x74, 0x73, 0x18, 0x0e, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x34, 0x2e, 0x6f, 0x63,
+	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x63, 0x6c, 0x75, 0x73, 0x74,
+	0x65, 0x72, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65,
+	0x73, 0x6f, 0x6c, 0x76, 0x65, 0x64, 0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x4d, 0x6f, 0x75, 0x6e,
+	0x74, 0x52, 0x0c, 0x76, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x4d, 0x6f, 0x75, 0x6e, 0x74, 0x73, 0x1a,
 	0x4d, 0x0a, 0x03, 0x53, 0x53, 0x48, 0x12, 0x1e, 0x0a, 0x0a, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x48,
 	0x6f, 0x73, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x0a, 0x6b, 0x6e, 0x6f, 0x77,
 	0x6e, 0x48, 0x6f, 0x73, 0x74, 0x73, 0x12, 0x26, 0x0a, 0x0e, 0x61, 0x75, 0x74, 0x68, 0x6f, 0x72,
@@ -3415,7 +3512,7 @@ func file_ccordiumv1_proto_rawDescGZIP() []byte {
 }
 
 var file_ccordiumv1_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_ccordiumv1_proto_msgTypes = make([]protoimpl.MessageInfo, 56)
+var file_ccordiumv1_proto_msgTypes = make([]protoimpl.MessageInfo, 57)
 var file_ccordiumv1_proto_goTypes = []any{
 	(PersistentStateSource)(0),                 // 0: octelium.api.cluster.cordium.v1.PersistentStateSource
 	(*CreateTerminalRequest)(nil),              // 1: octelium.api.cluster.cordium.v1.CreateTerminalRequest
@@ -3432,161 +3529,165 @@ var file_ccordiumv1_proto_goTypes = []any{
 	(*ListenTerminalRequest)(nil),              // 12: octelium.api.cluster.cordium.v1.ListenTerminalRequest
 	(*ListenTerminalResponse)(nil),             // 13: octelium.api.cluster.cordium.v1.ListenTerminalResponse
 	(*StartTerminalResponse)(nil),              // 14: octelium.api.cluster.cordium.v1.StartTerminalResponse
-	(*PrepareRequest)(nil),                     // 15: octelium.api.cluster.cordium.v1.PrepareRequest
-	(*PrepareResponse)(nil),                    // 16: octelium.api.cluster.cordium.v1.PrepareResponse
-	(*GetStateRequest)(nil),                    // 17: octelium.api.cluster.cordium.v1.GetStateRequest
-	(*GetStateResponse)(nil),                   // 18: octelium.api.cluster.cordium.v1.GetStateResponse
-	(*ShutdownRequest)(nil),                    // 19: octelium.api.cluster.cordium.v1.ShutdownRequest
-	(*ShutdownResponse)(nil),                   // 20: octelium.api.cluster.cordium.v1.ShutdownResponse
-	(*GetTunnelPublicKeyRequest)(nil),          // 21: octelium.api.cluster.cordium.v1.GetTunnelPublicKeyRequest
-	(*GetTunnelPublicKeyResponse)(nil),         // 22: octelium.api.cluster.cordium.v1.GetTunnelPublicKeyResponse
-	(*InitializeRequest)(nil),                  // 23: octelium.api.cluster.cordium.v1.InitializeRequest
-	(*InitializeResponse)(nil),                 // 24: octelium.api.cluster.cordium.v1.InitializeResponse
-	(*GetGitCredsRequest)(nil),                 // 25: octelium.api.cluster.cordium.v1.GetGitCredsRequest
-	(*GetGitCredsResponse)(nil),                // 26: octelium.api.cluster.cordium.v1.GetGitCredsResponse
-	(*StoreGitCredsRequest)(nil),               // 27: octelium.api.cluster.cordium.v1.StoreGitCredsRequest
-	(*StoreGitCredsResponse)(nil),              // 28: octelium.api.cluster.cordium.v1.StoreGitCredsResponse
-	(*EraseGitCredsRequest)(nil),               // 29: octelium.api.cluster.cordium.v1.EraseGitCredsRequest
-	(*EraseGitCredsResponse)(nil),              // 30: octelium.api.cluster.cordium.v1.EraseGitCredsResponse
-	(*ListenStateRequest)(nil),                 // 31: octelium.api.cluster.cordium.v1.ListenStateRequest
-	(*ListenStateResponse)(nil),                // 32: octelium.api.cluster.cordium.v1.ListenStateResponse
-	(*ListenEventRequest)(nil),                 // 33: octelium.api.cluster.cordium.v1.ListenEventRequest
-	(*GetFailureRequest)(nil),                  // 34: octelium.api.cluster.cordium.v1.GetFailureRequest
-	(*GetFailureResponse)(nil),                 // 35: octelium.api.cluster.cordium.v1.GetFailureResponse
-	(*GitProviderInfo)(nil),                    // 36: octelium.api.cluster.cordium.v1.GitProviderInfo
-	(*ListenStatsResponse)(nil),                // 37: octelium.api.cluster.cordium.v1.ListenStatsResponse
-	(*ListenEventResponse)(nil),                // 38: octelium.api.cluster.cordium.v1.ListenEventResponse
-	(*ShutdownAckRequest)(nil),                 // 39: octelium.api.cluster.cordium.v1.ShutdownAckRequest
-	(*ShutdownAckResponse)(nil),                // 40: octelium.api.cluster.cordium.v1.ShutdownAckResponse
-	(*WaitUntilReadyRequest)(nil),              // 41: octelium.api.cluster.cordium.v1.WaitUntilReadyRequest
-	(*WaitUntilReadyResponse)(nil),             // 42: octelium.api.cluster.cordium.v1.WaitUntilReadyResponse
-	(*ListenTerminalResponse_Stdout)(nil),      // 43: octelium.api.cluster.cordium.v1.ListenTerminalResponse.Stdout
-	(*ListenTerminalResponse_WindowSize)(nil),  // 44: octelium.api.cluster.cordium.v1.ListenTerminalResponse.WindowSize
-	(*ListenTerminalResponse_Close)(nil),       // 45: octelium.api.cluster.cordium.v1.ListenTerminalResponse.Close
-	(*StartTerminalResponse_Stdout)(nil),       // 46: octelium.api.cluster.cordium.v1.StartTerminalResponse.Stdout
-	(*InitializeRequest_SSH)(nil),              // 47: octelium.api.cluster.cordium.v1.InitializeRequest.SSH
-	(*InitializeRequest_ClientInfo)(nil),       // 48: octelium.api.cluster.cordium.v1.InitializeRequest.ClientInfo
-	nil,                                        // 49: octelium.api.cluster.cordium.v1.GetGitCredsRequest.RequestEntry
-	nil,                                        // 50: octelium.api.cluster.cordium.v1.GetGitCredsResponse.ResponseEntry
-	nil,                                        // 51: octelium.api.cluster.cordium.v1.StoreGitCredsRequest.RequestEntry
-	nil,                                        // 52: octelium.api.cluster.cordium.v1.EraseGitCredsRequest.RequestEntry
-	(*ListenStatsResponse_CPU)(nil),            // 53: octelium.api.cluster.cordium.v1.ListenStatsResponse.CPU
-	(*ListenStatsResponse_Memory)(nil),         // 54: octelium.api.cluster.cordium.v1.ListenStatsResponse.Memory
-	(*ListenStatsResponse_Network)(nil),        // 55: octelium.api.cluster.cordium.v1.ListenStatsResponse.Network
-	(*ListenStatsResponse_IO)(nil),             // 56: octelium.api.cluster.cordium.v1.ListenStatsResponse.IO
-	(*cordiumv1.Workspace)(nil),                // 57: octelium.api.main.cordium.v1.Workspace
-	(*cordiumv1.Space)(nil),                    // 58: octelium.api.main.cordium.v1.Space
-	(*cordiumv1.Template)(nil),                 // 59: octelium.api.main.cordium.v1.Template
-	(*cordiumv1.SecretList)(nil),               // 60: octelium.api.main.cordium.v1.SecretList
-	(*cordiumv1.UserSecretList)(nil),           // 61: octelium.api.main.cordium.v1.UserSecretList
-	(*cordiumv1.UserConfig)(nil),               // 62: octelium.api.main.cordium.v1.UserConfig
-	(cordiumv1.Workspace_Status_State)(0),      // 63: octelium.api.main.cordium.v1.Workspace.Status.State
-	(*cordiumv1.ClusterConfig)(nil),            // 64: octelium.api.main.cordium.v1.ClusterConfig
-	(*cordiumv1.Workspace_Status_Failure)(nil), // 65: octelium.api.main.cordium.v1.Workspace.Status.Failure
-	(*metav1.ObjectReference)(nil),             // 66: octelium.api.main.meta.v1.ObjectReference
-	(*timestamppb.Timestamp)(nil),              // 67: google.protobuf.Timestamp
-	(*cordiumv1.ListenLogResponse)(nil),        // 68: octelium.api.main.cordium.v1.ListenLogResponse
-	(*metav1.Duration)(nil),                    // 69: octelium.api.main.meta.v1.Duration
-	(*cordiumv1.ExecRequest)(nil),              // 70: octelium.api.main.cordium.v1.ExecRequest
-	(*cordiumv1.ExecResponse)(nil),             // 71: octelium.api.main.cordium.v1.ExecResponse
+	(*ResolvedVolumeMount)(nil),                // 15: octelium.api.cluster.cordium.v1.ResolvedVolumeMount
+	(*PrepareRequest)(nil),                     // 16: octelium.api.cluster.cordium.v1.PrepareRequest
+	(*PrepareResponse)(nil),                    // 17: octelium.api.cluster.cordium.v1.PrepareResponse
+	(*GetStateRequest)(nil),                    // 18: octelium.api.cluster.cordium.v1.GetStateRequest
+	(*GetStateResponse)(nil),                   // 19: octelium.api.cluster.cordium.v1.GetStateResponse
+	(*ShutdownRequest)(nil),                    // 20: octelium.api.cluster.cordium.v1.ShutdownRequest
+	(*ShutdownResponse)(nil),                   // 21: octelium.api.cluster.cordium.v1.ShutdownResponse
+	(*GetTunnelPublicKeyRequest)(nil),          // 22: octelium.api.cluster.cordium.v1.GetTunnelPublicKeyRequest
+	(*GetTunnelPublicKeyResponse)(nil),         // 23: octelium.api.cluster.cordium.v1.GetTunnelPublicKeyResponse
+	(*InitializeRequest)(nil),                  // 24: octelium.api.cluster.cordium.v1.InitializeRequest
+	(*InitializeResponse)(nil),                 // 25: octelium.api.cluster.cordium.v1.InitializeResponse
+	(*GetGitCredsRequest)(nil),                 // 26: octelium.api.cluster.cordium.v1.GetGitCredsRequest
+	(*GetGitCredsResponse)(nil),                // 27: octelium.api.cluster.cordium.v1.GetGitCredsResponse
+	(*StoreGitCredsRequest)(nil),               // 28: octelium.api.cluster.cordium.v1.StoreGitCredsRequest
+	(*StoreGitCredsResponse)(nil),              // 29: octelium.api.cluster.cordium.v1.StoreGitCredsResponse
+	(*EraseGitCredsRequest)(nil),               // 30: octelium.api.cluster.cordium.v1.EraseGitCredsRequest
+	(*EraseGitCredsResponse)(nil),              // 31: octelium.api.cluster.cordium.v1.EraseGitCredsResponse
+	(*ListenStateRequest)(nil),                 // 32: octelium.api.cluster.cordium.v1.ListenStateRequest
+	(*ListenStateResponse)(nil),                // 33: octelium.api.cluster.cordium.v1.ListenStateResponse
+	(*ListenEventRequest)(nil),                 // 34: octelium.api.cluster.cordium.v1.ListenEventRequest
+	(*GetFailureRequest)(nil),                  // 35: octelium.api.cluster.cordium.v1.GetFailureRequest
+	(*GetFailureResponse)(nil),                 // 36: octelium.api.cluster.cordium.v1.GetFailureResponse
+	(*GitProviderInfo)(nil),                    // 37: octelium.api.cluster.cordium.v1.GitProviderInfo
+	(*ListenStatsResponse)(nil),                // 38: octelium.api.cluster.cordium.v1.ListenStatsResponse
+	(*ListenEventResponse)(nil),                // 39: octelium.api.cluster.cordium.v1.ListenEventResponse
+	(*ShutdownAckRequest)(nil),                 // 40: octelium.api.cluster.cordium.v1.ShutdownAckRequest
+	(*ShutdownAckResponse)(nil),                // 41: octelium.api.cluster.cordium.v1.ShutdownAckResponse
+	(*WaitUntilReadyRequest)(nil),              // 42: octelium.api.cluster.cordium.v1.WaitUntilReadyRequest
+	(*WaitUntilReadyResponse)(nil),             // 43: octelium.api.cluster.cordium.v1.WaitUntilReadyResponse
+	(*ListenTerminalResponse_Stdout)(nil),      // 44: octelium.api.cluster.cordium.v1.ListenTerminalResponse.Stdout
+	(*ListenTerminalResponse_WindowSize)(nil),  // 45: octelium.api.cluster.cordium.v1.ListenTerminalResponse.WindowSize
+	(*ListenTerminalResponse_Close)(nil),       // 46: octelium.api.cluster.cordium.v1.ListenTerminalResponse.Close
+	(*StartTerminalResponse_Stdout)(nil),       // 47: octelium.api.cluster.cordium.v1.StartTerminalResponse.Stdout
+	(*InitializeRequest_SSH)(nil),              // 48: octelium.api.cluster.cordium.v1.InitializeRequest.SSH
+	(*InitializeRequest_ClientInfo)(nil),       // 49: octelium.api.cluster.cordium.v1.InitializeRequest.ClientInfo
+	nil,                                        // 50: octelium.api.cluster.cordium.v1.GetGitCredsRequest.RequestEntry
+	nil,                                        // 51: octelium.api.cluster.cordium.v1.GetGitCredsResponse.ResponseEntry
+	nil,                                        // 52: octelium.api.cluster.cordium.v1.StoreGitCredsRequest.RequestEntry
+	nil,                                        // 53: octelium.api.cluster.cordium.v1.EraseGitCredsRequest.RequestEntry
+	(*ListenStatsResponse_CPU)(nil),            // 54: octelium.api.cluster.cordium.v1.ListenStatsResponse.CPU
+	(*ListenStatsResponse_Memory)(nil),         // 55: octelium.api.cluster.cordium.v1.ListenStatsResponse.Memory
+	(*ListenStatsResponse_Network)(nil),        // 56: octelium.api.cluster.cordium.v1.ListenStatsResponse.Network
+	(*ListenStatsResponse_IO)(nil),             // 57: octelium.api.cluster.cordium.v1.ListenStatsResponse.IO
+	(*metav1.ObjectReference)(nil),             // 58: octelium.api.main.meta.v1.ObjectReference
+	(*cordiumv1.Workspace)(nil),                // 59: octelium.api.main.cordium.v1.Workspace
+	(*cordiumv1.Space)(nil),                    // 60: octelium.api.main.cordium.v1.Space
+	(*cordiumv1.Template)(nil),                 // 61: octelium.api.main.cordium.v1.Template
+	(*cordiumv1.SecretList)(nil),               // 62: octelium.api.main.cordium.v1.SecretList
+	(*cordiumv1.UserSecretList)(nil),           // 63: octelium.api.main.cordium.v1.UserSecretList
+	(*cordiumv1.UserConfig)(nil),               // 64: octelium.api.main.cordium.v1.UserConfig
+	(cordiumv1.Workspace_Status_State)(0),      // 65: octelium.api.main.cordium.v1.Workspace.Status.State
+	(*cordiumv1.ClusterConfig)(nil),            // 66: octelium.api.main.cordium.v1.ClusterConfig
+	(*cordiumv1.Workspace_Status_Failure)(nil), // 67: octelium.api.main.cordium.v1.Workspace.Status.Failure
+	(*timestamppb.Timestamp)(nil),              // 68: google.protobuf.Timestamp
+	(*cordiumv1.ListenLogResponse)(nil),        // 69: octelium.api.main.cordium.v1.ListenLogResponse
+	(*metav1.Duration)(nil),                    // 70: octelium.api.main.meta.v1.Duration
+	(*cordiumv1.ExecRequest)(nil),              // 71: octelium.api.main.cordium.v1.ExecRequest
+	(*cordiumv1.ExecResponse)(nil),             // 72: octelium.api.main.cordium.v1.ExecResponse
 }
 var file_ccordiumv1_proto_depIdxs = []int32{
 	2,  // 0: octelium.api.cluster.cordium.v1.ListTerminalResponse.items:type_name -> octelium.api.cluster.cordium.v1.Terminal
-	43, // 1: octelium.api.cluster.cordium.v1.ListenTerminalResponse.stdout:type_name -> octelium.api.cluster.cordium.v1.ListenTerminalResponse.Stdout
-	44, // 2: octelium.api.cluster.cordium.v1.ListenTerminalResponse.windowSize:type_name -> octelium.api.cluster.cordium.v1.ListenTerminalResponse.WindowSize
-	45, // 3: octelium.api.cluster.cordium.v1.ListenTerminalResponse.close:type_name -> octelium.api.cluster.cordium.v1.ListenTerminalResponse.Close
-	46, // 4: octelium.api.cluster.cordium.v1.StartTerminalResponse.stdout:type_name -> octelium.api.cluster.cordium.v1.StartTerminalResponse.Stdout
-	47, // 5: octelium.api.cluster.cordium.v1.PrepareRequest.ssh:type_name -> octelium.api.cluster.cordium.v1.InitializeRequest.SSH
-	57, // 6: octelium.api.cluster.cordium.v1.PrepareRequest.workspace:type_name -> octelium.api.main.cordium.v1.Workspace
-	58, // 7: octelium.api.cluster.cordium.v1.PrepareRequest.Space:type_name -> octelium.api.main.cordium.v1.Space
-	59, // 8: octelium.api.cluster.cordium.v1.PrepareRequest.template:type_name -> octelium.api.main.cordium.v1.Template
-	60, // 9: octelium.api.cluster.cordium.v1.PrepareRequest.secretList:type_name -> octelium.api.main.cordium.v1.SecretList
-	61, // 10: octelium.api.cluster.cordium.v1.PrepareRequest.userSecretList:type_name -> octelium.api.main.cordium.v1.UserSecretList
-	36, // 11: octelium.api.cluster.cordium.v1.PrepareRequest.gitProviderInfo:type_name -> octelium.api.cluster.cordium.v1.GitProviderInfo
-	62, // 12: octelium.api.cluster.cordium.v1.PrepareRequest.userConfig:type_name -> octelium.api.main.cordium.v1.UserConfig
-	0,  // 13: octelium.api.cluster.cordium.v1.PrepareRequest.persistentStateSource:type_name -> octelium.api.cluster.cordium.v1.PersistentStateSource
-	63, // 14: octelium.api.cluster.cordium.v1.GetStateResponse.state:type_name -> octelium.api.main.cordium.v1.Workspace.Status.State
-	57, // 15: octelium.api.cluster.cordium.v1.ShutdownRequest.workspace:type_name -> octelium.api.main.cordium.v1.Workspace
-	57, // 16: octelium.api.cluster.cordium.v1.InitializeRequest.workspace:type_name -> octelium.api.main.cordium.v1.Workspace
-	58, // 17: octelium.api.cluster.cordium.v1.InitializeRequest.space:type_name -> octelium.api.main.cordium.v1.Space
-	59, // 18: octelium.api.cluster.cordium.v1.InitializeRequest.template:type_name -> octelium.api.main.cordium.v1.Template
-	48, // 19: octelium.api.cluster.cordium.v1.InitializeRequest.clientInfo:type_name -> octelium.api.cluster.cordium.v1.InitializeRequest.ClientInfo
-	47, // 20: octelium.api.cluster.cordium.v1.InitializeRequest.ssh:type_name -> octelium.api.cluster.cordium.v1.InitializeRequest.SSH
-	60, // 21: octelium.api.cluster.cordium.v1.InitializeRequest.secretList:type_name -> octelium.api.main.cordium.v1.SecretList
-	36, // 22: octelium.api.cluster.cordium.v1.InitializeRequest.gitProviderInfo:type_name -> octelium.api.cluster.cordium.v1.GitProviderInfo
-	61, // 23: octelium.api.cluster.cordium.v1.InitializeRequest.userSecretList:type_name -> octelium.api.main.cordium.v1.UserSecretList
-	62, // 24: octelium.api.cluster.cordium.v1.InitializeRequest.userConfig:type_name -> octelium.api.main.cordium.v1.UserConfig
-	64, // 25: octelium.api.cluster.cordium.v1.InitializeRequest.clusterConfig:type_name -> octelium.api.main.cordium.v1.ClusterConfig
-	0,  // 26: octelium.api.cluster.cordium.v1.InitializeRequest.persistentStateSource:type_name -> octelium.api.cluster.cordium.v1.PersistentStateSource
-	49, // 27: octelium.api.cluster.cordium.v1.GetGitCredsRequest.request:type_name -> octelium.api.cluster.cordium.v1.GetGitCredsRequest.RequestEntry
-	50, // 28: octelium.api.cluster.cordium.v1.GetGitCredsResponse.response:type_name -> octelium.api.cluster.cordium.v1.GetGitCredsResponse.ResponseEntry
-	51, // 29: octelium.api.cluster.cordium.v1.StoreGitCredsRequest.request:type_name -> octelium.api.cluster.cordium.v1.StoreGitCredsRequest.RequestEntry
-	52, // 30: octelium.api.cluster.cordium.v1.EraseGitCredsRequest.request:type_name -> octelium.api.cluster.cordium.v1.EraseGitCredsRequest.RequestEntry
-	63, // 31: octelium.api.cluster.cordium.v1.ListenStateResponse.state:type_name -> octelium.api.main.cordium.v1.Workspace.Status.State
-	65, // 32: octelium.api.cluster.cordium.v1.GetFailureResponse.failure:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure
-	66, // 33: octelium.api.cluster.cordium.v1.GitProviderInfo.gitProviderRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	66, // 34: octelium.api.cluster.cordium.v1.GitProviderInfo.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	67, // 35: octelium.api.cluster.cordium.v1.GitProviderInfo.createdAt:type_name -> google.protobuf.Timestamp
-	67, // 36: octelium.api.cluster.cordium.v1.GitProviderInfo.expiresAt:type_name -> google.protobuf.Timestamp
-	53, // 37: octelium.api.cluster.cordium.v1.ListenStatsResponse.cpu:type_name -> octelium.api.cluster.cordium.v1.ListenStatsResponse.CPU
-	54, // 38: octelium.api.cluster.cordium.v1.ListenStatsResponse.memory:type_name -> octelium.api.cluster.cordium.v1.ListenStatsResponse.Memory
-	55, // 39: octelium.api.cluster.cordium.v1.ListenStatsResponse.network:type_name -> octelium.api.cluster.cordium.v1.ListenStatsResponse.Network
-	56, // 40: octelium.api.cluster.cordium.v1.ListenStatsResponse.io:type_name -> octelium.api.cluster.cordium.v1.ListenStatsResponse.IO
-	37, // 41: octelium.api.cluster.cordium.v1.ListenEventResponse.listenStatsResponse:type_name -> octelium.api.cluster.cordium.v1.ListenStatsResponse
-	68, // 42: octelium.api.cluster.cordium.v1.ListenEventResponse.listenLogResponse:type_name -> octelium.api.main.cordium.v1.ListenLogResponse
-	65, // 43: octelium.api.cluster.cordium.v1.ListenEventResponse.failure:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure
-	69, // 44: octelium.api.cluster.cordium.v1.ListenStatsResponse.CPU.timeDuration:type_name -> octelium.api.main.meta.v1.Duration
-	15, // 45: octelium.api.cluster.cordium.v1.WorkspaceService.Prepare:input_type -> octelium.api.cluster.cordium.v1.PrepareRequest
-	17, // 46: octelium.api.cluster.cordium.v1.WorkspaceService.GetState:input_type -> octelium.api.cluster.cordium.v1.GetStateRequest
-	19, // 47: octelium.api.cluster.cordium.v1.WorkspaceService.Shutdown:input_type -> octelium.api.cluster.cordium.v1.ShutdownRequest
-	25, // 48: octelium.api.cluster.cordium.v1.WorkspaceService.GetGitCreds:input_type -> octelium.api.cluster.cordium.v1.GetGitCredsRequest
-	27, // 49: octelium.api.cluster.cordium.v1.WorkspaceService.StoreGitCreds:input_type -> octelium.api.cluster.cordium.v1.StoreGitCredsRequest
-	29, // 50: octelium.api.cluster.cordium.v1.WorkspaceService.EraseGitCreds:input_type -> octelium.api.cluster.cordium.v1.EraseGitCredsRequest
-	33, // 51: octelium.api.cluster.cordium.v1.WorkspaceService.ListenEvent:input_type -> octelium.api.cluster.cordium.v1.ListenEventRequest
-	31, // 52: octelium.api.cluster.cordium.v1.WorkspaceService.ListenState:input_type -> octelium.api.cluster.cordium.v1.ListenStateRequest
-	17, // 53: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.GetState:input_type -> octelium.api.cluster.cordium.v1.GetStateRequest
-	23, // 54: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.Initialize:input_type -> octelium.api.cluster.cordium.v1.InitializeRequest
-	19, // 55: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.Shutdown:input_type -> octelium.api.cluster.cordium.v1.ShutdownRequest
-	21, // 56: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.GetTunnelPublicKey:input_type -> octelium.api.cluster.cordium.v1.GetTunnelPublicKeyRequest
-	31, // 57: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.ListenState:input_type -> octelium.api.cluster.cordium.v1.ListenStateRequest
-	33, // 58: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.ListenEvent:input_type -> octelium.api.cluster.cordium.v1.ListenEventRequest
-	34, // 59: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.GetFailure:input_type -> octelium.api.cluster.cordium.v1.GetFailureRequest
-	39, // 60: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.ShutdownAck:input_type -> octelium.api.cluster.cordium.v1.ShutdownAckRequest
-	1,  // 61: octelium.api.cluster.cordium.v1.TerminalService.CreateTerminal:input_type -> octelium.api.cluster.cordium.v1.CreateTerminalRequest
-	4,  // 62: octelium.api.cluster.cordium.v1.TerminalService.RemoveTerminal:input_type -> octelium.api.cluster.cordium.v1.RemoveTerminalRequest
-	6,  // 63: octelium.api.cluster.cordium.v1.TerminalService.ListTerminal:input_type -> octelium.api.cluster.cordium.v1.ListTerminalRequest
-	8,  // 64: octelium.api.cluster.cordium.v1.TerminalService.WriteDataTerminal:input_type -> octelium.api.cluster.cordium.v1.WriteDataTerminalRequest
-	10, // 65: octelium.api.cluster.cordium.v1.TerminalService.SetWindowSize:input_type -> octelium.api.cluster.cordium.v1.SetWindowSizeRequest
-	12, // 66: octelium.api.cluster.cordium.v1.TerminalService.ListenTerminal:input_type -> octelium.api.cluster.cordium.v1.ListenTerminalRequest
-	70, // 67: octelium.api.cluster.cordium.v1.TerminalService.Exec:input_type -> octelium.api.main.cordium.v1.ExecRequest
-	16, // 68: octelium.api.cluster.cordium.v1.WorkspaceService.Prepare:output_type -> octelium.api.cluster.cordium.v1.PrepareResponse
-	18, // 69: octelium.api.cluster.cordium.v1.WorkspaceService.GetState:output_type -> octelium.api.cluster.cordium.v1.GetStateResponse
-	20, // 70: octelium.api.cluster.cordium.v1.WorkspaceService.Shutdown:output_type -> octelium.api.cluster.cordium.v1.ShutdownResponse
-	26, // 71: octelium.api.cluster.cordium.v1.WorkspaceService.GetGitCreds:output_type -> octelium.api.cluster.cordium.v1.GetGitCredsResponse
-	28, // 72: octelium.api.cluster.cordium.v1.WorkspaceService.StoreGitCreds:output_type -> octelium.api.cluster.cordium.v1.StoreGitCredsResponse
-	30, // 73: octelium.api.cluster.cordium.v1.WorkspaceService.EraseGitCreds:output_type -> octelium.api.cluster.cordium.v1.EraseGitCredsResponse
-	38, // 74: octelium.api.cluster.cordium.v1.WorkspaceService.ListenEvent:output_type -> octelium.api.cluster.cordium.v1.ListenEventResponse
-	32, // 75: octelium.api.cluster.cordium.v1.WorkspaceService.ListenState:output_type -> octelium.api.cluster.cordium.v1.ListenStateResponse
-	18, // 76: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.GetState:output_type -> octelium.api.cluster.cordium.v1.GetStateResponse
-	24, // 77: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.Initialize:output_type -> octelium.api.cluster.cordium.v1.InitializeResponse
-	20, // 78: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.Shutdown:output_type -> octelium.api.cluster.cordium.v1.ShutdownResponse
-	22, // 79: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.GetTunnelPublicKey:output_type -> octelium.api.cluster.cordium.v1.GetTunnelPublicKeyResponse
-	32, // 80: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.ListenState:output_type -> octelium.api.cluster.cordium.v1.ListenStateResponse
-	38, // 81: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.ListenEvent:output_type -> octelium.api.cluster.cordium.v1.ListenEventResponse
-	35, // 82: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.GetFailure:output_type -> octelium.api.cluster.cordium.v1.GetFailureResponse
-	40, // 83: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.ShutdownAck:output_type -> octelium.api.cluster.cordium.v1.ShutdownAckResponse
-	3,  // 84: octelium.api.cluster.cordium.v1.TerminalService.CreateTerminal:output_type -> octelium.api.cluster.cordium.v1.CreateTerminalResponse
-	5,  // 85: octelium.api.cluster.cordium.v1.TerminalService.RemoveTerminal:output_type -> octelium.api.cluster.cordium.v1.RemoveTerminalResponse
-	7,  // 86: octelium.api.cluster.cordium.v1.TerminalService.ListTerminal:output_type -> octelium.api.cluster.cordium.v1.ListTerminalResponse
-	9,  // 87: octelium.api.cluster.cordium.v1.TerminalService.WriteDataTerminal:output_type -> octelium.api.cluster.cordium.v1.WriteDataTerminalResponse
-	11, // 88: octelium.api.cluster.cordium.v1.TerminalService.SetWindowSize:output_type -> octelium.api.cluster.cordium.v1.SetWindowSizeResponse
-	13, // 89: octelium.api.cluster.cordium.v1.TerminalService.ListenTerminal:output_type -> octelium.api.cluster.cordium.v1.ListenTerminalResponse
-	71, // 90: octelium.api.cluster.cordium.v1.TerminalService.Exec:output_type -> octelium.api.main.cordium.v1.ExecResponse
-	68, // [68:91] is the sub-list for method output_type
-	45, // [45:68] is the sub-list for method input_type
-	45, // [45:45] is the sub-list for extension type_name
-	45, // [45:45] is the sub-list for extension extendee
-	0,  // [0:45] is the sub-list for field type_name
+	44, // 1: octelium.api.cluster.cordium.v1.ListenTerminalResponse.stdout:type_name -> octelium.api.cluster.cordium.v1.ListenTerminalResponse.Stdout
+	45, // 2: octelium.api.cluster.cordium.v1.ListenTerminalResponse.windowSize:type_name -> octelium.api.cluster.cordium.v1.ListenTerminalResponse.WindowSize
+	46, // 3: octelium.api.cluster.cordium.v1.ListenTerminalResponse.close:type_name -> octelium.api.cluster.cordium.v1.ListenTerminalResponse.Close
+	47, // 4: octelium.api.cluster.cordium.v1.StartTerminalResponse.stdout:type_name -> octelium.api.cluster.cordium.v1.StartTerminalResponse.Stdout
+	58, // 5: octelium.api.cluster.cordium.v1.ResolvedVolumeMount.volumeRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	48, // 6: octelium.api.cluster.cordium.v1.PrepareRequest.ssh:type_name -> octelium.api.cluster.cordium.v1.InitializeRequest.SSH
+	59, // 7: octelium.api.cluster.cordium.v1.PrepareRequest.workspace:type_name -> octelium.api.main.cordium.v1.Workspace
+	60, // 8: octelium.api.cluster.cordium.v1.PrepareRequest.Space:type_name -> octelium.api.main.cordium.v1.Space
+	61, // 9: octelium.api.cluster.cordium.v1.PrepareRequest.template:type_name -> octelium.api.main.cordium.v1.Template
+	62, // 10: octelium.api.cluster.cordium.v1.PrepareRequest.secretList:type_name -> octelium.api.main.cordium.v1.SecretList
+	63, // 11: octelium.api.cluster.cordium.v1.PrepareRequest.userSecretList:type_name -> octelium.api.main.cordium.v1.UserSecretList
+	37, // 12: octelium.api.cluster.cordium.v1.PrepareRequest.gitProviderInfo:type_name -> octelium.api.cluster.cordium.v1.GitProviderInfo
+	64, // 13: octelium.api.cluster.cordium.v1.PrepareRequest.userConfig:type_name -> octelium.api.main.cordium.v1.UserConfig
+	0,  // 14: octelium.api.cluster.cordium.v1.PrepareRequest.persistentStateSource:type_name -> octelium.api.cluster.cordium.v1.PersistentStateSource
+	15, // 15: octelium.api.cluster.cordium.v1.PrepareRequest.volumeMounts:type_name -> octelium.api.cluster.cordium.v1.ResolvedVolumeMount
+	65, // 16: octelium.api.cluster.cordium.v1.GetStateResponse.state:type_name -> octelium.api.main.cordium.v1.Workspace.Status.State
+	59, // 17: octelium.api.cluster.cordium.v1.ShutdownRequest.workspace:type_name -> octelium.api.main.cordium.v1.Workspace
+	59, // 18: octelium.api.cluster.cordium.v1.InitializeRequest.workspace:type_name -> octelium.api.main.cordium.v1.Workspace
+	60, // 19: octelium.api.cluster.cordium.v1.InitializeRequest.space:type_name -> octelium.api.main.cordium.v1.Space
+	61, // 20: octelium.api.cluster.cordium.v1.InitializeRequest.template:type_name -> octelium.api.main.cordium.v1.Template
+	49, // 21: octelium.api.cluster.cordium.v1.InitializeRequest.clientInfo:type_name -> octelium.api.cluster.cordium.v1.InitializeRequest.ClientInfo
+	48, // 22: octelium.api.cluster.cordium.v1.InitializeRequest.ssh:type_name -> octelium.api.cluster.cordium.v1.InitializeRequest.SSH
+	62, // 23: octelium.api.cluster.cordium.v1.InitializeRequest.secretList:type_name -> octelium.api.main.cordium.v1.SecretList
+	37, // 24: octelium.api.cluster.cordium.v1.InitializeRequest.gitProviderInfo:type_name -> octelium.api.cluster.cordium.v1.GitProviderInfo
+	63, // 25: octelium.api.cluster.cordium.v1.InitializeRequest.userSecretList:type_name -> octelium.api.main.cordium.v1.UserSecretList
+	64, // 26: octelium.api.cluster.cordium.v1.InitializeRequest.userConfig:type_name -> octelium.api.main.cordium.v1.UserConfig
+	66, // 27: octelium.api.cluster.cordium.v1.InitializeRequest.clusterConfig:type_name -> octelium.api.main.cordium.v1.ClusterConfig
+	0,  // 28: octelium.api.cluster.cordium.v1.InitializeRequest.persistentStateSource:type_name -> octelium.api.cluster.cordium.v1.PersistentStateSource
+	15, // 29: octelium.api.cluster.cordium.v1.InitializeRequest.volumeMounts:type_name -> octelium.api.cluster.cordium.v1.ResolvedVolumeMount
+	50, // 30: octelium.api.cluster.cordium.v1.GetGitCredsRequest.request:type_name -> octelium.api.cluster.cordium.v1.GetGitCredsRequest.RequestEntry
+	51, // 31: octelium.api.cluster.cordium.v1.GetGitCredsResponse.response:type_name -> octelium.api.cluster.cordium.v1.GetGitCredsResponse.ResponseEntry
+	52, // 32: octelium.api.cluster.cordium.v1.StoreGitCredsRequest.request:type_name -> octelium.api.cluster.cordium.v1.StoreGitCredsRequest.RequestEntry
+	53, // 33: octelium.api.cluster.cordium.v1.EraseGitCredsRequest.request:type_name -> octelium.api.cluster.cordium.v1.EraseGitCredsRequest.RequestEntry
+	65, // 34: octelium.api.cluster.cordium.v1.ListenStateResponse.state:type_name -> octelium.api.main.cordium.v1.Workspace.Status.State
+	67, // 35: octelium.api.cluster.cordium.v1.GetFailureResponse.failure:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure
+	58, // 36: octelium.api.cluster.cordium.v1.GitProviderInfo.gitProviderRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	58, // 37: octelium.api.cluster.cordium.v1.GitProviderInfo.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	68, // 38: octelium.api.cluster.cordium.v1.GitProviderInfo.createdAt:type_name -> google.protobuf.Timestamp
+	68, // 39: octelium.api.cluster.cordium.v1.GitProviderInfo.expiresAt:type_name -> google.protobuf.Timestamp
+	54, // 40: octelium.api.cluster.cordium.v1.ListenStatsResponse.cpu:type_name -> octelium.api.cluster.cordium.v1.ListenStatsResponse.CPU
+	55, // 41: octelium.api.cluster.cordium.v1.ListenStatsResponse.memory:type_name -> octelium.api.cluster.cordium.v1.ListenStatsResponse.Memory
+	56, // 42: octelium.api.cluster.cordium.v1.ListenStatsResponse.network:type_name -> octelium.api.cluster.cordium.v1.ListenStatsResponse.Network
+	57, // 43: octelium.api.cluster.cordium.v1.ListenStatsResponse.io:type_name -> octelium.api.cluster.cordium.v1.ListenStatsResponse.IO
+	38, // 44: octelium.api.cluster.cordium.v1.ListenEventResponse.listenStatsResponse:type_name -> octelium.api.cluster.cordium.v1.ListenStatsResponse
+	69, // 45: octelium.api.cluster.cordium.v1.ListenEventResponse.listenLogResponse:type_name -> octelium.api.main.cordium.v1.ListenLogResponse
+	67, // 46: octelium.api.cluster.cordium.v1.ListenEventResponse.failure:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure
+	70, // 47: octelium.api.cluster.cordium.v1.ListenStatsResponse.CPU.timeDuration:type_name -> octelium.api.main.meta.v1.Duration
+	16, // 48: octelium.api.cluster.cordium.v1.WorkspaceService.Prepare:input_type -> octelium.api.cluster.cordium.v1.PrepareRequest
+	18, // 49: octelium.api.cluster.cordium.v1.WorkspaceService.GetState:input_type -> octelium.api.cluster.cordium.v1.GetStateRequest
+	20, // 50: octelium.api.cluster.cordium.v1.WorkspaceService.Shutdown:input_type -> octelium.api.cluster.cordium.v1.ShutdownRequest
+	26, // 51: octelium.api.cluster.cordium.v1.WorkspaceService.GetGitCreds:input_type -> octelium.api.cluster.cordium.v1.GetGitCredsRequest
+	28, // 52: octelium.api.cluster.cordium.v1.WorkspaceService.StoreGitCreds:input_type -> octelium.api.cluster.cordium.v1.StoreGitCredsRequest
+	30, // 53: octelium.api.cluster.cordium.v1.WorkspaceService.EraseGitCreds:input_type -> octelium.api.cluster.cordium.v1.EraseGitCredsRequest
+	34, // 54: octelium.api.cluster.cordium.v1.WorkspaceService.ListenEvent:input_type -> octelium.api.cluster.cordium.v1.ListenEventRequest
+	32, // 55: octelium.api.cluster.cordium.v1.WorkspaceService.ListenState:input_type -> octelium.api.cluster.cordium.v1.ListenStateRequest
+	18, // 56: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.GetState:input_type -> octelium.api.cluster.cordium.v1.GetStateRequest
+	24, // 57: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.Initialize:input_type -> octelium.api.cluster.cordium.v1.InitializeRequest
+	20, // 58: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.Shutdown:input_type -> octelium.api.cluster.cordium.v1.ShutdownRequest
+	22, // 59: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.GetTunnelPublicKey:input_type -> octelium.api.cluster.cordium.v1.GetTunnelPublicKeyRequest
+	32, // 60: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.ListenState:input_type -> octelium.api.cluster.cordium.v1.ListenStateRequest
+	34, // 61: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.ListenEvent:input_type -> octelium.api.cluster.cordium.v1.ListenEventRequest
+	35, // 62: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.GetFailure:input_type -> octelium.api.cluster.cordium.v1.GetFailureRequest
+	40, // 63: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.ShutdownAck:input_type -> octelium.api.cluster.cordium.v1.ShutdownAckRequest
+	1,  // 64: octelium.api.cluster.cordium.v1.TerminalService.CreateTerminal:input_type -> octelium.api.cluster.cordium.v1.CreateTerminalRequest
+	4,  // 65: octelium.api.cluster.cordium.v1.TerminalService.RemoveTerminal:input_type -> octelium.api.cluster.cordium.v1.RemoveTerminalRequest
+	6,  // 66: octelium.api.cluster.cordium.v1.TerminalService.ListTerminal:input_type -> octelium.api.cluster.cordium.v1.ListTerminalRequest
+	8,  // 67: octelium.api.cluster.cordium.v1.TerminalService.WriteDataTerminal:input_type -> octelium.api.cluster.cordium.v1.WriteDataTerminalRequest
+	10, // 68: octelium.api.cluster.cordium.v1.TerminalService.SetWindowSize:input_type -> octelium.api.cluster.cordium.v1.SetWindowSizeRequest
+	12, // 69: octelium.api.cluster.cordium.v1.TerminalService.ListenTerminal:input_type -> octelium.api.cluster.cordium.v1.ListenTerminalRequest
+	71, // 70: octelium.api.cluster.cordium.v1.TerminalService.Exec:input_type -> octelium.api.main.cordium.v1.ExecRequest
+	17, // 71: octelium.api.cluster.cordium.v1.WorkspaceService.Prepare:output_type -> octelium.api.cluster.cordium.v1.PrepareResponse
+	19, // 72: octelium.api.cluster.cordium.v1.WorkspaceService.GetState:output_type -> octelium.api.cluster.cordium.v1.GetStateResponse
+	21, // 73: octelium.api.cluster.cordium.v1.WorkspaceService.Shutdown:output_type -> octelium.api.cluster.cordium.v1.ShutdownResponse
+	27, // 74: octelium.api.cluster.cordium.v1.WorkspaceService.GetGitCreds:output_type -> octelium.api.cluster.cordium.v1.GetGitCredsResponse
+	29, // 75: octelium.api.cluster.cordium.v1.WorkspaceService.StoreGitCreds:output_type -> octelium.api.cluster.cordium.v1.StoreGitCredsResponse
+	31, // 76: octelium.api.cluster.cordium.v1.WorkspaceService.EraseGitCreds:output_type -> octelium.api.cluster.cordium.v1.EraseGitCredsResponse
+	39, // 77: octelium.api.cluster.cordium.v1.WorkspaceService.ListenEvent:output_type -> octelium.api.cluster.cordium.v1.ListenEventResponse
+	33, // 78: octelium.api.cluster.cordium.v1.WorkspaceService.ListenState:output_type -> octelium.api.cluster.cordium.v1.ListenStateResponse
+	19, // 79: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.GetState:output_type -> octelium.api.cluster.cordium.v1.GetStateResponse
+	25, // 80: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.Initialize:output_type -> octelium.api.cluster.cordium.v1.InitializeResponse
+	21, // 81: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.Shutdown:output_type -> octelium.api.cluster.cordium.v1.ShutdownResponse
+	23, // 82: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.GetTunnelPublicKey:output_type -> octelium.api.cluster.cordium.v1.GetTunnelPublicKeyResponse
+	33, // 83: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.ListenState:output_type -> octelium.api.cluster.cordium.v1.ListenStateResponse
+	39, // 84: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.ListenEvent:output_type -> octelium.api.cluster.cordium.v1.ListenEventResponse
+	36, // 85: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.GetFailure:output_type -> octelium.api.cluster.cordium.v1.GetFailureResponse
+	41, // 86: octelium.api.cluster.cordium.v1.WorkspaceSupervisorService.ShutdownAck:output_type -> octelium.api.cluster.cordium.v1.ShutdownAckResponse
+	3,  // 87: octelium.api.cluster.cordium.v1.TerminalService.CreateTerminal:output_type -> octelium.api.cluster.cordium.v1.CreateTerminalResponse
+	5,  // 88: octelium.api.cluster.cordium.v1.TerminalService.RemoveTerminal:output_type -> octelium.api.cluster.cordium.v1.RemoveTerminalResponse
+	7,  // 89: octelium.api.cluster.cordium.v1.TerminalService.ListTerminal:output_type -> octelium.api.cluster.cordium.v1.ListTerminalResponse
+	9,  // 90: octelium.api.cluster.cordium.v1.TerminalService.WriteDataTerminal:output_type -> octelium.api.cluster.cordium.v1.WriteDataTerminalResponse
+	11, // 91: octelium.api.cluster.cordium.v1.TerminalService.SetWindowSize:output_type -> octelium.api.cluster.cordium.v1.SetWindowSizeResponse
+	13, // 92: octelium.api.cluster.cordium.v1.TerminalService.ListenTerminal:output_type -> octelium.api.cluster.cordium.v1.ListenTerminalResponse
+	72, // 93: octelium.api.cluster.cordium.v1.TerminalService.Exec:output_type -> octelium.api.main.cordium.v1.ExecResponse
+	71, // [71:94] is the sub-list for method output_type
+	48, // [48:71] is the sub-list for method input_type
+	48, // [48:48] is the sub-list for extension type_name
+	48, // [48:48] is the sub-list for extension extendee
+	0,  // [0:48] is the sub-list for field type_name
 }
 
 func init() { file_ccordiumv1_proto_init() }
@@ -3602,7 +3703,7 @@ func file_ccordiumv1_proto_init() {
 	file_ccordiumv1_proto_msgTypes[13].OneofWrappers = []any{
 		(*StartTerminalResponse_Stdout_)(nil),
 	}
-	file_ccordiumv1_proto_msgTypes[37].OneofWrappers = []any{
+	file_ccordiumv1_proto_msgTypes[38].OneofWrappers = []any{
 		(*ListenEventResponse_ListenStatsResponse)(nil),
 		(*ListenEventResponse_ListenLogResponse)(nil),
 		(*ListenEventResponse_Failure)(nil),
@@ -3613,7 +3714,7 @@ func file_ccordiumv1_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_ccordiumv1_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   56,
+			NumMessages:   57,
 			NumExtensions: 0,
 			NumServices:   3,
 		},

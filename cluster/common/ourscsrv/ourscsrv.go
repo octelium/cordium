@@ -152,6 +152,18 @@ func FilterStatusWorkspaceSnapshotUID(uid string) *rmetav1.ListOptions_Filter {
 	}
 }
 
+func FilterStatusRegionUID(uid string) *rmetav1.ListOptions_Filter {
+	return &rmetav1.ListOptions_Filter{
+		Field: "status.regionRef.uid",
+		Op:    rmetav1.ListOptions_Filter_OP_EQ,
+		Value: &structpb.Value{
+			Kind: &structpb.Value_StringValue{
+				StringValue: uid,
+			},
+		},
+	}
+}
+
 func SetCountOnly(opts *rmetav1.ListOptions) *rmetav1.ListOptions {
 	opts.Paginate = true
 	opts.ItemsPerPage = 1

@@ -751,6 +751,10 @@ func (s *Server) doPrepare(ctx context.Context, req *ccordiumv1.PrepareRequest) 
 		return errors.Errorf("Could not set user: %+v", err)
 	}
 
+	if err := s.setVolumeMounts(); err != nil {
+		return errors.Errorf("Could not set the Volume mounts: %+v", err)
+	}
+
 	if err := s.doShallowCloneMainRepository(ctx); err != nil {
 		zap.L().Warn("Could not doShallowCloneMainRepository", zap.Error(err))
 	}

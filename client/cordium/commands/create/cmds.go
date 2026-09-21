@@ -23,6 +23,7 @@ import (
 	"github.com/octelium/cordium/client/cordium/commands/create/space"
 	"github.com/octelium/cordium/client/cordium/commands/create/template"
 	"github.com/octelium/cordium/client/cordium/commands/create/usersecret"
+	"github.com/octelium/cordium/client/cordium/commands/create/volume"
 	"github.com/octelium/cordium/client/cordium/commands/create/workspace"
 	"github.com/spf13/cobra"
 )
@@ -35,6 +36,7 @@ func AddSubcommands() {
 	Cmd.AddCommand(workspace.Cmd)
 	Cmd.AddCommand(snapshot.Cmd)
 	Cmd.AddCommand(template.Cmd)
+	Cmd.AddCommand(volume.Cmd)
 	Cmd.AddCommand(space.Cmd)
 	Cmd.AddCommand(secret.Cmd)
 	Cmd.AddCommand(usersecret.Cmd)

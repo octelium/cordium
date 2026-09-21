@@ -24,6 +24,7 @@ import (
 	"os"
 	"os/exec"
 
+	workspacecommon "github.com/octelium/cordium/cluster/common"
 	"github.com/octelium/octelium/pkg/utils/ldflags"
 	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/pkg/errors"
@@ -150,6 +151,8 @@ func (s *Server) runPreInitCommandsRoot(ctx context.Context) error {
 
 		"mkdir -p /octelium/home",
 
+		fmt.Sprintf("mkdir -p %s", workspacecommon.VolumeRootDir),
+
 		"mkdir -p /tmp/octelium",
 		"mkdir -p /tmp/podman-conf",
 		"chmod 1777 /tmp/octelium",
@@ -230,6 +233,8 @@ func (s *Server) runPreInitCommandsRoot(ctx context.Context) error {
 			return err
 		}
 	}
+
+	s.prepareVolumeRoots()
 
 	if err := s.prepareTUN(); err != nil {
 		return err
@@ -409,6 +414,8 @@ func (s *Server) runOuterPodman(ctx context.Context) error {
 		// "-v /octelium/outer/runtime:/octelium-runtime",
 
 		"-v", "/octelium:/octelium:nosuid",
+		"-v", fmt.Sprintf("%s:%s:rbind,nosuid",
+			workspacecommon.VolumeRootDir, workspacecommon.VolumeRootDir),
 		"-v", fmt.Sprintf("%s:%s:noexec,nosuid", netPolicyDir, netPolicyDir),
 		"-v", "/tmp/podman-conf/containers:/etc/containers:ro",
 

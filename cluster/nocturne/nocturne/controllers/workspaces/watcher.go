@@ -760,6 +760,11 @@ func (c *statusWatcher) onReadyInit(ctx context.Context) error {
 		return err
 	}
 
+	volumeMounts, err := c.ctl.resolveVolumeMounts(ctx, ws)
+	if err != nil {
+		return err
+	}
+
 	initializeReq := &ccordiumv1.InitializeRequest{
 		Workspace: ws,
 		Space:     space,
@@ -781,6 +786,7 @@ func (c *statusWatcher) onReadyInit(ctx context.Context) error {
 		ClusterConfig:       cco,
 
 		PersistentStateSource: getPersistentStateSource(ws, template, templateHasSnapshot),
+		VolumeMounts:          volumeMounts,
 	}
 
 	zap.L().Debug("Sending an Initialize call", zap.String("name", c.name))

@@ -259,6 +259,7 @@ func (s *Server) doInitialize() error {
 		TemplateHasSnapshot: req.TemplateHasSnapshot,
 
 		PersistentStateSource: req.PersistentStateSource,
+		VolumeMounts:          req.VolumeMounts,
 	}
 
 	zap.L().Debug("sending prepare request")

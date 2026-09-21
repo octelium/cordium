@@ -24,10 +24,12 @@ import (
 	snapshotset "github.com/kubernetes-csi/external-snapshotter/client/v8/clientset/versioned"
 	"github.com/octelium/cordium/cluster/common/octeliumc"
 	"github.com/octelium/cordium/cluster/common/suputils"
+	"github.com/octelium/cordium/cluster/common/wsutils"
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
 	"github.com/octelium/octelium/apis/cluster/ccordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
+	"github.com/octelium/octelium/apis/rsc/rmetav1"
 	"github.com/octelium/octelium/cluster/common/celengine"
 	"github.com/octelium/octelium/cluster/common/jwkctl"
 	"github.com/octelium/octelium/cluster/common/k8sutils"
@@ -217,6 +219,20 @@ func (c *Controller) startWorkspace(ctx context.Context, ws *cordiumv1.Workspace
 		}
 	}
 
+	if _, err := c.resolveVolumeMounts(ctx, ws); err != nil {
+		if volErr, ok := err.(*wsutils.VolumeMountError); ok {
+			return c.setWorkspaceStartFailure(ctx, ws, &cordiumv1.Workspace_Status_Failure{
+				Message: volErr.Error(),
+				Type: &cordiumv1.Workspace_Status_Failure_Volume_{
+					Volume: &cordiumv1.Workspace_Status_Failure_Volume{
+						Name: volErr.Volume,
+					},
+				},
+			})
+		}
+		return err
+	}
+
 	zap.L().Debug("Starting Workspace",
 		zap.String("uid", ws.Metadata.Uid), zap.String("name", ws.Metadata.Name))
 
@@ -351,6 +367,62 @@ func (c *Controller) stopWorkspace(ctx context.Context, ws *cordiumv1.Workspace)
 
 	if ws.Spec.IsEphemeral {
 		if err := c.removePersistentClaim(ctx, ws); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *Controller) setWorkspaceStartFailure(ctx context.Context,
+	ws *cordiumv1.Workspace, failure *cordiumv1.Workspace_Status_Failure) error {
+
+	zap.L().Warn("The Workspace cannot be started",
+		zap.String("name", ws.Metadata.Name), zap.Any("failure", failure))
+
+	cur, err := c.octeliumC.CordiumC().GetWorkspace(ctx, &rmetav1.GetOptions{
+		Uid: ws.Metadata.Uid,
+	})
+	if err != nil {
+		if grpcerr.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+
+	sessionRef := cur.Status.SessionRef
+
+	cur.Status.Failure = failure
+	cur.Status.LastState = cur.Status.State
+	cur.Status.State = cordiumv1.Workspace_Status_STOPPED
+	cur.Status.LastStateSetAt = cur.Status.CurrentStateSetAt
+	cur.Status.CurrentStateSetAt = pbutils.Now()
+	cur.Status.LastStoppedAt = cur.Status.CurrentStateSetAt
+	cur.Status.StoppingReason = cordiumv1.Workspace_Status_STOPPING_REASON_ERROR
+	cur.Status.SessionRef = nil
+	cur.Status.Hostname = ""
+
+	if cur.Status.RegionRef != nil {
+		cur.Status.LastRegionRef = cur.Status.RegionRef
+	}
+	cur.Status.RegionRef = nil
+
+	if run := ucordiumv1.ToWorkspace(cur).GetCurrentRun(); run != nil {
+		run.Failure = failure
+		run.StoppedAt = cur.Status.LastStoppedAt
+	}
+
+	if _, err := c.octeliumC.CordiumC().UpdateWorkspace(ctx, cur); err != nil {
+		if grpcerr.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+
+	if sessionRef != nil {
+		if _, err := c.octeliumC.CoreC().DeleteSession(ctx, &rmetav1.DeleteOptions{
+			Uid: sessionRef.Uid,
+		}); err != nil && !grpcerr.IsNotFound(err) {
 			return err
 		}
 	}

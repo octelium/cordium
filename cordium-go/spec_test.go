@@ -289,6 +289,53 @@ func TestSpecVarsTemplateAndSpace(t *testing.T) {
 	}
 }
 
+func TestSpecVolumeMounts(t *testing.T) {
+	b := buildSpec(t,
+		WithVolume("datasets", "/data"),
+		WithReadOnlyVolume("models", "/opt/models"))
+
+	mounts := b.spec.GetRuntime().GetVolumeMounts()
+	if len(mounts) != 2 {
+		t.Fatalf("volumeMounts = %v", mounts)
+	}
+
+	if mounts[0].GetVolumeRef().GetName() != "datasets" ||
+		mounts[0].GetMountPath() != "/data" || mounts[0].GetReadOnly() {
+		t.Errorf("mount = %v", mounts[0])
+	}
+
+	if mounts[1].GetVolumeRef().GetName() != "models" ||
+		mounts[1].GetMountPath() != "/opt/models" || !mounts[1].GetReadOnly() {
+		t.Errorf("mount = %v", mounts[1])
+	}
+
+	for name, opt := range map[string]WorkspaceOption{
+		"emptyName":      WithVolume("", "/data"),
+		"emptyPath":      WithVolume("datasets", ""),
+		"relativePath":   WithVolume("datasets", "data"),
+		"emptyRONname":   WithReadOnlyVolume("", "/data"),
+		"relativeROPath": WithReadOnlyVolume("datasets", "data"),
+	} {
+		if _, err := newSpecBuilder(opt); !IsInvalidArgument(err) {
+			t.Errorf("%s was accepted: %v", name, err)
+		}
+	}
+}
+
+func TestTemplateSpecKeepsVolumeMounts(t *testing.T) {
+	b := buildSpec(t, WithVolume("datasets", "/data"))
+
+	spec, err := templateSpecFrom(b)
+	if err != nil {
+		t.Fatalf("templateSpecFrom: %v", err)
+	}
+
+	mounts := spec.GetRuntime().GetVolumeMounts()
+	if len(mounts) != 1 || mounts[0].GetVolumeRef().GetName() != "datasets" {
+		t.Errorf("a Template lost its volumeMounts: %v", mounts)
+	}
+}
+
 func TestSpecEscapeHatches(t *testing.T) {
 	base := &cordiumv1.Workspace_Spec{
 		Image: &cordiumv1.Workspace_Spec_Image{

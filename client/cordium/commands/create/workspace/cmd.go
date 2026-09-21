@@ -70,6 +70,8 @@ type CreateWorkspaceArgs struct {
 	AddCaps  []string
 	DropCaps []string
 
+	Volumes []string
+
 	Out string
 }
 
@@ -91,6 +93,8 @@ func init() {
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Dockerfile, "dockerfile", "", "",
 		"Path to a local Dockerfile. The file is read and embedded inline. COPY/ADD with local context paths are not supported; use --file for those cases.")
 	Cmd.PersistentFlags().BoolVarP(&cmdArgs.Ephemeral, "ephemeral", "", false, "Create an ephemeral Workspace whose storage is discarded on stop")
+	Cmd.PersistentFlags().StringArrayVarP(&cmdArgs.Volumes, "volume", "", nil,
+		`Mount a Volume of the Space inside the Workspace (NAME:MOUNT_PATH[:ro]). Repeatable: --volume datasets:/data:ro --volume cache:/cache`)
 
 	Cmd.PersistentFlags().StringVarP(&cmdArgs.Branch, "branch", "b", "", "Branch to clone when using --repository (default: repository default branch)")
 	Cmd.PersistentFlags().Uint32Var(&cmdArgs.Depth, "depth", 0, "Shallow clone depth when using --repository (0 = full clone)")
@@ -234,6 +238,7 @@ func doCmd(cmd *cobra.Command, args []string) error {
 		Space:             cmdArgs.Space,
 		Template:          cmdArgs.Template,
 		Snapshot:          cmdArgs.Snapshot,
+		Volumes:           cmdArgs.Volumes,
 		File:              cmdArgs.File,
 		Start:             cmdArgs.Start,
 		Repo:              cmdArgs.Repo,
@@ -317,6 +322,8 @@ type DoCreateWorkspaceOpts struct {
 
 	AddCaps  []string
 	DropCaps []string
+
+	Volumes []string
 
 	Vars []string
 }
@@ -518,6 +525,19 @@ func DoCreateWorkspace(ctx context.Context, c pb.MainServiceClient, o *DoCreateW
 		ws.Spec.Runtime.AutoStop = o.AutoStop
 	}
 
+	for _, raw := range o.Volumes {
+		mount, err := parseVolumeMount(raw)
+		if err != nil {
+			return nil, err
+		}
+
+		if ws.Spec.Runtime == nil {
+			ws.Spec.Runtime = &pb.Workspace_Spec_Runtime{}
+		}
+
+		ws.Spec.Runtime.VolumeMounts = append(ws.Spec.Runtime.VolumeMounts, mount)
+	}
+
 	ws.Spec.IsEphemeral = o.Ephemeral
 
 	ws.Metadata = &metav1.Metadata{}
@@ -553,6 +573,39 @@ func DoCreateWorkspace(ctx context.Context, c pb.MainServiceClient, o *DoCreateW
 	}
 
 	return ws, nil
+}
+
+func parseVolumeMount(raw string) (*pb.Workspace_Spec_Runtime_VolumeMount, error) {
+	parts := strings.Split(raw, ":")
+	if len(parts) < 2 || len(parts) > 3 {
+		return nil, errors.Errorf(
+			"invalid --volume value %q: expected NAME:MOUNT_PATH[:ro]", raw)
+	}
+
+	if parts[0] == "" || parts[1] == "" {
+		return nil, errors.Errorf(
+			"invalid --volume value %q: expected NAME:MOUNT_PATH[:ro]", raw)
+	}
+
+	ret := &pb.Workspace_Spec_Runtime_VolumeMount{
+		VolumeRef: &metav1.ObjectReference{
+			Name: parts[0],
+		},
+		MountPath: parts[1],
+	}
+
+	if len(parts) == 3 {
+		switch parts[2] {
+		case "ro":
+			ret.ReadOnly = true
+		case "rw":
+		default:
+			return nil, errors.Errorf(
+				"invalid --volume mode %q: expected either ro or rw", parts[2])
+		}
+	}
+
+	return ret, nil
 }
 
 func parseAppPort(raw string) (*pb.Workspace_Spec_Application, error) {

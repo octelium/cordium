@@ -19,6 +19,7 @@ package cordium
 import (
 	"os"
 	"sort"
+	"strings"
 
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
@@ -178,6 +179,51 @@ func FromSnapshot(name string) WorkspaceOption {
 			return invalidArgumentf("empty WorkspaceSnapshot name")
 		}
 		b.snapshotRef = &metav1.ObjectReference{Name: name}
+		return nil
+	}
+}
+
+// WithVolume mounts a Volume of the Workspace's Space at an absolute path
+// inside the Workspace. The Volume must already exist and it must belong to
+// the same Space as the Workspace.
+//
+//	ws, err := c.Workspaces().Create(ctx,
+//		cordium.WithSpace("my-project"),
+//		cordium.WithVolume("datasets", "/data"))
+//
+// The mount path cannot be the root directory, it cannot overlap with another
+// mount and it cannot cover the paths that are reserved by the Cluster. Use
+// [WithReadOnlyVolume] in order to mount the Volume read-only.
+func WithVolume(name, mountPath string) WorkspaceOption {
+	return withVolume(name, mountPath, false)
+}
+
+// WithReadOnlyVolume mounts a Volume read-only inside the Workspace. It is set
+// per mount, so the same Volume can simultaneously be mounted read-write by a
+// Workspace and read-only by another one.
+func WithReadOnlyVolume(name, mountPath string) WorkspaceOption {
+	return withVolume(name, mountPath, true)
+}
+
+func withVolume(name, mountPath string, readOnly bool) WorkspaceOption {
+	return func(b *specBuilder) error {
+		if name == "" {
+			return invalidArgumentf("empty Volume name")
+		}
+		if mountPath == "" {
+			return invalidArgumentf("empty Volume mountPath")
+		}
+		if !strings.HasPrefix(mountPath, "/") {
+			return invalidArgumentf("the Volume mountPath %q must be absolute", mountPath)
+		}
+
+		runtime := b.runtime()
+		runtime.VolumeMounts = append(runtime.VolumeMounts,
+			&cordiumv1.Workspace_Spec_Runtime_VolumeMount{
+				VolumeRef: &metav1.ObjectReference{Name: name},
+				MountPath: mountPath,
+				ReadOnly:  readOnly,
+			})
 		return nil
 	}
 }

@@ -23,6 +23,7 @@ import (
 	"github.com/octelium/cordium/client/cordium/commands/delete/space"
 	"github.com/octelium/cordium/client/cordium/commands/delete/template"
 	"github.com/octelium/cordium/client/cordium/commands/delete/usersecret"
+	"github.com/octelium/cordium/client/cordium/commands/delete/volume"
 	"github.com/octelium/cordium/client/cordium/commands/delete/workspace"
 	"github.com/spf13/cobra"
 )
@@ -38,6 +39,7 @@ func AddSubcommands() {
 	Cmd.AddCommand(snapshot.Cmd)
 	Cmd.AddCommand(usersecret.Cmd)
 	Cmd.AddCommand(secret.Cmd)
+	Cmd.AddCommand(volume.Cmd)
 	Cmd.AddCommand(space.Cmd)
 	Cmd.AddCommand(template.Cmd)
 	Cmd.AddCommand(gitprovider.Cmd)
