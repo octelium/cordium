@@ -7,9 +7,9 @@ require (
 	github.com/gosimple/slug v1.15.0
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/cluster/apiserver v0.0.0-20260912095159-4af4f27d984c
-	github.com/octelium/octelium/cluster/common v0.0.0-20260912095159-4af4f27d984c
-	github.com/octelium/octelium/pkg v0.0.0-20260912095159-4af4f27d984c
+	github.com/octelium/octelium/cluster/apiserver v0.0.0-20260927234815-4596c9818d7c
+	github.com/octelium/octelium/cluster/common v0.0.0-20260927234815-4596c9818d7c
+	github.com/octelium/octelium/pkg v0.0.0-20260927234815-4596c9818d7c
 	github.com/stretchr/testify v1.12.1
 	go.uber.org/zap v1.28.0
 	golang.org/x/crypto v0.55.0
@@ -128,8 +128,8 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/octelium/octelium/client/common v0.0.0-20260912095159-4af4f27d984c // indirect
-	github.com/octelium/octelium/cluster/rscserver v0.0.0-20260912095159-4af4f27d984c // indirect
+	github.com/octelium/octelium/client/common v0.0.0-20260927234815-4596c9818d7c // indirect
+	github.com/octelium/octelium/cluster/rscserver v0.0.0-20260927234815-4596c9818d7c // indirect
 	github.com/open-policy-agent/opa v1.20.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
