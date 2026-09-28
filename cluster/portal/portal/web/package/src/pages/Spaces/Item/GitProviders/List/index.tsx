@@ -18,6 +18,7 @@ import {
   IconBrandGithub,
   IconBrandGitlab,
   IconGitBranch,
+  IconPencil,
   IconPlus,
   IconTrash,
   IconWorld,
@@ -52,10 +53,15 @@ const providerInfo = (item: WsPB.GitProvider) => {
   }
 };
 
-const ProviderRow = (props: { item: WsPB.GitProvider; canManage: boolean }) => {
+const ProviderRow = (props: {
+  item: WsPB.GitProvider;
+  space: WsPB.Space;
+  canManage: boolean;
+}) => {
   const { item } = props;
   const info = providerInfo(item);
   const client = getClientWorkspace();
+  const navigate = useNavigate();
 
   const mutationDelete = useMutation({
     mutationFn: async () => {
@@ -97,6 +103,20 @@ const ProviderRow = (props: { item: WsPB.GitProvider; canManage: boolean }) => {
             )}
           </div>
         </div>
+        {props.canManage && (
+          <Button
+            size="xs"
+            variant="default"
+            leftSection={<IconPencil size={13} />}
+            onClick={() =>
+              navigate(
+                `${getPathSpace(props.space)}/gitproviders/${getShortName(item)}`,
+              )
+            }
+          >
+            Edit
+          </Button>
+        )}
         {props.canManage && (
           <ConfirmAction
             triggerLabel="Delete"
@@ -199,6 +219,7 @@ const Page = () => {
                   <ProviderRow
                     key={x.metadata?.uid}
                     item={x}
+                    space={space}
                     canManage={ctx.isAdmin}
                   />
                 ))}

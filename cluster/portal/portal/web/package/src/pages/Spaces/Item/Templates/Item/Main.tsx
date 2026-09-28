@@ -4,7 +4,7 @@ import Panel, { PanelBody, PanelHeader } from "@/components/Panel";
 import RepoLink from "@/components/RepoLink";
 import Tag from "@/components/Tag";
 import TimeAgo from "@/components/TimeAgo";
-import { formatMegabytes, formatMillicores } from "@/utils";
+import { formatMegabytes, formatMillicores, pluralize } from "@/utils";
 import { getPathSpace } from "@/utils/octelium";
 import { getResourceRef, getShortName, getShortNameFromStr } from "@/utils/pb";
 import { Anchor, Stack } from "@mantine/core";
@@ -106,6 +106,17 @@ const Page = () => {
               </Fact>
               <Fact label="Extra repos">
                 {spec?.additionalRepositories.length ?? 0}
+              </Fact>
+              <Fact label="Volumes">
+                {spec?.runtime?.volumeMounts.length ?? 0}
+              </Fact>
+              <Fact label="Egress">
+                {spec?.runtime?.network?.egress
+                  ? `${spec.runtime.network.egress.rules.length} ${pluralize(
+                      spec.runtime.network.egress.rules.length,
+                      "rule",
+                    )}`
+                  : "Default"}
               </Fact>
             </Facts>
           </PanelBody>

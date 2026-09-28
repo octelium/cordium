@@ -10,6 +10,8 @@ export type Resource =
   | WsPB.Space
   | WsPB.GitProvider
   | WsPB.UserSecret
+  | WsPB.Volume
+  | WsPB.WorkspaceSnapshot
   | UserPB.Service
   | UserPB.Namespace;
 
@@ -19,7 +21,9 @@ export type ResourceName =
   | "Secret"
   | "Space"
   | "GitProvider"
-  | "UserSecret";
+  | "UserSecret"
+  | "Volume"
+  | "WorkspaceSnapshot";
 
 interface ResourceCodec {
   clone(arg: object): object;
@@ -102,6 +106,16 @@ export const isWorkspaceStopped = (arg: WsPB.Workspace): boolean => {
 
 export const isWorkspaceRunning = (arg: WsPB.Workspace): boolean => {
   return arg.status?.state === WsPB.Workspace_Status_State.RUNNING;
+};
+
+export const isWorkspaceSnapshotReady = (
+  arg: WsPB.WorkspaceSnapshot,
+): boolean => {
+  return arg.status?.state === WsPB.WorkspaceSnapshot_Status_State.READY;
+};
+
+export const isVolumeShared = (arg: WsPB.Volume): boolean => {
+  return arg.spec?.accessMode === WsPB.Volume_AccessMode.SHARED;
 };
 
 export const isMemberAdmin = (arg: WsPB.Membership): boolean => {

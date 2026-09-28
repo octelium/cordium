@@ -6,7 +6,11 @@ import SecretSelect from "@/components/SecretSelect";
 import { useContextSpace } from "@/pages/Spaces/utils";
 import { onError } from "@/utils";
 import { getClientWorkspace } from "@/utils/client";
-import { getPathSpace, invalidateGitProviders } from "@/utils/octelium";
+import {
+  getPathSpace,
+  invalidateGitProviders,
+  invalidateResource,
+} from "@/utils/octelium";
 import { cloneResource, getResourceRef, getShortName } from "@/utils/pb";
 import {
   Alert,
@@ -70,21 +74,26 @@ const makeSpec = (kind: ProviderKind): WsPB.GitProvider["spec"] => {
   }
 };
 
-const CreateGitProvider = () => {
+export const GitProviderForm = (props: { item?: WsPB.GitProvider }) => {
   const ctx = useContextSpace();
   const client = getClientWorkspace();
   const navigate = useNavigate();
   const space = ctx.space.data;
+  const isEdit = !!props.item;
 
-  const [kind, setKind] = React.useState<ProviderKind>("github");
-  const [req, setReq] = React.useState(
-    WsPB.GitProvider.create({
-      apiVersion: "cordium/v1",
-      kind: "GitProvider",
-      metadata: {},
-      spec: makeSpec("github"),
-      status: {},
-    }),
+  const [kind, setKind] = React.useState<ProviderKind>(
+    (props.item?.spec?.type.oneofKind as ProviderKind | undefined) ?? "github",
+  );
+  const [req, setReq] = React.useState(() =>
+    props.item
+      ? cloneResource(props.item)
+      : WsPB.GitProvider.create({
+          apiVersion: "cordium/v1",
+          kind: "GitProvider",
+          metadata: {},
+          spec: makeSpec("github"),
+          status: {},
+        }),
   );
 
   const patch = (fn: (draft: WsPB.GitProvider) => void) => {
@@ -104,13 +113,18 @@ const CreateGitProvider = () => {
   const mutation = useMutation({
     mutationFn: async () => {
       const payload = cloneResource(req);
+      if (isEdit) {
+        const { response } = await client.updateGitProvider(payload);
+        return response;
+      }
       payload.status!.spaceRef = getResourceRef(space!);
       const { response } = await client.createGitProvider(payload);
       return response;
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       invalidateGitProviders();
-      toast.success("Git provider created");
+      invalidateResource(response);
+      toast.success(isEdit ? "Git provider updated" : "Git provider created");
       navigate(`${getPathSpace(space!)}/gitproviders`);
     },
     onError,
@@ -135,14 +149,14 @@ const CreateGitProvider = () => {
 
   return (
     <>
-      <Meta title="New Git provider" />
+      <Meta title={isEdit ? "Edit Git provider" : "New Git provider"} />
       <PageHeader
-        title="New Git provider"
+        title={isEdit ? `Edit ${getShortName(req)}` : "New Git provider"}
         crumbs={[
           { label: "Spaces", to: "/spaces" },
           { label: getShortName(space), to: getPathSpace(space) },
           { label: "Git providers", to: `${getPathSpace(space)}/gitproviders` },
-          { label: "New" },
+          { label: isEdit ? getShortName(req) : "New" },
         ]}
         description="Register an OAuth application so members can authorise Cordium to clone their private repositories."
       />
@@ -159,6 +173,7 @@ const CreateGitProvider = () => {
               <MetadataEdit
                 metadata={req.metadata!}
                 parentName={space.metadata?.name}
+                disableName={isEdit}
                 onChange={(md) =>
                   patch((d) => {
                     d.metadata = md;
@@ -292,7 +307,7 @@ const CreateGitProvider = () => {
                 disabled={!req.metadata?.name || !inner?.clientID}
                 onClick={() => mutation.mutate()}
               >
-                Create provider
+                {isEdit ? "Save changes" : "Create provider"}
               </Button>
             </PanelFooter>
           </Panel>
@@ -301,5 +316,7 @@ const CreateGitProvider = () => {
     </>
   );
 };
+
+const CreateGitProvider = () => <GitProviderForm />;
 
 export default CreateGitProvider;

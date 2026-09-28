@@ -23,7 +23,7 @@
     "@headlessui/react": "^2.2.10",
     "@mantine/core": "^9.5.2",
     "@mantine/hooks": "^9.5.2",
-    "@octelium/apis": "^1.0.7",
+    "@octelium/apis": "^1.0.11",
     "@protobuf-ts/grpcweb-transport": "^2.11.1",
     "@protobuf-ts/plugin": "^2.11.1",
     "@reduxjs/toolkit": "^2.12.0",

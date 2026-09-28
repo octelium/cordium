@@ -1,4 +1,5 @@
 import CopyText from "@/components/CopyText";
+import CreateSnapshot from "@/components/CreateSnapshot";
 import Facts, { Fact } from "@/components/Facts";
 import Panel, { PanelBody, PanelHeader } from "@/components/Panel";
 import RepoLink from "@/components/RepoLink";
@@ -12,19 +13,26 @@ import {
   getPathSpaceRef,
   getPathTemplateRef,
   getWorkspaceURL,
+  invalidateResource,
 } from "@/utils/octelium";
-import { getShortNameFromRef, isWorkspaceStopped } from "@/utils/pb";
-import { Alert, Anchor, Button, Stack } from "@mantine/core";
+import {
+  getResourceRef,
+  getShortNameFromRef,
+  isWorkspaceStopped,
+} from "@/utils/pb";
+import { Alert, Anchor, Button, Select, Stack } from "@mantine/core";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { GetOptions } from "@octelium/apis/main/metav1";
 import {
   IconAlertTriangle,
   IconBrandGit,
   IconExternalLink,
+  IconShare,
   IconWorldWww,
 } from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { useContextWorkspace } from "../utils";
 import { StartStopButtons } from "./index";
@@ -109,9 +117,103 @@ const failureLabel = (failure: WsPB.Workspace_Status_Failure): string => {
       return "Container failed to run";
     case "healthCheck":
       return "Health check failed";
+    case "networkPolicy":
+      return "Network policy could not be enforced";
+    case "volume":
+      return `Volume "${failure.type.volume.name}" could not be mounted`;
     default:
       return "Workspace failed";
   }
+};
+
+const stoppingReasonLabel = (
+  reason: WsPB.Workspace_Status_StoppingReason,
+): string | undefined => {
+  switch (reason) {
+    case WsPB.Workspace_Status_StoppingReason.API:
+      return "Stopped on request";
+    case WsPB.Workspace_Status_StoppingReason.ERROR:
+      return "Stopped after a failure";
+    case WsPB.Workspace_Status_StoppingReason.CLUSTER:
+      return "Stopped by the Cluster";
+    default:
+      return undefined;
+  }
+};
+
+const ShareMode = WsPB.Workspace_Status_SharedPort_Mode;
+
+const ApplicationShare = (props: {
+  item: WsPB.Workspace;
+  app: WsPB.Workspace_Spec_Application;
+}) => {
+  const { item, app } = props;
+  const client = getClientWorkspace();
+  const sharedPort = item.status?.sharedPorts.find(
+    (x) => x.applicationName === app.name,
+  );
+  const isOrg = item.status?.spaceType === WsPB.Space_Status_Type.ORGANIZATION;
+
+  const mutation = useMutation({
+    mutationFn: async (val: string) => {
+      if (val === "private") {
+        await client.unshareWorkspacePort(
+          WsPB.UnshareWorkspacePortRequest.create({
+            workspaceRef: getResourceRef(item),
+            applicationName: app.name,
+          }),
+        );
+        return;
+      }
+
+      await client.shareWorkspacePort(
+        WsPB.ShareWorkspacePortRequest.create({
+          workspaceRef: getResourceRef(item),
+          applicationName: app.name,
+          mode:
+            val === "all"
+              ? WsPB.ShareWorkspacePortRequest_Mode.ALL
+              : WsPB.ShareWorkspacePortRequest_Mode.MEMBERS,
+        }),
+      );
+    },
+    onSuccess: (_, val) => {
+      invalidateResource(item);
+      toast.success(
+        val === "private" ? "Application unshared" : "Application shared",
+      );
+    },
+    onError,
+  });
+
+  const value =
+    sharedPort?.mode === ShareMode.ALL
+      ? "all"
+      : sharedPort?.mode === ShareMode.MEMBERS
+        ? "members"
+        : "private";
+
+  return (
+    <Select
+      size="xs"
+      w={170}
+      aria-label={`Sharing of ${app.name}`}
+      allowDeselect={false}
+      leftSection={<IconShare size={13} />}
+      disabled={mutation.isPending}
+      data={[
+        { value: "private", label: "Only you" },
+        ...(isOrg || value === "members"
+          ? [{ value: "members", label: "Space members" }]
+          : []),
+        { value: "all", label: "All users" },
+      ]}
+      value={value}
+      onChange={(val) => {
+        if (val && val !== value) mutation.mutate(val);
+      }}
+    />
+  );
 };
 
 const Page = () => {
@@ -136,6 +238,13 @@ const Page = () => {
   const limit = item.status?.limit;
   const failure = item.status?.failure;
   const active = !isWorkspaceStopped(item);
+  const volumeMounts = item.spec?.runtime?.volumeMounts ?? [];
+  const stoppingReason = stoppingReasonLabel(
+    item.status?.stoppingReason ?? WsPB.Workspace_Status_StoppingReason.UNSET,
+  );
+  const canSnapshot =
+    !(item.spec?.isEphemeral && !active) &&
+    (!!item.status?.regionRef || !!item.status?.lastRegionRef);
 
   return (
     <Stack gap="lg">
@@ -232,9 +341,36 @@ const Page = () => {
                       .join(" · ") || "—"}
                   </Fact>
                 )}
+                {item.status?.workspaceSnapshotRef && (
+                  <Fact label="Restored from">
+                    <Anchor component={Link} to="/snapshots" size="sm" fw={600}>
+                      {getShortNameFromRef(item.status.workspaceSnapshotRef)}
+                    </Anchor>
+                  </Fact>
+                )}
+                {volumeMounts.length > 0 && (
+                  <Fact label="Volumes">
+                    <div className="flex flex-wrap gap-1.5">
+                      {volumeMounts.map((m, idx) => (
+                        <Tag key={idx} mono>
+                          {m.volumeRef ? getShortNameFromRef(m.volumeRef) : "?"}
+                          {` → ${m.mountPath}`}
+                          {m.readOnly && " · ro"}
+                        </Tag>
+                      ))}
+                    </div>
+                  </Fact>
+                )}
                 {item.status?.regionRef?.name && (
                   <Fact label="Region">{item.status.regionRef.name}</Fact>
                 )}
+                {!item.status?.regionRef?.name &&
+                  !item.spec?.isEphemeral &&
+                  item.status?.lastRegionRef?.name && (
+                    <Fact label="Storage region">
+                      {item.status.lastRegionRef.name}
+                    </Fact>
+                  )}
                 <Fact label="Created">
                   <TimeAgo rfc3339={item.metadata?.createdAt} />
                 </Fact>
@@ -246,6 +382,7 @@ const Page = () => {
                 {item.status?.lastStoppedAt && (
                   <Fact label="Last stopped">
                     <TimeAgo rfc3339={item.status.lastStoppedAt} />
+                    {!active && stoppingReason && ` · ${stoppingReason}`}
                   </Fact>
                 )}
                 {active && item.status?.lastActivityAt && (
@@ -267,42 +404,46 @@ const Page = () => {
                 title="Applications"
                 description={
                   active
-                    ? "Ports exposed by this workspace over HTTPS."
+                    ? "Ports exposed by this workspace over HTTPS. Share them with other users when needed."
                     : "Available once the workspace is running."
                 }
               />
-              <PanelBody>
-                <div className="flex flex-wrap gap-2">
+              <PanelBody className="px-5 py-1">
+                <div className="divide-y divide-line-subtle">
                   {apps.map((app) => {
                     const href = getApplicationURL(item, app);
                     const label = `${app.displayName || app.name}${
                       app.port ? ` :${app.port}` : ""
                     }`;
-                    if (!href || !active) {
-                      return (
-                        <Tag key={app.name}>
-                          {label}
-                          {app.isDefault && " · default"}
-                        </Tag>
-                      );
-                    }
                     return (
-                      <Anchor
+                      <div
                         key={app.name}
-                        href={href}
-                        target="_blank"
-                        rel="noreferrer"
-                        underline="never"
+                        className="flex flex-wrap items-center justify-between gap-3 py-2.5"
                       >
-                        <Tag
-                          tone="info"
-                          icon={<IconExternalLink size={11} />}
-                          className="cursor-pointer"
-                        >
-                          {label}
-                          {app.isDefault && " · default"}
-                        </Tag>
-                      </Anchor>
+                        {!href || !active ? (
+                          <Tag>
+                            {label}
+                            {app.isDefault && " · default"}
+                          </Tag>
+                        ) : (
+                          <Anchor
+                            href={href}
+                            target="_blank"
+                            rel="noreferrer"
+                            underline="never"
+                          >
+                            <Tag
+                              tone="info"
+                              icon={<IconExternalLink size={11} />}
+                              className="cursor-pointer"
+                            >
+                              {label}
+                              {app.isDefault && " · default"}
+                            </Tag>
+                          </Anchor>
+                        )}
+                        <ApplicationShare item={item} app={app} />
+                      </div>
                     );
                   })}
                 </div>
@@ -317,6 +458,9 @@ const Page = () => {
             <Stack gap="sm">
               <StartStopButtons item={item} fullWidth />
               <GitProviderLogin item={item} />
+              {canSnapshot && (
+                <CreateSnapshot item={item} size="sm" fullWidth />
+              )}
               {qryTemplate.isSuccess && item.status?.spaceRef && (
                 <Button
                   fullWidth

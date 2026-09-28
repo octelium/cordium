@@ -1,19 +1,17 @@
 import { RouteObject } from "react-router-dom";
 import Create from "./Create";
-import Edit from "./Edit";
 import List from "./List";
 import Root from "./index";
 
-const routerSpacesItemGitproviders = (): RouteObject => {
+const routerSpacesItemVolumes = (): RouteObject => {
   return {
-    path: "gitproviders",
+    path: "volumes",
     element: <Root />,
     children: [
       { path: "", element: <List /> },
       { path: "create", element: <Create /> },
-      { path: ":gitProviderName", element: <Edit /> },
     ],
   };
 };
 
-export default routerSpacesItemGitproviders;
+export default routerSpacesItemVolumes;

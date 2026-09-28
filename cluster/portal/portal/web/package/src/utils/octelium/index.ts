@@ -153,3 +153,13 @@ export const invalidateMemberships = () => {
 export const invalidateUserSecrets = () => {
   queryClient.invalidateQueries({ queryKey: ["workspace/listUserSecret"] });
 };
+
+export const invalidateVolumes = () => {
+  queryClient.invalidateQueries({ queryKey: ["workspace/listVolume"] });
+};
+
+export const invalidateWorkspaceSnapshots = () => {
+  queryClient.invalidateQueries({
+    queryKey: ["workspace/listWorkspaceSnapshot"],
+  });
+};

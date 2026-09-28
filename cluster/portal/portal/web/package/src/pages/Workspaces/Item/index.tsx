@@ -22,6 +22,7 @@ import * as WsPB from "@octelium/apis/main/cordiumv1";
 import {
   IconActivity,
   IconBolt,
+  IconCamera,
   IconExternalLink,
   IconLayoutGrid,
   IconPlayerPlay,
@@ -186,6 +187,11 @@ const Page = () => {
                 label: "Logs",
                 to: `${base}/logs`,
                 icon: <IconActivity size={14} />,
+              },
+              {
+                label: "Snapshots",
+                to: `${base}/snapshots`,
+                icon: <IconCamera size={14} />,
               },
               {
                 label: "Config",

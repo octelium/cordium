@@ -1,4 +1,5 @@
 import {
+  IconCamera,
   IconLayoutDashboard,
   IconKey,
   IconServer2,
@@ -26,6 +27,7 @@ const primary: NavItem[] = [
   },
   { label: "Spaces", to: "/spaces", icon: <IconStack2 size={17} /> },
   { label: "Workspaces", to: "/workspaces", icon: <IconTerminal2 size={17} /> },
+  { label: "Snapshots", to: "/snapshots", icon: <IconCamera size={17} /> },
 ];
 
 const secondary: NavItem[] = [

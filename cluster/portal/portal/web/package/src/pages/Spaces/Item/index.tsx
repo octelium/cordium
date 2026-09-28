@@ -14,6 +14,7 @@ import {
 import { Button } from "@mantine/core";
 import {
   IconBuilding,
+  IconDatabase,
   IconGitBranch,
   IconKey,
   IconLayoutGrid,
@@ -105,6 +106,12 @@ const Page = () => {
                   to: `${getPathSpace(data)}/secrets`,
                   icon: <IconKey size={14} />,
                   count: counts.secrets.data?.listResponseMeta?.totalCount,
+                },
+                {
+                  label: "Volumes",
+                  to: `${getPathSpace(data)}/volumes`,
+                  icon: <IconDatabase size={14} />,
+                  count: counts.volumes.data?.listResponseMeta?.totalCount,
                 },
                 {
                   label: "Git providers",

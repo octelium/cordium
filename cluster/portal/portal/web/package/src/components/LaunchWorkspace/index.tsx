@@ -1,4 +1,5 @@
 import Panel, { PanelBody, PanelFooter, PanelHeader } from "@/components/Panel";
+import RegionSelect from "@/components/RegionSelect";
 import SpecEditor from "@/components/SpecEditor";
 import { onError } from "@/utils";
 import { getClientWorkspace } from "@/utils/client";
@@ -38,41 +39,6 @@ const newWorkspace = (templateRef: MetaPB.ObjectReference) =>
     spec: {},
     status: { templateRef },
   });
-
-const RegionPicker = (props: {
-  value: string;
-  onChange: (val: string) => void;
-}) => {
-  const qry = useQuery({
-    queryKey: ["workspace/listRegion"],
-    queryFn: () => {
-      const { response } = getClientWorkspace().listRegion(
-        WsPB.ListRegionOptions.create({}),
-      );
-      return response;
-    },
-  });
-
-  const items = qry.data?.items ?? [];
-  if (items.length < 2) return null;
-
-  return (
-    <Select
-      label="Region"
-      description="Where the Workspace runs. Defaults to your preferred region."
-      placeholder="Default"
-      clearable
-      data={items.map((x) => ({
-        value: x.metadata!.name,
-        label: [x.metadata!.name, x.status?.city, x.status?.country]
-          .filter(Boolean)
-          .join(" · "),
-      }))}
-      value={props.value || null}
-      onChange={(val) => props.onChange(val ?? "")}
-    />
-  );
-};
 
 const LaunchForm = (props: {
   template: WsPB.Template;
@@ -252,7 +218,7 @@ const LaunchForm = (props: {
             </div>
           )}
 
-          <RegionPicker value={region} onChange={setRegion} />
+          <RegionSelect value={region} onChange={setRegion} />
 
           <div className="flex flex-wrap gap-6 rounded-lg border border-line bg-surface-subtle px-4 py-3">
             <Switch

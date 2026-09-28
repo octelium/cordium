@@ -114,6 +114,11 @@ export const formatMegabytes = (megabytes: number): string => {
   return `${megabytes} MB`;
 };
 
+export const formatBytes = (bytes: number): string => {
+  if (bytes <= 0) return "—";
+  return formatMegabytes(Math.ceil(bytes / 1000000));
+};
+
 export const formatMillicores = (millicores: number): string => {
   if (millicores <= 0) return "—";
   if (millicores >= 1000) {

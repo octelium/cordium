@@ -8,6 +8,7 @@ import routerGitProvider from "./GitProviders/router";
 import routerMembership from "./Memberships/router";
 import routerSecret from "./Secrets/router";
 import routerTemplate from "./Templates/router";
+import routerVolume from "./Volumes/router";
 
 const routerSpacesItem = (): RouteObject => {
   return {
@@ -21,6 +22,7 @@ const routerSpacesItem = (): RouteObject => {
       routerSecret(),
       routerMembership(),
       routerTemplate(),
+      routerVolume(),
     ],
   };
 };

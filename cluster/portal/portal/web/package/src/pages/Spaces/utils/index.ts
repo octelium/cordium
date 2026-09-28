@@ -104,6 +104,17 @@ export const useSpaceCounts = (spaceRef?: MetaPB.ObjectReference) => {
     enabled,
   });
 
+  const volumes = useQuery({
+    queryKey: ["workspace/listVolume", spaceRef?.uid, "count"],
+    queryFn: () => {
+      const { response } = client.listVolume(
+        WsPB.ListVolumeOptions.create({ spaceRef: spaceRef!, common }),
+      );
+      return response;
+    },
+    enabled,
+  });
+
   const members = useQuery({
     queryKey: ["workspace/listMembership", spaceRef?.uid, "count"],
     queryFn: () => {
@@ -115,5 +126,5 @@ export const useSpaceCounts = (spaceRef?: MetaPB.ObjectReference) => {
     enabled,
   });
 
-  return { workspaces, templates, secrets, members };
+  return { workspaces, templates, secrets, volumes, members };
 };

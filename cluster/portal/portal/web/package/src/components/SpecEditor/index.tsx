@@ -13,7 +13,9 @@ import {
   IconAdjustments,
   IconBox,
   IconCpu,
+  IconDatabase,
   IconGitBranch,
+  IconNetwork,
   IconTerminal2,
   IconVariable,
   IconWorldWww,
@@ -24,10 +26,12 @@ import toast from "react-hot-toast";
 import ApplicationsSection from "./Applications";
 import ImageSection from "./Image";
 import LimitsSection from "./Limits";
+import NetworkSection from "./Network";
 import RepositorySection from "./Repository";
 import RuntimeSection from "./Runtime";
 import { CommonSpec, SpecKind } from "./types";
 import VarsSection from "./Vars";
+import VolumesSection from "./Volumes";
 
 type Editable = WsPB.Workspace | WsPB.Template;
 
@@ -125,6 +129,18 @@ const SpecEditor = (props: {
       label: "Runtime",
       icon: <IconTerminal2 size={14} />,
       body: <RuntimeSection {...{ kind, spec, patch }} spaceRef={props.spaceRef} />,
+    },
+    {
+      value: "volumes",
+      label: "Volumes",
+      icon: <IconDatabase size={14} />,
+      body: <VolumesSection {...{ kind, spec, patch }} spaceRef={props.spaceRef} />,
+    },
+    {
+      value: "network",
+      label: "Network",
+      icon: <IconNetwork size={14} />,
+      body: <NetworkSection {...{ kind, spec, patch }} spaceRef={props.spaceRef} />,
     },
     ...(kind === "Workspace"
       ? [
