@@ -351,29 +351,3 @@ func (s *Server) getWorkspaceSnapshotForRestore(ctx context.Context,
 
 	return snapshot, nil
 }
-
-func (s *Server) setWorkspaceRestoreLimit(ws *cordiumv1.Workspace,
-	snapshot *cordiumv1.WorkspaceSnapshot) error {
-
-	if snapshot.Status.RestoreSizeBytes == 0 {
-		return nil
-	}
-
-	restoreMegabytes := uint32((snapshot.Status.RestoreSizeBytes + 1000*1000 - 1) / (1000 * 1000))
-
-	if ws.Status.Limit == nil {
-		ws.Status.Limit = &cordiumv1.Workspace_Spec_Limit{}
-	}
-
-	if ws.Status.Limit.Storage == nil {
-		ws.Status.Limit.Storage = &cordiumv1.Workspace_Spec_Limit_Storage{}
-	}
-
-	if ws.Status.Limit.Storage.Megabytes >= restoreMegabytes {
-		return nil
-	}
-
-	return grpcutils.InvalidArg(
-		"The WorkspaceSnapshot: %s needs at least %d MB of storage while the Workspace is limited to %d MB",
-		snapshot.Metadata.Name, restoreMegabytes, ws.Status.Limit.Storage.Megabytes)
-}

@@ -519,25 +519,164 @@ func TestGetPVCDataSource(t *testing.T) {
 		assert.NotNil(t, dataSource)
 		assert.Equal(t, c.ctl.getTemplateBuildName(tmpl), dataSource.Name)
 	})
+}
 
-	t.Run("the PVC is at least as large as the restore size", func(t *testing.T) {
+func TestSetPersistentVolumeClaimSize(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	tst, err := otests.Initialize(nil)
+	assert.Nil(t, err, "%+v", err)
+	t.Cleanup(func() {
+		tst.Destroy()
+	})
+
+	c := newSnapshotTest(ctx, t, tst.C)
+
+	const gigabyte = 1000 * 1000 * 1000
+
+	newWorkspace := func(t *testing.T, megabytes uint32) *cordiumv1.Workspace {
 		ws := c.createWorkspace(ctx, t)
 		ws.Status.Limit = &cordiumv1.Workspace_Spec_Limit{
 			Storage: &cordiumv1.Workspace_Spec_Limit_Storage{
-				Megabytes: 1000,
+				Megabytes: megabytes,
 			},
 		}
 
-		assert.Equal(t, int64(1000), c.ctl.getPVCStorageMegabytes(ctx, ws))
+		return ws
+	}
 
-		snapshot := readySnapshot(t, ws)
-		snapshot.Status.RestoreSizeBytes = 8000 * 1000 * 1000
+	getPVCSize := func(t *testing.T, ws *cordiumv1.Workspace) int64 {
+		assert.Nil(t, c.ctl.setPersistentVolumeClaim(ctx, ws))
+
+		pvc, err := c.ctl.k8sC.CoreV1().PersistentVolumeClaims(ns).
+			Get(ctx, c.ctl.getPVCName(ws), k8smetav1.GetOptions{})
+		assert.Nil(t, err, "%+v", err)
+
+		return pvc.Spec.Resources.Requests.Storage().Value()
+	}
+
+	restoreFrom := func(t *testing.T, ws *cordiumv1.Workspace,
+		restoreSizeBytes int64, megabytes uint32) *cordiumv1.Workspace {
+		snapshot := c.createSnapshot(ctx, t, ws, c.regionRef)
+		snapshot.Status.State = cordiumv1.WorkspaceSnapshot_Status_STATE_READY
+		snapshot.Status.RestoreSizeBytes = uint64(restoreSizeBytes)
 		snapshot, err := c.fakeC.OcteliumC.CordiumC().UpdateWorkspaceSnapshot(ctx, snapshot)
 		assert.Nil(t, err, "%+v", err)
 
-		ws.Status.WorkspaceSnapshotRef = umetav1.GetObjectReference(snapshot)
+		_, err = c.ctl.createVolumeSnapshot(ctx, &createVolumeSnapshotReq{
+			name:    getWorkspaceSnapshotK8sName(snapshot),
+			pvcName: c.ctl.getPVCName(ws),
+		})
+		assert.Nil(t, err, "%+v", err)
 
-		assert.Equal(t, int64(8000), c.ctl.getPVCStorageMegabytes(ctx, ws))
+		c.setVolumeSnapshotReady(ctx, t, getWorkspaceSnapshotK8sName(snapshot), restoreSizeBytes)
+
+		ret := newWorkspace(t, megabytes)
+		ret.Status.WorkspaceSnapshotRef = umetav1.GetObjectReference(snapshot)
+
+		return ret
+	}
+
+	t.Run("the storage limit is requested in megabytes", func(t *testing.T) {
+		ws := newWorkspace(t, 3000)
+
+		assert.Equal(t, int64(3000*1000*1000), getPVCSize(t, ws))
+	})
+
+	t.Run("a restore is at least as large as the restore size", func(t *testing.T) {
+		ws := newWorkspace(t, 1000)
+		restored := restoreFrom(t, ws, 8*gigabyte, 1000)
+
+		assert.Equal(t, int64(8*gigabyte), getPVCSize(t, restored))
+	})
+
+	t.Run("a restore is at least as large as the storage limit", func(t *testing.T) {
+		ws := newWorkspace(t, 1000)
+		restored := restoreFrom(t, ws, 1*gigabyte, 20000)
+
+		assert.Equal(t, int64(20*gigabyte), getPVCSize(t, restored))
+	})
+
+	t.Run("a restore keeps the exact restore size", func(t *testing.T) {
+		ws := newWorkspace(t, 20000)
+		restored := restoreFrom(t, ws, 20000*1024*1024, 20000)
+
+		assert.Equal(t, int64(20000*1024*1024), getPVCSize(t, restored))
+	})
+
+	t.Run("the restore size of the volume snapshot is honored", func(t *testing.T) {
+		ws := newWorkspace(t, 20000)
+		restored := restoreFrom(t, ws, 20000538624, 20000)
+
+		snapshot, err := c.fakeC.OcteliumC.CordiumC().GetWorkspaceSnapshot(ctx, &rmetav1.GetOptions{
+			Uid: restored.Status.WorkspaceSnapshotRef.Uid,
+		})
+		assert.Nil(t, err, "%+v", err)
+		snapshot.Status.RestoreSizeBytes = 0
+		_, err = c.fakeC.OcteliumC.CordiumC().UpdateWorkspaceSnapshot(ctx, snapshot)
+		assert.Nil(t, err, "%+v", err)
+
+		assert.Equal(t, int64(20000538624), getPVCSize(t, restored))
+	})
+
+	t.Run("restoring a restored Workspace does not grow its storage", func(t *testing.T) {
+		roundUpToGiB := func(size int64) int64 {
+			return (size + 1024*1024*1024 - 1) / (1024 * 1024 * 1024) * (1024 * 1024 * 1024)
+		}
+
+		ws := newWorkspace(t, 20000)
+		size := getPVCSize(t, ws)
+		assert.Equal(t, int64(20*gigabyte), size)
+
+		restored := restoreFrom(t, ws, roundUpToGiB(size), 20000)
+		size = getPVCSize(t, restored)
+		assert.Equal(t, roundUpToGiB(20*gigabyte), size)
+
+		for i := 0; i < 3; i++ {
+			restored = restoreFrom(t, restored, roundUpToGiB(size), 20000)
+			assert.Equal(t, size, getPVCSize(t, restored))
+		}
+	})
+
+	t.Run("a Template build restore is at least as large as its restore size", func(t *testing.T) {
+		org, err := c.fakeC.OcteliumC.CordiumC().CreateSpace(ctx, &cordiumv1.Space{
+			Metadata: &metav1.Metadata{
+				Name: utilrand.GetRandomStringCanonical(8),
+			},
+			Spec: &cordiumv1.Space_Spec{},
+			Status: &cordiumv1.Space_Status{
+				Type: cordiumv1.Space_Status_ORGANIZATION,
+			},
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		tmpl, err := c.fakeC.OcteliumC.CordiumC().CreateTemplate(ctx, &cordiumv1.Template{
+			Metadata: &metav1.Metadata{
+				Name: utilrand.GetRandomStringCanonical(8),
+			},
+			Spec: &cordiumv1.Template_Spec{},
+			Status: &cordiumv1.Template_Status{
+				SpaceRef: umetav1.GetObjectReference(org),
+				BuildInfo: &cordiumv1.Template_Status_BuildInfo{
+					CurrentReadyBuildID: utilrand.GetRandomStringCanonical(8),
+				},
+			},
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		ws := newWorkspace(t, 20000)
+		ws.Status.TemplateRef = umetav1.GetObjectReference(tmpl)
+
+		_, err = c.ctl.createVolumeSnapshot(ctx, &createVolumeSnapshotReq{
+			name:    c.ctl.getTemplateBuildName(tmpl),
+			pvcName: c.ctl.getPVCName(ws),
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		c.setVolumeSnapshotReady(ctx, t, c.ctl.getTemplateBuildName(tmpl), 20000538624)
+
+		assert.Equal(t, int64(20000538624), getPVCSize(t, ws))
 	})
 }
 

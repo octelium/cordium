@@ -17,6 +17,7 @@
 package suite
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -26,8 +27,10 @@ import (
 	"github.com/octelium/octelium/cluster/e2e/harness"
 	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"github.com/octelium/octelium/pkg/grpcerr"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	k8smetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func testWorkspaceSnapshot(t *testing.T, ch *harness.H) {
@@ -38,6 +41,9 @@ func testWorkspaceSnapshot(t *testing.T, ch *harness.H) {
 	name := h.Name()
 
 	ws := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{})
+
+	marker := workspacePath("e2e-" + name)
+	h.MustExec(t, ws, fmt.Sprintf("echo %s > %s && sync", ws.Metadata.Uid, marker))
 
 	snapshot := h.CreateWorkspaceSnapshot(t, ws, fmt.Sprintf("e2e-%s", name))
 
@@ -125,6 +131,42 @@ func testWorkspaceSnapshot(t *testing.T, ch *harness.H) {
 		assert.True(t, grpcerr.IsInvalidArg(err), "%+v", err)
 	})
 
+	t.Run("AWorkspaceIsRestoredWithTheStorageLimitOfItsSnapshot", func(t *testing.T) {
+		ready := waitWorkspaceSnapshotTaken(t, h, snapshot)
+
+		restored := h.CreateWorkspace(t, &cordiumv1.Workspace{
+			Status: &cordiumv1.Workspace_Status{
+				WorkspaceSnapshotRef: umetav1.GetObjectReference(ready),
+			},
+		})
+		h.StartWorkspace(t, restored)
+		h.WaitWorkspaceRunning(t, restored)
+
+		assert.Equal(t, ws.Metadata.Uid, h.MustExec(t, restored, "cat "+marker))
+
+		source := h.GetWorkspace(t, ws)
+		cur := h.GetWorkspace(t, restored)
+		require.NotNil(t, cur.Status.Limit)
+		require.NotNil(t, cur.Status.Limit.Storage)
+		assert.Equal(t, source.Status.Limit.Storage.Megabytes, cur.Status.Limit.Storage.Megabytes)
+
+		sourcePVC, err := h.K8sC().CoreV1().PersistentVolumeClaims(charness.WorkspaceNamespace).
+			Get(ctx, workspacePVCName(ws), k8smetav1.GetOptions{})
+		require.Nil(t, err)
+
+		restoredPVC, err := h.K8sC().CoreV1().PersistentVolumeClaims(charness.WorkspaceNamespace).
+			Get(ctx, workspacePVCName(restored), k8smetav1.GetOptions{})
+		require.Nil(t, err)
+
+		assert.Equal(t,
+			max(int64(cur.Status.Limit.Storage.Megabytes)*1000*1000, int64(ready.Status.RestoreSizeBytes)),
+			restoredPVC.Spec.Resources.Requests.Storage().Value())
+
+		assert.Equal(t, sourcePVC.Status.Capacity.Storage().Value(),
+			restoredPVC.Status.Capacity.Storage().Value(),
+			"the restored Workspace storage grew beyond the storage of the snapshotted Workspace")
+	})
+
 	t.Run("TheSnapshotIsDeleted", func(t *testing.T) {
 		_, err := h.CordiumC().DeleteWorkspaceSnapshot(ctx, &metav1.DeleteOptions{
 			Uid: snapshot.Metadata.Uid,
@@ -137,4 +179,40 @@ func testWorkspaceSnapshot(t *testing.T, ch *harness.H) {
 		require.NotNil(t, err)
 		assert.True(t, grpcerr.IsNotFound(err), "%+v", err)
 	})
+}
+
+func waitWorkspaceSnapshotTaken(t *testing.T, h *charness.H,
+	snapshot *cordiumv1.WorkspaceSnapshot) *cordiumv1.WorkspaceSnapshot {
+	t.Helper()
+
+	var ret *cordiumv1.WorkspaceSnapshot
+
+	h.Eventually(t, "the WorkspaceSnapshot to be taken", charness.StartBudget,
+		func(ctx context.Context) error {
+			cur, err := h.CordiumC().GetWorkspaceSnapshot(ctx, &metav1.GetOptions{
+				Uid: snapshot.Metadata.Uid,
+			})
+			if err != nil {
+				return err
+			}
+
+			if cur.Status.State == cordiumv1.WorkspaceSnapshot_Status_STATE_CREATING {
+				return errors.Errorf("the WorkspaceSnapshot %s is still being taken",
+					cur.Metadata.Name)
+			}
+
+			ret = cur
+
+			return nil
+		})
+
+	if ret.Status.Failure.GetUnsupported() != nil {
+		t.Skip("the Cluster storage backend does not support snapshots")
+	}
+
+	require.Equal(t, cordiumv1.WorkspaceSnapshot_Status_STATE_READY, ret.Status.State,
+		"the WorkspaceSnapshot %s could not be taken: %s",
+		ret.Metadata.Name, ret.Status.Failure.GetMessage())
+
+	return ret
 }

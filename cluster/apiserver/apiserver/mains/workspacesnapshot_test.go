@@ -313,11 +313,11 @@ func TestWorkspaceSnapshot(t *testing.T) {
 		assert.True(t, grpcerr.IsInvalidArg(err), "%+v", err)
 	})
 
-	t.Run("a Workspace cannot be restored into a smaller storage", func(t *testing.T) {
+	t.Run("a Workspace is restored from a snapshot that is larger than its storage limit", func(t *testing.T) {
 		ws := setWorkspaceRan(t, createWorkspace(t))
 		snapshot := setSnapshotReady(t, createSnapshot(t, ws), 100*1000*1000*1000)
 
-		_, err := srv.CreateWorkspace(usr.Ctx(), &cordiumv1.Workspace{
+		restored, err := srv.CreateWorkspace(usr.Ctx(), &cordiumv1.Workspace{
 			Metadata: &metav1.Metadata{},
 			Spec: &cordiumv1.Workspace_Spec{
 				Limit: &cordiumv1.Workspace_Spec_Limit{
@@ -331,8 +331,68 @@ func TestWorkspaceSnapshot(t *testing.T) {
 				WorkspaceSnapshotRef: umetav1.GetObjectReference(snapshot),
 			},
 		})
-		assert.NotNil(t, err)
-		assert.True(t, grpcerr.IsInvalidArg(err), "%+v", err)
+		assert.Nil(t, err, "%+v", err)
+		assert.Equal(t, uint32(1000), restored.Status.Limit.Storage.Megabytes)
+	})
+
+	t.Run("a Workspace is restored from a snapshot of a Workspace with the same storage limit", func(t *testing.T) {
+		ws := setWorkspaceRan(t, createWorkspace(t))
+		snapshot := setSnapshotReady(t, createSnapshot(t, ws),
+			uint64(ws.Status.Limit.Storage.Megabytes)*1024*1024)
+
+		restored, err := srv.CreateWorkspace(usr.Ctx(), &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{},
+			Spec:     &cordiumv1.Workspace_Spec{},
+			Status: &cordiumv1.Workspace_Status{
+				WorkspaceSnapshotRef: umetav1.GetObjectReference(snapshot),
+			},
+		})
+		assert.Nil(t, err, "%+v", err)
+		assert.Equal(t, ws.Status.Limit.Storage.Megabytes, restored.Status.Limit.Storage.Megabytes)
+	})
+
+	t.Run("a Workspace restored from a snapshot that is larger than its storage limit is started", func(t *testing.T) {
+		regionList, err := fakeC.OcteliumC.CoreC().ListRegion(ctx, &rmetav1.ListOptions{})
+		assert.Nil(t, err, "%+v", err)
+		assert.True(t, len(regionList.Items) > 0)
+
+		region := regionList.Items[0]
+
+		ws := createWorkspace(t)
+		ws.Status.LastRegionRef = umetav1.GetObjectReference(region)
+		ws.Status.SuccessfulRuns = 1
+		ws, err = fakeC.OcteliumC.CordiumC().UpdateWorkspace(ctx, ws)
+		assert.Nil(t, err, "%+v", err)
+
+		snapshot := setSnapshotReady(t, createSnapshot(t, ws), 100*1000*1000*1000)
+
+		restored, err := srv.CreateWorkspace(usr.Ctx(), &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{},
+			Spec: &cordiumv1.Workspace_Spec{
+				Limit: &cordiumv1.Workspace_Spec_Limit{
+					Storage: &cordiumv1.Workspace_Spec_Limit_Storage{
+						Megabytes: 1000,
+					},
+				},
+			},
+			Status: &cordiumv1.Workspace_Status{
+				WorkspaceSnapshotRef: umetav1.GetObjectReference(snapshot),
+			},
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		_, err = srv.StartWorkspace(usr.Ctx(), &cordiumv1.StartWorkspaceRequest{
+			WorkspaceRef: umetav1.GetObjectReference(restored),
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		cur, err := fakeC.OcteliumC.CordiumC().GetWorkspace(ctx, &rmetav1.GetOptions{
+			Uid: restored.Metadata.Uid,
+		})
+		assert.Nil(t, err, "%+v", err)
+		assert.Equal(t, cordiumv1.Workspace_Status_INIT_REQUEST, cur.Status.State)
+		assert.Equal(t, region.Metadata.Uid, cur.Status.RegionRef.Uid)
+		assert.Equal(t, uint32(1000), cur.Status.Limit.Storage.Megabytes)
 	})
 
 	t.Run("an ephemeral Workspace keeps its WorkspaceSnapshot alive", func(t *testing.T) {

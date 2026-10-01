@@ -211,12 +211,6 @@ func (s *Server) CreateWorkspace(ctx context.Context, req *cordiumv1.Workspace) 
 		return nil, grpcutils.InternalWithErr(err)
 	}
 
-	if snapshot != nil {
-		if err := s.setWorkspaceRestoreLimit(ws, snapshot); err != nil {
-			return nil, err
-		}
-	}
-
 	ws, err = s.octeliumC.CordiumC().CreateWorkspace(ctx, ws)
 	if err != nil {
 		return nil, err
@@ -664,12 +658,6 @@ func (s *Server) StartWorkspace(ctx context.Context, req *cordiumv1.StartWorkspa
 
 	if err := s.setWorkspaceLimit(ctx, ws, spc, cco); err != nil {
 		return nil, err
-	}
-
-	if snapshot != nil {
-		if err := s.setWorkspaceRestoreLimit(ws, snapshot); err != nil {
-			return nil, err
-		}
 	}
 
 	wsSession, err := s.createWorkspaceSession(ctx, i, ws)

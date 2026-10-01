@@ -539,11 +539,11 @@ func (c *Controller) setPersistentVolumeClaim(ctx context.Context, ws *cordiumv1
 		return err
 	}
 
-	storageLimit := c.getPVCStorageMegabytes(ctx, ws)
+	storageBytes := c.getPVCStorageBytes(ctx, ws, dataSource)
 
-	storageReq := getResourceQuantity(fmt.Sprintf("%dMi", storageLimit))
+	storageReq := resource.NewQuantity(storageBytes, resource.DecimalSI)
 
-	zap.L().Debug("Setting PVC", zap.String("name", ws.Metadata.Name), zap.Int64("sizeMB", storageLimit))
+	zap.L().Debug("Setting PVC", zap.String("name", ws.Metadata.Name), zap.Int64("sizeBytes", storageBytes))
 
 	if _, err := c.k8sC.CoreV1().PersistentVolumeClaims(ns).Create(ctx, &corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
@@ -580,22 +580,48 @@ func (c *Controller) setPersistentVolumeClaim(ctx context.Context, ws *cordiumv1
 	return nil
 }
 
-func (c *Controller) getPVCStorageMegabytes(ctx context.Context, ws *cordiumv1.Workspace) int64 {
+func getPVCStorageMegabytes(ws *cordiumv1.Workspace) int64 {
+	if ws.Status.Limit != nil && ws.Status.Limit.Storage != nil &&
+		ws.Status.Limit.Storage.Megabytes > 0 &&
+		ws.Status.Limit.Storage.Megabytes < 5000000 {
+		return int64(ws.Status.Limit.Storage.Megabytes)
+	}
 
-	ret := func() int64 {
+	if ldflags.IsDev() {
+		return 50 * 1000
+	}
 
-		if ws.Status.Limit != nil && ws.Status.Limit.Storage != nil &&
-			ws.Status.Limit.Storage.Megabytes > 0 &&
-			ws.Status.Limit.Storage.Megabytes < 5000000 {
-			return int64(ws.Status.Limit.Storage.Megabytes)
-		}
+	return 10 * 1000
+}
 
-		if ldflags.IsDev() {
-			return 50 * 1000
-		}
+func (c *Controller) getPVCStorageBytes(ctx context.Context,
+	ws *cordiumv1.Workspace, dataSource *corev1.TypedLocalObjectReference) int64 {
 
-		return 10 * 1000
-	}()
+	ret := getPVCStorageMegabytes(ws) * 1000 * 1000
+
+	if restoreSize := c.getPVCRestoreSizeBytes(ctx, ws, dataSource); restoreSize > ret {
+		zap.L().Debug("Using the restore size of the snapshot as the PVC size",
+			zap.String("wsName", ws.Metadata.Name), zap.Int64("sizeBytes", restoreSize))
+		return restoreSize
+	}
+
+	return ret
+}
+
+func (c *Controller) getPVCRestoreSizeBytes(ctx context.Context,
+	ws *cordiumv1.Workspace, dataSource *corev1.TypedLocalObjectReference) int64 {
+
+	if dataSource == nil {
+		return 0
+	}
+
+	var ret int64
+
+	k8sSnapshot, err := c.snapshotC.SnapshotV1().VolumeSnapshots(ns).
+		Get(ctx, dataSource.Name, metav1.GetOptions{})
+	if err == nil && k8sSnapshot.Status != nil && k8sSnapshot.Status.RestoreSize != nil {
+		ret = k8sSnapshot.Status.RestoreSize.Value()
+	}
 
 	if ws.Status.WorkspaceSnapshotRef == nil {
 		return ret
@@ -608,21 +634,7 @@ func (c *Controller) getPVCStorageMegabytes(ctx context.Context, ws *cordiumv1.W
 		return ret
 	}
 
-	if restoreMB := getRestoreSizeMegabytes(snapshot); restoreMB > ret {
-		zap.L().Debug("Using the restore size of the WorkspaceSnapshot as the PVC size",
-			zap.String("wsName", ws.Metadata.Name), zap.Int64("sizeMB", restoreMB))
-		return restoreMB
-	}
-
-	return ret
-}
-
-func getRestoreSizeMegabytes(snapshot *cordiumv1.WorkspaceSnapshot) int64 {
-	if snapshot.Status.RestoreSizeBytes == 0 {
-		return 0
-	}
-
-	return int64((snapshot.Status.RestoreSizeBytes + 1000*1000 - 1) / (1000 * 1000))
+	return max(ret, int64(snapshot.Status.RestoreSizeBytes))
 }
 
 func (c *Controller) getPVCDataSource(ctx context.Context,
