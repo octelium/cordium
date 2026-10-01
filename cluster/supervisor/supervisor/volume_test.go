@@ -122,6 +122,59 @@ func TestPrepareVolumeRoots(t *testing.T) {
 		assert.Equal(t, before.Mode().Perm(), after.Mode().Perm())
 	})
 
+	t.Run("a freshly formatted ext4 Volume is initialized", func(t *testing.T) {
+		if os.Getuid() != 0 {
+			t.Skip("Initializing the ownership of a Volume dir requires root")
+		}
+
+		root := t.TempDir()
+
+		oldRoot := volumeRootDir
+		t.Cleanup(func() { volumeRootDir = oldRoot })
+		volumeRootDir = root
+
+		formatted := path.Join(root, "vol0")
+		require.Nil(t, os.MkdirAll(path.Join(formatted, "lost+found"), 0700))
+		require.Nil(t, os.Chmod(formatted, 0755))
+
+		srv := &Server{octeliumUID: 1000, octeliumGID: 1000}
+		srv.prepareVolumeRoots()
+
+		info, err := os.Stat(formatted)
+		require.Nil(t, err, "%+v", err)
+		assert.Equal(t, uint32(1000), info.Sys().(*syscall.Stat_t).Uid)
+		assert.Equal(t, uint32(1000), info.Sys().(*syscall.Stat_t).Gid)
+
+		info, err = os.Stat(path.Join(formatted, "lost+found"))
+		require.Nil(t, err, "%+v", err)
+		assert.Equal(t, uint32(0), info.Sys().(*syscall.Stat_t).Uid)
+		assert.Equal(t, os.FileMode(0700), info.Mode().Perm())
+	})
+
+	t.Run("an ext4 Volume that has content is never re-owned", func(t *testing.T) {
+		root := t.TempDir()
+
+		oldRoot := volumeRootDir
+		t.Cleanup(func() { volumeRootDir = oldRoot })
+		volumeRootDir = root
+
+		initialized := path.Join(root, "vol0")
+		require.Nil(t, os.MkdirAll(path.Join(initialized, "lost+found"), 0700))
+		require.Nil(t, os.Chmod(initialized, 0775))
+		require.Nil(t, os.WriteFile(path.Join(initialized, "f"), []byte("x"), 0644))
+
+		before, err := os.Stat(initialized)
+		require.Nil(t, err, "%+v", err)
+
+		srv := &Server{octeliumUID: uid + 100000, octeliumGID: gid + 100000}
+		srv.prepareVolumeRoots()
+
+		after, err := os.Stat(initialized)
+		require.Nil(t, err, "%+v", err)
+		assert.Equal(t, before.Sys().(*syscall.Stat_t).Uid, after.Sys().(*syscall.Stat_t).Uid)
+		assert.Equal(t, before.Mode().Perm(), after.Mode().Perm())
+	})
+
 	t.Run("an unownable Volume dir does not abort the initialization", func(t *testing.T) {
 		root := t.TempDir()
 

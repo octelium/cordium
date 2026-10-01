@@ -230,6 +230,53 @@ func TestSetVolumeMounts(t *testing.T) {
 		assert.Equal(t, os.FileMode(0775), info.Mode().Perm())
 	})
 
+	t.Run("the ownership of a freshly formatted ext4 Volume is initialized", func(t *testing.T) {
+		c := newVolumeTest(t)
+		c.srv.userInfo = &userInfo{
+			name: "octelium",
+			uid:  os.Getuid(),
+			gid:  os.Getgid(),
+		}
+
+		mount := c.newVolume(t, "data", false)
+		src := path.Join(volumeRootDir, mount.VolumeRef.Uid)
+		assert.Nil(t, os.Mkdir(path.Join(src, "lost+found"), 0700))
+		assert.Nil(t, os.Chmod(src, 0755))
+
+		c.setMounts(mount)
+		assert.Nil(t, c.srv.setVolumeMounts())
+
+		info, err := os.Stat(src)
+		assert.Nil(t, err, "%+v", err)
+		assert.Equal(t, os.FileMode(0775), info.Mode().Perm())
+
+		info, err = os.Stat(path.Join(src, "lost+found"))
+		assert.Nil(t, err, "%+v", err)
+		assert.Equal(t, os.FileMode(0700), info.Mode().Perm())
+	})
+
+	t.Run("the ownership of an ext4 Volume that has content is left alone", func(t *testing.T) {
+		c := newVolumeTest(t)
+		c.srv.userInfo = &userInfo{
+			name: "octelium",
+			uid:  os.Getuid(),
+			gid:  os.Getgid(),
+		}
+
+		mount := c.newVolume(t, "data", false)
+		src := path.Join(volumeRootDir, mount.VolumeRef.Uid)
+		assert.Nil(t, os.Mkdir(path.Join(src, "lost+found"), 0700))
+		assert.Nil(t, os.WriteFile(path.Join(src, "f"), []byte("x"), 0644))
+		assert.Nil(t, os.Chmod(src, 0755))
+
+		c.setMounts(mount)
+		assert.Nil(t, c.srv.setVolumeMounts())
+
+		info, err := os.Stat(src)
+		assert.Nil(t, err, "%+v", err)
+		assert.Equal(t, os.FileMode(0755), info.Mode().Perm())
+	})
+
 	t.Run("the ownership of a Volume that has content is left alone", func(t *testing.T) {
 		c := newVolumeTest(t)
 		c.srv.userInfo = &userInfo{

@@ -17,6 +17,7 @@
 package supervisor
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -55,8 +56,14 @@ func (s *Server) prepareVolumeRoots() {
 			continue
 		}
 
-		if !isEmptyDir(pth) {
-			zap.L().Debug("The Volume is already initialized. Leaving its ownership alone",
+		isEmpty, err := workspacecommon.IsEmptyVolumeDir(pth)
+		if err != nil {
+			zap.L().Warn("Could not read the Volume dir", zap.String("path", pth), zap.Error(err))
+			continue
+		}
+
+		if !isEmpty {
+			zap.L().Warn("The Volume dir is not empty and it is not owned by the Workspace. Leaving its ownership alone",
 				zap.String("path", pth))
 			continue
 		}
@@ -64,8 +71,13 @@ func (s *Server) prepareVolumeRoots() {
 		zap.L().Debug("Initializing the ownership of the Volume dir", zap.String("path", pth))
 
 		if err := os.Chown(pth, s.octeliumUID, s.octeliumGID); err != nil {
-			zap.L().Debug("Could not chown the Volume dir. It is most probably mounted read-only",
-				zap.String("path", pth), zap.Error(err))
+			if errors.Is(err, syscall.EROFS) {
+				zap.L().Debug("Could not chown the Volume dir since it is mounted read-only",
+					zap.String("path", pth))
+				continue
+			}
+
+			zap.L().Warn("Could not chown the Volume dir", zap.String("path", pth), zap.Error(err))
 		}
 	}
 }
@@ -73,15 +85,6 @@ func (s *Server) prepareVolumeRoots() {
 func (s *Server) isMappedID(id uint32) bool {
 	return id >= uint32(s.octeliumUID) &&
 		id < uint32(s.octeliumUID)+1+subordinateIDCount
-}
-
-func isEmptyDir(pth string) bool {
-	entries, err := os.ReadDir(pth)
-	if err != nil {
-		return false
-	}
-
-	return len(entries) == 0
 }
 
 func getVolumeRootMountArg() string {

@@ -17,6 +17,7 @@
 package suite
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -26,8 +27,10 @@ import (
 	"github.com/octelium/octelium/cluster/e2e/harness"
 	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"github.com/octelium/octelium/pkg/grpcerr"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	k8scorev1 "k8s.io/api/core/v1"
 	k8smetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -153,6 +156,35 @@ func testWorkspaceVolume(t *testing.T, ch *harness.H) {
 			h.MustExec(t, other, fmt.Sprintf("cat /shared/e2e-%s", name)))
 	})
 
+	t.Run("AFreshlyFormattedVolumeIsWritableInsideTheWorkspace", func(t *testing.T) {
+		formatted := h.CreateVolume(t, spc, &cordiumv1.Volume_Spec{
+			Size: &cordiumv1.Volume_Spec_Size{Megabytes: 2000},
+		})
+
+		setExt4VolumeLayout(t, h, formatted)
+
+		other := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
+			IsEphemeral: true,
+			Runtime: &cordiumv1.Workspace_Spec_Runtime{
+				VolumeMounts: []*cordiumv1.Workspace_Spec_Runtime_VolumeMount{
+					{
+						VolumeRef: &metav1.ObjectReference{Name: formatted.Metadata.Name},
+						MountPath: "/formatted",
+					},
+				},
+			},
+		})
+
+		h.MustExec(t, other, fmt.Sprintf("echo ext4 > /formatted/e2e-%s", name))
+		assert.Equal(t, "ext4",
+			h.MustExec(t, other, fmt.Sprintf("cat /formatted/e2e-%s", name)))
+
+		assert.Equal(t, h.MustExec(t, other, "id -u"),
+			h.MustExec(t, other, "stat -L -c %u /formatted"))
+
+		assert.Equal(t, "700", h.MustExec(t, other, "stat -c %a /formatted/lost+found"))
+	})
+
 	t.Run("AVolumeThatDoesNotExistCannotBeMounted", func(t *testing.T) {
 		_, err := h.CordiumC().CreateWorkspace(ctx, &cordiumv1.Workspace{
 			Metadata: &metav1.Metadata{},
@@ -211,4 +243,71 @@ func testWorkspaceVolume(t *testing.T, ch *harness.H) {
 		require.NotNil(t, err)
 		assert.True(t, grpcerr.IsNotFound(err), "%+v", err)
 	})
+}
+
+func setExt4VolumeLayout(t *testing.T, h *charness.H, vol *cordiumv1.Volume) {
+	t.Helper()
+
+	ctx, cancel := h.Ctx(t)
+	defer cancel()
+
+	name := fmt.Sprintf("e2e-ext4-%s", vol.Metadata.Uid)
+
+	_, err := h.K8sC().CoreV1().Pods(charness.WorkspaceNamespace).Create(ctx, &k8scorev1.Pod{
+		ObjectMeta: k8smetav1.ObjectMeta{
+			Name:      name,
+			Namespace: charness.WorkspaceNamespace,
+		},
+		Spec: k8scorev1.PodSpec{
+			RestartPolicy: k8scorev1.RestartPolicyNever,
+			NodeSelector: map[string]string{
+				"octelium.com/node-mode-cordium": "",
+			},
+			Containers: []k8scorev1.Container{
+				{
+					Name:  "ext4",
+					Image: alpineImage,
+					Command: []string{"/bin/sh", "-c",
+						"mkdir -p /data/lost+found && chmod 0700 /data/lost+found && chown 0:0 /data && chmod 0755 /data"},
+					VolumeMounts: []k8scorev1.VolumeMount{
+						{
+							Name:      "data",
+							MountPath: "/data",
+						},
+					},
+				},
+			},
+			Volumes: []k8scorev1.Volume{
+				{
+					Name: "data",
+					VolumeSource: k8scorev1.VolumeSource{
+						PersistentVolumeClaim: &k8scorev1.PersistentVolumeClaimVolumeSource{
+							ClaimName: fmt.Sprintf("vol-%s", vol.Metadata.Uid),
+						},
+					},
+				},
+			},
+		},
+	}, k8smetav1.CreateOptions{})
+	require.Nil(t, err)
+
+	t.Cleanup(func() {
+		h.K8sC().CoreV1().Pods(charness.WorkspaceNamespace).
+			Delete(context.Background(), name, k8smetav1.DeleteOptions{})
+	})
+
+	h.Eventually(t, "the Volume to be laid out like a freshly formatted ext4 filesystem",
+		charness.StartBudget, func(ctx context.Context) error {
+			pod, err := h.K8sC().CoreV1().Pods(charness.WorkspaceNamespace).
+				Get(ctx, name, k8smetav1.GetOptions{})
+			if err != nil {
+				return err
+			}
+
+			if pod.Status.Phase != k8scorev1.PodSucceeded {
+				return errors.Errorf("the pod %s is %s", name, pod.Status.Phase)
+			}
+
+			return nil
+		})
 }

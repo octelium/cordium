@@ -112,12 +112,12 @@ func (s *Server) initVolumeOwnership(src string, mount *ccordiumv1.ResolvedVolum
 		return nil
 	}
 
-	entries, err := os.ReadDir(src)
+	isEmpty, err := workspacecommon.IsEmptyVolumeDir(src)
 	if err != nil {
 		return err
 	}
 
-	if len(entries) > 0 {
+	if !isEmpty {
 		return nil
 	}
 

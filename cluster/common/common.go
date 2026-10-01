@@ -19,6 +19,7 @@ package workspacecommon
 import (
 	"fmt"
 	"net"
+	"os"
 	"strings"
 
 	"github.com/octelium/octelium/apis/main/metav1"
@@ -53,4 +54,23 @@ const VolumeRootDir = "/cordium-volumes"
 
 func GetVolumePathByUID(uid string) string {
 	return fmt.Sprintf("%s/%s", VolumeRootDir, uid)
+}
+
+const volumeLostAndFoundDir = "lost+found"
+
+func IsEmptyVolumeDir(pth string) (bool, error) {
+	entries, err := os.ReadDir(pth)
+	if err != nil {
+		return false, err
+	}
+
+	for _, entry := range entries {
+		if entry.Name() == volumeLostAndFoundDir && entry.IsDir() {
+			continue
+		}
+
+		return false, nil
+	}
+
+	return true, nil
 }
