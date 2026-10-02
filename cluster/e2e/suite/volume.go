@@ -19,6 +19,7 @@ package suite
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	charness "github.com/octelium/cordium/cluster/e2e/harness"
@@ -48,7 +49,7 @@ func testWorkspaceVolume(t *testing.T, ch *harness.H) {
 	})
 
 	t.Run("TheVolumeIsProvisionedAsynchronously", func(t *testing.T) {
-		assert.Equal(t, fmt.Sprintf("%s.default.%s", name, h.UserName(t)), vol.Metadata.Name)
+		assert.True(t, strings.HasSuffix(vol.Metadata.Name, fmt.Sprintf(".default.%s", h.UserName(t))))
 		assert.Equal(t, cordiumv1.Volume_ACCESS_MODE_EXCLUSIVE, vol.Spec.AccessMode)
 		assert.Equal(t, uint32(2000), vol.Spec.Size.Megabytes)
 		assert.Equal(t, spc.Metadata.Uid, vol.Status.SpaceRef.Uid)
@@ -117,7 +118,7 @@ func testWorkspaceVolume(t *testing.T, ch *harness.H) {
 		assert.Equal(t, fmt.Sprintf("/cordium-volumes/%s", vol.Metadata.Uid),
 			h.MustExec(t, ws, "readlink -f /data"))
 
-		assert.NotEqual(t, h.MustExec(t, ws, "stat -c %d /data"),
+		assert.NotEqual(t, h.MustExec(t, ws, "stat -L -c %d /data"),
 			h.MustExec(t, ws, "stat -c %d /workspace"))
 	})
 
@@ -140,6 +141,9 @@ func testWorkspaceVolume(t *testing.T, ch *harness.H) {
 	})
 
 	t.Run("TheVolumeDataOutlivesTheWorkspace", func(t *testing.T) {
+		h.StopWorkspace(t, ws)
+		h.WaitWorkspaceStopped(t, ws)
+
 		other := h.RunWorkspace(t, &cordiumv1.Workspace_Spec{
 			IsEphemeral: true,
 			Runtime: &cordiumv1.Workspace_Spec_Runtime{

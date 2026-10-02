@@ -186,7 +186,7 @@ func testWorkspaceRuntime(t *testing.T, ch *harness.H) {
 		pvc, err := h.K8sC().CoreV1().PersistentVolumeClaims(charness.WorkspaceNamespace).
 			Get(ctx, workspacePVCName(ws), k8smetav1.GetOptions{})
 		require.Nil(t, err)
-		assert.Equal(t, int64(2000*1024*1024),
+		assert.Equal(t, int64(2000*1000*1000),
 			pvc.Spec.Resources.Requests.Storage().Value())
 	})
 

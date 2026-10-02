@@ -302,6 +302,61 @@ func TestWorkspace(t *testing.T) {
 		assert.Nil(t, err)
 	}
 
+	{
+		usr, err := tstuser.NewUserWithType(fakeC.OcteliumC, adminSrv, nil, nil, corev1.User_Spec_HUMAN, corev1.Session_Status_CLIENTLESS)
+		assert.Nil(t, err)
+
+		spc, err := srv.CreateSpace(usr.Ctx(), &cordiumv1.Space{
+			Metadata: &metav1.Metadata{
+				Name: fmt.Sprintf("%s.cordium", utilrand.GetRandomStringCanonical(8)),
+			},
+			Spec: &cordiumv1.Space_Spec{},
+			Status: &cordiumv1.Space_Status{
+				Type: cordiumv1.Space_Status_ORGANIZATION,
+			},
+		})
+		assert.Nil(t, err)
+
+		ws, err := srv.CreateWorkspace(usr.Ctx(), &cordiumv1.Workspace{
+			Metadata: &metav1.Metadata{
+				Name: utilrand.GetRandomStringCanonical(8),
+			},
+			Spec: &cordiumv1.Workspace_Spec{},
+			Status: &cordiumv1.Workspace_Status{
+				TemplateRef: &metav1.ObjectReference{
+					Name: fmt.Sprintf("default.%s", spc.Metadata.Name),
+				},
+			},
+		})
+		assert.Nil(t, err, "%+v", err)
+
+		_, err = srv.StartWorkspace(usr.Ctx(), &cordiumv1.StartWorkspaceRequest{
+			WorkspaceRef: umetav1.GetObjectReference(ws),
+			Config: &cordiumv1.StartWorkspaceRequest_Config{
+				RegionRef: &metav1.ObjectReference{
+					Name: utilrand.GetRandomStringCanonical(8),
+				},
+			},
+		})
+		assert.NotNil(t, err)
+		assert.True(t, grpcerr.IsInvalidArg(err), "%+v", err)
+
+		_, err = srv.StartWorkspace(usr.Ctx(), &cordiumv1.StartWorkspaceRequest{
+			WorkspaceRef: umetav1.GetObjectReference(ws),
+			Config: &cordiumv1.StartWorkspaceRequest_Config{
+				RegionRef: &metav1.ObjectReference{
+					Uid: vutils.UUIDv4(),
+				},
+			},
+		})
+		assert.NotNil(t, err)
+		assert.True(t, grpcerr.IsNotFound(err), "%+v", err)
+
+		ws, err = fakeC.OcteliumC.CordiumC().GetWorkspace(ctx, &rmetav1.GetOptions{Uid: ws.Metadata.Uid})
+		assert.Nil(t, err)
+		assert.Equal(t, cordiumv1.Workspace_Status_STOPPED, ws.Status.State)
+	}
+
 	t.Run("share-ports", func(t *testing.T) {
 		usr, err := tstuser.NewUserWithType(fakeC.OcteliumC, adminSrv, nil, nil, corev1.User_Spec_HUMAN, corev1.Session_Status_CLIENTLESS)
 		assert.Nil(t, err)

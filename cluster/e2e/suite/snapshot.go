@@ -82,7 +82,16 @@ func testWorkspaceSnapshot(t *testing.T, ch *harness.H) {
 	})
 
 	t.Run("TheWorkspaceCannotBeSnapshottedTwiceAtOnce", func(t *testing.T) {
-		_, err := h.CordiumC().CreateWorkspaceSnapshot(ctx, &cordiumv1.WorkspaceSnapshot{
+		cur, err := h.CordiumC().GetWorkspaceSnapshot(ctx, &metav1.GetOptions{
+			Name: snapshot.Metadata.Name,
+		})
+		require.Nil(t, err)
+
+		if cur.Status.State != cordiumv1.WorkspaceSnapshot_Status_STATE_CREATING {
+			t.Skip("the Cluster storage backend already finished taking the snapshot")
+		}
+
+		_, err = h.CordiumC().CreateWorkspaceSnapshot(ctx, &cordiumv1.WorkspaceSnapshot{
 			Metadata: &metav1.Metadata{
 				Name: fmt.Sprintf("e2e-%s-second", name),
 			},

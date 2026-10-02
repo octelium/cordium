@@ -618,7 +618,7 @@ func (s *Server) StartWorkspace(ctx context.Context, req *cordiumv1.StartWorkspa
 		}())
 	}()
 	if err != nil {
-		return nil, serr.K8sNotFoundOrInternalWithErr(err)
+		return nil, serr.InternalWithErr(err)
 	}
 
 	cc, err := s.octeliumC.CoreV1Utils().GetClusterConfig(ctx)
