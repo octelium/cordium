@@ -11,13 +11,18 @@
     />
     <title>Cordium</title>
     <script>
+      var scheme;
       try {
-        var scheme = window.localStorage.getItem("cordium.colorScheme");
-        document.documentElement.setAttribute(
-          "data-mantine-color-scheme",
-          scheme === "dark" ? "dark" : "light",
-        );
+        scheme = window.localStorage.getItem("cordium.colorScheme");
       } catch (e) {}
+      document.documentElement.setAttribute(
+        "data-mantine-color-scheme",
+        scheme === "dark" || scheme === "light"
+          ? scheme
+          : window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light",
+      );
     </script>
   </head>
   <body>

@@ -11,8 +11,21 @@ const require = createRequire(import.meta.url);
 
 const __dirname = path.resolve();
 
+const shadowRootPlugin = {
+  name: "mantine-shadow-root",
+  resolveId(id: string, importer?: string) {
+    if (
+      importer?.includes("/node_modules/@mantine/core/") &&
+      id.endsWith("/find-element-in-shadow-dom.mjs")
+    ) {
+      return path.resolve(__dirname, "src/utils/dom/shadowRoot.ts");
+    }
+  },
+};
+
 export default defineConfig({
   plugins: [
+    { ...shadowRootPlugin, enforce: "pre" },
     react(),
     svgr(),
     visualizer({
@@ -20,6 +33,11 @@ export default defineConfig({
       filename: "tmp/stats.html",
     }),
   ],
+  optimizeDeps: {
+    rolldownOptions: {
+      plugins: [shadowRootPlugin],
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
@@ -27,6 +45,7 @@ export default defineConfig({
   },
   build: {
     manifest: true,
+    sourcemap: true,
     commonjsOptions: {
       defaultIsModuleExports(id) {
         try {

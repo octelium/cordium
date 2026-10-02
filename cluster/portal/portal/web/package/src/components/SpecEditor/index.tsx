@@ -24,6 +24,7 @@ import { useQuery } from "@tanstack/react-query";
 import * as React from "react";
 import toast from "react-hot-toast";
 import ApplicationsSection from "./Applications";
+import ErrorBoundary from "./ErrorBoundary";
 import ImageSection from "./Image";
 import LimitsSection from "./Limits";
 import NetworkSection from "./Network";
@@ -80,6 +81,7 @@ const SpecEditor = (props: {
 }) => {
   const { item, kind } = props;
   const [mode, setMode] = React.useState("form");
+  const [section, setSection] = React.useState("source");
   const [yamlDraft, setYamlDraft] = React.useState<string | null>(null);
   const [yamlError, setYamlError] = React.useState<string | null>(null);
 
@@ -210,48 +212,58 @@ const SpecEditor = (props: {
         ]}
       />
 
-      {mode === "form" && (
-        <Tabs defaultValue="source" orientation="vertical" variant="pills">
-          <Tabs.List className="min-w-[11rem] pr-4">
+      <ErrorBoundary
+        key={mode}
+        view={`${kind} ${mode === "form" ? section : "yaml"}`}
+      >
+        {mode === "form" && (
+          <Tabs
+            value={section}
+            onChange={(v) => setSection(v ?? "source")}
+            orientation="vertical"
+            variant="pills"
+          >
+            <Tabs.List className="min-w-[11rem] pr-4">
+              {sections.map((s) => (
+                <Tabs.Tab key={s.value} value={s.value} leftSection={s.icon}>
+                  {s.label}
+                </Tabs.Tab>
+              ))}
+            </Tabs.List>
+
             {sections.map((s) => (
-              <Tabs.Tab key={s.value} value={s.value} leftSection={s.icon}>
-                {s.label}
-              </Tabs.Tab>
+              <Tabs.Panel key={s.value} value={s.value} className="min-w-0 flex-1">
+                {s.body}
+              </Tabs.Panel>
             ))}
-          </Tabs.List>
+          </Tabs>
+        )}
 
-          {sections.map((s) => (
-            <Tabs.Panel key={s.value} value={s.value} className="min-w-0 flex-1">
-              {s.body}
-            </Tabs.Panel>
-          ))}
-        </Tabs>
-      )}
-
-      {mode === "yaml" && (
-        <Stack gap="sm">
-          {yamlError && (
-            <Alert color="red" title="Could not parse the document">
-              {yamlError}
-            </Alert>
-          )}
-          <CodeEditor
-            mode="yaml"
-            value={yamlDraft ?? resourceToYAML(item)}
-            minHeight="420px"
-            onChange={(v) => setYamlDraft(v)}
-          />
-          <div className="flex justify-end">
-            <button
-              type="button"
-              className="rounded-md bg-inverted px-3 py-1.5 text-[0.8rem] font-semibold text-on-inverted transition-colors duration-150 hover:bg-inverted-hover"
-              onClick={() => applyYaml(yamlDraft ?? resourceToYAML(item))}
-            >
-              Apply to form
-            </button>
-          </div>
-        </Stack>
-      )}
+        {mode === "yaml" && (
+          <Stack gap="sm">
+            {yamlError && (
+              <Alert color="red" title="Could not parse the document">
+                {yamlError}
+              </Alert>
+            )}
+            <CodeEditor
+              mode="yaml"
+              value={yamlDraft ?? resourceToYAML(item)}
+              minHeight="420px"
+              onChange={(v) => setYamlDraft(v)}
+            />
+            <div className="flex justify-end">
+              <button
+                type="button"
+                className="rounded-md bg-inverted px-3 py-1.5 text-[0.8rem] font-semibold text-on-inverted transition-colors duration-150 hover:bg-inverted-hover"
+                onClick={() => applyYaml(yamlDraft ?? resourceToYAML(item))}
+              >
+                Apply to form
+              </button>
+            </div>
+          </Stack>
+        )}
+      </ErrorBoundary>
     </Stack>
   );
 };

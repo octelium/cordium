@@ -30,6 +30,7 @@ import {
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import {
   IconAdjustments,
+  IconDeviceDesktop,
   IconFileCode,
   IconMoon,
   IconSun,
@@ -62,12 +63,21 @@ const LocalPreferences = () => {
               Appearance
             </Text>
             <Text size="xs" c="dimmed" mb={8}>
-              Dark mode is off until you turn it on here.
+              Follows your system unless you choose Light or Dark.
             </Text>
             <SegmentedControl
               value={colorScheme}
               onChange={(v) => setColorScheme(v as MantineColorScheme)}
               data={[
+                {
+                  value: "auto",
+                  label: (
+                    <span className="inline-flex items-center gap-1.5">
+                      <IconDeviceDesktop size={14} />
+                      System
+                    </span>
+                  ),
+                },
                 {
                   value: "light",
                   label: (

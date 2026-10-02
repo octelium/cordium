@@ -15,12 +15,11 @@ export default (): Middleware => {
   }
 
   const ws = new WebSocketCtl();
+  const encoder = new TextEncoder();
 
   return () => (next) => (action) => {
     if (sendTerminalData.match(action)) {
-      const dataBytes = Uint8Array.from(action.payload.data, (x) =>
-        x.charCodeAt(0),
-      );
+      const dataBytes = encoder.encode(action.payload.data);
 
       ws.sendMsgData(action.payload.uid, dataBytes);
     } else if (sendSetTerminalSize.match(action)) {

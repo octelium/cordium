@@ -20,7 +20,15 @@ import {
 import themeMantine, { cssVariablesResolver } from "@/utils/theme/mantine";
 import { QueryClientProvider } from "@tanstack/react-query";
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+ReactDOM.createRoot(document.getElementById("root")!, {
+  onCaughtError: (error, info) => {
+    console.error("Portal error", error, {
+      componentStack: info.componentStack,
+      path: window.location.pathname,
+      userAgent: navigator.userAgent,
+    });
+  },
+}).render(
   <React.StrictMode>
     <Provider store={store}>
       <MantineProvider

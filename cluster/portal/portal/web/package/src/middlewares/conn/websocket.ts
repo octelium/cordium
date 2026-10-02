@@ -9,6 +9,8 @@ import { Emitter } from "nanoevents";
 import toast from "react-hot-toast";
 import ReconnectingWebSocket from "reconnecting-websocket";
 
+const TERMINAL_DATA_CHUNK_SIZE = 4096;
+
 export enum State {
   OPENING = 1,
   OPEN,
@@ -78,16 +80,18 @@ export class WebSocketCtl {
   }
 
   sendMsgData(id: string, data: Uint8Array) {
-    const msg = WsPB.ClientMessage.create({
-      type: {
-        oneofKind: "writeTerminalDataRequest",
-        writeTerminalDataRequest: {
-          id,
-          data,
+    for (let offset = 0; offset < data.length; offset += TERMINAL_DATA_CHUNK_SIZE) {
+      const msg = WsPB.ClientMessage.create({
+        type: {
+          oneofKind: "writeTerminalDataRequest",
+          writeTerminalDataRequest: {
+            id,
+            data: data.subarray(offset, offset + TERMINAL_DATA_CHUNK_SIZE),
+          },
         },
-      },
-    });
-    this.sendMsg(msg);
+      });
+      this.sendMsg(msg);
+    }
   }
 
   sendListenTerminal(id: string) {

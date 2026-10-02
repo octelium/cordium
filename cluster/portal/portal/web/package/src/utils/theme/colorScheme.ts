@@ -7,7 +7,7 @@ import * as React from "react";
 
 export const COLOR_SCHEME_STORAGE_KEY = "cordium.colorScheme";
 
-export const DEFAULT_COLOR_SCHEME: MantineColorScheme = "light";
+export const DEFAULT_COLOR_SCHEME: MantineColorScheme = "auto";
 
 export const colorSchemeManager = localStorageColorSchemeManager({
   key: COLOR_SCHEME_STORAGE_KEY,
