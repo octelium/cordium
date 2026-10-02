@@ -151,6 +151,7 @@ func (s *Server) getDefaultCmdEnvAsOctelium() map[string]string {
 		"TERM":                    "xterm",
 		"NO_PROXY":                "localhost,127.0.0.0/8,::1",
 		"CONTAINERS_STORAGE_CONF": "/etc/containers/storage.conf",
+		"XDG_RUNTIME_DIR":         s.getPodmanRuntimeDir(),
 	}
 }
 

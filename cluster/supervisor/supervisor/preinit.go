@@ -35,6 +35,10 @@ import (
 
 const subordinateIDCount = 65536
 
+const podmanRunRoot = "/octelium/podman/tmp-storage"
+
+const podmanContainerEnvPath = "/tmp/podman-conf/containerenv"
+
 func (s *Server) runPreInitCommands(ctx context.Context) error {
 
 	if s.isInner || ldflags.IsTest() {
@@ -68,6 +72,7 @@ func (s *Server) runPreInitCommandsInner(ctx context.Context) error {
 		`mkdir -p /sys/fs/cgroup/init`,
 		`xargs -rn1 < /sys/fs/cgroup/cgroup.procs > /sys/fs/cgroup/init/cgroup.procs || :`,
 		`sed -e 's/ / +/g' -e 's/^/+/' < /sys/fs/cgroup/cgroup.controllers > /sys/fs/cgroup/cgroup.subtree_control`,
+		fmt.Sprintf("chown %d:%d %s %s", s.octeliumUID, s.octeliumGID, podmanRunRoot, s.getPodmanRuntimeDir()),
 		// "mkdir -p /home/octelium",
 		// "chown -R octelium:octelium /home/octelium",
 		// "podman --log-level=debug version",
@@ -129,7 +134,7 @@ func (s *Server) runPreInitCommandsRoot(ctx context.Context) error {
 		"mkdir -p /octelium/podman",
 		"mkdir -p /octelium/podman/root",
 		"mkdir -p /octelium/podman/tmp-cp",
-		"mkdir -p /octelium/podman/tmp-storage",
+		fmt.Sprintf("mkdir -p %s", podmanRunRoot),
 		"mkdir -p /octelium/podman/tmp-dir",
 		"mkdir -p /octelium/podman/libpod",
 		"mkdir -p /octelium/podman/storage",
@@ -232,6 +237,10 @@ func (s *Server) runPreInitCommandsRoot(ctx context.Context) error {
 		}
 
 		if err := os.WriteFile("/tmp/podman-conf/containers/storage.conf", []byte(podmanConfStorage), 0644); err != nil {
+			return err
+		}
+
+		if err := os.WriteFile(podmanContainerEnvPath, nil, 0644); err != nil {
 			return err
 		}
 	}
@@ -444,6 +453,8 @@ func (s *Server) runOuterPodman(ctx context.Context) error {
 		fmt.Sprintf("--cgroup-parent=%s", s.getRelativePathOuterCgroup()),
 	}
 
+	argList = append(argList, s.getPodmanVolatileArgs()...)
+
 	if ldflags.IsDev() {
 		argList = append(argList, "--log-level=debug")
 		argList = append(argList, "--env=OCTELIUM_DEV=true")
@@ -477,6 +488,18 @@ func (s *Server) runOuterPodman(ctx context.Context) error {
 	zap.L().Debug("Successfully ran outer podman run")
 
 	return nil
+}
+
+func (s *Server) getPodmanRuntimeDir() string {
+	return fmt.Sprintf("/tmp/storage-run-%d", s.octeliumUID)
+}
+
+func (s *Server) getPodmanVolatileArgs() []string {
+	return []string{
+		"-v", fmt.Sprintf("%s:/run/.containerenv:ro", podmanContainerEnvPath),
+		"--tmpfs", fmt.Sprintf("%s:rw,dev,nosuid,notmpcopyup,mode=0755", podmanRunRoot),
+		"--tmpfs", fmt.Sprintf("%s:rw,noexec,dev,nosuid,notmpcopyup,mode=0700", s.getPodmanRuntimeDir()),
+	}
 }
 
 func (s *Server) setSeccompProfileOuter() error {

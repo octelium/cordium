@@ -530,7 +530,7 @@ func (s *Server) waitUntilWorkspaceAgentReady() error {
 	for {
 		select {
 		case <-s.ctxMain.Done():
-			return nil
+			return errors.Errorf("Shutdown started while waiting for Workspace agent to be ready")
 		case <-tickerCh.C:
 			if err := doCheck(); err == nil {
 				zap.L().Debug("Workspace agent is now READY")

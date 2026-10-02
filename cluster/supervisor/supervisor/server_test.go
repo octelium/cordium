@@ -25,6 +25,7 @@ import (
 	wssrv "github.com/octelium/cordium/cluster/workspace/workspace"
 	"github.com/octelium/octelium/apis/cluster/ccordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
+	"github.com/octelium/octelium/pkg/utils/ldflags"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -88,6 +89,22 @@ func TestWaitUntilWorkspaceAgentReady(t *testing.T) {
 		err := srv.waitUntilWorkspaceAgentReady()
 		assert.Nil(t, err, "%+v", err)
 	}
+}
+
+func TestWaitUntilWorkspaceAgentReadyOnShutdown(t *testing.T) {
+
+	oldTestMode := ldflags.TestMode
+	t.Cleanup(func() { ldflags.TestMode = oldTestMode })
+	ldflags.TestMode = "false"
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	srv := &Server{ctxMain: ctx}
+
+	err := srv.waitUntilWorkspaceAgentReady()
+	assert.NotNil(t, err)
+	assert.Nil(t, srv.wsC, "the initialization must not proceed without a Workspace agent client")
 }
 
 func TestLimits(t *testing.T) {
