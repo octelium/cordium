@@ -12,9 +12,8 @@ const YamlDrawer = (props: { item: Resource; label?: string }) => {
   return (
     <>
       <Button
-        size="compact-xs"
         variant="default"
-        leftSection={<IconFileCode size={13} />}
+        leftSection={<IconFileCode size={15} />}
         onClick={open}
       >
         {props.label ?? "View YAML"}
