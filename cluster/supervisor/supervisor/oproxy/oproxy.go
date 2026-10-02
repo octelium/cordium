@@ -45,6 +45,8 @@ type OcteliumProxy struct {
 	isClosed bool
 
 	c *authc.Client
+
+	socketPath string
 }
 
 const SocketPath = "/tmp/octelium-proxy.socket"
@@ -67,7 +69,8 @@ type Opts struct {
 func NewOcteliumProxy(opts *Opts) (*OcteliumProxy, error) {
 
 	return &OcteliumProxy{
-		opts: opts,
+		opts:       opts,
+		socketPath: SocketPath,
 	}, nil
 }
 
@@ -119,7 +122,7 @@ func (p *OcteliumProxy) Close() error {
 		p.lis.Close()
 	}
 
-	os.RemoveAll(SocketPath)
+	os.RemoveAll(p.socketPath)
 	return nil
 }
 
@@ -141,22 +144,27 @@ func (p *OcteliumProxy) doSetInitAccessToken(ctx context.Context) error {
 
 func (p *OcteliumProxy) setSocketPermissions() error {
 	if p.opts.UserUID == 0 {
-		return os.Chmod(SocketPath, 0666)
+		return os.Chmod(p.socketPath, 0666)
 	}
 
-	if err := os.Chown(SocketPath, p.opts.UserUID, p.opts.UserGID); err != nil {
+	if err := os.Chown(p.socketPath, p.opts.UserUID, p.opts.UserGID); err != nil {
 		zap.L().Warn("Could not chown the oProxy socket", zap.Error(err))
-		return os.Chmod(SocketPath, 0666)
+		return os.Chmod(p.socketPath, 0666)
 	}
 
-	return os.Chmod(SocketPath, 0600)
+	return os.Chmod(p.socketPath, 0600)
 }
 
 func (p *OcteliumProxy) runProxy(ctx context.Context) error {
 	var err error
 
-	zap.L().Debug("oProxy: Starting listening on unix socket", zap.String("path", SocketPath))
-	p.lis, err = net.Listen("unix", SocketPath)
+	zap.L().Debug("oProxy: Starting listening on unix socket", zap.String("path", p.socketPath))
+
+	if err := os.Remove(p.socketPath); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+
+	p.lis, err = net.Listen("unix", p.socketPath)
 	if err != nil {
 		return errors.Errorf("Could not listen on unix socket path: %+v", err)
 	}
