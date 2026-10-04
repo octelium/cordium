@@ -168,6 +168,11 @@ func (g *Genesis) installSystemResources(ctx context.Context, region *corev1.Reg
 		return err
 	}
 
+	clusterCfg, err := g.octeliumCInit.CoreV1Utils().GetClusterConfig(ctx)
+	if err != nil {
+		return err
+	}
+
 	{
 		svc := &corev1.Service{
 			Metadata: &metav1.Metadata{
@@ -240,6 +245,13 @@ func (g *Genesis) installSystemResources(ctx context.Context, region *corev1.Reg
 				Port:     8080,
 				IsPublic: true,
 				Mode:     corev1.Service_Spec_WEB,
+				Config: &corev1.Service_Spec_Config{
+					Type: &corev1.Service_Spec_Config_Http{
+						Http: &corev1.Service_Spec_Config_HTTP{
+							Cors: getPortalCORS(clusterCfg.Status.Domain),
+						},
+					},
+				},
 
 				Region: region.Metadata.Name,
 			},
@@ -351,6 +363,19 @@ func (g *Genesis) copyRegcred(ctx context.Context) error {
 	return nil
 }
 */
+
+func getPortalCORS(domain string) *corev1.Service_Spec_Config_HTTP_CORS {
+	return &corev1.Service_Spec_Config_HTTP_CORS{
+		AllowOriginStringMatch: []string{
+			fmt.Sprintf("https://console.octelium.%s", domain),
+		},
+		AllowMethods:     "GET, POST, PUT, PATCH, DELETE",
+		AllowHeaders:     "Authorization, Content-Type, Last-Event-ID, X-File-Name",
+		ExposeHeaders:    "Content-Disposition",
+		MaxAge:           "600",
+		AllowCredentials: true,
+	}
+}
 
 func (g *Genesis) setInitClusterCertificate(ctx context.Context, region *corev1.Region) error {
 
