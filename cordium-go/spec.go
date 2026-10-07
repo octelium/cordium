@@ -31,6 +31,11 @@ import (
 // Template specs. Since a Template is a reusable Workspace configuration, the
 // same options describe both, and [TemplateClient.Create] rejects the few
 // options that only a Workspace can carry.
+//
+// The options that add a keyed entry (environment variables, variables, Tasks,
+// Applications, Volume mounts, additional repositories and devcontainer
+// Features) replace an existing entry with the same key, which is what lets
+// [Workspace.Update] and [TemplateClient.Update] change an entry in place.
 type WorkspaceOption func(*specBuilder) error
 
 type specBuilder struct {
@@ -68,6 +73,13 @@ func (b *specBuilder) repository() *cordiumv1.Workspace_Spec_Repository {
 		b.spec.Repository = &cordiumv1.Workspace_Spec_Repository{}
 	}
 	return b.spec.Repository
+}
+
+func (b *specBuilder) setEnv(env *cordiumv1.Workspace_Spec_Runtime_EnvVar) {
+	rt := b.runtime()
+	rt.EnvVars = upsert(rt.EnvVars, env, func(e *cordiumv1.Workspace_Spec_Runtime_EnvVar) bool {
+		return e.GetKey() == env.GetKey()
+	})
 }
 
 func (b *specBuilder) limit() *cordiumv1.Workspace_Spec_Limit {
@@ -220,11 +232,13 @@ func withVolume(name, mountPath string, readOnly bool) WorkspaceOption {
 		}
 
 		runtime := b.runtime()
-		runtime.VolumeMounts = append(runtime.VolumeMounts,
+		runtime.VolumeMounts = upsert(runtime.VolumeMounts,
 			&cordiumv1.Workspace_Spec_Runtime_VolumeMount{
 				VolumeRef: &metav1.ObjectReference{Name: name},
 				MountPath: mountPath,
 				ReadOnly:  readOnly,
+			}, func(m *cordiumv1.Workspace_Spec_Runtime_VolumeMount) bool {
+				return m.GetMountPath() == mountPath
 			})
 		return nil
 	}
@@ -268,10 +282,12 @@ func WithImage(ref string) WorkspaceOption {
 // through the application.
 func WithPrivateImage(ref, username, passwordSecret string) WorkspaceOption {
 	return func(b *specBuilder) error {
-		if ref == "" {
+		switch {
+		case ref == "":
 			return invalidArgumentf("empty image reference")
-		}
-		if passwordSecret == "" {
+		case username == "":
+			return invalidArgumentf("empty registry username")
+		case passwordSecret == "":
 			return invalidArgumentf("empty registry password Secret name")
 		}
 		b.spec.Image = &cordiumv1.Workspace_Spec_Image{
@@ -516,7 +532,10 @@ func WithoutLazyUnshallow() RepoOption {
 // GitProvider, since the User's OAuth2 token is then injected automatically.
 func WithRepoAuth(username, passwordSecret string) RepoOption {
 	return func(repo *cordiumv1.Workspace_Spec_Repository) error {
-		if passwordSecret == "" {
+		switch {
+		case username == "":
+			return invalidArgumentf("empty repository username")
+		case passwordSecret == "":
 			return invalidArgumentf("empty repository password Secret name")
 		}
 		repo.Authentication = &cordiumv1.Workspace_Spec_Repository_Authentication{
@@ -577,11 +596,13 @@ func WithAdditionalRepo(name, clonePath, url string, opts ...RepoOption) Workspa
 			}
 		}
 
-		b.spec.AdditionalRepositories = append(b.spec.AdditionalRepositories,
+		b.spec.AdditionalRepositories = upsert(b.spec.AdditionalRepositories,
 			&cordiumv1.Workspace_Spec_AdditionalRepository{
 				Name:       name,
 				ClonePath:  clonePath,
 				Repository: repo,
+			}, func(r *cordiumv1.Workspace_Spec_AdditionalRepository) bool {
+				return r.GetName() == name
 			})
 		return nil
 	}
@@ -606,14 +627,17 @@ func WithGitProvider(name string) WorkspaceOption {
  */
 
 // WithEnv injects an environment variable into the Workspace container and into
-// all of its lifecycle Tasks.
+// all of its lifecycle Tasks. It replaces an environment variable that has the
+// same name. The Cluster rejects empty values.
 func WithEnv(key, value string) WorkspaceOption {
 	return func(b *specBuilder) error {
-		if key == "" {
+		switch {
+		case key == "":
 			return invalidArgumentf("empty environment variable name")
+		case value == "":
+			return invalidArgumentf("empty value for the environment variable %q", key)
 		}
-		rt := b.runtime()
-		rt.EnvVars = append(rt.EnvVars, &cordiumv1.Workspace_Spec_Runtime_EnvVar{
+		b.setEnv(&cordiumv1.Workspace_Spec_Runtime_EnvVar{
 			Key:  key,
 			Type: &cordiumv1.Workspace_Spec_Runtime_EnvVar_Value{Value: value},
 		})
@@ -645,8 +669,7 @@ func WithEnvFromSecret(key, secretName string) WorkspaceOption {
 		case secretName == "":
 			return invalidArgumentf("empty Secret name")
 		}
-		rt := b.runtime()
-		rt.EnvVars = append(rt.EnvVars, &cordiumv1.Workspace_Spec_Runtime_EnvVar{
+		b.setEnv(&cordiumv1.Workspace_Spec_Runtime_EnvVar{
 			Key:  key,
 			Type: &cordiumv1.Workspace_Spec_Runtime_EnvVar_FromSecret{FromSecret: secretName},
 		})
@@ -667,15 +690,21 @@ func TaskWorkingDir(dir string) TaskOption {
 }
 
 // TaskEnv sets a Task specific environment variable, which is merged with the
-// Workspace level ones.
+// Workspace level ones. It replaces a Task environment variable that has the
+// same name. The Cluster rejects empty values.
 func TaskEnv(key, value string) TaskOption {
 	return func(t *cordiumv1.Workspace_Spec_Runtime_Task) error {
-		if key == "" {
+		switch {
+		case key == "":
 			return invalidArgumentf("empty Task environment variable name")
+		case value == "":
+			return invalidArgumentf("empty value for the Task environment variable %q", key)
 		}
-		t.EnvVars = append(t.EnvVars, &cordiumv1.Workspace_Spec_Runtime_Task_EnvVar{
+		t.EnvVars = upsert(t.EnvVars, &cordiumv1.Workspace_Spec_Runtime_Task_EnvVar{
 			Key:   key,
 			Value: value,
+		}, func(e *cordiumv1.Workspace_Spec_Runtime_Task_EnvVar) bool {
+			return e.GetKey() == key
 		})
 		return nil
 	}
@@ -742,7 +771,9 @@ func withTask(typ cordiumv1.Workspace_Spec_Runtime_Task_Type,
 		}
 
 		rt := b.runtime()
-		rt.Tasks = append(rt.Tasks, task)
+		rt.Tasks = upsert(rt.Tasks, task, func(t *cordiumv1.Workspace_Spec_Runtime_Task) bool {
+			return t.GetName() == name
+		})
 		return nil
 	}
 }
@@ -826,7 +857,10 @@ func WithDevcontainerFeature(reference string, options map[string]string) Worksp
 		if rt.Devcontainers == nil {
 			rt.Devcontainers = &cordiumv1.Workspace_Spec_Runtime_Devcontainers{}
 		}
-		rt.Devcontainers.Features = append(rt.Devcontainers.Features, feature)
+		rt.Devcontainers.Features = upsert(rt.Devcontainers.Features, feature,
+			func(f *cordiumv1.Workspace_Spec_Runtime_Devcontainers_Feature) bool {
+				return f.GetReference() == reference
+			})
 		return nil
 	}
 }
@@ -1022,7 +1056,10 @@ func WithApp(name string, port int, opts ...AppOption) WorkspaceOption {
 			}
 		}
 
-		b.spec.Applications = append(b.spec.Applications, app)
+		b.spec.Applications = upsert(b.spec.Applications, app,
+			func(a *cordiumv1.Workspace_Spec_Application) bool {
+				return a.GetName() == name
+			})
 		return nil
 	}
 }
@@ -1120,9 +1157,11 @@ func WithVar(name, value string) WorkspaceOption {
 		if name == "" {
 			return invalidArgumentf("empty variable name")
 		}
-		b.spec.Vars = append(b.spec.Vars, &cordiumv1.Workspace_Spec_Var{
+		b.spec.Vars = upsert(b.spec.Vars, &cordiumv1.Workspace_Spec_Var{
 			Name:  name,
 			Value: value,
+		}, func(v *cordiumv1.Workspace_Spec_Var) bool {
+			return v.GetName() == name
 		})
 		return nil
 	}
@@ -1159,6 +1198,16 @@ func Persistent() WorkspaceOption {
 		b.spec.IsEphemeral = false
 		return nil
 	}
+}
+
+func upsert[T any](items []T, item T, same func(T) bool) []T {
+	for i, existing := range items {
+		if same(existing) {
+			items[i] = item
+			return items
+		}
+	}
+	return append(items, item)
 }
 
 func sortedKeys(m map[string]string) []string {

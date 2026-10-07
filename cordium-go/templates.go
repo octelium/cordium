@@ -184,8 +184,15 @@ func (tc *TemplateClient) All(ctx context.Context, opts ...ListOption) iter.Seq2
 // A Template has at most one running pre-build: starting a new one cancels the
 // running one. The tags default to "latest".
 //
-// The pre-build itself is asynchronous; [TemplateClient.WaitForBuild] follows
-// it to completion.
+// The pre-build itself is asynchronous. The returned Template carries its ID,
+// which [TemplateClient.WaitForBuild] follows to completion:
+//
+//	tpl, err := c.Templates().Build(ctx, "ci-runner.my-project")
+//	if err != nil {
+//		return err
+//	}
+//	build, err := c.Templates().WaitForBuild(ctx, "ci-runner.my-project",
+//		tpl.GetStatus().GetBuildInfo().GetCurrentRunningBuildID())
 func (tc *TemplateClient) Build(ctx context.Context, name string, tags ...string) (*cordiumv1.Template, error) {
 	if err := tc.c.ensureOpen(); err != nil {
 		return nil, err
@@ -215,50 +222,53 @@ func (tc *TemplateClient) CancelBuild(ctx context.Context, name string) (*cordiu
 	})
 }
 
-// WaitForBuild polls a Template until its running pre-build completes and
-// returns that pre-build. It fails with a [*WorkspaceFailureError] when the
-// pre-build fails, since a pre-build is itself a Workspace run.
+// WaitForBuild polls a Template until one of its pre-builds, identified by its
+// ID, completes and returns that pre-build. Following an explicit ID means that
+// neither an earlier pre-build nor one that completed before the call can be
+// mistaken for it.
+//
+// It fails with [ErrBuildCanceled] when the pre-build is canceled, with a
+// [*WorkspaceFailureError] when it fails, since a pre-build is itself a
+// Workspace run, and with [ErrBuildNotFound] when the Template's history does
+// not contain it.
 //
 // The Cluster publishes no pre-build stream, so this polls; the caller's
 // context bounds the wait.
-func (tc *TemplateClient) WaitForBuild(ctx context.Context, name string) (*cordiumv1.Template_Status_BuildInfo_Build, error) {
+func (tc *TemplateClient) WaitForBuild(ctx context.Context,
+	name, buildID string) (*cordiumv1.Template_Status_BuildInfo_Build, error) {
+
 	if err := tc.c.ensureOpen(); err != nil {
 		return nil, err
 	}
-
-	tpl, err := tc.Get(ctx, name)
-	if err != nil {
-		return nil, err
-	}
-
-	buildID := tpl.GetStatus().GetBuildInfo().GetCurrentRunningBuildID()
 	if buildID == "" {
-		return nil, invalidArgumentf("Template %q has no running pre-build", name)
+		return nil, invalidArgumentf("empty pre-build ID")
 	}
 
 	backoff := newBackoff()
 	for {
-		if build := findBuild(tpl, buildID); build != nil {
-			switch build.GetState() {
-			case cordiumv1.Template_Status_BuildInfo_Build_STATE_READY:
-				return build, nil
-			case cordiumv1.Template_Status_BuildInfo_Build_STATE_FAILED:
-				if failure := build.GetFailure(); failure != nil {
-					return build, &WorkspaceFailureError{
-						Workspace: "pre-build " + buildID + " of Template " + name,
-						Failure:   failure,
-					}
-				}
-				return build, ErrWorkspaceStopped
+		tpl, err := tc.Get(ctx, name)
+		if err != nil {
+			return nil, err
+		}
+
+		build := findBuild(tpl, buildID)
+		if build == nil {
+			return nil, ErrBuildNotFound
+		}
+
+		switch {
+		case build.GetIsCanceled():
+			return build, ErrBuildCanceled
+		case build.GetState() == cordiumv1.Template_Status_BuildInfo_Build_STATE_READY:
+			return build, nil
+		case build.GetState() == cordiumv1.Template_Status_BuildInfo_Build_STATE_FAILED:
+			return build, &WorkspaceFailureError{
+				Workspace: "pre-build " + buildID + " of Template " + name,
+				Failure:   build.GetFailure(),
 			}
 		}
 
 		if err := backoff.sleep(ctx); err != nil {
-			return nil, err
-		}
-
-		tpl, err = tc.Get(ctx, name)
-		if err != nil {
 			return nil, err
 		}
 	}

@@ -155,7 +155,14 @@ func (r *ExecResult) Err() error {
 	}
 }
 
-const defaultMaxCaptureBytes = 4 << 20
+const (
+	defaultMaxCaptureBytes = 1 << 20
+
+	// defaultKillGracePeriod is how long a killed command is given to report
+	// its exit before the session gives up on it. The Cluster terminates the
+	// process group with SIGTERM and then with SIGKILL after 5 seconds.
+	defaultKillGracePeriod = 10 * time.Second
+)
 
 type execConfig struct {
 	workingDir string
@@ -169,11 +176,13 @@ type execConfig struct {
 	stderr   io.Writer
 	combined io.Writer
 
-	capture        bool
-	maxCaptureSize int
+	capture           bool
+	maxCaptureSize    int
+	maxCaptureSizeSet bool
 
-	timeout    time.Duration
-	bufferSize int
+	timeout         time.Duration
+	killGracePeriod time.Duration
+	bufferSize      int
 
 	streaming bool
 }
@@ -183,9 +192,10 @@ type ExecOption func(*execConfig) error
 
 func newExecConfig(opts ...ExecOption) (*execConfig, error) {
 	ret := &execConfig{
-		capture:        true,
-		maxCaptureSize: defaultMaxCaptureBytes,
-		bufferSize:     defaultOutputBuffer,
+		capture:         true,
+		maxCaptureSize:  defaultMaxCaptureBytes,
+		killGracePeriod: defaultKillGracePeriod,
+		bufferSize:      defaultOutputBuffer,
 	}
 	for _, opt := range opts {
 		if opt == nil {
@@ -321,13 +331,14 @@ func WithCombinedOutput(w io.Writer) ExecOption {
 
 // WithMaxCaptureBytes caps how much of each captured stream is kept in memory.
 // Once the cap is reached the rest is dropped and the result is marked as
-// truncated. It defaults to 4 MiB.
+// truncated. It defaults to 1 MiB, and zero captures nothing.
 func WithMaxCaptureBytes(n int) ExecOption {
 	return func(c *execConfig) error {
 		if n < 0 {
 			return invalidArgumentf("negative capture limit")
 		}
 		c.maxCaptureSize = n
+		c.maxCaptureSizeSet = true
 		return nil
 	}
 }
@@ -349,6 +360,19 @@ func WithExecTimeout(timeout time.Duration) ExecOption {
 			return invalidArgumentf("negative exec timeout")
 		}
 		c.timeout = timeout
+		return nil
+	}
+}
+
+// WithKillGracePeriod sets how long [ExecSession.Kill] waits for the killed
+// command to report its exit before the session ends on its own with the exit
+// code -1. It defaults to 10 seconds.
+func WithKillGracePeriod(period time.Duration) ExecOption {
+	return func(c *execConfig) error {
+		if period < 0 {
+			return invalidArgumentf("negative kill grace period")
+		}
+		c.killGracePeriod = period
 		return nil
 	}
 }
@@ -507,6 +531,7 @@ type ExecSession struct {
 
 	outputTaken atomic.Bool
 	killed      atomic.Bool
+	killOnce    sync.Once
 
 	stdoutBuf   *captureBuffer
 	stderrBuf   *captureBuffer
@@ -573,18 +598,32 @@ func (s *ExecSession) WriteString(str string) (int, error) {
 // input gets the chance to flush and exit.
 //
 // A killed command is reported with the exit code -1 and with
-// [ExecResult.Killed] set.
+// [ExecResult.Killed] set. A command whose exit the Cluster does not report
+// within the grace period set by [WithKillGracePeriod] is released by the
+// session on its own.
 func (s *ExecSession) Kill() error {
-	select {
-	case <-s.done:
+	s.mu.Lock()
+	if s.exited || s.err != nil {
+		s.mu.Unlock()
 		return nil
-	default:
+	}
+	s.killed.Store(true)
+	s.mu.Unlock()
+
+	if err := s.send(&cordiumv1.ExecRequest{
+		Type: &cordiumv1.ExecRequest_Kill_{Kill: &cordiumv1.ExecRequest_Kill{}},
+	}); err != nil {
+		return err
 	}
 
-	s.killed.Store(true)
-	return s.send(&cordiumv1.ExecRequest{
-		Type: &cordiumv1.ExecRequest_Kill_{Kill: &cordiumv1.ExecRequest_Kill{}},
+	s.killOnce.Do(func() {
+		timer := time.AfterFunc(s.cfg.killGracePeriod, s.cancel)
+		go func() {
+			<-s.done
+			timer.Stop()
+		}()
 	})
+	return nil
 }
 
 // Wait blocks until the command has exited and returns its result.
@@ -830,16 +869,14 @@ func (b *captureBuffer) write(data []byte) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	if b.limit > 0 {
-		remaining := b.limit - b.buf.Len()
-		if remaining <= 0 {
-			b.truncated = true
-			return
-		}
-		if len(data) > remaining {
-			data = data[:remaining]
-			b.truncated = true
-		}
+	remaining := b.limit - b.buf.Len()
+	if remaining <= 0 {
+		b.truncated = true
+		return
+	}
+	if len(data) > remaining {
+		data = data[:remaining]
+		b.truncated = true
 	}
 	b.buf.Write(data)
 }

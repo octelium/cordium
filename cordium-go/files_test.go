@@ -309,6 +309,12 @@ func TestReadFileRespectsItsSizeCap(t *testing.T) {
 		t.Fatal("ReadFile ignored its size cap")
 	}
 
+	fs.files["/default-cap"] = bytes.Repeat([]byte("x"), defaultMaxCaptureBytes+1)
+	if _, err := ws.ReadFile(t.Context(), "/default-cap",
+		WithMaxCaptureBytes(defaultMaxCaptureBytes)); err == nil {
+		t.Fatal("ReadFile ignored an explicit cap equal to the exec default")
+	}
+
 	// The same file still streams through DownloadFileTo.
 	var buf bytes.Buffer
 	if err := ws.DownloadFileTo(t.Context(), "/big", &buf); err != nil {

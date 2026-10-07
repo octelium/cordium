@@ -185,7 +185,7 @@ func (uc *UserSecretClient) CreateAttrs(ctx context.Context, name string, attrs 
 // every Workspace of the User, while the returned UserSecret carries the public
 // key in its status.
 func (uc *UserSecretClient) CreateSSHKey(ctx context.Context, name string) (*cordiumv1.UserSecret, error) {
-	return uc.create(ctx, name, cordiumv1.UserSecret_Spec_SSH_KEY, nil)
+	return uc.create(ctx, name, cordiumv1.UserSecret_Spec_SSH_KEY, &cordiumv1.UserSecret_Data{})
 }
 
 func (uc *UserSecretClient) create(ctx context.Context, name string,

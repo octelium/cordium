@@ -462,8 +462,17 @@ type RegionClient struct {
 	c *Client
 }
 
-// List returns the Regions of the Cluster that are enabled to host Workspaces.
-func (rc *RegionClient) List(ctx context.Context, opts ...ListOption) ([]*cordiumv1.Region, error) {
+// RegionList is a single page of Regions.
+type RegionList struct {
+	// Items is the page's Regions.
+	Items []*cordiumv1.Region
+	// Page is the pagination information of the response.
+	Page PageInfo
+}
+
+// List returns one page of the Regions of the Cluster that are enabled to host
+// Workspaces.
+func (rc *RegionClient) List(ctx context.Context, opts ...ListOption) (*RegionList, error) {
 	if err := rc.c.ensureOpen(); err != nil {
 		return nil, err
 	}
@@ -479,7 +488,24 @@ func (rc *RegionClient) List(ctx context.Context, opts ...ListOption) ([]*cordiu
 	if err != nil {
 		return nil, err
 	}
-	return list.GetItems(), nil
+
+	return &RegionList{
+		Items: list.GetItems(),
+		Page:  pageInfoFrom(list.GetListResponseMeta()),
+	}, nil
+}
+
+// All iterates over every Region that is enabled to host Workspaces, fetching
+// the pages as it goes.
+func (rc *RegionClient) All(ctx context.Context, opts ...ListOption) iter.Seq2[*cordiumv1.Region, error] {
+	return allPages(ctx, opts,
+		func(ctx context.Context, opts ...ListOption) ([]*cordiumv1.Region, PageInfo, error) {
+			list, err := rc.List(ctx, opts...)
+			if err != nil {
+				return nil, PageInfo{}, err
+			}
+			return list.Items, list.Page, nil
+		})
 }
 
 /*

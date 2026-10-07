@@ -2,8 +2,8 @@ github.com/golang/protobuf v1.5.4 h1:i7eJL8qZTpSEXOPTxNKhASYpMn+8e5Q6AdndVa1dWek
 github.com/golang/protobuf v1.5.4/go.mod h1:lnTiLA8Wa4RWRcIUkrtSVa5nRhsEGBg48fD6rSs7xps=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
-github.com/octelium/octelium/octelium-go v0.42.1-0.20261003070331-0fe86d9363da h1:GCRvyTx/bYSuiCE/H4BLiuK7R19kciRGyg944cUvTXw=
-github.com/octelium/octelium/octelium-go v0.42.1-0.20261003070331-0fe86d9363da/go.mod h1:vOV5uoZb5BGRA4xgoBFTtf5F0de5QPExifbm0E0eD0g=
+github.com/octelium/octelium/octelium-go v0.42.1-0.20261007173542-f3c32cdac940 h1:1BhwjmBsAM9PF45zZEYiYHcAWP5VZv9A8h4mRn+l3fI=
+github.com/octelium/octelium/octelium-go v0.42.1-0.20261007173542-f3c32cdac940/go.mod h1:vOV5uoZb5BGRA4xgoBFTtf5F0de5QPExifbm0E0eD0g=
 golang.org/x/net v0.58.0 h1:ynWG7rqYi4ccpTEuPZ2QGWHktVEM9DMCj9yzDE0Q7To=
 golang.org/x/net v0.58.0/go.mod h1:YwCddHnFlT7eLQqVprV19OnhLGtc5xOKgE0RyqgfWAU=
 golang.org/x/oauth2 v0.36.0 h1:peZ/1z27fi9hUOFCAZaHyrpWG5lwe0RJEEEeH0ThlIs=

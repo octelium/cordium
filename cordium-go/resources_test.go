@@ -228,7 +228,8 @@ func TestTemplateBuildAndWait(t *testing.T) {
 	ctx, cancel := context.WithTimeout(t.Context(), 20*time.Second)
 	defer cancel()
 
-	build, err := c.Templates().WaitForBuild(ctx, "ci-runner.my-project")
+	buildID := tpl.GetStatus().GetBuildInfo().GetCurrentRunningBuildID()
+	build, err := c.Templates().WaitForBuild(ctx, "ci-runner.my-project", buildID)
 	if err != nil {
 		t.Fatalf("WaitForBuild: %v", err)
 	}
@@ -236,8 +237,25 @@ func TestTemplateBuildAndWait(t *testing.T) {
 		t.Errorf("build state = %s", build.GetState())
 	}
 
+	// A pre-build that completed before the wait began is still found.
+	if _, err := c.Templates().WaitForBuild(ctx, "ci-runner.my-project", buildID); err != nil {
+		t.Fatalf("WaitForBuild after completion: %v", err)
+	}
+	if _, err := c.Templates().WaitForBuild(ctx, "ci-runner.my-project", "nope"); !errors.Is(err, ErrBuildNotFound) {
+		t.Errorf("unknown pre-build: %v", err)
+	}
+	if _, err := c.Templates().WaitForBuild(ctx, "ci-runner.my-project", ""); !IsInvalidArgument(err) {
+		t.Errorf("empty pre-build ID: %v", err)
+	}
+
+	if _, err := c.Templates().Build(t.Context(), "ci-runner.my-project"); err != nil {
+		t.Fatalf("Build: %v", err)
+	}
 	if _, err := c.Templates().CancelBuild(t.Context(), "ci-runner.my-project"); err != nil {
 		t.Fatalf("CancelBuild: %v", err)
+	}
+	if _, err := c.Templates().WaitForBuild(ctx, "ci-runner.my-project", buildID); !errors.Is(err, ErrBuildCanceled) {
+		t.Errorf("canceled pre-build: %v", err)
 	}
 }
 
@@ -245,7 +263,8 @@ func TestTemplateWaitForBuildReportsFailure(t *testing.T) {
 	fake := newFakeCluster()
 	c := startFakeCluster(t, fake)
 
-	if _, err := c.Templates().Build(t.Context(), "ci-runner.my-project"); err != nil {
+	tpl, err := c.Templates().Build(t.Context(), "ci-runner.my-project")
+	if err != nil {
 		t.Fatalf("Build: %v", err)
 	}
 
@@ -263,7 +282,8 @@ func TestTemplateWaitForBuildReportsFailure(t *testing.T) {
 	ctx, cancel := context.WithTimeout(t.Context(), 20*time.Second)
 	defer cancel()
 
-	_, err := c.Templates().WaitForBuild(ctx, "ci-runner.my-project")
+	_, err = c.Templates().WaitForBuild(ctx, "ci-runner.my-project",
+		tpl.GetStatus().GetBuildInfo().GetCurrentRunningBuildID())
 
 	var failure *WorkspaceFailureError
 	if !errors.As(err, &failure) {
@@ -360,7 +380,8 @@ func TestUserSecrets(t *testing.T) {
 	fake.mu.Lock()
 	sent := fake.lastUserSecret
 	fake.mu.Unlock()
-	if sent.GetSpec().GetType() != cordiumv1.UserSecret_Spec_SSH_KEY || sent.GetData() != nil {
+	if sent.GetSpec().GetType() != cordiumv1.UserSecret_Spec_SSH_KEY || sent.GetData() == nil ||
+		sent.GetData().GetType() != nil {
 		t.Errorf("SSH key UserSecret = %v", sent)
 	}
 
@@ -533,8 +554,21 @@ func TestRegionsAndUserConfig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Regions: %v", err)
 	}
-	if len(regions) != 1 || regions[0].GetStatus().GetCity() != "Frankfurt" {
-		t.Errorf("regions = %v", regions)
+	if len(regions.Items) != 1 || regions.Items[0].GetStatus().GetCity() != "Frankfurt" {
+		t.Errorf("regions = %v", regions.Items)
+	}
+	count := 0
+	for region, err := range c.Regions().All(t.Context()) {
+		if err != nil {
+			t.Fatalf("All: %v", err)
+		}
+		if region.GetMetadata().GetName() != "default" {
+			t.Errorf("region = %v", region)
+		}
+		count++
+	}
+	if count != 1 {
+		t.Errorf("All yielded %d Regions", count)
 	}
 
 	cfg, err := c.UserConfig().SetPreferredRegion(t.Context(), "eu-west")
@@ -643,6 +677,13 @@ func TestErrorMessages(t *testing.T) {
 	}
 	if FailureReason(nil) != "" {
 		t.Error("FailureReason(nil) is not empty")
+	}
+	if got := FailureReason(&cordiumv1.Workspace_Status_Failure{
+		Type: &cordiumv1.Workspace_Status_Failure_Volume_{
+			Volume: &cordiumv1.Workspace_Status_Failure_Volume{Name: "datasets"},
+		},
+	}); got != "Volume" {
+		t.Errorf("FailureReason(Volume) = %q", got)
 	}
 }
 

@@ -23,6 +23,8 @@ import (
 	"time"
 
 	"github.com/octelium/octelium/apis/main/cordiumv1"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // driveToRunning walks a Workspace through a realistic startup once the SDK has
@@ -170,6 +172,63 @@ func TestWaitUntilStoppedAcceptsACleanStop(t *testing.T) {
 	}
 }
 
+func TestWaitUntilStoppedIgnoresAPreviousRunFailure(t *testing.T) {
+	fake := newFakeCluster()
+	c := startFakeCluster(t, fake)
+
+	ws, err := c.Workspaces().Create(t.Context(), WithAutoStop())
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	if err := ws.Start(t.Context()); err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+	fake.setFailure(ws.Name(), &cordiumv1.Workspace_Status_Failure{
+		Type: &cordiumv1.Workspace_Status_Failure_ImageBuild_{
+			ImageBuild: &cordiumv1.Workspace_Status_Failure_ImageBuild{},
+		},
+	})
+
+	if err := ws.Start(t.Context()); err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+	fake.setState(ws.Name(), cordiumv1.Workspace_Status_STOPPED)
+
+	ctx, cancel := context.WithTimeout(t.Context(), 10*time.Second)
+	defer cancel()
+
+	if err := ws.WaitUntilStopped(ctx); err != nil {
+		t.Fatalf("WaitUntilStopped: %v", err)
+	}
+	if failure := ws.Failure(); failure != nil {
+		t.Errorf("Failure = %v, want none for the latest run", failure)
+	}
+}
+
+func TestWaitFailsOnPermanentErrors(t *testing.T) {
+	fake := newFakeCluster()
+	c := startFakeCluster(t, fake)
+
+	ws, err := c.Workspaces().Create(t.Context())
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	if err := ws.Start(t.Context()); err != nil {
+		t.Fatalf("Start: %v", err)
+	}
+
+	fake.mu.Lock()
+	fake.getErr = status.Error(codes.PermissionDenied, "denied")
+	fake.mu.Unlock()
+
+	ctx, cancel := context.WithTimeout(t.Context(), 10*time.Second)
+	defer cancel()
+
+	if err := ws.WaitUntilRunning(ctx); !IsPermissionDenied(err) {
+		t.Fatalf("err = %v, want PERMISSION_DENIED", err)
+	}
+}
+
 // TestWaitReconcilesBeforeTheStream covers the race in which the Workspace
 // reaches the awaited state before the watch stream is even open.
 func TestWaitReconcilesStateReachedBeforeTheStream(t *testing.T) {
@@ -235,6 +294,25 @@ func TestWaitHonorsTheContextDeadline(t *testing.T) {
 
 	if err := ws.WaitUntilRunning(ctx); !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatalf("err = %v, want context.DeadlineExceeded", err)
+	}
+}
+
+func TestRunReturnsTheWorkspaceWhenItFails(t *testing.T) {
+	fake := newFakeCluster()
+	c := startFakeCluster(t, fake)
+
+	ctx, cancel := context.WithTimeout(t.Context(), 300*time.Millisecond)
+	defer cancel()
+
+	ws, err := c.Workspaces().Run(ctx, WithImage("python:3.11"))
+	if !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("err = %v, want context.DeadlineExceeded", err)
+	}
+	if ws == nil || ws.Name() == "" {
+		t.Fatal("Run did not return the Workspace it created")
+	}
+	if err := ws.Delete(t.Context()); err != nil {
+		t.Fatalf("Delete: %v", err)
 	}
 }
 
@@ -405,6 +483,17 @@ func TestUpdateStartsFromTheCurrentSpec(t *testing.T) {
 	if len(spec.GetRuntime().GetEnvVars()) != 2 {
 		t.Errorf("envVars = %v, want the original one plus the new one",
 			spec.GetRuntime().GetEnvVars())
+	}
+
+	if err := ws.Update(t.Context(), WithEnv("ONE", "changed"), WithVar("V", "1"), WithVar("V", "2")); err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+	spec = ws.Spec()
+	if envs := spec.GetRuntime().GetEnvVars(); len(envs) != 2 || envs[0].GetValue() != "changed" {
+		t.Errorf("envVars = %v, want ONE replaced in place", envs)
+	}
+	if vars := spec.GetVars(); len(vars) != 1 || vars[0].GetValue() != "2" {
+		t.Errorf("vars = %v, want V replaced", vars)
 	}
 	if spec.GetImage().GetRegistry().GetUrl() != "node:20" {
 		t.Error("the image was lost by the update")

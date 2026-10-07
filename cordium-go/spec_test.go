@@ -506,3 +506,97 @@ func TestWorkspaceStatePredicates(t *testing.T) {
 		}
 	}
 }
+
+func TestKeyedOptionsReplaceAndValidate(t *testing.T) {
+	b, err := newSpecBuilder(
+		WithTask("deps", "npm ci", TaskEnv("A", "1"), TaskEnv("A", "2")),
+		WithTask("deps", "pnpm i"),
+		WithApp("web", 3000),
+		WithApp("web", 8080),
+		WithVolume("data", "/data"),
+		WithReadOnlyVolume("other", "/data"),
+		WithAdditionalRepo("libs", "/workspace/libs", "https://example.com/a"),
+		WithAdditionalRepo("libs", "/workspace/libs", "https://example.com/b"),
+		WithDevcontainerFeature("ghcr.io/f:1", nil),
+		WithDevcontainerFeature("ghcr.io/f:1", map[string]string{"k": "v"}),
+		WithEnvFromSecret("TOKEN", "a"),
+		WithEnv("TOKEN", "literal"),
+	)
+	if err != nil {
+		t.Fatalf("newSpecBuilder: %v", err)
+	}
+	spec := b.spec
+	if tasks := spec.GetRuntime().GetTasks(); len(tasks) != 1 || tasks[0].GetRun() != "pnpm i" {
+		t.Errorf("tasks = %v", tasks)
+	}
+	if apps := spec.GetApplications(); len(apps) != 1 || apps[0].GetPort() != 8080 {
+		t.Errorf("applications = %v", apps)
+	}
+	if mounts := spec.GetRuntime().GetVolumeMounts(); len(mounts) != 1 || !mounts[0].GetReadOnly() {
+		t.Errorf("volume mounts = %v", mounts)
+	}
+	if repos := spec.GetAdditionalRepositories(); len(repos) != 1 ||
+		repos[0].GetRepository().GetUrl() != "https://example.com/b" {
+		t.Errorf("additional repositories = %v", repos)
+	}
+	if features := spec.GetRuntime().GetDevcontainers().GetFeatures(); len(features) != 1 ||
+		len(features[0].GetOptions()) != 1 {
+		t.Errorf("features = %v", features)
+	}
+	if envs := spec.GetRuntime().GetEnvVars(); len(envs) != 1 || envs[0].GetValue() != "literal" {
+		t.Errorf("envVars = %v", envs)
+	}
+
+	b, err = newSpecBuilder(WithTask("deps", "npm ci", TaskEnv("A", "1"), TaskEnv("A", "2")))
+	if err != nil {
+		t.Fatalf("newSpecBuilder: %v", err)
+	}
+	if envs := b.spec.GetRuntime().GetTasks()[0].GetEnvVars(); len(envs) != 1 || envs[0].GetValue() != "2" {
+		t.Errorf("Task envVars = %v", envs)
+	}
+
+	for name, opt := range map[string]WorkspaceOption{
+		"empty env value":       WithEnv("A", ""),
+		"empty task env value":  WithTask("t", "true", TaskEnv("A", "")),
+		"empty registry user":   WithPrivateImage("registry.example.com/x", "", "pw"),
+		"empty repository user": WithRepo("https://example.com/x", WithRepoAuth("", "pw")),
+	} {
+		if _, err := newSpecBuilder(opt); !IsInvalidArgument(err) {
+			t.Errorf("%s: %v", name, err)
+		}
+	}
+}
+
+func TestSpaceOptionsReplaceAndClone(t *testing.T) {
+	base := &cordiumv1.Space_Spec{
+		Runtime: &cordiumv1.Space_Spec_Runtime{
+			EnvVars: []*cordiumv1.Workspace_Spec_Runtime_EnvVar{{
+				Key:  "A",
+				Type: &cordiumv1.Workspace_Spec_Runtime_EnvVar_Value{Value: "1"},
+			}},
+		},
+	}
+
+	cfg := &spaceConfig{}
+	for _, opt := range []SpaceOption{
+		WithSpaceSpec(base),
+		WithSpaceEnv("A", "2"),
+		WithSpaceTask("t", "true"),
+		WithSpaceTask("t", "false"),
+	} {
+		if err := opt(cfg); err != nil {
+			t.Fatalf("option: %v", err)
+		}
+	}
+	spec := cfg.build()
+
+	if envs := spec.GetRuntime().GetEnvVars(); len(envs) != 1 || envs[0].GetValue() != "2" {
+		t.Errorf("envVars = %v, want A replaced", envs)
+	}
+	if tasks := spec.GetRuntime().GetTasks(); len(tasks) != 1 || tasks[0].GetRun() != "false" {
+		t.Errorf("tasks = %v, want t replaced", tasks)
+	}
+	if base.GetRuntime().GetEnvVars()[0].GetValue() != "1" {
+		t.Error("WithSpaceSpec mutated the caller's spec")
+	}
+}

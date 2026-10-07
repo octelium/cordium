@@ -39,6 +39,12 @@ var (
 	ErrExecNotRunning = errors.New("cordium: exec session is no longer running")
 	// ErrTerminalClosed is returned once a Terminal has been closed.
 	ErrTerminalClosed = errors.New("cordium: terminal is closed")
+	// ErrBuildCanceled is returned by [TemplateClient.WaitForBuild] when the
+	// pre-build it follows is canceled.
+	ErrBuildCanceled = errors.New("cordium: Template pre-build was canceled")
+	// ErrBuildNotFound is returned by [TemplateClient.WaitForBuild] when the
+	// Template's pre-build history does not contain the pre-build it follows.
+	ErrBuildNotFound = errors.New("cordium: Template pre-build not found")
 )
 
 func invalidArgumentf(format string, args ...any) error {
@@ -130,6 +136,8 @@ func FailureReason(failure *cordiumv1.Workspace_Status_Failure) string {
 		return "HealthCheck"
 	case *cordiumv1.Workspace_Status_Failure_NetworkPolicy_:
 		return "NetworkPolicy"
+	case *cordiumv1.Workspace_Status_Failure_Volume_:
+		return "Volume"
 	case *cordiumv1.Workspace_Status_Failure_Unknown_:
 		return "Unknown"
 	default:
@@ -268,6 +276,16 @@ func Code(err error) codes.Code {
 		return codes.OK
 	}
 	return status.Code(err)
+}
+
+func isTransient(err error) bool {
+	switch Code(err) {
+	case codes.Unavailable, codes.ResourceExhausted, codes.Aborted,
+		codes.Internal, codes.Unknown, codes.DeadlineExceeded:
+		return true
+	default:
+		return false
+	}
 }
 
 func hasCode(err error, code codes.Code) bool {

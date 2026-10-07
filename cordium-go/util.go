@@ -47,7 +47,7 @@ func ShellQuote(arg string) string {
 	if arg == "" {
 		return "''"
 	}
-	if !strings.ContainsAny(arg, "\\\"'`$&|;<>()[]{}*?!#~^ \t\n\r") {
+	if !strings.ContainsAny(arg, "\\\"'`$&|;<>()[]{}*?!#~^= \t\n\r") {
 		return arg
 	}
 	return "'" + strings.ReplaceAll(arg, "'", `'\''`) + "'"

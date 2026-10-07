@@ -334,6 +334,125 @@ func TestExecStdinAndKill(t *testing.T) {
 	}
 }
 
+func TestExecKillWithoutExitEndsAfterTheGracePeriod(t *testing.T) {
+	fake := newFakeCluster()
+	fake.execScript = func(req *cordiumv1.ExecRequest_Request,
+		srv grpc.BidiStreamingServer[cordiumv1.ExecRequest, cordiumv1.ExecResponse]) error {
+		// Like the Cluster, report nothing after a kill and keep the stream open.
+		for {
+			msg, err := srv.Recv()
+			if err != nil {
+				return err
+			}
+			if msg.GetKill() != nil {
+				<-srv.Context().Done()
+				return nil
+			}
+		}
+	}
+
+	c := startFakeCluster(t, fake)
+	ws := testWorkspace(t, c)
+
+	sess, err := ws.ExecStream(t.Context(), "sleep 60", WithKillGracePeriod(50*time.Millisecond))
+	if err != nil {
+		t.Fatalf("ExecStream: %v", err)
+	}
+	defer sess.Close()
+
+	if err := sess.Kill(); err != nil {
+		t.Fatalf("Kill: %v", err)
+	}
+
+	done := make(chan struct{})
+	var res *ExecResult
+	go func() {
+		defer close(done)
+		res, err = sess.Wait()
+	}()
+	select {
+	case <-done:
+	case <-time.After(10 * time.Second):
+		t.Fatal("Wait did not return after the kill grace period")
+	}
+	if err != nil {
+		t.Fatalf("Wait: %v", err)
+	}
+	if !res.Killed || res.ExitCode != -1 {
+		t.Errorf("result = killed %v, exit %d", res.Killed, res.ExitCode)
+	}
+
+	if err := sess.Kill(); err != nil {
+		t.Errorf("killing a finished command: %v", err)
+	}
+	if _, err := ws.ExecStream(t.Context(), "true", WithKillGracePeriod(-time.Second)); !IsInvalidArgument(err) {
+		t.Errorf("a negative grace period: %v", err)
+	}
+}
+
+func TestExecKillAfterExitIsANoop(t *testing.T) {
+	fake := newFakeCluster()
+	fake.execScript = func(req *cordiumv1.ExecRequest_Request,
+		srv grpc.BidiStreamingServer[cordiumv1.ExecRequest, cordiumv1.ExecResponse]) error {
+		_ = srv.Send(exit(0))
+		<-srv.Context().Done()
+		return nil
+	}
+
+	c := startFakeCluster(t, fake)
+	ws := testWorkspace(t, c)
+
+	sess, err := ws.ExecStream(t.Context(), "true")
+	if err != nil {
+		t.Fatalf("ExecStream: %v", err)
+	}
+	defer sess.Close()
+
+	if _, err := sess.Wait(); err != nil {
+		t.Fatalf("Wait: %v", err)
+	}
+	if err := sess.Kill(); err != nil {
+		t.Fatalf("Kill: %v", err)
+	}
+	res, err := sess.Wait()
+	if err != nil {
+		t.Fatalf("Wait: %v", err)
+	}
+	if res.Killed || res.ExitCode != 0 {
+		t.Errorf("result = killed %v, exit %d", res.Killed, res.ExitCode)
+	}
+}
+
+func TestExecCaptureLimits(t *testing.T) {
+	fake := newFakeCluster()
+	fake.execScript = func(req *cordiumv1.ExecRequest_Request,
+		srv grpc.BidiStreamingServer[cordiumv1.ExecRequest, cordiumv1.ExecResponse]) error {
+		_ = srv.Send(stdout(strings.Repeat("x", defaultMaxCaptureBytes+1)))
+		_ = srv.Send(exit(0))
+		<-srv.Context().Done()
+		return nil
+	}
+
+	c := startFakeCluster(t, fake)
+	ws := testWorkspace(t, c)
+
+	res, err := ws.Exec(t.Context(), "big")
+	if err != nil {
+		t.Fatalf("Exec: %v", err)
+	}
+	if len(res.Stdout) != 1<<20 || !res.Truncated {
+		t.Errorf("default capture kept %d bytes (truncated %v), want 1 MiB", len(res.Stdout), res.Truncated)
+	}
+
+	res, err = ws.Exec(t.Context(), "big", WithMaxCaptureBytes(0))
+	if err != nil {
+		t.Fatalf("Exec: %v", err)
+	}
+	if len(res.Stdout) != 0 || len(res.Combined) != 0 || !res.Truncated {
+		t.Errorf("a zero capture kept %d bytes (truncated %v)", len(res.Stdout), res.Truncated)
+	}
+}
+
 func TestExecTerminateOnStdinEOF(t *testing.T) {
 	killed := make(chan struct{})
 	fake := newFakeCluster()
@@ -460,6 +579,7 @@ func TestArgvQuoting(t *testing.T) {
 		{[]string{"echo", ""}, "echo ''"},
 		{[]string{"rm", "-rf", "/tmp/x; rm -rf /"}, "rm -rf '/tmp/x; rm -rf /'"},
 		{[]string{"echo", "$HOME"}, "echo '$HOME'"},
+		{[]string{"A=b", "rm", "-rf", "/"}, "'A=b' rm -rf /"},
 	} {
 		if got := Argv(tc.args...); got != tc.want {
 			t.Errorf("Argv(%q) = %q, want %q", tc.args, got, tc.want)

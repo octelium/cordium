@@ -151,7 +151,7 @@ func (w *Workspace) ReadFile(ctx context.Context, remotePath string, opts ...Exe
 	}
 
 	limit := cfg.maxCaptureSize
-	if limit == defaultMaxCaptureBytes {
+	if !cfg.maxCaptureSizeSet {
 		limit = defaultMaxReadFileBytes
 	}
 

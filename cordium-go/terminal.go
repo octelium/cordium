@@ -49,20 +49,22 @@ type TerminalEvent struct {
 
 type terminalConfig struct {
 	cols, rows uint32
+	sizeSet    bool
 	bufferSize int
 }
 
 // TerminalOption configures an interactive terminal.
 type TerminalOption func(*terminalConfig) error
 
-// WithTerminalSize sets the initial window size of the terminal. It defaults to
-// 80 by 24.
+// WithTerminalSize sets the window size of the terminal. A new terminal
+// defaults to 80 by 24, and [Workspace.AttachTerminal] resizes an existing one
+// only when this option is given.
 func WithTerminalSize(cols, rows uint32) TerminalOption {
 	return func(c *terminalConfig) error {
 		if cols == 0 || rows == 0 {
 			return invalidArgumentf("terminal size must be positive")
 		}
-		c.cols, c.rows = cols, rows
+		c.cols, c.rows, c.sizeSet = cols, rows, true
 		return nil
 	}
 }
@@ -158,6 +160,17 @@ func (w *Workspace) AttachTerminal(ctx context.Context, id string, opts ...Termi
 			continue
 		}
 		if err := opt(cfg); err != nil {
+			return nil, err
+		}
+	}
+
+	if cfg.sizeSet {
+		if _, err := w.c.WorkspaceService().SetTerminalWindowSize(ctx,
+			&cordiumv1.SetTerminalWindowSizeRequest{
+				Id:   id,
+				Cols: cfg.cols,
+				Rows: cfg.rows,
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -315,7 +328,9 @@ func (t *Terminal) Remove(ctx context.Context) error {
 	return err
 }
 
-// Err returns the error that ended the terminal's stream, if any.
+// Err returns the error that ended the terminal's stream. It is nil while the
+// stream is running and once the caller ended it, through [Terminal.Detach] or
+// its context.
 func (t *Terminal) Err() error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -378,7 +393,7 @@ func (t *Terminal) emit(ctx context.Context, ev TerminalEvent) bool {
 	case t.events <- ev:
 		return true
 	case <-ctx.Done():
-		t.finish(ctx.Err())
+		t.finish(nil)
 		return false
 	case <-t.c.closedCh():
 		t.finish(ErrClientClosed)

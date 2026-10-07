@@ -22,6 +22,7 @@ import (
 
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
+	"google.golang.org/protobuf/proto"
 )
 
 // SpaceClient is the Space API. A Space is Cordium's top-level namespace: it
@@ -201,13 +202,13 @@ func WithoutSSH() SpaceOption {
 }
 
 // WithSpaceSpec starts from an existing Space spec, which the later options
-// then refine.
+// then refine. The spec is cloned, so the caller's copy is never mutated.
 func WithSpaceSpec(spec *cordiumv1.Space_Spec) SpaceOption {
 	return func(c *spaceConfig) error {
 		if spec == nil {
 			return invalidArgumentf("nil Space spec")
 		}
-		c.spec = spec
+		c.spec = proto.Clone(spec).(*cordiumv1.Space_Spec)
 		return nil
 	}
 }
@@ -234,8 +235,18 @@ func (c *spaceConfig) build() *cordiumv1.Space_Spec {
 		if ret.Runtime == nil {
 			ret.Runtime = &cordiumv1.Space_Spec_Runtime{}
 		}
-		ret.Runtime.EnvVars = append(ret.Runtime.EnvVars, c.envVars...)
-		ret.Runtime.Tasks = append(ret.Runtime.Tasks, c.tasks...)
+		for _, env := range c.envVars {
+			ret.Runtime.EnvVars = upsert(ret.Runtime.EnvVars, env,
+				func(e *cordiumv1.Workspace_Spec_Runtime_EnvVar) bool {
+					return e.GetKey() == env.GetKey()
+				})
+		}
+		for _, task := range c.tasks {
+			ret.Runtime.Tasks = upsert(ret.Runtime.Tasks, task,
+				func(t *cordiumv1.Workspace_Spec_Runtime_Task) bool {
+					return t.GetName() == task.GetName()
+				})
+		}
 		if len(c.addCaps) > 0 || len(c.dropCaps) > 0 {
 			if ret.Runtime.Capabilities == nil {
 				ret.Runtime.Capabilities = &cordiumv1.Workspace_Spec_Runtime_Capabilities{}

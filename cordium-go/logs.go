@@ -164,7 +164,7 @@ func (w *Workspace) Logs(ctx context.Context) (*LogStream, error) {
 			select {
 			case ret.entries <- entry:
 			case <-ctx.Done():
-				ret.finish(ctx.Err())
+				ret.finish(nil)
 				return
 			case <-w.c.closedCh():
 				ret.finish(ErrClientClosed)
@@ -209,7 +209,9 @@ func (w *Workspace) StreamLogsTo(ctx context.Context, stdout, stderr io.Writer) 
 // closed once the stream ends.
 func (s *LogStream) Entries() <-chan LogEntry { return s.entries }
 
-// Err returns the error that ended the stream, if any.
+// Err returns the error that ended the stream. It is nil while the stream is
+// running and once the caller ended it, through [LogStream.Close] or its
+// context.
 func (s *LogStream) Err() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()

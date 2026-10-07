@@ -89,7 +89,7 @@ func (w *Workspace) WaitUntilStopped(ctx context.Context) error {
 		if ws.GetStatus().GetState() != StateStopped {
 			return false, nil
 		}
-		if failure := ws.GetStatus().GetFailure(); failure != nil {
+		if failure := runFailure(ws); failure != nil {
 			return false, &WorkspaceFailureError{
 				Workspace: ws.GetMetadata().GetName(),
 				Failure:   failure,
@@ -196,6 +196,9 @@ func (w *Workspace) reconcile(ctx context.Context, cond WaitCondition) (bool, er
 		if ctx.Err() != nil {
 			return false, ctx.Err()
 		}
+		if !isTransient(err) {
+			return false, err
+		}
 		w.c.logger().Debug("Could not reconcile the Workspace state",
 			"workspace", w.Name(), "error", err)
 		return false, nil
@@ -287,7 +290,7 @@ func watchedItem(msg *cordiumv1.WatchWorkspaceResponse) (item *cordiumv1.Workspa
 }
 
 func stoppedError(ws *cordiumv1.Workspace) error {
-	if failure := ws.GetStatus().GetFailure(); failure != nil {
+	if failure := runFailure(ws); failure != nil {
 		return &WorkspaceFailureError{
 			Workspace: ws.GetMetadata().GetName(),
 			Failure:   failure,
@@ -423,7 +426,7 @@ func (wc *WorkspaceClient) watch(ctx context.Context, ref *metav1.ObjectReferenc
 			select {
 			case ret.events <- ev:
 			case <-ctx.Done():
-				ret.finish(ctx.Err())
+				ret.finish(nil)
 				return
 			case <-wc.c.closedCh():
 				ret.finish(ErrClientClosed)

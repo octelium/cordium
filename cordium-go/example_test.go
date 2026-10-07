@@ -43,10 +43,12 @@ func Example() {
 		cordium.WithImage("python:3.11-slim"),
 		cordium.Ephemeral(),
 	)
+	if ws != nil {
+		defer ws.Delete(context.WithoutCancel(ctx))
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer ws.Delete(context.WithoutCancel(ctx))
 
 	res, err := ws.Exec(ctx, "python -c 'print(6 * 7)'")
 	if err != nil {
@@ -297,11 +299,13 @@ func ExampleTemplateClient_Build() {
 		log.Fatal(err)
 	}
 
-	if _, err := c.Templates().Build(ctx, "ml-env.research", "latest"); err != nil {
+	tpl, err := c.Templates().Build(ctx, "ml-env.research", "latest")
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	build, err := c.Templates().WaitForBuild(ctx, "ml-env.research")
+	build, err := c.Templates().WaitForBuild(ctx, "ml-env.research",
+		tpl.GetStatus().GetBuildInfo().GetCurrentRunningBuildID())
 	if err != nil {
 		log.Fatal(err)
 	}

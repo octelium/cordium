@@ -50,6 +50,7 @@ type fakeCluster struct {
 	listCalls   int
 	lastCreate  *cordiumv1.Workspace
 	lastExecReq *cordiumv1.ExecRequest_Request
+	getErr      error
 
 	terminalCols, terminalRows uint32
 	terminalWrites             chan []byte
@@ -148,6 +149,9 @@ func (f *fakeCluster) GetWorkspace(ctx context.Context, req *metav1.GetOptions) 
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
+	if f.getErr != nil {
+		return nil, f.getErr
+	}
 	ws := f.lookupLocked(req.GetName(), req.GetUid())
 	if ws == nil {
 		return nil, status.Error(codes.NotFound, "no such Workspace")
@@ -198,6 +202,10 @@ func (f *fakeCluster) StartWorkspace(ctx context.Context,
 	if ws.Status.State != cordiumv1.Workspace_Status_STOPPED {
 		return nil, status.Error(codes.AlreadyExists, "the Workspace is already starting or running")
 	}
+	if ws.Status.Run != nil {
+		ws.Status.LastRuns = append([]*cordiumv1.Workspace_Status_Run{ws.Status.Run}, ws.Status.LastRuns...)
+	}
+	ws.Status.Run = &cordiumv1.Workspace_Status_Run{Id: fmt.Sprintf("run%d", f.startCalls)}
 	f.setStateLocked(ws, cordiumv1.Workspace_Status_INIT_REQUEST)
 	return &cordiumv1.StartWorkspaceResponse{}, nil
 }
@@ -331,6 +339,9 @@ func (f *fakeCluster) setFailure(name string, failure *cordiumv1.Workspace_Statu
 
 	if ws, ok := f.workspaces[name]; ok {
 		ws.Status.Failure = failure
+		if ws.Status.Run != nil {
+			ws.Status.Run.Failure = failure
+		}
 		f.setStateLocked(ws, cordiumv1.Workspace_Status_STOPPED)
 	}
 }
@@ -610,7 +621,17 @@ func (f *fakeCluster) BuildTemplate(ctx context.Context,
 
 func (f *fakeCluster) CancelBuildTemplate(ctx context.Context,
 	req *cordiumv1.CancelBuildTemplateRequest) (*cordiumv1.Template, error) {
-	return &cordiumv1.Template{Status: &cordiumv1.Template_Status{}}, nil
+
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	if f.templateState == nil {
+		return &cordiumv1.Template{Status: &cordiumv1.Template_Status{}}, nil
+	}
+	build := f.templateState.Status.BuildInfo.Builds[0]
+	build.IsCanceled = true
+	build.State = cordiumv1.Template_Status_BuildInfo_Build_STATE_FAILED
+	return proto.Clone(f.templateState).(*cordiumv1.Template), nil
 }
 
 // finishBuild moves the running pre-build into a terminal state.

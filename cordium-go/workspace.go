@@ -246,7 +246,14 @@ func (w *Workspace) RegionName() string {
 
 // Failure returns the failure of the Workspace's current or latest run, if any.
 func (w *Workspace) Failure() *cordiumv1.Workspace_Status_Failure {
-	return w.snapshot().GetStatus().GetFailure()
+	return runFailure(w.snapshot())
+}
+
+func runFailure(ws *cordiumv1.Workspace) *cordiumv1.Workspace_Status_Failure {
+	if run := ws.GetStatus().GetRun(); run != nil {
+		return run.GetFailure()
+	}
+	return ws.GetStatus().GetFailure()
 }
 
 // Run returns the current or the latest run of the Workspace.

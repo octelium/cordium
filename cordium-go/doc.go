@@ -35,10 +35,12 @@
 //		cordium.WithRepo("https://github.com/myorg/my-project"),
 //		cordium.Ephemeral(),
 //	)
+//	if ws != nil {
+//		defer ws.Delete(context.WithoutCancel(ctx))
+//	}
 //	if err != nil {
 //		return err
 //	}
-//	defer ws.Delete(context.WithoutCancel(ctx))
 //
 //	res, err := ws.Exec(ctx, "pytest -q")
 //	if err != nil {

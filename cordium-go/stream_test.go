@@ -156,6 +156,44 @@ func TestTerminalRoundTrip(t *testing.T) {
 	}
 }
 
+func TestAttachTerminalAppliesItsSize(t *testing.T) {
+	fake := newFakeCluster()
+	c := startFakeCluster(t, fake)
+	ws := testWorkspace(t, c)
+
+	term, err := ws.AttachTerminal(t.Context(), ws.Name()+"-term1", WithTerminalSize(132, 50))
+	if err != nil {
+		t.Fatalf("AttachTerminal: %v", err)
+	}
+	defer term.Detach()
+
+	fake.mu.Lock()
+	cols, rows := fake.terminalCols, fake.terminalRows
+	fake.mu.Unlock()
+	if cols != 132 || rows != 50 {
+		t.Errorf("size = %dx%d, want 132x50", cols, rows)
+	}
+}
+
+func TestDetachedTerminalReportsNoError(t *testing.T) {
+	c := startFakeCluster(t, newFakeCluster())
+	ws := testWorkspace(t, c)
+
+	term, err := ws.NewTerminal(t.Context(), WithTerminalBuffer(0))
+	if err != nil {
+		t.Fatalf("NewTerminal: %v", err)
+	}
+	time.Sleep(50 * time.Millisecond)
+	if err := term.Detach(); err != nil {
+		t.Fatalf("Detach: %v", err)
+	}
+	for range term.Events() {
+	}
+	if err := term.Err(); err != nil {
+		t.Errorf("Err after Detach = %v, want nil", err)
+	}
+}
+
 func TestTerminalRejectsInvalidSize(t *testing.T) {
 	c := startFakeCluster(t, newFakeCluster())
 	ws := testWorkspace(t, c)

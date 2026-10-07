@@ -80,14 +80,16 @@ func (wc *WorkspaceClient) Create(ctx context.Context, opts ...WorkspaceOption) 
 // a usable sandbox:
 //
 //	ws, err := c.Workspaces().Run(ctx, cordium.WithImage("python:3.11"), cordium.Ephemeral())
+//	if ws != nil {
+//		defer ws.Delete(context.WithoutCancel(ctx))
+//	}
 //	if err != nil {
 //		return err
 //	}
-//	defer ws.Delete(context.WithoutCancel(ctx))
 //
-// If the run fails, the Workspace is left in place so that its logs and its
-// failure can be inspected, and the returned error is a
-// [*WorkspaceFailureError].
+// Once the Workspace has been created, Run returns it even when a later step
+// fails, so that it can be inspected or deleted rather than leaked. A failed
+// run is reported as a [*WorkspaceFailureError].
 //
 // The start-time options ([WithRunVar], [WithRegion]) are accepted alongside
 // the spec options.
@@ -115,11 +117,11 @@ func (wc *WorkspaceClient) Run(ctx context.Context, opts ...RunOption) (*Workspa
 	}
 
 	if err := ws.Start(ctx, startOpts...); err != nil {
-		return nil, err
+		return ws, err
 	}
 
 	if err := ws.WaitUntilRunning(ctx); err != nil {
-		return nil, err
+		return ws, err
 	}
 
 	return ws, nil

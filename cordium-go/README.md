@@ -18,10 +18,12 @@ ws, err := c.Workspaces().Run(ctx,
 	cordium.WithImage("python:3.11-slim"),
 	cordium.Ephemeral(),
 )
+if ws != nil {
+	defer ws.Delete(context.WithoutCancel(ctx))
+}
 if err != nil {
 	return err
 }
-defer ws.Delete(context.WithoutCancel(ctx))
 
 res, err := ws.Exec(ctx, "python -c 'print(6 * 7)'")
 if err != nil {
@@ -118,7 +120,7 @@ ws, err := c.Workspaces().Run(ctx,
 )
 ```
 
-`Run` creates the Workspace, starts it and waits for it to reach the `RUNNING` state. `Create` does only the first step, which is what a caller that wants to start it later, or with run-specific variables, needs:
+`Run` creates the Workspace, starts it and waits for it to reach the `RUNNING` state. Once the Workspace exists, `Run` returns it even when a later step fails, so that it can be inspected or deleted rather than leaked. `Create` does only the first step, which is what a caller that wants to start it later, or with run-specific variables, needs:
 
 ```go
 ws, err := c.Workspaces().Create(ctx, cordium.WithTemplate("ci-runner.my-project"))
@@ -220,9 +222,9 @@ for out := range sess.Output() {
 res, err := sess.Wait()
 ```
 
-A session is also an `io.Writer` onto the command's standard input, and `Kill` terminates it.
+A session is also an `io.Writer` onto the command's standard input, and `Kill` terminates it. A killed command that the Cluster does not report as exited within 10 seconds (`WithKillGracePeriod`) ends the session with the exit code -1.
 
-Other output options: `WithStdout`, `WithStderr` and `WithCombinedOutput` stream into writers as the output arrives; `WithoutCapture` turns the in-memory capture off for very chatty commands; `WithMaxCaptureBytes` caps it (4 MiB by default) and marks the result as truncated.
+Other output options: `WithStdout`, `WithStderr` and `WithCombinedOutput` stream into writers as the output arrives; `WithoutCapture` turns the in-memory capture off for very chatty commands; `WithMaxCaptureBytes` caps it (1 MiB by default) and marks the result as truncated.
 
 > **Standard input has no half-close.** Cordium's execution protocol carries no way to close a command's standard input on its own, so a command that reads until end of file (`cat`, `sha256sum`, `psql`) never sees the input end. `WithTerminateOnStdinEOF` terminates the command once the input source is exhausted, which closes its standard input as a side effect and lets it flush and exit. A command that must do substantial work *after* consuming its input should not be run that way.
 
@@ -346,10 +348,12 @@ _, err = c.Memberships().Add(ctx, "my-project.cordium", "jane@example.com", cord
 A Template is a reusable Workspace configuration, so it takes the **same** options as a Workspace, minus the few that only a single Workspace can carry (`WithApp` and `Ephemeral`). A pre-build snapshots a fully initialized filesystem, which is the single biggest lever on startup time:
 
 ```go
-if _, err := c.Templates().Build(ctx, "ci-runner.my-project", "latest"); err != nil {
+tpl, err := c.Templates().Build(ctx, "ci-runner.my-project", "latest")
+if err != nil {
 	return err
 }
-build, err := c.Templates().WaitForBuild(ctx, "ci-runner.my-project")
+build, err := c.Templates().WaitForBuild(ctx, "ci-runner.my-project",
+	tpl.GetStatus().GetBuildInfo().GetCurrentRunningBuildID())
 ```
 
 Names are resolved by the Cluster: a short name such as `npm-token` lands in the caller's default Space, while `npm-token.my-project` is explicit. `ShortName` strips the qualification back off for display.
