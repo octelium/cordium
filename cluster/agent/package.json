@@ -52,7 +52,7 @@
     "@earendil-works/pi-ai": "1.0.1",
     "@earendil-works/pi-coding-agent": "1.0.1",
     "@grpc/grpc-js": "1.14.6",
-    "@octelium/apis": "^1.0.12",
+    "@octelium/apis": "1.0.13",
     "@octelium/cordium": "0.3.0",
     "@protobuf-ts/runtime": "2.11.1",
     "@protobuf-ts/runtime-rpc": "2.11.1",
