@@ -472,11 +472,12 @@ func (s *Server) ListWorkspace(ctx context.Context, req *cordiumv1.ListWorkspace
 			return nil, err
 		}
 
-		if _, err := s.octeliumC.CordiumC().GetSpace(ctx, apivalidation.ObjectReferenceToRGetOptions(req.GetSpaceRef())); err != nil {
+		spc, err := s.octeliumC.CordiumC().GetSpace(ctx, apivalidation.ObjectReferenceToRGetOptions(req.GetSpaceRef()))
+		if err != nil {
 			return nil, grpcutils.K8sNotFoundOrInternalWithErr(err)
 		}
 
-		filters = append(filters, ourscsrv.FilterStatusSpaceUID(req.GetSpaceRef().Uid))
+		filters = append(filters, ourscsrv.FilterStatusSpaceUID(spc.Metadata.Uid))
 	default:
 
 	}
@@ -518,6 +519,10 @@ func (s *Server) DeleteWorkspace(ctx context.Context, req *metav1.DeleteOptions)
 
 	if _, err := s.octeliumC.CordiumC().DeleteWorkspace(ctx, &rmetav1.DeleteOptions{Uid: ws.Metadata.Uid}); err != nil {
 		return nil, serr.InternalWithErr(err)
+	}
+
+	if err := s.unsetAgentWorkspace(ctx, ws); err != nil {
+		return nil, err
 	}
 
 	return &metav1.OperationResult{}, nil

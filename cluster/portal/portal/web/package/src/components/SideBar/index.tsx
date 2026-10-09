@@ -1,6 +1,7 @@
 import {
   IconCamera,
   IconLayoutDashboard,
+  IconSparkles,
   IconKey,
   IconServer2,
   IconSettings,
@@ -25,6 +26,7 @@ const primary: NavItem[] = [
     icon: <IconLayoutDashboard size={17} />,
     end: true,
   },
+  { label: "Agent", to: "/agent", icon: <IconSparkles size={17} /> },
   { label: "Spaces", to: "/spaces", icon: <IconStack2 size={17} /> },
   { label: "Workspaces", to: "/workspaces", icon: <IconTerminal2 size={17} /> },
   { label: "Snapshots", to: "/snapshots", icon: <IconCamera size={17} /> },

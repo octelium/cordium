@@ -368,6 +368,7 @@ func getPortalCORS(domain string) *corev1.Service_Spec_Config_HTTP_CORS {
 	return &corev1.Service_Spec_Config_HTTP_CORS{
 		AllowOriginStringMatch: []string{
 			fmt.Sprintf("https://console.octelium.%s", domain),
+			fmt.Sprintf("https://cordium.%s", domain),
 		},
 		AllowMethods:     "GET, POST, PUT, PATCH, DELETE",
 		AllowHeaders:     "Authorization, Content-Type, Last-Event-ID, X-File-Name",

@@ -2,7 +2,7 @@ import Footer from "@/components/Footer";
 import SideBar from "@/components/SideBar";
 import TopBar from "@/components/TopBar";
 
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useMatch } from "react-router-dom";
 
 import { setStatus } from "@/features/settings/slice";
 import { getClientUser, getClientWorkspace } from "@/utils/client";
@@ -29,6 +29,7 @@ const Root = () => {
   const dispatch = useAppDispatch();
   const [navOpened, { toggle: toggleNav, close: closeNav }] = useDisclosure();
   const consoleWide = useAppSelector((s) => s.settings.terminalFullscreen);
+  const isAgent = !!useMatch({ path: "/agent", end: false });
 
   useThemeColorMeta();
 
@@ -95,16 +96,22 @@ const Root = () => {
       </AppShell.Navbar>
 
       <AppShell.Main className="bg-canvas">
-        <div
-          className={
-            consoleWide
-              ? "w-full px-4 py-6 md:px-8"
-              : "mx-auto w-full max-w-[1400px] px-4 py-6 md:px-8"
-          }
-        >
-          <Outlet />
-          <Footer />
-        </div>
+        {isAgent ? (
+          <div className="h-[calc(100dvh-60px)] w-full">
+            <Outlet />
+          </div>
+        ) : (
+          <div
+            className={
+              consoleWide
+                ? "w-full px-4 py-6 md:px-8"
+                : "mx-auto w-full max-w-[1400px] px-4 py-6 md:px-8"
+            }
+          >
+            <Outlet />
+            <Footer />
+          </div>
+        )}
       </AppShell.Main>
     </AppShell>
   );

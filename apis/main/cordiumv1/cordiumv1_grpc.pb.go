@@ -104,6 +104,7 @@ const (
 	MainService_GetUserSecret_FullMethodName           = "/octelium.api.main.cordium.v1.MainService/GetUserSecret"
 	MainService_GetUserConfig_FullMethodName           = "/octelium.api.main.cordium.v1.MainService/GetUserConfig"
 	MainService_UpdateUserConfig_FullMethodName        = "/octelium.api.main.cordium.v1.MainService/UpdateUserConfig"
+	MainService_InitializeAgent_FullMethodName         = "/octelium.api.main.cordium.v1.MainService/InitializeAgent"
 	MainService_ListRegion_FullMethodName              = "/octelium.api.main.cordium.v1.MainService/ListRegion"
 	MainService_WatchWorkspace_FullMethodName          = "/octelium.api.main.cordium.v1.MainService/WatchWorkspace"
 )
@@ -288,6 +289,17 @@ type MainServiceClient interface {
 	GetUserConfig(ctx context.Context, in *GetUserConfigRequest, opts ...grpc.CallOption) (*UserConfig, error)
 	// UpdateUserConfig updates the calling User's UserConfig.
 	UpdateUserConfig(ctx context.Context, in *UserConfig, opts ...grpc.CallOption) (*UserConfig, error)
+	// InitializeAgent provisions the Cordium AI agent of the calling User upon
+	// the first call and reconciles it upon the subsequent ones. The agent runs
+	// inside a Workspace of the User's personal `octelium` Space (i.e.
+	// `octelium.<USER>`), a system Space that hosts the Workspaces of all the
+	// Octelium-managed AI agents of the User and which is created on demand.
+	// The Space, the agent's Template and the agent's Workspace are created if
+	// they do not exist yet and the agent's Template is updated to match the
+	// agent configuration of the ClusterConfig. The agent's Workspace, which is
+	// created in the STOPPED state, is referenced by the `agentWorkspaceRef` of
+	// the returned UserConfig's status.
+	InitializeAgent(ctx context.Context, in *InitializeAgentRequest, opts ...grpc.CallOption) (*UserConfig, error)
 	// ListRegion lists the Regions of the Cluster that are enabled to host
 	// Workspaces.
 	ListRegion(ctx context.Context, in *ListRegionOptions, opts ...grpc.CallOption) (*RegionList, error)
@@ -837,6 +849,16 @@ func (c *mainServiceClient) UpdateUserConfig(ctx context.Context, in *UserConfig
 	return out, nil
 }
 
+func (c *mainServiceClient) InitializeAgent(ctx context.Context, in *InitializeAgentRequest, opts ...grpc.CallOption) (*UserConfig, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UserConfig)
+	err := c.cc.Invoke(ctx, MainService_InitializeAgent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *mainServiceClient) ListRegion(ctx context.Context, in *ListRegionOptions, opts ...grpc.CallOption) (*RegionList, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(RegionList)
@@ -1046,6 +1068,17 @@ type MainServiceServer interface {
 	GetUserConfig(context.Context, *GetUserConfigRequest) (*UserConfig, error)
 	// UpdateUserConfig updates the calling User's UserConfig.
 	UpdateUserConfig(context.Context, *UserConfig) (*UserConfig, error)
+	// InitializeAgent provisions the Cordium AI agent of the calling User upon
+	// the first call and reconciles it upon the subsequent ones. The agent runs
+	// inside a Workspace of the User's personal `octelium` Space (i.e.
+	// `octelium.<USER>`), a system Space that hosts the Workspaces of all the
+	// Octelium-managed AI agents of the User and which is created on demand.
+	// The Space, the agent's Template and the agent's Workspace are created if
+	// they do not exist yet and the agent's Template is updated to match the
+	// agent configuration of the ClusterConfig. The agent's Workspace, which is
+	// created in the STOPPED state, is referenced by the `agentWorkspaceRef` of
+	// the returned UserConfig's status.
+	InitializeAgent(context.Context, *InitializeAgentRequest) (*UserConfig, error)
 	// ListRegion lists the Regions of the Cluster that are enabled to host
 	// Workspaces.
 	ListRegion(context.Context, *ListRegionOptions) (*RegionList, error)
@@ -1223,6 +1256,9 @@ func (UnimplementedMainServiceServer) GetUserConfig(context.Context, *GetUserCon
 }
 func (UnimplementedMainServiceServer) UpdateUserConfig(context.Context, *UserConfig) (*UserConfig, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserConfig not implemented")
+}
+func (UnimplementedMainServiceServer) InitializeAgent(context.Context, *InitializeAgentRequest) (*UserConfig, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InitializeAgent not implemented")
 }
 func (UnimplementedMainServiceServer) ListRegion(context.Context, *ListRegionOptions) (*RegionList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListRegion not implemented")
@@ -2205,6 +2241,24 @@ func _MainService_UpdateUserConfig_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MainService_InitializeAgent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InitializeAgentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MainServiceServer).InitializeAgent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MainService_InitializeAgent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MainServiceServer).InitializeAgent(ctx, req.(*InitializeAgentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _MainService_ListRegion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListRegionOptions)
 	if err := dec(in); err != nil {
@@ -2452,6 +2506,10 @@ var MainService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateUserConfig",
 			Handler:    _MainService_UpdateUserConfig_Handler,
+		},
+		{
+			MethodName: "InitializeAgent",
+			Handler:    _MainService_InitializeAgent_Handler,
 		},
 		{
 			MethodName: "ListRegion",

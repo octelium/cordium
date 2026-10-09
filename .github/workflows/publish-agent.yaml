@@ -1,0 +1,100 @@
+name: Publish @octelium/cordium-agent
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "npm dist-tag (for example: dev, main, next, latest)"
+        required: true
+        type: string
+      version:
+        description: "Semver override; defaults to the selected Git tag or a unique prerelease"
+        required: false
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_type == 'tag' && github.ref_name || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: cluster/agent
+        shell: bash
+    steps:
+      - name: Check out code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Install npm with OIDC support
+        run: npm install --global npm@11
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test publishing versions
+        run: npm run test:publish
+
+      - name: Resolve publishing version
+        id: version
+        run: node scripts/publish-version.mjs
+
+      - name: Update package version
+        env:
+          PACKAGE_VERSION: ${{ steps.version.outputs.version }}
+        run: npm version "$PACKAGE_VERSION" --no-git-tag-version --allow-same-version --ignore-scripts
+
+      - name: Check types
+        run: npm run typecheck
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Publish
+        env:
+          PACKAGE_VERSION: ${{ steps.version.outputs.version }}
+          PACKAGE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { execFileSync } from "node:child_process";
+          import * as fs from "node:fs";
+
+          const { name } = JSON.parse(fs.readFileSync("package.json", "utf8"));
+          const { PACKAGE_VERSION, PACKAGE_TAG, GITHUB_EVENT_NAME } = process.env;
+          const response = await fetch(
+            `https://registry.npmjs.org/${encodeURIComponent(name)}/${encodeURIComponent(PACKAGE_VERSION)}`,
+            { signal: AbortSignal.timeout(30000) },
+          );
+          if (response.ok && GITHUB_EVENT_NAME !== "workflow_dispatch") {
+            console.log(`${name}@${PACKAGE_VERSION} is already published; skipping.`);
+          } else if (response.ok || response.status === 404) {
+            execFileSync("npm", ["publish", "--access", "public", "--tag", PACKAGE_TAG], {
+              stdio: "inherit",
+            });
+          } else {
+            throw new Error(`Could not check the npm registry: HTTP ${response.status}`);
+          }
+          NODE

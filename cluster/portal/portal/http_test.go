@@ -77,7 +77,7 @@ func TestHandleIndexHeaders(t *testing.T) {
 	assert.True(t, strings.Contains(csp, "form-action 'self'"), csp)
 	assert.False(t, strings.Contains(csp, "script-src 'self' 'unsafe-inline'"), csp)
 	assert.True(t, strings.Contains(csp,
-		"connect-src 'self' https://octelium-api.example.com https://*.octelium-api.example.com wss://cordium.example.com"), csp)
+		"connect-src 'self' https://octelium-api.example.com https://*.octelium-api.example.com https://*.cordium.example.com wss://cordium.example.com"), csp)
 
 	body, err := io.ReadAll(resp.Body)
 	assert.Nil(t, err)

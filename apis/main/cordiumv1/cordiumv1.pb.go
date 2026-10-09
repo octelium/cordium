@@ -1179,7 +1179,7 @@ func (x ShareWorkspacePortRequest_Mode) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ShareWorkspacePortRequest_Mode.Descriptor instead.
 func (ShareWorkspacePortRequest_Mode) EnumDescriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{38, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{39, 0}
 }
 
 // Mode is the output stream that the log entry was emitted on
@@ -1232,7 +1232,7 @@ func (x ListenLogResponse_Mode) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ListenLogResponse_Mode.Descriptor instead.
 func (ListenLogResponse_Mode) EnumDescriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{61, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{62, 0}
 }
 
 // Type is the initialization stage that produced the log entry
@@ -1296,7 +1296,7 @@ func (x ListenLogResponse_Type) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ListenLogResponse_Type.Descriptor instead.
 func (ListenLogResponse_Type) EnumDescriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{61, 1}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{62, 1}
 }
 
 // Effect is the effect of the Rule when its Condition matches
@@ -1351,7 +1351,7 @@ func (x ClusterConfig_Spec_Space_Ownership_Rule_Effect) Number() protoreflect.En
 
 // Deprecated: Use ClusterConfig_Spec_Space_Ownership_Rule_Effect.Descriptor instead.
 func (ClusterConfig_Spec_Space_Ownership_Rule_Effect) EnumDescriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 0, 0, 0, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 0, 0, 0, 0}
 }
 
 // Workspace, which is synonymous with a sandbox, is the fundamental execution
@@ -4133,6 +4133,55 @@ func (*GetUserConfigRequest) Descriptor() ([]byte, []int) {
 	return file_cordiumv1_proto_rawDescGZIP(), []int{37}
 }
 
+// InitializeAgentRequest is the request of the InitializeAgent method.
+type InitializeAgentRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// WorkspaceRef optionally sets another existing Workspace of the agent's
+	// Template that is owned by the User as the agent's Workspace. If it is
+	// unset, the current agent's Workspace is kept as long as it still exists,
+	// otherwise a new one is created.
+	WorkspaceRef  *metav1.ObjectReference `protobuf:"bytes,1,opt,name=workspaceRef,proto3" json:"workspaceRef,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *InitializeAgentRequest) Reset() {
+	*x = InitializeAgentRequest{}
+	mi := &file_cordiumv1_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InitializeAgentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InitializeAgentRequest) ProtoMessage() {}
+
+func (x *InitializeAgentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_cordiumv1_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InitializeAgentRequest.ProtoReflect.Descriptor instead.
+func (*InitializeAgentRequest) Descriptor() ([]byte, []int) {
+	return file_cordiumv1_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *InitializeAgentRequest) GetWorkspaceRef() *metav1.ObjectReference {
+	if x != nil {
+		return x.WorkspaceRef
+	}
+	return nil
+}
+
 // ShareWorkspacePortRequest is the request of the ShareWorkspacePort method.
 type ShareWorkspacePortRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -4149,7 +4198,7 @@ type ShareWorkspacePortRequest struct {
 
 func (x *ShareWorkspacePortRequest) Reset() {
 	*x = ShareWorkspacePortRequest{}
-	mi := &file_cordiumv1_proto_msgTypes[38]
+	mi := &file_cordiumv1_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4161,7 +4210,7 @@ func (x *ShareWorkspacePortRequest) String() string {
 func (*ShareWorkspacePortRequest) ProtoMessage() {}
 
 func (x *ShareWorkspacePortRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[38]
+	mi := &file_cordiumv1_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4174,7 +4223,7 @@ func (x *ShareWorkspacePortRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ShareWorkspacePortRequest.ProtoReflect.Descriptor instead.
 func (*ShareWorkspacePortRequest) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{38}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *ShareWorkspacePortRequest) GetWorkspaceRef() *metav1.ObjectReference {
@@ -4208,7 +4257,7 @@ type ShareWorkspacePortResponse struct {
 
 func (x *ShareWorkspacePortResponse) Reset() {
 	*x = ShareWorkspacePortResponse{}
-	mi := &file_cordiumv1_proto_msgTypes[39]
+	mi := &file_cordiumv1_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4220,7 +4269,7 @@ func (x *ShareWorkspacePortResponse) String() string {
 func (*ShareWorkspacePortResponse) ProtoMessage() {}
 
 func (x *ShareWorkspacePortResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[39]
+	mi := &file_cordiumv1_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4233,7 +4282,7 @@ func (x *ShareWorkspacePortResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ShareWorkspacePortResponse.ProtoReflect.Descriptor instead.
 func (*ShareWorkspacePortResponse) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{39}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{40}
 }
 
 // UnshareWorkspacePortRequest is the request of the UnshareWorkspacePort
@@ -4250,7 +4299,7 @@ type UnshareWorkspacePortRequest struct {
 
 func (x *UnshareWorkspacePortRequest) Reset() {
 	*x = UnshareWorkspacePortRequest{}
-	mi := &file_cordiumv1_proto_msgTypes[40]
+	mi := &file_cordiumv1_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4262,7 +4311,7 @@ func (x *UnshareWorkspacePortRequest) String() string {
 func (*UnshareWorkspacePortRequest) ProtoMessage() {}
 
 func (x *UnshareWorkspacePortRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[40]
+	mi := &file_cordiumv1_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4275,7 +4324,7 @@ func (x *UnshareWorkspacePortRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnshareWorkspacePortRequest.ProtoReflect.Descriptor instead.
 func (*UnshareWorkspacePortRequest) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{40}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *UnshareWorkspacePortRequest) GetWorkspaceRef() *metav1.ObjectReference {
@@ -4302,7 +4351,7 @@ type UnshareWorkspacePortResponse struct {
 
 func (x *UnshareWorkspacePortResponse) Reset() {
 	*x = UnshareWorkspacePortResponse{}
-	mi := &file_cordiumv1_proto_msgTypes[41]
+	mi := &file_cordiumv1_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4314,7 +4363,7 @@ func (x *UnshareWorkspacePortResponse) String() string {
 func (*UnshareWorkspacePortResponse) ProtoMessage() {}
 
 func (x *UnshareWorkspacePortResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[41]
+	mi := &file_cordiumv1_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4327,7 +4376,7 @@ func (x *UnshareWorkspacePortResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnshareWorkspacePortResponse.ProtoReflect.Descriptor instead.
 func (*UnshareWorkspacePortResponse) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{41}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{42}
 }
 
 // LeaveSpaceRequest is the request of the LeaveSpace method.
@@ -4341,7 +4390,7 @@ type LeaveSpaceRequest struct {
 
 func (x *LeaveSpaceRequest) Reset() {
 	*x = LeaveSpaceRequest{}
-	mi := &file_cordiumv1_proto_msgTypes[42]
+	mi := &file_cordiumv1_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4353,7 +4402,7 @@ func (x *LeaveSpaceRequest) String() string {
 func (*LeaveSpaceRequest) ProtoMessage() {}
 
 func (x *LeaveSpaceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[42]
+	mi := &file_cordiumv1_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4366,7 +4415,7 @@ func (x *LeaveSpaceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LeaveSpaceRequest.ProtoReflect.Descriptor instead.
 func (*LeaveSpaceRequest) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{42}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *LeaveSpaceRequest) GetSpaceRef() *metav1.ObjectReference {
@@ -4386,7 +4435,7 @@ type LeaveSpaceResponse struct {
 
 func (x *LeaveSpaceResponse) Reset() {
 	*x = LeaveSpaceResponse{}
-	mi := &file_cordiumv1_proto_msgTypes[43]
+	mi := &file_cordiumv1_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4398,7 +4447,7 @@ func (x *LeaveSpaceResponse) String() string {
 func (*LeaveSpaceResponse) ProtoMessage() {}
 
 func (x *LeaveSpaceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[43]
+	mi := &file_cordiumv1_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4411,7 +4460,7 @@ func (x *LeaveSpaceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LeaveSpaceResponse.ProtoReflect.Descriptor instead.
 func (*LeaveSpaceResponse) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{43}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{44}
 }
 
 // Region is an Octelium Region of the Cluster that is enabled to host
@@ -4436,7 +4485,7 @@ type Region struct {
 
 func (x *Region) Reset() {
 	*x = Region{}
-	mi := &file_cordiumv1_proto_msgTypes[44]
+	mi := &file_cordiumv1_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4448,7 +4497,7 @@ func (x *Region) String() string {
 func (*Region) ProtoMessage() {}
 
 func (x *Region) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[44]
+	mi := &file_cordiumv1_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4461,7 +4510,7 @@ func (x *Region) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Region.ProtoReflect.Descriptor instead.
 func (*Region) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{44}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *Region) GetApiVersion() string {
@@ -4516,7 +4565,7 @@ type RegionList struct {
 
 func (x *RegionList) Reset() {
 	*x = RegionList{}
-	mi := &file_cordiumv1_proto_msgTypes[45]
+	mi := &file_cordiumv1_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4528,7 +4577,7 @@ func (x *RegionList) String() string {
 func (*RegionList) ProtoMessage() {}
 
 func (x *RegionList) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[45]
+	mi := &file_cordiumv1_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4541,7 +4590,7 @@ func (x *RegionList) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegionList.ProtoReflect.Descriptor instead.
 func (*RegionList) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{45}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *RegionList) GetApiVersion() string {
@@ -4584,7 +4633,7 @@ type ListRegionOptions struct {
 
 func (x *ListRegionOptions) Reset() {
 	*x = ListRegionOptions{}
-	mi := &file_cordiumv1_proto_msgTypes[46]
+	mi := &file_cordiumv1_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4596,7 +4645,7 @@ func (x *ListRegionOptions) String() string {
 func (*ListRegionOptions) ProtoMessage() {}
 
 func (x *ListRegionOptions) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[46]
+	mi := &file_cordiumv1_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4609,7 +4658,7 @@ func (x *ListRegionOptions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListRegionOptions.ProtoReflect.Descriptor instead.
 func (*ListRegionOptions) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{46}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *ListRegionOptions) GetCommon() *metav1.CommonListOptions {
@@ -4635,7 +4684,7 @@ type CreateTerminalRequest struct {
 
 func (x *CreateTerminalRequest) Reset() {
 	*x = CreateTerminalRequest{}
-	mi := &file_cordiumv1_proto_msgTypes[47]
+	mi := &file_cordiumv1_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4647,7 +4696,7 @@ func (x *CreateTerminalRequest) String() string {
 func (*CreateTerminalRequest) ProtoMessage() {}
 
 func (x *CreateTerminalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[47]
+	mi := &file_cordiumv1_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4660,7 +4709,7 @@ func (x *CreateTerminalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTerminalRequest.ProtoReflect.Descriptor instead.
 func (*CreateTerminalRequest) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{47}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *CreateTerminalRequest) GetWorkspaceRef() *metav1.ObjectReference {
@@ -4696,7 +4745,7 @@ type Terminal struct {
 
 func (x *Terminal) Reset() {
 	*x = Terminal{}
-	mi := &file_cordiumv1_proto_msgTypes[48]
+	mi := &file_cordiumv1_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4708,7 +4757,7 @@ func (x *Terminal) String() string {
 func (*Terminal) ProtoMessage() {}
 
 func (x *Terminal) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[48]
+	mi := &file_cordiumv1_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4721,7 +4770,7 @@ func (x *Terminal) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Terminal.ProtoReflect.Descriptor instead.
 func (*Terminal) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{48}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *Terminal) GetId() string {
@@ -4742,7 +4791,7 @@ type CreateTerminalResponse struct {
 
 func (x *CreateTerminalResponse) Reset() {
 	*x = CreateTerminalResponse{}
-	mi := &file_cordiumv1_proto_msgTypes[49]
+	mi := &file_cordiumv1_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4754,7 +4803,7 @@ func (x *CreateTerminalResponse) String() string {
 func (*CreateTerminalResponse) ProtoMessage() {}
 
 func (x *CreateTerminalResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[49]
+	mi := &file_cordiumv1_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4767,7 +4816,7 @@ func (x *CreateTerminalResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTerminalResponse.ProtoReflect.Descriptor instead.
 func (*CreateTerminalResponse) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{49}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *CreateTerminalResponse) GetId() string {
@@ -4788,7 +4837,7 @@ type RemoveTerminalRequest struct {
 
 func (x *RemoveTerminalRequest) Reset() {
 	*x = RemoveTerminalRequest{}
-	mi := &file_cordiumv1_proto_msgTypes[50]
+	mi := &file_cordiumv1_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4800,7 +4849,7 @@ func (x *RemoveTerminalRequest) String() string {
 func (*RemoveTerminalRequest) ProtoMessage() {}
 
 func (x *RemoveTerminalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[50]
+	mi := &file_cordiumv1_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4813,7 +4862,7 @@ func (x *RemoveTerminalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveTerminalRequest.ProtoReflect.Descriptor instead.
 func (*RemoveTerminalRequest) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{50}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *RemoveTerminalRequest) GetId() string {
@@ -4833,7 +4882,7 @@ type RemoveTerminalResponse struct {
 
 func (x *RemoveTerminalResponse) Reset() {
 	*x = RemoveTerminalResponse{}
-	mi := &file_cordiumv1_proto_msgTypes[51]
+	mi := &file_cordiumv1_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4845,7 +4894,7 @@ func (x *RemoveTerminalResponse) String() string {
 func (*RemoveTerminalResponse) ProtoMessage() {}
 
 func (x *RemoveTerminalResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[51]
+	mi := &file_cordiumv1_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4858,7 +4907,7 @@ func (x *RemoveTerminalResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveTerminalResponse.ProtoReflect.Descriptor instead.
 func (*RemoveTerminalResponse) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{51}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{52}
 }
 
 // ListTerminalRequest is the request of the ListTerminal method.
@@ -4872,7 +4921,7 @@ type ListTerminalRequest struct {
 
 func (x *ListTerminalRequest) Reset() {
 	*x = ListTerminalRequest{}
-	mi := &file_cordiumv1_proto_msgTypes[52]
+	mi := &file_cordiumv1_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4884,7 +4933,7 @@ func (x *ListTerminalRequest) String() string {
 func (*ListTerminalRequest) ProtoMessage() {}
 
 func (x *ListTerminalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[52]
+	mi := &file_cordiumv1_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4897,7 +4946,7 @@ func (x *ListTerminalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTerminalRequest.ProtoReflect.Descriptor instead.
 func (*ListTerminalRequest) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{52}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *ListTerminalRequest) GetWorkspaceRef() *metav1.ObjectReference {
@@ -4918,7 +4967,7 @@ type ListTerminalResponse struct {
 
 func (x *ListTerminalResponse) Reset() {
 	*x = ListTerminalResponse{}
-	mi := &file_cordiumv1_proto_msgTypes[53]
+	mi := &file_cordiumv1_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4930,7 +4979,7 @@ func (x *ListTerminalResponse) String() string {
 func (*ListTerminalResponse) ProtoMessage() {}
 
 func (x *ListTerminalResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[53]
+	mi := &file_cordiumv1_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4943,7 +4992,7 @@ func (x *ListTerminalResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTerminalResponse.ProtoReflect.Descriptor instead.
 func (*ListTerminalResponse) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{53}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *ListTerminalResponse) GetItems() []*Terminal {
@@ -4963,7 +5012,7 @@ type WriteTerminalDataResponse struct {
 
 func (x *WriteTerminalDataResponse) Reset() {
 	*x = WriteTerminalDataResponse{}
-	mi := &file_cordiumv1_proto_msgTypes[54]
+	mi := &file_cordiumv1_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4975,7 +5024,7 @@ func (x *WriteTerminalDataResponse) String() string {
 func (*WriteTerminalDataResponse) ProtoMessage() {}
 
 func (x *WriteTerminalDataResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[54]
+	mi := &file_cordiumv1_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4988,7 +5037,7 @@ func (x *WriteTerminalDataResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WriteTerminalDataResponse.ProtoReflect.Descriptor instead.
 func (*WriteTerminalDataResponse) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{54}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{55}
 }
 
 // SetTerminalWindowSizeRequest is the request of the SetTerminalWindowSize
@@ -5007,7 +5056,7 @@ type SetTerminalWindowSizeRequest struct {
 
 func (x *SetTerminalWindowSizeRequest) Reset() {
 	*x = SetTerminalWindowSizeRequest{}
-	mi := &file_cordiumv1_proto_msgTypes[55]
+	mi := &file_cordiumv1_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5019,7 +5068,7 @@ func (x *SetTerminalWindowSizeRequest) String() string {
 func (*SetTerminalWindowSizeRequest) ProtoMessage() {}
 
 func (x *SetTerminalWindowSizeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[55]
+	mi := &file_cordiumv1_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5032,7 +5081,7 @@ func (x *SetTerminalWindowSizeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetTerminalWindowSizeRequest.ProtoReflect.Descriptor instead.
 func (*SetTerminalWindowSizeRequest) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{55}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{56}
 }
 
 func (x *SetTerminalWindowSizeRequest) GetId() string {
@@ -5066,7 +5115,7 @@ type SetTerminalWindowSizeResponse struct {
 
 func (x *SetTerminalWindowSizeResponse) Reset() {
 	*x = SetTerminalWindowSizeResponse{}
-	mi := &file_cordiumv1_proto_msgTypes[56]
+	mi := &file_cordiumv1_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5078,7 +5127,7 @@ func (x *SetTerminalWindowSizeResponse) String() string {
 func (*SetTerminalWindowSizeResponse) ProtoMessage() {}
 
 func (x *SetTerminalWindowSizeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[56]
+	mi := &file_cordiumv1_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5091,7 +5140,7 @@ func (x *SetTerminalWindowSizeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetTerminalWindowSizeResponse.ProtoReflect.Descriptor instead.
 func (*SetTerminalWindowSizeResponse) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{56}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{57}
 }
 
 // WriteTerminalDataRequest is the request of the WriteTerminalData method.
@@ -5107,7 +5156,7 @@ type WriteTerminalDataRequest struct {
 
 func (x *WriteTerminalDataRequest) Reset() {
 	*x = WriteTerminalDataRequest{}
-	mi := &file_cordiumv1_proto_msgTypes[57]
+	mi := &file_cordiumv1_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5119,7 +5168,7 @@ func (x *WriteTerminalDataRequest) String() string {
 func (*WriteTerminalDataRequest) ProtoMessage() {}
 
 func (x *WriteTerminalDataRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[57]
+	mi := &file_cordiumv1_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5132,7 +5181,7 @@ func (x *WriteTerminalDataRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WriteTerminalDataRequest.ProtoReflect.Descriptor instead.
 func (*WriteTerminalDataRequest) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{57}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{58}
 }
 
 func (x *WriteTerminalDataRequest) GetId() string {
@@ -5160,7 +5209,7 @@ type ListenTerminalRequest struct {
 
 func (x *ListenTerminalRequest) Reset() {
 	*x = ListenTerminalRequest{}
-	mi := &file_cordiumv1_proto_msgTypes[58]
+	mi := &file_cordiumv1_proto_msgTypes[59]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5172,7 +5221,7 @@ func (x *ListenTerminalRequest) String() string {
 func (*ListenTerminalRequest) ProtoMessage() {}
 
 func (x *ListenTerminalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[58]
+	mi := &file_cordiumv1_proto_msgTypes[59]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5185,7 +5234,7 @@ func (x *ListenTerminalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListenTerminalRequest.ProtoReflect.Descriptor instead.
 func (*ListenTerminalRequest) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{58}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{59}
 }
 
 func (x *ListenTerminalRequest) GetId() string {
@@ -5212,7 +5261,7 @@ type ListenTerminalResponse struct {
 
 func (x *ListenTerminalResponse) Reset() {
 	*x = ListenTerminalResponse{}
-	mi := &file_cordiumv1_proto_msgTypes[59]
+	mi := &file_cordiumv1_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5224,7 +5273,7 @@ func (x *ListenTerminalResponse) String() string {
 func (*ListenTerminalResponse) ProtoMessage() {}
 
 func (x *ListenTerminalResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[59]
+	mi := &file_cordiumv1_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5237,7 +5286,7 @@ func (x *ListenTerminalResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListenTerminalResponse.ProtoReflect.Descriptor instead.
 func (*ListenTerminalResponse) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{59}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{60}
 }
 
 func (x *ListenTerminalResponse) GetType() isListenTerminalResponse_Type {
@@ -5310,7 +5359,7 @@ type ListenLogRequest struct {
 
 func (x *ListenLogRequest) Reset() {
 	*x = ListenLogRequest{}
-	mi := &file_cordiumv1_proto_msgTypes[60]
+	mi := &file_cordiumv1_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5322,7 +5371,7 @@ func (x *ListenLogRequest) String() string {
 func (*ListenLogRequest) ProtoMessage() {}
 
 func (x *ListenLogRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[60]
+	mi := &file_cordiumv1_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5335,7 +5384,7 @@ func (x *ListenLogRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListenLogRequest.ProtoReflect.Descriptor instead.
 func (*ListenLogRequest) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{60}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{61}
 }
 
 func (x *ListenLogRequest) GetWorkspaceRef() *metav1.ObjectReference {
@@ -5362,7 +5411,7 @@ type ListenLogResponse struct {
 
 func (x *ListenLogResponse) Reset() {
 	*x = ListenLogResponse{}
-	mi := &file_cordiumv1_proto_msgTypes[61]
+	mi := &file_cordiumv1_proto_msgTypes[62]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5374,7 +5423,7 @@ func (x *ListenLogResponse) String() string {
 func (*ListenLogResponse) ProtoMessage() {}
 
 func (x *ListenLogResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[61]
+	mi := &file_cordiumv1_proto_msgTypes[62]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5387,7 +5436,7 @@ func (x *ListenLogResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListenLogResponse.ProtoReflect.Descriptor instead.
 func (*ListenLogResponse) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{61}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{62}
 }
 
 func (x *ListenLogResponse) GetCreatedAt() *timestamppb.Timestamp {
@@ -5431,7 +5480,7 @@ type WatchWorkspaceRequest struct {
 
 func (x *WatchWorkspaceRequest) Reset() {
 	*x = WatchWorkspaceRequest{}
-	mi := &file_cordiumv1_proto_msgTypes[62]
+	mi := &file_cordiumv1_proto_msgTypes[63]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5443,7 +5492,7 @@ func (x *WatchWorkspaceRequest) String() string {
 func (*WatchWorkspaceRequest) ProtoMessage() {}
 
 func (x *WatchWorkspaceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[62]
+	mi := &file_cordiumv1_proto_msgTypes[63]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5456,7 +5505,7 @@ func (x *WatchWorkspaceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WatchWorkspaceRequest.ProtoReflect.Descriptor instead.
 func (*WatchWorkspaceRequest) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{62}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{63}
 }
 
 func (x *WatchWorkspaceRequest) GetWorkspaceRef() *metav1.ObjectReference {
@@ -5483,7 +5532,7 @@ type WatchWorkspaceResponse struct {
 
 func (x *WatchWorkspaceResponse) Reset() {
 	*x = WatchWorkspaceResponse{}
-	mi := &file_cordiumv1_proto_msgTypes[63]
+	mi := &file_cordiumv1_proto_msgTypes[64]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5495,7 +5544,7 @@ func (x *WatchWorkspaceResponse) String() string {
 func (*WatchWorkspaceResponse) ProtoMessage() {}
 
 func (x *WatchWorkspaceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[63]
+	mi := &file_cordiumv1_proto_msgTypes[64]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5508,7 +5557,7 @@ func (x *WatchWorkspaceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WatchWorkspaceResponse.ProtoReflect.Descriptor instead.
 func (*WatchWorkspaceResponse) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{63}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{64}
 }
 
 func (x *WatchWorkspaceResponse) GetType() isWatchWorkspaceResponse_Type {
@@ -5582,7 +5631,7 @@ type CancelBuildTemplateRequest struct {
 
 func (x *CancelBuildTemplateRequest) Reset() {
 	*x = CancelBuildTemplateRequest{}
-	mi := &file_cordiumv1_proto_msgTypes[64]
+	mi := &file_cordiumv1_proto_msgTypes[65]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5594,7 +5643,7 @@ func (x *CancelBuildTemplateRequest) String() string {
 func (*CancelBuildTemplateRequest) ProtoMessage() {}
 
 func (x *CancelBuildTemplateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[64]
+	mi := &file_cordiumv1_proto_msgTypes[65]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5607,7 +5656,7 @@ func (x *CancelBuildTemplateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelBuildTemplateRequest.ProtoReflect.Descriptor instead.
 func (*CancelBuildTemplateRequest) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{64}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{65}
 }
 
 func (x *CancelBuildTemplateRequest) GetTemplateRef() *metav1.ObjectReference {
@@ -5635,7 +5684,7 @@ type ExecRequest struct {
 
 func (x *ExecRequest) Reset() {
 	*x = ExecRequest{}
-	mi := &file_cordiumv1_proto_msgTypes[65]
+	mi := &file_cordiumv1_proto_msgTypes[66]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5647,7 +5696,7 @@ func (x *ExecRequest) String() string {
 func (*ExecRequest) ProtoMessage() {}
 
 func (x *ExecRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[65]
+	mi := &file_cordiumv1_proto_msgTypes[66]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5660,7 +5709,7 @@ func (x *ExecRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecRequest.ProtoReflect.Descriptor instead.
 func (*ExecRequest) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{65}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{66}
 }
 
 func (x *ExecRequest) GetType() isExecRequest_Type {
@@ -5740,7 +5789,7 @@ type ExecResponse struct {
 
 func (x *ExecResponse) Reset() {
 	*x = ExecResponse{}
-	mi := &file_cordiumv1_proto_msgTypes[66]
+	mi := &file_cordiumv1_proto_msgTypes[67]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5752,7 +5801,7 @@ func (x *ExecResponse) String() string {
 func (*ExecResponse) ProtoMessage() {}
 
 func (x *ExecResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[66]
+	mi := &file_cordiumv1_proto_msgTypes[67]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5765,7 +5814,7 @@ func (x *ExecResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecResponse.ProtoReflect.Descriptor instead.
 func (*ExecResponse) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{66}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{67}
 }
 
 func (x *ExecResponse) GetType() isExecResponse_Type {
@@ -5851,7 +5900,7 @@ type ClusterConfig struct {
 
 func (x *ClusterConfig) Reset() {
 	*x = ClusterConfig{}
-	mi := &file_cordiumv1_proto_msgTypes[67]
+	mi := &file_cordiumv1_proto_msgTypes[68]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5863,7 +5912,7 @@ func (x *ClusterConfig) String() string {
 func (*ClusterConfig) ProtoMessage() {}
 
 func (x *ClusterConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[67]
+	mi := &file_cordiumv1_proto_msgTypes[68]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5876,7 +5925,7 @@ func (x *ClusterConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClusterConfig.ProtoReflect.Descriptor instead.
 func (*ClusterConfig) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68}
 }
 
 func (x *ClusterConfig) GetApiVersion() string {
@@ -5937,7 +5986,7 @@ type Condition struct {
 
 func (x *Condition) Reset() {
 	*x = Condition{}
-	mi := &file_cordiumv1_proto_msgTypes[68]
+	mi := &file_cordiumv1_proto_msgTypes[69]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5949,7 +5998,7 @@ func (x *Condition) String() string {
 func (*Condition) ProtoMessage() {}
 
 func (x *Condition) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[68]
+	mi := &file_cordiumv1_proto_msgTypes[69]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5962,7 +6011,7 @@ func (x *Condition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Condition.ProtoReflect.Descriptor instead.
 func (*Condition) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{68}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{69}
 }
 
 func (x *Condition) GetType() isCondition_Type {
@@ -6099,7 +6148,7 @@ type GetClusterConfigRequest struct {
 
 func (x *GetClusterConfigRequest) Reset() {
 	*x = GetClusterConfigRequest{}
-	mi := &file_cordiumv1_proto_msgTypes[69]
+	mi := &file_cordiumv1_proto_msgTypes[70]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6111,7 +6160,7 @@ func (x *GetClusterConfigRequest) String() string {
 func (*GetClusterConfigRequest) ProtoMessage() {}
 
 func (x *GetClusterConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[69]
+	mi := &file_cordiumv1_proto_msgTypes[70]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6124,7 +6173,7 @@ func (x *GetClusterConfigRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetClusterConfigRequest.ProtoReflect.Descriptor instead.
 func (*GetClusterConfigRequest) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{69}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{70}
 }
 
 // SessionExtInfo is the Cordium-specific information that is attached to the
@@ -6149,7 +6198,7 @@ type SessionExtInfo struct {
 
 func (x *SessionExtInfo) Reset() {
 	*x = SessionExtInfo{}
-	mi := &file_cordiumv1_proto_msgTypes[70]
+	mi := &file_cordiumv1_proto_msgTypes[71]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6161,7 +6210,7 @@ func (x *SessionExtInfo) String() string {
 func (*SessionExtInfo) ProtoMessage() {}
 
 func (x *SessionExtInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[70]
+	mi := &file_cordiumv1_proto_msgTypes[71]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6174,7 +6223,7 @@ func (x *SessionExtInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SessionExtInfo.ProtoReflect.Descriptor instead.
 func (*SessionExtInfo) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{70}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{71}
 }
 
 func (x *SessionExtInfo) GetWorkspaceRef() *metav1.ObjectReference {
@@ -6218,7 +6267,7 @@ type RegionExtInfo struct {
 
 func (x *RegionExtInfo) Reset() {
 	*x = RegionExtInfo{}
-	mi := &file_cordiumv1_proto_msgTypes[71]
+	mi := &file_cordiumv1_proto_msgTypes[72]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6230,7 +6279,7 @@ func (x *RegionExtInfo) String() string {
 func (*RegionExtInfo) ProtoMessage() {}
 
 func (x *RegionExtInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[71]
+	mi := &file_cordiumv1_proto_msgTypes[72]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6243,7 +6292,7 @@ func (x *RegionExtInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegionExtInfo.ProtoReflect.Descriptor instead.
 func (*RegionExtInfo) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{71}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{72}
 }
 
 func (x *RegionExtInfo) GetIsEnabled() bool {
@@ -6284,7 +6333,7 @@ type Workspace_Spec struct {
 
 func (x *Workspace_Spec) Reset() {
 	*x = Workspace_Spec{}
-	mi := &file_cordiumv1_proto_msgTypes[72]
+	mi := &file_cordiumv1_proto_msgTypes[73]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6296,7 +6345,7 @@ func (x *Workspace_Spec) String() string {
 func (*Workspace_Spec) ProtoMessage() {}
 
 func (x *Workspace_Spec) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[72]
+	mi := &file_cordiumv1_proto_msgTypes[73]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6458,7 +6507,7 @@ type Workspace_Status struct {
 
 func (x *Workspace_Status) Reset() {
 	*x = Workspace_Status{}
-	mi := &file_cordiumv1_proto_msgTypes[73]
+	mi := &file_cordiumv1_proto_msgTypes[74]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6470,7 +6519,7 @@ func (x *Workspace_Status) String() string {
 func (*Workspace_Status) ProtoMessage() {}
 
 func (x *Workspace_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[73]
+	mi := &file_cordiumv1_proto_msgTypes[74]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6695,7 +6744,7 @@ type Workspace_Spec_Image struct {
 
 func (x *Workspace_Spec_Image) Reset() {
 	*x = Workspace_Spec_Image{}
-	mi := &file_cordiumv1_proto_msgTypes[74]
+	mi := &file_cordiumv1_proto_msgTypes[75]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6707,7 +6756,7 @@ func (x *Workspace_Spec_Image) String() string {
 func (*Workspace_Spec_Image) ProtoMessage() {}
 
 func (x *Workspace_Spec_Image) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[74]
+	mi := &file_cordiumv1_proto_msgTypes[75]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6819,7 +6868,7 @@ type Workspace_Spec_Repository struct {
 
 func (x *Workspace_Spec_Repository) Reset() {
 	*x = Workspace_Spec_Repository{}
-	mi := &file_cordiumv1_proto_msgTypes[75]
+	mi := &file_cordiumv1_proto_msgTypes[76]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6831,7 +6880,7 @@ func (x *Workspace_Spec_Repository) String() string {
 func (*Workspace_Spec_Repository) ProtoMessage() {}
 
 func (x *Workspace_Spec_Repository) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[75]
+	mi := &file_cordiumv1_proto_msgTypes[76]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6887,7 +6936,7 @@ type Workspace_Spec_AdditionalRepository struct {
 
 func (x *Workspace_Spec_AdditionalRepository) Reset() {
 	*x = Workspace_Spec_AdditionalRepository{}
-	mi := &file_cordiumv1_proto_msgTypes[76]
+	mi := &file_cordiumv1_proto_msgTypes[77]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6899,7 +6948,7 @@ func (x *Workspace_Spec_AdditionalRepository) String() string {
 func (*Workspace_Spec_AdditionalRepository) ProtoMessage() {}
 
 func (x *Workspace_Spec_AdditionalRepository) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[76]
+	mi := &file_cordiumv1_proto_msgTypes[77]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6981,7 +7030,7 @@ type Workspace_Spec_Runtime struct {
 
 func (x *Workspace_Spec_Runtime) Reset() {
 	*x = Workspace_Spec_Runtime{}
-	mi := &file_cordiumv1_proto_msgTypes[77]
+	mi := &file_cordiumv1_proto_msgTypes[78]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6993,7 +7042,7 @@ func (x *Workspace_Spec_Runtime) String() string {
 func (*Workspace_Spec_Runtime) ProtoMessage() {}
 
 func (x *Workspace_Spec_Runtime) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[77]
+	mi := &file_cordiumv1_proto_msgTypes[78]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7121,7 +7170,7 @@ type Workspace_Spec_Application struct {
 
 func (x *Workspace_Spec_Application) Reset() {
 	*x = Workspace_Spec_Application{}
-	mi := &file_cordiumv1_proto_msgTypes[78]
+	mi := &file_cordiumv1_proto_msgTypes[79]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7133,7 +7182,7 @@ func (x *Workspace_Spec_Application) String() string {
 func (*Workspace_Spec_Application) ProtoMessage() {}
 
 func (x *Workspace_Spec_Application) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[78]
+	mi := &file_cordiumv1_proto_msgTypes[79]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7195,7 +7244,7 @@ type Workspace_Spec_Limit struct {
 
 func (x *Workspace_Spec_Limit) Reset() {
 	*x = Workspace_Spec_Limit{}
-	mi := &file_cordiumv1_proto_msgTypes[79]
+	mi := &file_cordiumv1_proto_msgTypes[80]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7207,7 +7256,7 @@ func (x *Workspace_Spec_Limit) String() string {
 func (*Workspace_Spec_Limit) ProtoMessage() {}
 
 func (x *Workspace_Spec_Limit) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[79]
+	mi := &file_cordiumv1_proto_msgTypes[80]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7259,7 +7308,7 @@ type Workspace_Spec_Var struct {
 
 func (x *Workspace_Spec_Var) Reset() {
 	*x = Workspace_Spec_Var{}
-	mi := &file_cordiumv1_proto_msgTypes[80]
+	mi := &file_cordiumv1_proto_msgTypes[81]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7271,7 +7320,7 @@ func (x *Workspace_Spec_Var) String() string {
 func (*Workspace_Spec_Var) ProtoMessage() {}
 
 func (x *Workspace_Spec_Var) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[80]
+	mi := &file_cordiumv1_proto_msgTypes[81]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7318,7 +7367,7 @@ type Workspace_Spec_Image_Dockerfile struct {
 
 func (x *Workspace_Spec_Image_Dockerfile) Reset() {
 	*x = Workspace_Spec_Image_Dockerfile{}
-	mi := &file_cordiumv1_proto_msgTypes[81]
+	mi := &file_cordiumv1_proto_msgTypes[82]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7330,7 +7379,7 @@ func (x *Workspace_Spec_Image_Dockerfile) String() string {
 func (*Workspace_Spec_Image_Dockerfile) ProtoMessage() {}
 
 func (x *Workspace_Spec_Image_Dockerfile) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[81]
+	mi := &file_cordiumv1_proto_msgTypes[82]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7413,7 +7462,7 @@ type Workspace_Spec_Image_Git struct {
 
 func (x *Workspace_Spec_Image_Git) Reset() {
 	*x = Workspace_Spec_Image_Git{}
-	mi := &file_cordiumv1_proto_msgTypes[82]
+	mi := &file_cordiumv1_proto_msgTypes[83]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7425,7 +7474,7 @@ func (x *Workspace_Spec_Image_Git) String() string {
 func (*Workspace_Spec_Image_Git) ProtoMessage() {}
 
 func (x *Workspace_Spec_Image_Git) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[82]
+	mi := &file_cordiumv1_proto_msgTypes[83]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7484,7 +7533,7 @@ type Workspace_Spec_Image_Registry struct {
 
 func (x *Workspace_Spec_Image_Registry) Reset() {
 	*x = Workspace_Spec_Image_Registry{}
-	mi := &file_cordiumv1_proto_msgTypes[83]
+	mi := &file_cordiumv1_proto_msgTypes[84]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7496,7 +7545,7 @@ func (x *Workspace_Spec_Image_Registry) String() string {
 func (*Workspace_Spec_Image_Registry) ProtoMessage() {}
 
 func (x *Workspace_Spec_Image_Registry) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[83]
+	mi := &file_cordiumv1_proto_msgTypes[84]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7543,7 +7592,7 @@ type Workspace_Spec_Image_Repository struct {
 
 func (x *Workspace_Spec_Image_Repository) Reset() {
 	*x = Workspace_Spec_Image_Repository{}
-	mi := &file_cordiumv1_proto_msgTypes[84]
+	mi := &file_cordiumv1_proto_msgTypes[85]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7555,7 +7604,7 @@ func (x *Workspace_Spec_Image_Repository) String() string {
 func (*Workspace_Spec_Image_Repository) ProtoMessage() {}
 
 func (x *Workspace_Spec_Image_Repository) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[84]
+	mi := &file_cordiumv1_proto_msgTypes[85]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7630,7 +7679,7 @@ type Workspace_Spec_Image_Registry_Authentication struct {
 
 func (x *Workspace_Spec_Image_Registry_Authentication) Reset() {
 	*x = Workspace_Spec_Image_Registry_Authentication{}
-	mi := &file_cordiumv1_proto_msgTypes[85]
+	mi := &file_cordiumv1_proto_msgTypes[86]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7642,7 +7691,7 @@ func (x *Workspace_Spec_Image_Registry_Authentication) String() string {
 func (*Workspace_Spec_Image_Registry_Authentication) ProtoMessage() {}
 
 func (x *Workspace_Spec_Image_Registry_Authentication) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[85]
+	mi := &file_cordiumv1_proto_msgTypes[86]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7687,7 +7736,7 @@ type Workspace_Spec_Image_Registry_Authentication_Password struct {
 
 func (x *Workspace_Spec_Image_Registry_Authentication_Password) Reset() {
 	*x = Workspace_Spec_Image_Registry_Authentication_Password{}
-	mi := &file_cordiumv1_proto_msgTypes[86]
+	mi := &file_cordiumv1_proto_msgTypes[87]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7699,7 +7748,7 @@ func (x *Workspace_Spec_Image_Registry_Authentication_Password) String() string 
 func (*Workspace_Spec_Image_Registry_Authentication_Password) ProtoMessage() {}
 
 func (x *Workspace_Spec_Image_Registry_Authentication_Password) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[86]
+	mi := &file_cordiumv1_proto_msgTypes[87]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7758,7 +7807,7 @@ type Workspace_Spec_Image_Repository_Devcontainer struct {
 
 func (x *Workspace_Spec_Image_Repository_Devcontainer) Reset() {
 	*x = Workspace_Spec_Image_Repository_Devcontainer{}
-	mi := &file_cordiumv1_proto_msgTypes[87]
+	mi := &file_cordiumv1_proto_msgTypes[88]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7770,7 +7819,7 @@ func (x *Workspace_Spec_Image_Repository_Devcontainer) String() string {
 func (*Workspace_Spec_Image_Repository_Devcontainer) ProtoMessage() {}
 
 func (x *Workspace_Spec_Image_Repository_Devcontainer) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[87]
+	mi := &file_cordiumv1_proto_msgTypes[88]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7809,7 +7858,7 @@ type Workspace_Spec_Image_Repository_Dockerfile struct {
 
 func (x *Workspace_Spec_Image_Repository_Dockerfile) Reset() {
 	*x = Workspace_Spec_Image_Repository_Dockerfile{}
-	mi := &file_cordiumv1_proto_msgTypes[88]
+	mi := &file_cordiumv1_proto_msgTypes[89]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7821,7 +7870,7 @@ func (x *Workspace_Spec_Image_Repository_Dockerfile) String() string {
 func (*Workspace_Spec_Image_Repository_Dockerfile) ProtoMessage() {}
 
 func (x *Workspace_Spec_Image_Repository_Dockerfile) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[88]
+	mi := &file_cordiumv1_proto_msgTypes[89]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7869,7 +7918,7 @@ type Workspace_Spec_Repository_Authentication struct {
 
 func (x *Workspace_Spec_Repository_Authentication) Reset() {
 	*x = Workspace_Spec_Repository_Authentication{}
-	mi := &file_cordiumv1_proto_msgTypes[89]
+	mi := &file_cordiumv1_proto_msgTypes[90]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7881,7 +7930,7 @@ func (x *Workspace_Spec_Repository_Authentication) String() string {
 func (*Workspace_Spec_Repository_Authentication) ProtoMessage() {}
 
 func (x *Workspace_Spec_Repository_Authentication) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[89]
+	mi := &file_cordiumv1_proto_msgTypes[90]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7951,7 +8000,7 @@ type Workspace_Spec_Repository_CloneOptions struct {
 
 func (x *Workspace_Spec_Repository_CloneOptions) Reset() {
 	*x = Workspace_Spec_Repository_CloneOptions{}
-	mi := &file_cordiumv1_proto_msgTypes[90]
+	mi := &file_cordiumv1_proto_msgTypes[91]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7963,7 +8012,7 @@ func (x *Workspace_Spec_Repository_CloneOptions) String() string {
 func (*Workspace_Spec_Repository_CloneOptions) ProtoMessage() {}
 
 func (x *Workspace_Spec_Repository_CloneOptions) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[90]
+	mi := &file_cordiumv1_proto_msgTypes[91]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8034,7 +8083,7 @@ type Workspace_Spec_Repository_Authentication_HTTP struct {
 
 func (x *Workspace_Spec_Repository_Authentication_HTTP) Reset() {
 	*x = Workspace_Spec_Repository_Authentication_HTTP{}
-	mi := &file_cordiumv1_proto_msgTypes[91]
+	mi := &file_cordiumv1_proto_msgTypes[92]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8046,7 +8095,7 @@ func (x *Workspace_Spec_Repository_Authentication_HTTP) String() string {
 func (*Workspace_Spec_Repository_Authentication_HTTP) ProtoMessage() {}
 
 func (x *Workspace_Spec_Repository_Authentication_HTTP) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[91]
+	mi := &file_cordiumv1_proto_msgTypes[92]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8091,7 +8140,7 @@ type Workspace_Spec_Repository_Authentication_HTTP_Password struct {
 
 func (x *Workspace_Spec_Repository_Authentication_HTTP_Password) Reset() {
 	*x = Workspace_Spec_Repository_Authentication_HTTP_Password{}
-	mi := &file_cordiumv1_proto_msgTypes[92]
+	mi := &file_cordiumv1_proto_msgTypes[93]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8103,7 +8152,7 @@ func (x *Workspace_Spec_Repository_Authentication_HTTP_Password) String() string
 func (*Workspace_Spec_Repository_Authentication_HTTP_Password) ProtoMessage() {}
 
 func (x *Workspace_Spec_Repository_Authentication_HTTP_Password) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[92]
+	mi := &file_cordiumv1_proto_msgTypes[93]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8168,7 +8217,7 @@ type Workspace_Spec_Runtime_EnvVar struct {
 
 func (x *Workspace_Spec_Runtime_EnvVar) Reset() {
 	*x = Workspace_Spec_Runtime_EnvVar{}
-	mi := &file_cordiumv1_proto_msgTypes[93]
+	mi := &file_cordiumv1_proto_msgTypes[94]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8180,7 +8229,7 @@ func (x *Workspace_Spec_Runtime_EnvVar) String() string {
 func (*Workspace_Spec_Runtime_EnvVar) ProtoMessage() {}
 
 func (x *Workspace_Spec_Runtime_EnvVar) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[93]
+	mi := &file_cordiumv1_proto_msgTypes[94]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8279,7 +8328,7 @@ type Workspace_Spec_Runtime_Task struct {
 
 func (x *Workspace_Spec_Runtime_Task) Reset() {
 	*x = Workspace_Spec_Runtime_Task{}
-	mi := &file_cordiumv1_proto_msgTypes[94]
+	mi := &file_cordiumv1_proto_msgTypes[95]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8291,7 +8340,7 @@ func (x *Workspace_Spec_Runtime_Task) String() string {
 func (*Workspace_Spec_Runtime_Task) ProtoMessage() {}
 
 func (x *Workspace_Spec_Runtime_Task) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[94]
+	mi := &file_cordiumv1_proto_msgTypes[95]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8385,7 +8434,7 @@ type Workspace_Spec_Runtime_VolumeMount struct {
 
 func (x *Workspace_Spec_Runtime_VolumeMount) Reset() {
 	*x = Workspace_Spec_Runtime_VolumeMount{}
-	mi := &file_cordiumv1_proto_msgTypes[95]
+	mi := &file_cordiumv1_proto_msgTypes[96]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8397,7 +8446,7 @@ func (x *Workspace_Spec_Runtime_VolumeMount) String() string {
 func (*Workspace_Spec_Runtime_VolumeMount) ProtoMessage() {}
 
 func (x *Workspace_Spec_Runtime_VolumeMount) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[95]
+	mi := &file_cordiumv1_proto_msgTypes[96]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8447,7 +8496,7 @@ type Workspace_Spec_Runtime_Devcontainers struct {
 
 func (x *Workspace_Spec_Runtime_Devcontainers) Reset() {
 	*x = Workspace_Spec_Runtime_Devcontainers{}
-	mi := &file_cordiumv1_proto_msgTypes[96]
+	mi := &file_cordiumv1_proto_msgTypes[97]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8459,7 +8508,7 @@ func (x *Workspace_Spec_Runtime_Devcontainers) String() string {
 func (*Workspace_Spec_Runtime_Devcontainers) ProtoMessage() {}
 
 func (x *Workspace_Spec_Runtime_Devcontainers) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[96]
+	mi := &file_cordiumv1_proto_msgTypes[97]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8501,7 +8550,7 @@ type Workspace_Spec_Runtime_Octelium struct {
 
 func (x *Workspace_Spec_Runtime_Octelium) Reset() {
 	*x = Workspace_Spec_Runtime_Octelium{}
-	mi := &file_cordiumv1_proto_msgTypes[97]
+	mi := &file_cordiumv1_proto_msgTypes[98]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8513,7 +8562,7 @@ func (x *Workspace_Spec_Runtime_Octelium) String() string {
 func (*Workspace_Spec_Runtime_Octelium) ProtoMessage() {}
 
 func (x *Workspace_Spec_Runtime_Octelium) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[97]
+	mi := &file_cordiumv1_proto_msgTypes[98]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8554,7 +8603,7 @@ type Workspace_Spec_Runtime_Network struct {
 
 func (x *Workspace_Spec_Runtime_Network) Reset() {
 	*x = Workspace_Spec_Runtime_Network{}
-	mi := &file_cordiumv1_proto_msgTypes[98]
+	mi := &file_cordiumv1_proto_msgTypes[99]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8566,7 +8615,7 @@ func (x *Workspace_Spec_Runtime_Network) String() string {
 func (*Workspace_Spec_Runtime_Network) ProtoMessage() {}
 
 func (x *Workspace_Spec_Runtime_Network) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[98]
+	mi := &file_cordiumv1_proto_msgTypes[99]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8600,7 +8649,7 @@ type Workspace_Spec_Runtime_Filesystem struct {
 
 func (x *Workspace_Spec_Runtime_Filesystem) Reset() {
 	*x = Workspace_Spec_Runtime_Filesystem{}
-	mi := &file_cordiumv1_proto_msgTypes[99]
+	mi := &file_cordiumv1_proto_msgTypes[100]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8612,7 +8661,7 @@ func (x *Workspace_Spec_Runtime_Filesystem) String() string {
 func (*Workspace_Spec_Runtime_Filesystem) ProtoMessage() {}
 
 func (x *Workspace_Spec_Runtime_Filesystem) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[99]
+	mi := &file_cordiumv1_proto_msgTypes[100]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8652,7 +8701,7 @@ type Workspace_Spec_Runtime_Capabilities struct {
 
 func (x *Workspace_Spec_Runtime_Capabilities) Reset() {
 	*x = Workspace_Spec_Runtime_Capabilities{}
-	mi := &file_cordiumv1_proto_msgTypes[100]
+	mi := &file_cordiumv1_proto_msgTypes[101]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8664,7 +8713,7 @@ func (x *Workspace_Spec_Runtime_Capabilities) String() string {
 func (*Workspace_Spec_Runtime_Capabilities) ProtoMessage() {}
 
 func (x *Workspace_Spec_Runtime_Capabilities) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[100]
+	mi := &file_cordiumv1_proto_msgTypes[101]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8706,7 +8755,7 @@ type Workspace_Spec_Runtime_Timeout struct {
 
 func (x *Workspace_Spec_Runtime_Timeout) Reset() {
 	*x = Workspace_Spec_Runtime_Timeout{}
-	mi := &file_cordiumv1_proto_msgTypes[101]
+	mi := &file_cordiumv1_proto_msgTypes[102]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8718,7 +8767,7 @@ func (x *Workspace_Spec_Runtime_Timeout) String() string {
 func (*Workspace_Spec_Runtime_Timeout) ProtoMessage() {}
 
 func (x *Workspace_Spec_Runtime_Timeout) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[101]
+	mi := &file_cordiumv1_proto_msgTypes[102]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8755,7 +8804,7 @@ type Workspace_Spec_Runtime_Task_EnvVar struct {
 
 func (x *Workspace_Spec_Runtime_Task_EnvVar) Reset() {
 	*x = Workspace_Spec_Runtime_Task_EnvVar{}
-	mi := &file_cordiumv1_proto_msgTypes[102]
+	mi := &file_cordiumv1_proto_msgTypes[103]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8767,7 +8816,7 @@ func (x *Workspace_Spec_Runtime_Task_EnvVar) String() string {
 func (*Workspace_Spec_Runtime_Task_EnvVar) ProtoMessage() {}
 
 func (x *Workspace_Spec_Runtime_Task_EnvVar) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[102]
+	mi := &file_cordiumv1_proto_msgTypes[103]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8812,7 +8861,7 @@ type Workspace_Spec_Runtime_Devcontainers_Feature struct {
 
 func (x *Workspace_Spec_Runtime_Devcontainers_Feature) Reset() {
 	*x = Workspace_Spec_Runtime_Devcontainers_Feature{}
-	mi := &file_cordiumv1_proto_msgTypes[103]
+	mi := &file_cordiumv1_proto_msgTypes[104]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8824,7 +8873,7 @@ func (x *Workspace_Spec_Runtime_Devcontainers_Feature) String() string {
 func (*Workspace_Spec_Runtime_Devcontainers_Feature) ProtoMessage() {}
 
 func (x *Workspace_Spec_Runtime_Devcontainers_Feature) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[103]
+	mi := &file_cordiumv1_proto_msgTypes[104]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8867,7 +8916,7 @@ type Workspace_Spec_Runtime_Devcontainers_Feature_Option struct {
 
 func (x *Workspace_Spec_Runtime_Devcontainers_Feature_Option) Reset() {
 	*x = Workspace_Spec_Runtime_Devcontainers_Feature_Option{}
-	mi := &file_cordiumv1_proto_msgTypes[104]
+	mi := &file_cordiumv1_proto_msgTypes[105]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8879,7 +8928,7 @@ func (x *Workspace_Spec_Runtime_Devcontainers_Feature_Option) String() string {
 func (*Workspace_Spec_Runtime_Devcontainers_Feature_Option) ProtoMessage() {}
 
 func (x *Workspace_Spec_Runtime_Devcontainers_Feature_Option) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[104]
+	mi := &file_cordiumv1_proto_msgTypes[105]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8927,7 +8976,7 @@ type Workspace_Spec_Runtime_Network_Rule struct {
 
 func (x *Workspace_Spec_Runtime_Network_Rule) Reset() {
 	*x = Workspace_Spec_Runtime_Network_Rule{}
-	mi := &file_cordiumv1_proto_msgTypes[105]
+	mi := &file_cordiumv1_proto_msgTypes[106]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8939,7 +8988,7 @@ func (x *Workspace_Spec_Runtime_Network_Rule) String() string {
 func (*Workspace_Spec_Runtime_Network_Rule) ProtoMessage() {}
 
 func (x *Workspace_Spec_Runtime_Network_Rule) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[105]
+	mi := &file_cordiumv1_proto_msgTypes[106]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8994,7 +9043,7 @@ type Workspace_Spec_Runtime_Network_Egress struct {
 
 func (x *Workspace_Spec_Runtime_Network_Egress) Reset() {
 	*x = Workspace_Spec_Runtime_Network_Egress{}
-	mi := &file_cordiumv1_proto_msgTypes[106]
+	mi := &file_cordiumv1_proto_msgTypes[107]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9006,7 +9055,7 @@ func (x *Workspace_Spec_Runtime_Network_Egress) String() string {
 func (*Workspace_Spec_Runtime_Network_Egress) ProtoMessage() {}
 
 func (x *Workspace_Spec_Runtime_Network_Egress) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[106]
+	mi := &file_cordiumv1_proto_msgTypes[107]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9048,7 +9097,7 @@ type Workspace_Spec_Limit_CPU struct {
 
 func (x *Workspace_Spec_Limit_CPU) Reset() {
 	*x = Workspace_Spec_Limit_CPU{}
-	mi := &file_cordiumv1_proto_msgTypes[107]
+	mi := &file_cordiumv1_proto_msgTypes[108]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9060,7 +9109,7 @@ func (x *Workspace_Spec_Limit_CPU) String() string {
 func (*Workspace_Spec_Limit_CPU) ProtoMessage() {}
 
 func (x *Workspace_Spec_Limit_CPU) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[107]
+	mi := &file_cordiumv1_proto_msgTypes[108]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9094,7 +9143,7 @@ type Workspace_Spec_Limit_Memory struct {
 
 func (x *Workspace_Spec_Limit_Memory) Reset() {
 	*x = Workspace_Spec_Limit_Memory{}
-	mi := &file_cordiumv1_proto_msgTypes[108]
+	mi := &file_cordiumv1_proto_msgTypes[109]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9106,7 +9155,7 @@ func (x *Workspace_Spec_Limit_Memory) String() string {
 func (*Workspace_Spec_Limit_Memory) ProtoMessage() {}
 
 func (x *Workspace_Spec_Limit_Memory) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[108]
+	mi := &file_cordiumv1_proto_msgTypes[109]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9140,7 +9189,7 @@ type Workspace_Spec_Limit_Storage struct {
 
 func (x *Workspace_Spec_Limit_Storage) Reset() {
 	*x = Workspace_Spec_Limit_Storage{}
-	mi := &file_cordiumv1_proto_msgTypes[109]
+	mi := &file_cordiumv1_proto_msgTypes[110]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9152,7 +9201,7 @@ func (x *Workspace_Spec_Limit_Storage) String() string {
 func (*Workspace_Spec_Limit_Storage) ProtoMessage() {}
 
 func (x *Workspace_Spec_Limit_Storage) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[109]
+	mi := &file_cordiumv1_proto_msgTypes[110]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9207,7 +9256,7 @@ type Workspace_Status_Failure struct {
 
 func (x *Workspace_Status_Failure) Reset() {
 	*x = Workspace_Status_Failure{}
-	mi := &file_cordiumv1_proto_msgTypes[110]
+	mi := &file_cordiumv1_proto_msgTypes[111]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9219,7 +9268,7 @@ func (x *Workspace_Status_Failure) String() string {
 func (*Workspace_Status_Failure) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[110]
+	mi := &file_cordiumv1_proto_msgTypes[111]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9530,7 +9579,7 @@ type Workspace_Status_SharedPort struct {
 
 func (x *Workspace_Status_SharedPort) Reset() {
 	*x = Workspace_Status_SharedPort{}
-	mi := &file_cordiumv1_proto_msgTypes[111]
+	mi := &file_cordiumv1_proto_msgTypes[112]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9542,7 +9591,7 @@ func (x *Workspace_Status_SharedPort) String() string {
 func (*Workspace_Status_SharedPort) ProtoMessage() {}
 
 func (x *Workspace_Status_SharedPort) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[111]
+	mi := &file_cordiumv1_proto_msgTypes[112]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9593,7 +9642,7 @@ type Workspace_Status_Run struct {
 
 func (x *Workspace_Status_Run) Reset() {
 	*x = Workspace_Status_Run{}
-	mi := &file_cordiumv1_proto_msgTypes[112]
+	mi := &file_cordiumv1_proto_msgTypes[113]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9605,7 +9654,7 @@ func (x *Workspace_Status_Run) String() string {
 func (*Workspace_Status_Run) ProtoMessage() {}
 
 func (x *Workspace_Status_Run) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[112]
+	mi := &file_cordiumv1_proto_msgTypes[113]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9665,7 +9714,7 @@ type Workspace_Status_Failure_ImageBuild struct {
 
 func (x *Workspace_Status_Failure_ImageBuild) Reset() {
 	*x = Workspace_Status_Failure_ImageBuild{}
-	mi := &file_cordiumv1_proto_msgTypes[113]
+	mi := &file_cordiumv1_proto_msgTypes[114]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9677,7 +9726,7 @@ func (x *Workspace_Status_Failure_ImageBuild) String() string {
 func (*Workspace_Status_Failure_ImageBuild) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure_ImageBuild) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[113]
+	mi := &file_cordiumv1_proto_msgTypes[114]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9702,7 +9751,7 @@ type Workspace_Status_Failure_ImagePull struct {
 
 func (x *Workspace_Status_Failure_ImagePull) Reset() {
 	*x = Workspace_Status_Failure_ImagePull{}
-	mi := &file_cordiumv1_proto_msgTypes[114]
+	mi := &file_cordiumv1_proto_msgTypes[115]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9714,7 +9763,7 @@ func (x *Workspace_Status_Failure_ImagePull) String() string {
 func (*Workspace_Status_Failure_ImagePull) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure_ImagePull) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[114]
+	mi := &file_cordiumv1_proto_msgTypes[115]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9739,7 +9788,7 @@ type Workspace_Status_Failure_RepoClone struct {
 
 func (x *Workspace_Status_Failure_RepoClone) Reset() {
 	*x = Workspace_Status_Failure_RepoClone{}
-	mi := &file_cordiumv1_proto_msgTypes[115]
+	mi := &file_cordiumv1_proto_msgTypes[116]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9751,7 +9800,7 @@ func (x *Workspace_Status_Failure_RepoClone) String() string {
 func (*Workspace_Status_Failure_RepoClone) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure_RepoClone) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[115]
+	mi := &file_cordiumv1_proto_msgTypes[116]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9777,7 +9826,7 @@ type Workspace_Status_Failure_RepoCheckout struct {
 
 func (x *Workspace_Status_Failure_RepoCheckout) Reset() {
 	*x = Workspace_Status_Failure_RepoCheckout{}
-	mi := &file_cordiumv1_proto_msgTypes[116]
+	mi := &file_cordiumv1_proto_msgTypes[117]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9789,7 +9838,7 @@ func (x *Workspace_Status_Failure_RepoCheckout) String() string {
 func (*Workspace_Status_Failure_RepoCheckout) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure_RepoCheckout) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[116]
+	mi := &file_cordiumv1_proto_msgTypes[117]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9815,7 +9864,7 @@ type Workspace_Status_Failure_BuildTimeoutExceeded struct {
 
 func (x *Workspace_Status_Failure_BuildTimeoutExceeded) Reset() {
 	*x = Workspace_Status_Failure_BuildTimeoutExceeded{}
-	mi := &file_cordiumv1_proto_msgTypes[117]
+	mi := &file_cordiumv1_proto_msgTypes[118]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9827,7 +9876,7 @@ func (x *Workspace_Status_Failure_BuildTimeoutExceeded) String() string {
 func (*Workspace_Status_Failure_BuildTimeoutExceeded) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure_BuildTimeoutExceeded) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[117]
+	mi := &file_cordiumv1_proto_msgTypes[118]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9857,7 +9906,7 @@ type Workspace_Status_Failure_Task struct {
 
 func (x *Workspace_Status_Failure_Task) Reset() {
 	*x = Workspace_Status_Failure_Task{}
-	mi := &file_cordiumv1_proto_msgTypes[118]
+	mi := &file_cordiumv1_proto_msgTypes[119]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9869,7 +9918,7 @@ func (x *Workspace_Status_Failure_Task) String() string {
 func (*Workspace_Status_Failure_Task) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure_Task) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[118]
+	mi := &file_cordiumv1_proto_msgTypes[119]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9909,7 +9958,7 @@ type Workspace_Status_Failure_StartupUnknown struct {
 
 func (x *Workspace_Status_Failure_StartupUnknown) Reset() {
 	*x = Workspace_Status_Failure_StartupUnknown{}
-	mi := &file_cordiumv1_proto_msgTypes[119]
+	mi := &file_cordiumv1_proto_msgTypes[120]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9921,7 +9970,7 @@ func (x *Workspace_Status_Failure_StartupUnknown) String() string {
 func (*Workspace_Status_Failure_StartupUnknown) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure_StartupUnknown) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[119]
+	mi := &file_cordiumv1_proto_msgTypes[120]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9947,7 +9996,7 @@ type Workspace_Status_Failure_StartupTimeoutExceeded struct {
 
 func (x *Workspace_Status_Failure_StartupTimeoutExceeded) Reset() {
 	*x = Workspace_Status_Failure_StartupTimeoutExceeded{}
-	mi := &file_cordiumv1_proto_msgTypes[120]
+	mi := &file_cordiumv1_proto_msgTypes[121]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9959,7 +10008,7 @@ func (x *Workspace_Status_Failure_StartupTimeoutExceeded) String() string {
 func (*Workspace_Status_Failure_StartupTimeoutExceeded) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure_StartupTimeoutExceeded) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[120]
+	mi := &file_cordiumv1_proto_msgTypes[121]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9985,7 +10034,7 @@ type Workspace_Status_Failure_LoadStorage struct {
 
 func (x *Workspace_Status_Failure_LoadStorage) Reset() {
 	*x = Workspace_Status_Failure_LoadStorage{}
-	mi := &file_cordiumv1_proto_msgTypes[121]
+	mi := &file_cordiumv1_proto_msgTypes[122]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9997,7 +10046,7 @@ func (x *Workspace_Status_Failure_LoadStorage) String() string {
 func (*Workspace_Status_Failure_LoadStorage) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure_LoadStorage) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[121]
+	mi := &file_cordiumv1_proto_msgTypes[122]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10023,7 +10072,7 @@ type Workspace_Status_Failure_SaveStorage struct {
 
 func (x *Workspace_Status_Failure_SaveStorage) Reset() {
 	*x = Workspace_Status_Failure_SaveStorage{}
-	mi := &file_cordiumv1_proto_msgTypes[122]
+	mi := &file_cordiumv1_proto_msgTypes[123]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10035,7 +10084,7 @@ func (x *Workspace_Status_Failure_SaveStorage) String() string {
 func (*Workspace_Status_Failure_SaveStorage) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure_SaveStorage) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[122]
+	mi := &file_cordiumv1_proto_msgTypes[123]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10061,7 +10110,7 @@ type Workspace_Status_Failure_StoppageTimeoutExceeded struct {
 
 func (x *Workspace_Status_Failure_StoppageTimeoutExceeded) Reset() {
 	*x = Workspace_Status_Failure_StoppageTimeoutExceeded{}
-	mi := &file_cordiumv1_proto_msgTypes[123]
+	mi := &file_cordiumv1_proto_msgTypes[124]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10073,7 +10122,7 @@ func (x *Workspace_Status_Failure_StoppageTimeoutExceeded) String() string {
 func (*Workspace_Status_Failure_StoppageTimeoutExceeded) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure_StoppageTimeoutExceeded) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[123]
+	mi := &file_cordiumv1_proto_msgTypes[124]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10098,7 +10147,7 @@ type Workspace_Status_Failure_RunContainer struct {
 
 func (x *Workspace_Status_Failure_RunContainer) Reset() {
 	*x = Workspace_Status_Failure_RunContainer{}
-	mi := &file_cordiumv1_proto_msgTypes[124]
+	mi := &file_cordiumv1_proto_msgTypes[125]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10110,7 +10159,7 @@ func (x *Workspace_Status_Failure_RunContainer) String() string {
 func (*Workspace_Status_Failure_RunContainer) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure_RunContainer) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[124]
+	mi := &file_cordiumv1_proto_msgTypes[125]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10135,7 +10184,7 @@ type Workspace_Status_Failure_HealthCheck struct {
 
 func (x *Workspace_Status_Failure_HealthCheck) Reset() {
 	*x = Workspace_Status_Failure_HealthCheck{}
-	mi := &file_cordiumv1_proto_msgTypes[125]
+	mi := &file_cordiumv1_proto_msgTypes[126]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10147,7 +10196,7 @@ func (x *Workspace_Status_Failure_HealthCheck) String() string {
 func (*Workspace_Status_Failure_HealthCheck) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure_HealthCheck) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[125]
+	mi := &file_cordiumv1_proto_msgTypes[126]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10172,7 +10221,7 @@ type Workspace_Status_Failure_Unknown struct {
 
 func (x *Workspace_Status_Failure_Unknown) Reset() {
 	*x = Workspace_Status_Failure_Unknown{}
-	mi := &file_cordiumv1_proto_msgTypes[126]
+	mi := &file_cordiumv1_proto_msgTypes[127]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10184,7 +10233,7 @@ func (x *Workspace_Status_Failure_Unknown) String() string {
 func (*Workspace_Status_Failure_Unknown) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure_Unknown) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[126]
+	mi := &file_cordiumv1_proto_msgTypes[127]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10213,7 +10262,7 @@ type Workspace_Status_Failure_AdditionalRepoClone struct {
 
 func (x *Workspace_Status_Failure_AdditionalRepoClone) Reset() {
 	*x = Workspace_Status_Failure_AdditionalRepoClone{}
-	mi := &file_cordiumv1_proto_msgTypes[127]
+	mi := &file_cordiumv1_proto_msgTypes[128]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10225,7 +10274,7 @@ func (x *Workspace_Status_Failure_AdditionalRepoClone) String() string {
 func (*Workspace_Status_Failure_AdditionalRepoClone) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure_AdditionalRepoClone) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[127]
+	mi := &file_cordiumv1_proto_msgTypes[128]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10258,7 +10307,7 @@ type Workspace_Status_Failure_NetworkPolicy struct {
 
 func (x *Workspace_Status_Failure_NetworkPolicy) Reset() {
 	*x = Workspace_Status_Failure_NetworkPolicy{}
-	mi := &file_cordiumv1_proto_msgTypes[128]
+	mi := &file_cordiumv1_proto_msgTypes[129]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10270,7 +10319,7 @@ func (x *Workspace_Status_Failure_NetworkPolicy) String() string {
 func (*Workspace_Status_Failure_NetworkPolicy) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure_NetworkPolicy) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[128]
+	mi := &file_cordiumv1_proto_msgTypes[129]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10300,7 +10349,7 @@ type Workspace_Status_Failure_Volume struct {
 
 func (x *Workspace_Status_Failure_Volume) Reset() {
 	*x = Workspace_Status_Failure_Volume{}
-	mi := &file_cordiumv1_proto_msgTypes[129]
+	mi := &file_cordiumv1_proto_msgTypes[130]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10312,7 +10361,7 @@ func (x *Workspace_Status_Failure_Volume) String() string {
 func (*Workspace_Status_Failure_Volume) ProtoMessage() {}
 
 func (x *Workspace_Status_Failure_Volume) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[129]
+	mi := &file_cordiumv1_proto_msgTypes[130]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10344,7 +10393,7 @@ type WorkspaceSnapshot_Spec struct {
 
 func (x *WorkspaceSnapshot_Spec) Reset() {
 	*x = WorkspaceSnapshot_Spec{}
-	mi := &file_cordiumv1_proto_msgTypes[130]
+	mi := &file_cordiumv1_proto_msgTypes[131]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10356,7 +10405,7 @@ func (x *WorkspaceSnapshot_Spec) String() string {
 func (*WorkspaceSnapshot_Spec) ProtoMessage() {}
 
 func (x *WorkspaceSnapshot_Spec) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[130]
+	mi := &file_cordiumv1_proto_msgTypes[131]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10411,7 +10460,7 @@ type WorkspaceSnapshot_Status struct {
 
 func (x *WorkspaceSnapshot_Status) Reset() {
 	*x = WorkspaceSnapshot_Status{}
-	mi := &file_cordiumv1_proto_msgTypes[131]
+	mi := &file_cordiumv1_proto_msgTypes[132]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10423,7 +10472,7 @@ func (x *WorkspaceSnapshot_Status) String() string {
 func (*WorkspaceSnapshot_Status) ProtoMessage() {}
 
 func (x *WorkspaceSnapshot_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[131]
+	mi := &file_cordiumv1_proto_msgTypes[132]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10536,7 +10585,7 @@ type WorkspaceSnapshot_Status_Failure struct {
 
 func (x *WorkspaceSnapshot_Status_Failure) Reset() {
 	*x = WorkspaceSnapshot_Status_Failure{}
-	mi := &file_cordiumv1_proto_msgTypes[132]
+	mi := &file_cordiumv1_proto_msgTypes[133]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10548,7 +10597,7 @@ func (x *WorkspaceSnapshot_Status_Failure) String() string {
 func (*WorkspaceSnapshot_Status_Failure) ProtoMessage() {}
 
 func (x *WorkspaceSnapshot_Status_Failure) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[132]
+	mi := &file_cordiumv1_proto_msgTypes[133]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10658,7 +10707,7 @@ type WorkspaceSnapshot_Status_Failure_Unsupported struct {
 
 func (x *WorkspaceSnapshot_Status_Failure_Unsupported) Reset() {
 	*x = WorkspaceSnapshot_Status_Failure_Unsupported{}
-	mi := &file_cordiumv1_proto_msgTypes[133]
+	mi := &file_cordiumv1_proto_msgTypes[134]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10670,7 +10719,7 @@ func (x *WorkspaceSnapshot_Status_Failure_Unsupported) String() string {
 func (*WorkspaceSnapshot_Status_Failure_Unsupported) ProtoMessage() {}
 
 func (x *WorkspaceSnapshot_Status_Failure_Unsupported) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[133]
+	mi := &file_cordiumv1_proto_msgTypes[134]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10696,7 +10745,7 @@ type WorkspaceSnapshot_Status_Failure_SourceNotFound struct {
 
 func (x *WorkspaceSnapshot_Status_Failure_SourceNotFound) Reset() {
 	*x = WorkspaceSnapshot_Status_Failure_SourceNotFound{}
-	mi := &file_cordiumv1_proto_msgTypes[134]
+	mi := &file_cordiumv1_proto_msgTypes[135]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10708,7 +10757,7 @@ func (x *WorkspaceSnapshot_Status_Failure_SourceNotFound) String() string {
 func (*WorkspaceSnapshot_Status_Failure_SourceNotFound) ProtoMessage() {}
 
 func (x *WorkspaceSnapshot_Status_Failure_SourceNotFound) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[134]
+	mi := &file_cordiumv1_proto_msgTypes[135]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10733,7 +10782,7 @@ type WorkspaceSnapshot_Status_Failure_Storage struct {
 
 func (x *WorkspaceSnapshot_Status_Failure_Storage) Reset() {
 	*x = WorkspaceSnapshot_Status_Failure_Storage{}
-	mi := &file_cordiumv1_proto_msgTypes[135]
+	mi := &file_cordiumv1_proto_msgTypes[136]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10745,7 +10794,7 @@ func (x *WorkspaceSnapshot_Status_Failure_Storage) String() string {
 func (*WorkspaceSnapshot_Status_Failure_Storage) ProtoMessage() {}
 
 func (x *WorkspaceSnapshot_Status_Failure_Storage) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[135]
+	mi := &file_cordiumv1_proto_msgTypes[136]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10770,7 +10819,7 @@ type WorkspaceSnapshot_Status_Failure_Unknown struct {
 
 func (x *WorkspaceSnapshot_Status_Failure_Unknown) Reset() {
 	*x = WorkspaceSnapshot_Status_Failure_Unknown{}
-	mi := &file_cordiumv1_proto_msgTypes[136]
+	mi := &file_cordiumv1_proto_msgTypes[137]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10782,7 +10831,7 @@ func (x *WorkspaceSnapshot_Status_Failure_Unknown) String() string {
 func (*WorkspaceSnapshot_Status_Failure_Unknown) ProtoMessage() {}
 
 func (x *WorkspaceSnapshot_Status_Failure_Unknown) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[136]
+	mi := &file_cordiumv1_proto_msgTypes[137]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10815,7 +10864,7 @@ type Volume_Spec struct {
 
 func (x *Volume_Spec) Reset() {
 	*x = Volume_Spec{}
-	mi := &file_cordiumv1_proto_msgTypes[137]
+	mi := &file_cordiumv1_proto_msgTypes[138]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10827,7 +10876,7 @@ func (x *Volume_Spec) String() string {
 func (*Volume_Spec) ProtoMessage() {}
 
 func (x *Volume_Spec) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[137]
+	mi := &file_cordiumv1_proto_msgTypes[138]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10885,7 +10934,7 @@ type Volume_Status struct {
 
 func (x *Volume_Status) Reset() {
 	*x = Volume_Status{}
-	mi := &file_cordiumv1_proto_msgTypes[138]
+	mi := &file_cordiumv1_proto_msgTypes[139]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10897,7 +10946,7 @@ func (x *Volume_Status) String() string {
 func (*Volume_Status) ProtoMessage() {}
 
 func (x *Volume_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[138]
+	mi := &file_cordiumv1_proto_msgTypes[139]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10973,7 +11022,7 @@ type Volume_Spec_Size struct {
 
 func (x *Volume_Spec_Size) Reset() {
 	*x = Volume_Spec_Size{}
-	mi := &file_cordiumv1_proto_msgTypes[139]
+	mi := &file_cordiumv1_proto_msgTypes[140]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10985,7 +11034,7 @@ func (x *Volume_Spec_Size) String() string {
 func (*Volume_Spec_Size) ProtoMessage() {}
 
 func (x *Volume_Spec_Size) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[139]
+	mi := &file_cordiumv1_proto_msgTypes[140]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11027,7 +11076,7 @@ type Volume_Status_Failure struct {
 
 func (x *Volume_Status_Failure) Reset() {
 	*x = Volume_Status_Failure{}
-	mi := &file_cordiumv1_proto_msgTypes[140]
+	mi := &file_cordiumv1_proto_msgTypes[141]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11039,7 +11088,7 @@ func (x *Volume_Status_Failure) String() string {
 func (*Volume_Status_Failure) ProtoMessage() {}
 
 func (x *Volume_Status_Failure) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[140]
+	mi := &file_cordiumv1_proto_msgTypes[141]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11133,7 +11182,7 @@ type Volume_Status_Failure_Unsupported struct {
 
 func (x *Volume_Status_Failure_Unsupported) Reset() {
 	*x = Volume_Status_Failure_Unsupported{}
-	mi := &file_cordiumv1_proto_msgTypes[141]
+	mi := &file_cordiumv1_proto_msgTypes[142]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11145,7 +11194,7 @@ func (x *Volume_Status_Failure_Unsupported) String() string {
 func (*Volume_Status_Failure_Unsupported) ProtoMessage() {}
 
 func (x *Volume_Status_Failure_Unsupported) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[141]
+	mi := &file_cordiumv1_proto_msgTypes[142]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11171,7 +11220,7 @@ type Volume_Status_Failure_Storage struct {
 
 func (x *Volume_Status_Failure_Storage) Reset() {
 	*x = Volume_Status_Failure_Storage{}
-	mi := &file_cordiumv1_proto_msgTypes[142]
+	mi := &file_cordiumv1_proto_msgTypes[143]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11183,7 +11232,7 @@ func (x *Volume_Status_Failure_Storage) String() string {
 func (*Volume_Status_Failure_Storage) ProtoMessage() {}
 
 func (x *Volume_Status_Failure_Storage) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[142]
+	mi := &file_cordiumv1_proto_msgTypes[143]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11208,7 +11257,7 @@ type Volume_Status_Failure_Unknown struct {
 
 func (x *Volume_Status_Failure_Unknown) Reset() {
 	*x = Volume_Status_Failure_Unknown{}
-	mi := &file_cordiumv1_proto_msgTypes[143]
+	mi := &file_cordiumv1_proto_msgTypes[144]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11220,7 +11269,7 @@ func (x *Volume_Status_Failure_Unknown) String() string {
 func (*Volume_Status_Failure_Unknown) ProtoMessage() {}
 
 func (x *Volume_Status_Failure_Unknown) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[143]
+	mi := &file_cordiumv1_proto_msgTypes[144]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11245,7 +11294,7 @@ type Secret_Spec struct {
 
 func (x *Secret_Spec) Reset() {
 	*x = Secret_Spec{}
-	mi := &file_cordiumv1_proto_msgTypes[144]
+	mi := &file_cordiumv1_proto_msgTypes[145]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11257,7 +11306,7 @@ func (x *Secret_Spec) String() string {
 func (*Secret_Spec) ProtoMessage() {}
 
 func (x *Secret_Spec) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[144]
+	mi := &file_cordiumv1_proto_msgTypes[145]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11287,7 +11336,7 @@ type Secret_Status struct {
 
 func (x *Secret_Status) Reset() {
 	*x = Secret_Status{}
-	mi := &file_cordiumv1_proto_msgTypes[145]
+	mi := &file_cordiumv1_proto_msgTypes[146]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11299,7 +11348,7 @@ func (x *Secret_Status) String() string {
 func (*Secret_Status) ProtoMessage() {}
 
 func (x *Secret_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[145]
+	mi := &file_cordiumv1_proto_msgTypes[146]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11347,7 +11396,7 @@ type Secret_Data struct {
 
 func (x *Secret_Data) Reset() {
 	*x = Secret_Data{}
-	mi := &file_cordiumv1_proto_msgTypes[146]
+	mi := &file_cordiumv1_proto_msgTypes[147]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11359,7 +11408,7 @@ func (x *Secret_Data) String() string {
 func (*Secret_Data) ProtoMessage() {}
 
 func (x *Secret_Data) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[146]
+	mi := &file_cordiumv1_proto_msgTypes[147]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11446,7 +11495,7 @@ type ClientMessage_ListenTerminalEndRequest struct {
 
 func (x *ClientMessage_ListenTerminalEndRequest) Reset() {
 	*x = ClientMessage_ListenTerminalEndRequest{}
-	mi := &file_cordiumv1_proto_msgTypes[147]
+	mi := &file_cordiumv1_proto_msgTypes[148]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11458,7 +11507,7 @@ func (x *ClientMessage_ListenTerminalEndRequest) String() string {
 func (*ClientMessage_ListenTerminalEndRequest) ProtoMessage() {}
 
 func (x *ClientMessage_ListenTerminalEndRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[147]
+	mi := &file_cordiumv1_proto_msgTypes[148]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11493,7 +11542,7 @@ type ServerMessage_WorkspaceUpdate struct {
 
 func (x *ServerMessage_WorkspaceUpdate) Reset() {
 	*x = ServerMessage_WorkspaceUpdate{}
-	mi := &file_cordiumv1_proto_msgTypes[148]
+	mi := &file_cordiumv1_proto_msgTypes[149]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11505,7 +11554,7 @@ func (x *ServerMessage_WorkspaceUpdate) String() string {
 func (*ServerMessage_WorkspaceUpdate) ProtoMessage() {}
 
 func (x *ServerMessage_WorkspaceUpdate) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[148]
+	mi := &file_cordiumv1_proto_msgTypes[149]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11542,7 +11591,7 @@ type ServerMessage_ListenTerminalEvent struct {
 
 func (x *ServerMessage_ListenTerminalEvent) Reset() {
 	*x = ServerMessage_ListenTerminalEvent{}
-	mi := &file_cordiumv1_proto_msgTypes[149]
+	mi := &file_cordiumv1_proto_msgTypes[150]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11554,7 +11603,7 @@ func (x *ServerMessage_ListenTerminalEvent) String() string {
 func (*ServerMessage_ListenTerminalEvent) ProtoMessage() {}
 
 func (x *ServerMessage_ListenTerminalEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[149]
+	mi := &file_cordiumv1_proto_msgTypes[150]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11601,7 +11650,7 @@ type StartWorkspaceRequest_Config struct {
 
 func (x *StartWorkspaceRequest_Config) Reset() {
 	*x = StartWorkspaceRequest_Config{}
-	mi := &file_cordiumv1_proto_msgTypes[150]
+	mi := &file_cordiumv1_proto_msgTypes[151]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11613,7 +11662,7 @@ func (x *StartWorkspaceRequest_Config) String() string {
 func (*StartWorkspaceRequest_Config) ProtoMessage() {}
 
 func (x *StartWorkspaceRequest_Config) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[150]
+	mi := &file_cordiumv1_proto_msgTypes[151]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11674,7 +11723,7 @@ type Template_Spec struct {
 
 func (x *Template_Spec) Reset() {
 	*x = Template_Spec{}
-	mi := &file_cordiumv1_proto_msgTypes[151]
+	mi := &file_cordiumv1_proto_msgTypes[152]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11686,7 +11735,7 @@ func (x *Template_Spec) String() string {
 func (*Template_Spec) ProtoMessage() {}
 
 func (x *Template_Spec) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[151]
+	mi := &file_cordiumv1_proto_msgTypes[152]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11770,7 +11819,7 @@ type Template_Status struct {
 
 func (x *Template_Status) Reset() {
 	*x = Template_Status{}
-	mi := &file_cordiumv1_proto_msgTypes[152]
+	mi := &file_cordiumv1_proto_msgTypes[153]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11782,7 +11831,7 @@ func (x *Template_Status) String() string {
 func (*Template_Status) ProtoMessage() {}
 
 func (x *Template_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[152]
+	mi := &file_cordiumv1_proto_msgTypes[153]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11844,7 +11893,7 @@ type Template_Status_BuildInfo struct {
 
 func (x *Template_Status_BuildInfo) Reset() {
 	*x = Template_Status_BuildInfo{}
-	mi := &file_cordiumv1_proto_msgTypes[153]
+	mi := &file_cordiumv1_proto_msgTypes[154]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11856,7 +11905,7 @@ func (x *Template_Status_BuildInfo) String() string {
 func (*Template_Status_BuildInfo) ProtoMessage() {}
 
 func (x *Template_Status_BuildInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[153]
+	mi := &file_cordiumv1_proto_msgTypes[154]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11919,7 +11968,7 @@ type Template_Status_BuildInfo_Build struct {
 
 func (x *Template_Status_BuildInfo_Build) Reset() {
 	*x = Template_Status_BuildInfo_Build{}
-	mi := &file_cordiumv1_proto_msgTypes[154]
+	mi := &file_cordiumv1_proto_msgTypes[155]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11931,7 +11980,7 @@ func (x *Template_Status_BuildInfo_Build) String() string {
 func (*Template_Status_BuildInfo_Build) ProtoMessage() {}
 
 func (x *Template_Status_BuildInfo_Build) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[154]
+	mi := &file_cordiumv1_proto_msgTypes[155]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12014,7 +12063,7 @@ type Space_Spec struct {
 
 func (x *Space_Spec) Reset() {
 	*x = Space_Spec{}
-	mi := &file_cordiumv1_proto_msgTypes[155]
+	mi := &file_cordiumv1_proto_msgTypes[156]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12026,7 +12075,7 @@ func (x *Space_Spec) String() string {
 func (*Space_Spec) ProtoMessage() {}
 
 func (x *Space_Spec) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[155]
+	mi := &file_cordiumv1_proto_msgTypes[156]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12077,7 +12126,7 @@ type Space_Status struct {
 
 func (x *Space_Status) Reset() {
 	*x = Space_Status{}
-	mi := &file_cordiumv1_proto_msgTypes[156]
+	mi := &file_cordiumv1_proto_msgTypes[157]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12089,7 +12138,7 @@ func (x *Space_Status) String() string {
 func (*Space_Status) ProtoMessage() {}
 
 func (x *Space_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[156]
+	mi := &file_cordiumv1_proto_msgTypes[157]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12134,7 +12183,7 @@ type Space_Spec_Limit struct {
 
 func (x *Space_Spec_Limit) Reset() {
 	*x = Space_Spec_Limit{}
-	mi := &file_cordiumv1_proto_msgTypes[157]
+	mi := &file_cordiumv1_proto_msgTypes[158]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12146,7 +12195,7 @@ func (x *Space_Spec_Limit) String() string {
 func (*Space_Spec_Limit) ProtoMessage() {}
 
 func (x *Space_Spec_Limit) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[157]
+	mi := &file_cordiumv1_proto_msgTypes[158]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12196,7 +12245,7 @@ type Space_Spec_Runtime struct {
 
 func (x *Space_Spec_Runtime) Reset() {
 	*x = Space_Spec_Runtime{}
-	mi := &file_cordiumv1_proto_msgTypes[158]
+	mi := &file_cordiumv1_proto_msgTypes[159]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12208,7 +12257,7 @@ func (x *Space_Spec_Runtime) String() string {
 func (*Space_Spec_Runtime) ProtoMessage() {}
 
 func (x *Space_Spec_Runtime) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[158]
+	mi := &file_cordiumv1_proto_msgTypes[159]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12257,7 +12306,7 @@ type Space_Spec_Authorization struct {
 
 func (x *Space_Spec_Authorization) Reset() {
 	*x = Space_Spec_Authorization{}
-	mi := &file_cordiumv1_proto_msgTypes[159]
+	mi := &file_cordiumv1_proto_msgTypes[160]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12269,7 +12318,7 @@ func (x *Space_Spec_Authorization) String() string {
 func (*Space_Spec_Authorization) ProtoMessage() {}
 
 func (x *Space_Spec_Authorization) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[159]
+	mi := &file_cordiumv1_proto_msgTypes[160]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12303,7 +12352,7 @@ type Membership_Spec struct {
 
 func (x *Membership_Spec) Reset() {
 	*x = Membership_Spec{}
-	mi := &file_cordiumv1_proto_msgTypes[160]
+	mi := &file_cordiumv1_proto_msgTypes[161]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12315,7 +12364,7 @@ func (x *Membership_Spec) String() string {
 func (*Membership_Spec) ProtoMessage() {}
 
 func (x *Membership_Spec) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[160]
+	mi := &file_cordiumv1_proto_msgTypes[161]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12360,7 +12409,7 @@ type Membership_Status struct {
 
 func (x *Membership_Status) Reset() {
 	*x = Membership_Status{}
-	mi := &file_cordiumv1_proto_msgTypes[161]
+	mi := &file_cordiumv1_proto_msgTypes[162]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12372,7 +12421,7 @@ func (x *Membership_Status) String() string {
 func (*Membership_Status) ProtoMessage() {}
 
 func (x *Membership_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[161]
+	mi := &file_cordiumv1_proto_msgTypes[162]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12438,7 +12487,7 @@ type Membership_Status_GitProviderState struct {
 
 func (x *Membership_Status_GitProviderState) Reset() {
 	*x = Membership_Status_GitProviderState{}
-	mi := &file_cordiumv1_proto_msgTypes[162]
+	mi := &file_cordiumv1_proto_msgTypes[163]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12450,7 +12499,7 @@ func (x *Membership_Status_GitProviderState) String() string {
 func (*Membership_Status_GitProviderState) ProtoMessage() {}
 
 func (x *Membership_Status_GitProviderState) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[162]
+	mi := &file_cordiumv1_proto_msgTypes[163]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12509,7 +12558,7 @@ type Membership_Status_UserInfo struct {
 
 func (x *Membership_Status_UserInfo) Reset() {
 	*x = Membership_Status_UserInfo{}
-	mi := &file_cordiumv1_proto_msgTypes[163]
+	mi := &file_cordiumv1_proto_msgTypes[164]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12521,7 +12570,7 @@ func (x *Membership_Status_UserInfo) String() string {
 func (*Membership_Status_UserInfo) ProtoMessage() {}
 
 func (x *Membership_Status_UserInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[163]
+	mi := &file_cordiumv1_proto_msgTypes[164]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12569,7 +12618,7 @@ type GitProvider_Spec struct {
 
 func (x *GitProvider_Spec) Reset() {
 	*x = GitProvider_Spec{}
-	mi := &file_cordiumv1_proto_msgTypes[165]
+	mi := &file_cordiumv1_proto_msgTypes[166]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12581,7 +12630,7 @@ func (x *GitProvider_Spec) String() string {
 func (*GitProvider_Spec) ProtoMessage() {}
 
 func (x *GitProvider_Spec) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[165]
+	mi := &file_cordiumv1_proto_msgTypes[166]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12671,7 +12720,7 @@ type GitProvider_Status struct {
 
 func (x *GitProvider_Status) Reset() {
 	*x = GitProvider_Status{}
-	mi := &file_cordiumv1_proto_msgTypes[166]
+	mi := &file_cordiumv1_proto_msgTypes[167]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12683,7 +12732,7 @@ func (x *GitProvider_Status) String() string {
 func (*GitProvider_Status) ProtoMessage() {}
 
 func (x *GitProvider_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[166]
+	mi := &file_cordiumv1_proto_msgTypes[167]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12729,7 +12778,7 @@ type GitProvider_Spec_Github struct {
 
 func (x *GitProvider_Spec_Github) Reset() {
 	*x = GitProvider_Spec_Github{}
-	mi := &file_cordiumv1_proto_msgTypes[167]
+	mi := &file_cordiumv1_proto_msgTypes[168]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12741,7 +12790,7 @@ func (x *GitProvider_Spec_Github) String() string {
 func (*GitProvider_Spec_Github) ProtoMessage() {}
 
 func (x *GitProvider_Spec_Github) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[167]
+	mi := &file_cordiumv1_proto_msgTypes[168]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12794,7 +12843,7 @@ type GitProvider_Spec_Gitlab struct {
 
 func (x *GitProvider_Spec_Gitlab) Reset() {
 	*x = GitProvider_Spec_Gitlab{}
-	mi := &file_cordiumv1_proto_msgTypes[168]
+	mi := &file_cordiumv1_proto_msgTypes[169]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12806,7 +12855,7 @@ func (x *GitProvider_Spec_Gitlab) String() string {
 func (*GitProvider_Spec_Gitlab) ProtoMessage() {}
 
 func (x *GitProvider_Spec_Gitlab) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[168]
+	mi := &file_cordiumv1_proto_msgTypes[169]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12864,7 +12913,7 @@ type GitProvider_Spec_OAuth2 struct {
 
 func (x *GitProvider_Spec_OAuth2) Reset() {
 	*x = GitProvider_Spec_OAuth2{}
-	mi := &file_cordiumv1_proto_msgTypes[169]
+	mi := &file_cordiumv1_proto_msgTypes[170]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12876,7 +12925,7 @@ func (x *GitProvider_Spec_OAuth2) String() string {
 func (*GitProvider_Spec_OAuth2) ProtoMessage() {}
 
 func (x *GitProvider_Spec_OAuth2) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[169]
+	mi := &file_cordiumv1_proto_msgTypes[170]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12942,7 +12991,7 @@ type GitProvider_Spec_Github_ClientSecret struct {
 
 func (x *GitProvider_Spec_Github_ClientSecret) Reset() {
 	*x = GitProvider_Spec_Github_ClientSecret{}
-	mi := &file_cordiumv1_proto_msgTypes[170]
+	mi := &file_cordiumv1_proto_msgTypes[171]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12954,7 +13003,7 @@ func (x *GitProvider_Spec_Github_ClientSecret) String() string {
 func (*GitProvider_Spec_Github_ClientSecret) ProtoMessage() {}
 
 func (x *GitProvider_Spec_Github_ClientSecret) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[170]
+	mi := &file_cordiumv1_proto_msgTypes[171]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13014,7 +13063,7 @@ type GitProvider_Spec_Gitlab_ClientSecret struct {
 
 func (x *GitProvider_Spec_Gitlab_ClientSecret) Reset() {
 	*x = GitProvider_Spec_Gitlab_ClientSecret{}
-	mi := &file_cordiumv1_proto_msgTypes[171]
+	mi := &file_cordiumv1_proto_msgTypes[172]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13026,7 +13075,7 @@ func (x *GitProvider_Spec_Gitlab_ClientSecret) String() string {
 func (*GitProvider_Spec_Gitlab_ClientSecret) ProtoMessage() {}
 
 func (x *GitProvider_Spec_Gitlab_ClientSecret) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[171]
+	mi := &file_cordiumv1_proto_msgTypes[172]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13086,7 +13135,7 @@ type GitProvider_Spec_OAuth2_ClientSecret struct {
 
 func (x *GitProvider_Spec_OAuth2_ClientSecret) Reset() {
 	*x = GitProvider_Spec_OAuth2_ClientSecret{}
-	mi := &file_cordiumv1_proto_msgTypes[172]
+	mi := &file_cordiumv1_proto_msgTypes[173]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13098,7 +13147,7 @@ func (x *GitProvider_Spec_OAuth2_ClientSecret) String() string {
 func (*GitProvider_Spec_OAuth2_ClientSecret) ProtoMessage() {}
 
 func (x *GitProvider_Spec_OAuth2_ClientSecret) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[172]
+	mi := &file_cordiumv1_proto_msgTypes[173]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13154,7 +13203,7 @@ type UserSecret_Spec struct {
 
 func (x *UserSecret_Spec) Reset() {
 	*x = UserSecret_Spec{}
-	mi := &file_cordiumv1_proto_msgTypes[173]
+	mi := &file_cordiumv1_proto_msgTypes[174]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13166,7 +13215,7 @@ func (x *UserSecret_Spec) String() string {
 func (*UserSecret_Spec) ProtoMessage() {}
 
 func (x *UserSecret_Spec) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[173]
+	mi := &file_cordiumv1_proto_msgTypes[174]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13207,7 +13256,7 @@ type UserSecret_Status struct {
 
 func (x *UserSecret_Status) Reset() {
 	*x = UserSecret_Status{}
-	mi := &file_cordiumv1_proto_msgTypes[174]
+	mi := &file_cordiumv1_proto_msgTypes[175]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13219,7 +13268,7 @@ func (x *UserSecret_Status) String() string {
 func (*UserSecret_Status) ProtoMessage() {}
 
 func (x *UserSecret_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[174]
+	mi := &file_cordiumv1_proto_msgTypes[175]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13288,7 +13337,7 @@ type UserSecret_Data struct {
 
 func (x *UserSecret_Data) Reset() {
 	*x = UserSecret_Data{}
-	mi := &file_cordiumv1_proto_msgTypes[175]
+	mi := &file_cordiumv1_proto_msgTypes[176]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13300,7 +13349,7 @@ func (x *UserSecret_Data) String() string {
 func (*UserSecret_Data) ProtoMessage() {}
 
 func (x *UserSecret_Data) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[175]
+	mi := &file_cordiumv1_proto_msgTypes[176]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13386,7 +13435,7 @@ type UserSecret_Status_SSHKey struct {
 
 func (x *UserSecret_Status_SSHKey) Reset() {
 	*x = UserSecret_Status_SSHKey{}
-	mi := &file_cordiumv1_proto_msgTypes[176]
+	mi := &file_cordiumv1_proto_msgTypes[177]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13398,7 +13447,7 @@ func (x *UserSecret_Status_SSHKey) String() string {
 func (*UserSecret_Status_SSHKey) ProtoMessage() {}
 
 func (x *UserSecret_Status_SSHKey) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[176]
+	mi := &file_cordiumv1_proto_msgTypes[177]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13443,7 +13492,7 @@ type UserConfig_Spec struct {
 
 func (x *UserConfig_Spec) Reset() {
 	*x = UserConfig_Spec{}
-	mi := &file_cordiumv1_proto_msgTypes[177]
+	mi := &file_cordiumv1_proto_msgTypes[178]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13455,7 +13504,7 @@ func (x *UserConfig_Spec) String() string {
 func (*UserConfig_Spec) ProtoMessage() {}
 
 func (x *UserConfig_Spec) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[177]
+	mi := &file_cordiumv1_proto_msgTypes[178]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13508,13 +13557,17 @@ type UserConfig_Status struct {
 	// PreferredRegionRef is the reference of the Region that the spec's
 	// preferredRegion resolves to.
 	PreferredRegionRef *metav1.ObjectReference `protobuf:"bytes,2,opt,name=preferredRegionRef,proto3" json:"preferredRegionRef,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	// AgentWorkspaceRef is the reference of the Workspace that runs the
+	// User's Cordium AI agent. It is set via the InitializeAgent method and
+	// it is unset once that Workspace is deleted.
+	AgentWorkspaceRef *metav1.ObjectReference `protobuf:"bytes,3,opt,name=agentWorkspaceRef,proto3" json:"agentWorkspaceRef,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *UserConfig_Status) Reset() {
 	*x = UserConfig_Status{}
-	mi := &file_cordiumv1_proto_msgTypes[178]
+	mi := &file_cordiumv1_proto_msgTypes[179]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13526,7 +13579,7 @@ func (x *UserConfig_Status) String() string {
 func (*UserConfig_Status) ProtoMessage() {}
 
 func (x *UserConfig_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[178]
+	mi := &file_cordiumv1_proto_msgTypes[179]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13556,6 +13609,13 @@ func (x *UserConfig_Status) GetPreferredRegionRef() *metav1.ObjectReference {
 	return nil
 }
 
+func (x *UserConfig_Status) GetAgentWorkspaceRef() *metav1.ObjectReference {
+	if x != nil {
+		return x.AgentWorkspaceRef
+	}
+	return nil
+}
+
 // Dotfiles is a git repository containing the User's personal dotfiles. It
 // is cloned into the Workspace at the beginning of the PREPARING phase and
 // the first install script that is found in it is executed.
@@ -13574,7 +13634,7 @@ type UserConfig_Spec_Dotfiles struct {
 
 func (x *UserConfig_Spec_Dotfiles) Reset() {
 	*x = UserConfig_Spec_Dotfiles{}
-	mi := &file_cordiumv1_proto_msgTypes[179]
+	mi := &file_cordiumv1_proto_msgTypes[180]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13586,7 +13646,7 @@ func (x *UserConfig_Spec_Dotfiles) String() string {
 func (*UserConfig_Spec_Dotfiles) ProtoMessage() {}
 
 func (x *UserConfig_Spec_Dotfiles) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[179]
+	mi := &file_cordiumv1_proto_msgTypes[180]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13642,7 +13702,7 @@ type UserConfig_Spec_EnvVar struct {
 
 func (x *UserConfig_Spec_EnvVar) Reset() {
 	*x = UserConfig_Spec_EnvVar{}
-	mi := &file_cordiumv1_proto_msgTypes[180]
+	mi := &file_cordiumv1_proto_msgTypes[181]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13654,7 +13714,7 @@ func (x *UserConfig_Spec_EnvVar) String() string {
 func (*UserConfig_Spec_EnvVar) ProtoMessage() {}
 
 func (x *UserConfig_Spec_EnvVar) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[180]
+	mi := &file_cordiumv1_proto_msgTypes[181]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13737,7 +13797,7 @@ type UserConfig_Spec_Dotfiles_Authentication struct {
 
 func (x *UserConfig_Spec_Dotfiles_Authentication) Reset() {
 	*x = UserConfig_Spec_Dotfiles_Authentication{}
-	mi := &file_cordiumv1_proto_msgTypes[181]
+	mi := &file_cordiumv1_proto_msgTypes[182]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13749,7 +13809,7 @@ func (x *UserConfig_Spec_Dotfiles_Authentication) String() string {
 func (*UserConfig_Spec_Dotfiles_Authentication) ProtoMessage() {}
 
 func (x *UserConfig_Spec_Dotfiles_Authentication) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[181]
+	mi := &file_cordiumv1_proto_msgTypes[182]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13806,7 +13866,7 @@ type UserConfig_Spec_Dotfiles_Authentication_HTTP struct {
 
 func (x *UserConfig_Spec_Dotfiles_Authentication_HTTP) Reset() {
 	*x = UserConfig_Spec_Dotfiles_Authentication_HTTP{}
-	mi := &file_cordiumv1_proto_msgTypes[182]
+	mi := &file_cordiumv1_proto_msgTypes[183]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13818,7 +13878,7 @@ func (x *UserConfig_Spec_Dotfiles_Authentication_HTTP) String() string {
 func (*UserConfig_Spec_Dotfiles_Authentication_HTTP) ProtoMessage() {}
 
 func (x *UserConfig_Spec_Dotfiles_Authentication_HTTP) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[182]
+	mi := &file_cordiumv1_proto_msgTypes[183]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13863,7 +13923,7 @@ type UserConfig_Spec_Dotfiles_Authentication_HTTP_Password struct {
 
 func (x *UserConfig_Spec_Dotfiles_Authentication_HTTP_Password) Reset() {
 	*x = UserConfig_Spec_Dotfiles_Authentication_HTTP_Password{}
-	mi := &file_cordiumv1_proto_msgTypes[183]
+	mi := &file_cordiumv1_proto_msgTypes[184]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13875,7 +13935,7 @@ func (x *UserConfig_Spec_Dotfiles_Authentication_HTTP_Password) String() string 
 func (*UserConfig_Spec_Dotfiles_Authentication_HTTP_Password) ProtoMessage() {}
 
 func (x *UserConfig_Spec_Dotfiles_Authentication_HTTP_Password) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[183]
+	mi := &file_cordiumv1_proto_msgTypes[184]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13929,7 +13989,7 @@ type Region_Spec struct {
 
 func (x *Region_Spec) Reset() {
 	*x = Region_Spec{}
-	mi := &file_cordiumv1_proto_msgTypes[184]
+	mi := &file_cordiumv1_proto_msgTypes[185]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13941,7 +14001,7 @@ func (x *Region_Spec) String() string {
 func (*Region_Spec) ProtoMessage() {}
 
 func (x *Region_Spec) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[184]
+	mi := &file_cordiumv1_proto_msgTypes[185]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13954,7 +14014,7 @@ func (x *Region_Spec) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Region_Spec.ProtoReflect.Descriptor instead.
 func (*Region_Spec) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{44, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{45, 0}
 }
 
 // Status is the current status of the Region. It is managed by the Cluster
@@ -13971,7 +14031,7 @@ type Region_Status struct {
 
 func (x *Region_Status) Reset() {
 	*x = Region_Status{}
-	mi := &file_cordiumv1_proto_msgTypes[185]
+	mi := &file_cordiumv1_proto_msgTypes[186]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13983,7 +14043,7 @@ func (x *Region_Status) String() string {
 func (*Region_Status) ProtoMessage() {}
 
 func (x *Region_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[185]
+	mi := &file_cordiumv1_proto_msgTypes[186]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13996,7 +14056,7 @@ func (x *Region_Status) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Region_Status.ProtoReflect.Descriptor instead.
 func (*Region_Status) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{44, 1}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{45, 1}
 }
 
 func (x *Region_Status) GetCountry() string {
@@ -14024,7 +14084,7 @@ type ListenTerminalResponse_Stdout struct {
 
 func (x *ListenTerminalResponse_Stdout) Reset() {
 	*x = ListenTerminalResponse_Stdout{}
-	mi := &file_cordiumv1_proto_msgTypes[186]
+	mi := &file_cordiumv1_proto_msgTypes[187]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14036,7 +14096,7 @@ func (x *ListenTerminalResponse_Stdout) String() string {
 func (*ListenTerminalResponse_Stdout) ProtoMessage() {}
 
 func (x *ListenTerminalResponse_Stdout) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[186]
+	mi := &file_cordiumv1_proto_msgTypes[187]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14049,7 +14109,7 @@ func (x *ListenTerminalResponse_Stdout) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListenTerminalResponse_Stdout.ProtoReflect.Descriptor instead.
 func (*ListenTerminalResponse_Stdout) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{59, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{60, 0}
 }
 
 func (x *ListenTerminalResponse_Stdout) GetData() []byte {
@@ -14072,7 +14132,7 @@ type ListenTerminalResponse_WindowSize struct {
 
 func (x *ListenTerminalResponse_WindowSize) Reset() {
 	*x = ListenTerminalResponse_WindowSize{}
-	mi := &file_cordiumv1_proto_msgTypes[187]
+	mi := &file_cordiumv1_proto_msgTypes[188]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14084,7 +14144,7 @@ func (x *ListenTerminalResponse_WindowSize) String() string {
 func (*ListenTerminalResponse_WindowSize) ProtoMessage() {}
 
 func (x *ListenTerminalResponse_WindowSize) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[187]
+	mi := &file_cordiumv1_proto_msgTypes[188]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14097,7 +14157,7 @@ func (x *ListenTerminalResponse_WindowSize) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ListenTerminalResponse_WindowSize.ProtoReflect.Descriptor instead.
 func (*ListenTerminalResponse_WindowSize) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{59, 1}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{60, 1}
 }
 
 func (x *ListenTerminalResponse_WindowSize) GetCols() uint32 {
@@ -14123,7 +14183,7 @@ type ListenTerminalResponse_Close struct {
 
 func (x *ListenTerminalResponse_Close) Reset() {
 	*x = ListenTerminalResponse_Close{}
-	mi := &file_cordiumv1_proto_msgTypes[188]
+	mi := &file_cordiumv1_proto_msgTypes[189]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14135,7 +14195,7 @@ func (x *ListenTerminalResponse_Close) String() string {
 func (*ListenTerminalResponse_Close) ProtoMessage() {}
 
 func (x *ListenTerminalResponse_Close) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[188]
+	mi := &file_cordiumv1_proto_msgTypes[189]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14148,7 +14208,7 @@ func (x *ListenTerminalResponse_Close) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListenTerminalResponse_Close.ProtoReflect.Descriptor instead.
 func (*ListenTerminalResponse_Close) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{59, 2}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{60, 2}
 }
 
 // Create means that a Workspace was created.
@@ -14162,7 +14222,7 @@ type WatchWorkspaceResponse_Create struct {
 
 func (x *WatchWorkspaceResponse_Create) Reset() {
 	*x = WatchWorkspaceResponse_Create{}
-	mi := &file_cordiumv1_proto_msgTypes[189]
+	mi := &file_cordiumv1_proto_msgTypes[190]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14174,7 +14234,7 @@ func (x *WatchWorkspaceResponse_Create) String() string {
 func (*WatchWorkspaceResponse_Create) ProtoMessage() {}
 
 func (x *WatchWorkspaceResponse_Create) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[189]
+	mi := &file_cordiumv1_proto_msgTypes[190]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14187,7 +14247,7 @@ func (x *WatchWorkspaceResponse_Create) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WatchWorkspaceResponse_Create.ProtoReflect.Descriptor instead.
 func (*WatchWorkspaceResponse_Create) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{63, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{64, 0}
 }
 
 func (x *WatchWorkspaceResponse_Create) GetItem() *Workspace {
@@ -14211,7 +14271,7 @@ type WatchWorkspaceResponse_Update struct {
 
 func (x *WatchWorkspaceResponse_Update) Reset() {
 	*x = WatchWorkspaceResponse_Update{}
-	mi := &file_cordiumv1_proto_msgTypes[190]
+	mi := &file_cordiumv1_proto_msgTypes[191]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14223,7 +14283,7 @@ func (x *WatchWorkspaceResponse_Update) String() string {
 func (*WatchWorkspaceResponse_Update) ProtoMessage() {}
 
 func (x *WatchWorkspaceResponse_Update) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[190]
+	mi := &file_cordiumv1_proto_msgTypes[191]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14236,7 +14296,7 @@ func (x *WatchWorkspaceResponse_Update) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WatchWorkspaceResponse_Update.ProtoReflect.Descriptor instead.
 func (*WatchWorkspaceResponse_Update) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{63, 1}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{64, 1}
 }
 
 func (x *WatchWorkspaceResponse_Update) GetNewItem() *Workspace {
@@ -14264,7 +14324,7 @@ type WatchWorkspaceResponse_Delete struct {
 
 func (x *WatchWorkspaceResponse_Delete) Reset() {
 	*x = WatchWorkspaceResponse_Delete{}
-	mi := &file_cordiumv1_proto_msgTypes[191]
+	mi := &file_cordiumv1_proto_msgTypes[192]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14276,7 +14336,7 @@ func (x *WatchWorkspaceResponse_Delete) String() string {
 func (*WatchWorkspaceResponse_Delete) ProtoMessage() {}
 
 func (x *WatchWorkspaceResponse_Delete) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[191]
+	mi := &file_cordiumv1_proto_msgTypes[192]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14289,7 +14349,7 @@ func (x *WatchWorkspaceResponse_Delete) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WatchWorkspaceResponse_Delete.ProtoReflect.Descriptor instead.
 func (*WatchWorkspaceResponse_Delete) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{63, 2}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{64, 2}
 }
 
 func (x *WatchWorkspaceResponse_Delete) GetItem() *Workspace {
@@ -14324,7 +14384,7 @@ type ExecRequest_Request struct {
 
 func (x *ExecRequest_Request) Reset() {
 	*x = ExecRequest_Request{}
-	mi := &file_cordiumv1_proto_msgTypes[192]
+	mi := &file_cordiumv1_proto_msgTypes[193]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14336,7 +14396,7 @@ func (x *ExecRequest_Request) String() string {
 func (*ExecRequest_Request) ProtoMessage() {}
 
 func (x *ExecRequest_Request) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[192]
+	mi := &file_cordiumv1_proto_msgTypes[193]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14349,7 +14409,7 @@ func (x *ExecRequest_Request) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecRequest_Request.ProtoReflect.Descriptor instead.
 func (*ExecRequest_Request) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{65, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{66, 0}
 }
 
 func (x *ExecRequest_Request) GetWorkspaceRef() *metav1.ObjectReference {
@@ -14403,7 +14463,7 @@ type ExecRequest_Kill struct {
 
 func (x *ExecRequest_Kill) Reset() {
 	*x = ExecRequest_Kill{}
-	mi := &file_cordiumv1_proto_msgTypes[193]
+	mi := &file_cordiumv1_proto_msgTypes[194]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14415,7 +14475,7 @@ func (x *ExecRequest_Kill) String() string {
 func (*ExecRequest_Kill) ProtoMessage() {}
 
 func (x *ExecRequest_Kill) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[193]
+	mi := &file_cordiumv1_proto_msgTypes[194]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14428,7 +14488,7 @@ func (x *ExecRequest_Kill) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecRequest_Kill.ProtoReflect.Descriptor instead.
 func (*ExecRequest_Kill) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{65, 1}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{66, 1}
 }
 
 // WriteData writes data to the command's standard input.
@@ -14442,7 +14502,7 @@ type ExecRequest_WriteData struct {
 
 func (x *ExecRequest_WriteData) Reset() {
 	*x = ExecRequest_WriteData{}
-	mi := &file_cordiumv1_proto_msgTypes[194]
+	mi := &file_cordiumv1_proto_msgTypes[195]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14454,7 +14514,7 @@ func (x *ExecRequest_WriteData) String() string {
 func (*ExecRequest_WriteData) ProtoMessage() {}
 
 func (x *ExecRequest_WriteData) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[194]
+	mi := &file_cordiumv1_proto_msgTypes[195]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14467,7 +14527,7 @@ func (x *ExecRequest_WriteData) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecRequest_WriteData.ProtoReflect.Descriptor instead.
 func (*ExecRequest_WriteData) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{65, 2}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{66, 2}
 }
 
 func (x *ExecRequest_WriteData) GetData() []byte {
@@ -14490,7 +14550,7 @@ type ExecRequest_Request_EnvVar struct {
 
 func (x *ExecRequest_Request_EnvVar) Reset() {
 	*x = ExecRequest_Request_EnvVar{}
-	mi := &file_cordiumv1_proto_msgTypes[195]
+	mi := &file_cordiumv1_proto_msgTypes[196]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14502,7 +14562,7 @@ func (x *ExecRequest_Request_EnvVar) String() string {
 func (*ExecRequest_Request_EnvVar) ProtoMessage() {}
 
 func (x *ExecRequest_Request_EnvVar) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[195]
+	mi := &file_cordiumv1_proto_msgTypes[196]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14515,7 +14575,7 @@ func (x *ExecRequest_Request_EnvVar) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecRequest_Request_EnvVar.ProtoReflect.Descriptor instead.
 func (*ExecRequest_Request_EnvVar) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{65, 0, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{66, 0, 0}
 }
 
 func (x *ExecRequest_Request_EnvVar) GetKey() string {
@@ -14543,7 +14603,7 @@ type ExecResponse_Stdout struct {
 
 func (x *ExecResponse_Stdout) Reset() {
 	*x = ExecResponse_Stdout{}
-	mi := &file_cordiumv1_proto_msgTypes[196]
+	mi := &file_cordiumv1_proto_msgTypes[197]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14555,7 +14615,7 @@ func (x *ExecResponse_Stdout) String() string {
 func (*ExecResponse_Stdout) ProtoMessage() {}
 
 func (x *ExecResponse_Stdout) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[196]
+	mi := &file_cordiumv1_proto_msgTypes[197]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14568,7 +14628,7 @@ func (x *ExecResponse_Stdout) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecResponse_Stdout.ProtoReflect.Descriptor instead.
 func (*ExecResponse_Stdout) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{66, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0}
 }
 
 func (x *ExecResponse_Stdout) GetData() []byte {
@@ -14589,7 +14649,7 @@ type ExecResponse_Stderr struct {
 
 func (x *ExecResponse_Stderr) Reset() {
 	*x = ExecResponse_Stderr{}
-	mi := &file_cordiumv1_proto_msgTypes[197]
+	mi := &file_cordiumv1_proto_msgTypes[198]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14601,7 +14661,7 @@ func (x *ExecResponse_Stderr) String() string {
 func (*ExecResponse_Stderr) ProtoMessage() {}
 
 func (x *ExecResponse_Stderr) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[197]
+	mi := &file_cordiumv1_proto_msgTypes[198]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14614,7 +14674,7 @@ func (x *ExecResponse_Stderr) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecResponse_Stderr.ProtoReflect.Descriptor instead.
 func (*ExecResponse_Stderr) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{66, 1}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 1}
 }
 
 func (x *ExecResponse_Stderr) GetData() []byte {
@@ -14635,7 +14695,7 @@ type ExecResponse_Exit struct {
 
 func (x *ExecResponse_Exit) Reset() {
 	*x = ExecResponse_Exit{}
-	mi := &file_cordiumv1_proto_msgTypes[198]
+	mi := &file_cordiumv1_proto_msgTypes[199]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14647,7 +14707,7 @@ func (x *ExecResponse_Exit) String() string {
 func (*ExecResponse_Exit) ProtoMessage() {}
 
 func (x *ExecResponse_Exit) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[198]
+	mi := &file_cordiumv1_proto_msgTypes[199]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14660,7 +14720,7 @@ func (x *ExecResponse_Exit) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecResponse_Exit.ProtoReflect.Descriptor instead.
 func (*ExecResponse_Exit) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{66, 2}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 2}
 }
 
 func (x *ExecResponse_Exit) GetCode() int32 {
@@ -14678,14 +14738,16 @@ type ClusterConfig_Spec struct {
 	// Workspace is the Cluster-wide Workspace-related configuration.
 	Workspace *ClusterConfig_Spec_Workspace `protobuf:"bytes,2,opt,name=workspace,proto3" json:"workspace,omitempty"`
 	// Volume is the Cluster-wide Volume-related configuration.
-	Volume        *ClusterConfig_Spec_Volume `protobuf:"bytes,3,opt,name=volume,proto3" json:"volume,omitempty"`
+	Volume *ClusterConfig_Spec_Volume `protobuf:"bytes,3,opt,name=volume,proto3" json:"volume,omitempty"`
+	// Agent is the Cluster-wide configuration of the Cordium AI agent.
+	Agent         *ClusterConfig_Spec_Agent `protobuf:"bytes,4,opt,name=agent,proto3" json:"agent,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ClusterConfig_Spec) Reset() {
 	*x = ClusterConfig_Spec{}
-	mi := &file_cordiumv1_proto_msgTypes[199]
+	mi := &file_cordiumv1_proto_msgTypes[200]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14697,7 +14759,7 @@ func (x *ClusterConfig_Spec) String() string {
 func (*ClusterConfig_Spec) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[199]
+	mi := &file_cordiumv1_proto_msgTypes[200]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14710,7 +14772,7 @@ func (x *ClusterConfig_Spec) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClusterConfig_Spec.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0}
 }
 
 func (x *ClusterConfig_Spec) GetSpace() *ClusterConfig_Spec_Space {
@@ -14734,6 +14796,13 @@ func (x *ClusterConfig_Spec) GetVolume() *ClusterConfig_Spec_Volume {
 	return nil
 }
 
+func (x *ClusterConfig_Spec) GetAgent() *ClusterConfig_Spec_Agent {
+	if x != nil {
+		return x.Agent
+	}
+	return nil
+}
+
 // Status is the current status of the ClusterConfig. It is intentionally
 // empty.
 type ClusterConfig_Status struct {
@@ -14744,7 +14813,7 @@ type ClusterConfig_Status struct {
 
 func (x *ClusterConfig_Status) Reset() {
 	*x = ClusterConfig_Status{}
-	mi := &file_cordiumv1_proto_msgTypes[200]
+	mi := &file_cordiumv1_proto_msgTypes[201]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14756,7 +14825,7 @@ func (x *ClusterConfig_Status) String() string {
 func (*ClusterConfig_Status) ProtoMessage() {}
 
 func (x *ClusterConfig_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[200]
+	mi := &file_cordiumv1_proto_msgTypes[201]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14769,7 +14838,7 @@ func (x *ClusterConfig_Status) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClusterConfig_Status.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Status) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 1}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 1}
 }
 
 // Space is the Cluster-wide Space-related configuration.
@@ -14784,7 +14853,7 @@ type ClusterConfig_Spec_Space struct {
 
 func (x *ClusterConfig_Spec_Space) Reset() {
 	*x = ClusterConfig_Spec_Space{}
-	mi := &file_cordiumv1_proto_msgTypes[201]
+	mi := &file_cordiumv1_proto_msgTypes[202]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14796,7 +14865,7 @@ func (x *ClusterConfig_Spec_Space) String() string {
 func (*ClusterConfig_Spec_Space) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec_Space) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[201]
+	mi := &file_cordiumv1_proto_msgTypes[202]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14809,7 +14878,7 @@ func (x *ClusterConfig_Spec_Space) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClusterConfig_Spec_Space.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec_Space) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 0}
 }
 
 func (x *ClusterConfig_Spec_Space) GetOwnership() *ClusterConfig_Spec_Space_Ownership {
@@ -14836,7 +14905,7 @@ type ClusterConfig_Spec_Workspace struct {
 
 func (x *ClusterConfig_Spec_Workspace) Reset() {
 	*x = ClusterConfig_Spec_Workspace{}
-	mi := &file_cordiumv1_proto_msgTypes[202]
+	mi := &file_cordiumv1_proto_msgTypes[203]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14848,7 +14917,7 @@ func (x *ClusterConfig_Spec_Workspace) String() string {
 func (*ClusterConfig_Spec_Workspace) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec_Workspace) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[202]
+	mi := &file_cordiumv1_proto_msgTypes[203]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14861,7 +14930,7 @@ func (x *ClusterConfig_Spec_Workspace) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClusterConfig_Spec_Workspace.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec_Workspace) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 1}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 1}
 }
 
 func (x *ClusterConfig_Spec_Workspace) GetStorage() *ClusterConfig_Spec_Workspace_Storage {
@@ -14905,7 +14974,7 @@ type ClusterConfig_Spec_Volume struct {
 
 func (x *ClusterConfig_Spec_Volume) Reset() {
 	*x = ClusterConfig_Spec_Volume{}
-	mi := &file_cordiumv1_proto_msgTypes[203]
+	mi := &file_cordiumv1_proto_msgTypes[204]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14917,7 +14986,7 @@ func (x *ClusterConfig_Spec_Volume) String() string {
 func (*ClusterConfig_Spec_Volume) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec_Volume) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[203]
+	mi := &file_cordiumv1_proto_msgTypes[204]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14930,7 +14999,7 @@ func (x *ClusterConfig_Spec_Volume) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClusterConfig_Spec_Volume.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec_Volume) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 2}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 2}
 }
 
 func (x *ClusterConfig_Spec_Volume) GetStorage() *ClusterConfig_Spec_Volume_Storage {
@@ -14943,6 +15012,107 @@ func (x *ClusterConfig_Spec_Volume) GetStorage() *ClusterConfig_Spec_Volume_Stor
 func (x *ClusterConfig_Spec_Volume) GetLimit() *ClusterConfig_Spec_Volume_Limit {
 	if x != nil {
 		return x.Limit
+	}
+	return nil
+}
+
+// Agent is the Cluster-wide configuration of the Cordium AI agent whose
+// Workspaces are provisioned via the InitializeAgent method.
+type ClusterConfig_Spec_Agent struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// IsDisabled disables the InitializeAgent method for all the Users.
+	// Note that the already existing agent Workspaces are not deleted.
+	IsDisabled bool `protobuf:"varint,1,opt,name=isDisabled,proto3" json:"isDisabled,omitempty"`
+	// LLM sets the default LLM of the agent. If unset, the Users can still
+	// sign in with their own LLM subscriptions from the web portal.
+	Llm *ClusterConfig_Spec_Agent_LLM `protobuf:"bytes,2,opt,name=llm,proto3" json:"llm,omitempty"`
+	// Version is the version or the npm dist-tag of the
+	// `@octelium/cordium-agent` npm package that is run by the agent
+	// Workspaces (e.g. `0.1.0`). If unset, the version that is bundled with
+	// the Cluster is used.
+	Version string `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
+	// Image sets the container image of the agent Workspaces. If unset, the
+	// default Cordium image is used and Node.js is installed upon the first
+	// start of every agent Workspace.
+	Image *Workspace_Spec_Image `protobuf:"bytes,4,opt,name=image,proto3" json:"image,omitempty"`
+	// Limit sets the compute resources of the agent Workspaces.
+	Limit *Workspace_Spec_Limit `protobuf:"bytes,5,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Config is an additional configuration of the agent (i.e. the same
+	// structure of its `config.json` file) that is merged on top of the
+	// configuration that is generated by the Cluster.
+	Config        *structpb.Struct `protobuf:"bytes,6,opt,name=config,proto3" json:"config,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClusterConfig_Spec_Agent) Reset() {
+	*x = ClusterConfig_Spec_Agent{}
+	mi := &file_cordiumv1_proto_msgTypes[205]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClusterConfig_Spec_Agent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClusterConfig_Spec_Agent) ProtoMessage() {}
+
+func (x *ClusterConfig_Spec_Agent) ProtoReflect() protoreflect.Message {
+	mi := &file_cordiumv1_proto_msgTypes[205]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClusterConfig_Spec_Agent.ProtoReflect.Descriptor instead.
+func (*ClusterConfig_Spec_Agent) Descriptor() ([]byte, []int) {
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 3}
+}
+
+func (x *ClusterConfig_Spec_Agent) GetIsDisabled() bool {
+	if x != nil {
+		return x.IsDisabled
+	}
+	return false
+}
+
+func (x *ClusterConfig_Spec_Agent) GetLlm() *ClusterConfig_Spec_Agent_LLM {
+	if x != nil {
+		return x.Llm
+	}
+	return nil
+}
+
+func (x *ClusterConfig_Spec_Agent) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
+func (x *ClusterConfig_Spec_Agent) GetImage() *Workspace_Spec_Image {
+	if x != nil {
+		return x.Image
+	}
+	return nil
+}
+
+func (x *ClusterConfig_Spec_Agent) GetLimit() *Workspace_Spec_Limit {
+	if x != nil {
+		return x.Limit
+	}
+	return nil
+}
+
+func (x *ClusterConfig_Spec_Agent) GetConfig() *structpb.Struct {
+	if x != nil {
+		return x.Config
 	}
 	return nil
 }
@@ -14961,7 +15131,7 @@ type ClusterConfig_Spec_Space_Ownership struct {
 
 func (x *ClusterConfig_Spec_Space_Ownership) Reset() {
 	*x = ClusterConfig_Spec_Space_Ownership{}
-	mi := &file_cordiumv1_proto_msgTypes[204]
+	mi := &file_cordiumv1_proto_msgTypes[206]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -14973,7 +15143,7 @@ func (x *ClusterConfig_Spec_Space_Ownership) String() string {
 func (*ClusterConfig_Spec_Space_Ownership) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec_Space_Ownership) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[204]
+	mi := &file_cordiumv1_proto_msgTypes[206]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -14986,7 +15156,7 @@ func (x *ClusterConfig_Spec_Space_Ownership) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ClusterConfig_Spec_Space_Ownership.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec_Space_Ownership) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 0, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 0, 0}
 }
 
 func (x *ClusterConfig_Spec_Space_Ownership) GetRules() []*ClusterConfig_Spec_Space_Ownership_Rule {
@@ -15012,7 +15182,7 @@ type ClusterConfig_Spec_Space_Ownership_Rule struct {
 
 func (x *ClusterConfig_Spec_Space_Ownership_Rule) Reset() {
 	*x = ClusterConfig_Spec_Space_Ownership_Rule{}
-	mi := &file_cordiumv1_proto_msgTypes[205]
+	mi := &file_cordiumv1_proto_msgTypes[207]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15024,7 +15194,7 @@ func (x *ClusterConfig_Spec_Space_Ownership_Rule) String() string {
 func (*ClusterConfig_Spec_Space_Ownership_Rule) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec_Space_Ownership_Rule) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[205]
+	mi := &file_cordiumv1_proto_msgTypes[207]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15037,7 +15207,7 @@ func (x *ClusterConfig_Spec_Space_Ownership_Rule) ProtoReflect() protoreflect.Me
 
 // Deprecated: Use ClusterConfig_Spec_Space_Ownership_Rule.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec_Space_Ownership_Rule) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 0, 0, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 0, 0, 0}
 }
 
 func (x *ClusterConfig_Spec_Space_Ownership_Rule) GetEffect() ClusterConfig_Spec_Space_Ownership_Rule_Effect {
@@ -15070,7 +15240,7 @@ type ClusterConfig_Spec_Workspace_Storage struct {
 
 func (x *ClusterConfig_Spec_Workspace_Storage) Reset() {
 	*x = ClusterConfig_Spec_Workspace_Storage{}
-	mi := &file_cordiumv1_proto_msgTypes[206]
+	mi := &file_cordiumv1_proto_msgTypes[208]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15082,7 +15252,7 @@ func (x *ClusterConfig_Spec_Workspace_Storage) String() string {
 func (*ClusterConfig_Spec_Workspace_Storage) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec_Workspace_Storage) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[206]
+	mi := &file_cordiumv1_proto_msgTypes[208]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15095,7 +15265,7 @@ func (x *ClusterConfig_Spec_Workspace_Storage) ProtoReflect() protoreflect.Messa
 
 // Deprecated: Use ClusterConfig_Spec_Workspace_Storage.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec_Workspace_Storage) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 1, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 1, 0}
 }
 
 func (x *ClusterConfig_Spec_Workspace_Storage) GetStorageClass() *ClusterConfig_Spec_Workspace_Storage_StorageClass {
@@ -15143,7 +15313,7 @@ type ClusterConfig_Spec_Workspace_Limit struct {
 
 func (x *ClusterConfig_Spec_Workspace_Limit) Reset() {
 	*x = ClusterConfig_Spec_Workspace_Limit{}
-	mi := &file_cordiumv1_proto_msgTypes[207]
+	mi := &file_cordiumv1_proto_msgTypes[209]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15155,7 +15325,7 @@ func (x *ClusterConfig_Spec_Workspace_Limit) String() string {
 func (*ClusterConfig_Spec_Workspace_Limit) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec_Workspace_Limit) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[207]
+	mi := &file_cordiumv1_proto_msgTypes[209]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15168,7 +15338,7 @@ func (x *ClusterConfig_Spec_Workspace_Limit) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ClusterConfig_Spec_Workspace_Limit.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec_Workspace_Limit) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 1, 1}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 1, 1}
 }
 
 func (x *ClusterConfig_Spec_Workspace_Limit) GetMaxPerUser() uint32 {
@@ -15245,7 +15415,7 @@ type ClusterConfig_Spec_Workspace_Timeout struct {
 
 func (x *ClusterConfig_Spec_Workspace_Timeout) Reset() {
 	*x = ClusterConfig_Spec_Workspace_Timeout{}
-	mi := &file_cordiumv1_proto_msgTypes[208]
+	mi := &file_cordiumv1_proto_msgTypes[210]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15257,7 +15427,7 @@ func (x *ClusterConfig_Spec_Workspace_Timeout) String() string {
 func (*ClusterConfig_Spec_Workspace_Timeout) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec_Workspace_Timeout) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[208]
+	mi := &file_cordiumv1_proto_msgTypes[210]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15270,7 +15440,7 @@ func (x *ClusterConfig_Spec_Workspace_Timeout) ProtoReflect() protoreflect.Messa
 
 // Deprecated: Use ClusterConfig_Spec_Workspace_Timeout.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec_Workspace_Timeout) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 1, 2}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 1, 2}
 }
 
 func (x *ClusterConfig_Spec_Workspace_Timeout) GetDefaultDuration() *metav1.Duration {
@@ -15320,7 +15490,7 @@ type ClusterConfig_Spec_Workspace_Runtime struct {
 
 func (x *ClusterConfig_Spec_Workspace_Runtime) Reset() {
 	*x = ClusterConfig_Spec_Workspace_Runtime{}
-	mi := &file_cordiumv1_proto_msgTypes[209]
+	mi := &file_cordiumv1_proto_msgTypes[211]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15332,7 +15502,7 @@ func (x *ClusterConfig_Spec_Workspace_Runtime) String() string {
 func (*ClusterConfig_Spec_Workspace_Runtime) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec_Workspace_Runtime) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[209]
+	mi := &file_cordiumv1_proto_msgTypes[211]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15345,7 +15515,7 @@ func (x *ClusterConfig_Spec_Workspace_Runtime) ProtoReflect() protoreflect.Messa
 
 // Deprecated: Use ClusterConfig_Spec_Workspace_Runtime.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec_Workspace_Runtime) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 1, 3}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 1, 3}
 }
 
 func (x *ClusterConfig_Spec_Workspace_Runtime) GetCapabilities() *Workspace_Spec_Runtime_Capabilities {
@@ -15368,7 +15538,7 @@ type ClusterConfig_Spec_Workspace_Storage_StorageClass struct {
 
 func (x *ClusterConfig_Spec_Workspace_Storage_StorageClass) Reset() {
 	*x = ClusterConfig_Spec_Workspace_Storage_StorageClass{}
-	mi := &file_cordiumv1_proto_msgTypes[210]
+	mi := &file_cordiumv1_proto_msgTypes[212]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15380,7 +15550,7 @@ func (x *ClusterConfig_Spec_Workspace_Storage_StorageClass) String() string {
 func (*ClusterConfig_Spec_Workspace_Storage_StorageClass) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec_Workspace_Storage_StorageClass) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[210]
+	mi := &file_cordiumv1_proto_msgTypes[212]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15393,7 +15563,7 @@ func (x *ClusterConfig_Spec_Workspace_Storage_StorageClass) ProtoReflect() proto
 
 // Deprecated: Use ClusterConfig_Spec_Workspace_Storage_StorageClass.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec_Workspace_Storage_StorageClass) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 1, 0, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 1, 0, 0}
 }
 
 func (x *ClusterConfig_Spec_Workspace_Storage_StorageClass) GetRules() []*ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule {
@@ -15417,7 +15587,7 @@ type ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass struct {
 
 func (x *ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass) Reset() {
 	*x = ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass{}
-	mi := &file_cordiumv1_proto_msgTypes[211]
+	mi := &file_cordiumv1_proto_msgTypes[213]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15429,7 +15599,7 @@ func (x *ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass) String() stri
 func (*ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[211]
+	mi := &file_cordiumv1_proto_msgTypes[213]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15442,7 +15612,7 @@ func (x *ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass) ProtoReflect(
 
 // Deprecated: Use ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 1, 0, 1}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 1, 0, 1}
 }
 
 func (x *ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass) GetRules() []*ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule {
@@ -15467,7 +15637,7 @@ type ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule struct {
 
 func (x *ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule) Reset() {
 	*x = ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule{}
-	mi := &file_cordiumv1_proto_msgTypes[212]
+	mi := &file_cordiumv1_proto_msgTypes[214]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15479,7 +15649,7 @@ func (x *ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule) String() string
 func (*ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[212]
+	mi := &file_cordiumv1_proto_msgTypes[214]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15492,7 +15662,7 @@ func (x *ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule) ProtoReflect() 
 
 // Deprecated: Use ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 1, 0, 0, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 1, 0, 0, 0}
 }
 
 func (x *ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule) GetCondition() *Condition {
@@ -15525,7 +15695,7 @@ type ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule struct {
 
 func (x *ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule) Reset() {
 	*x = ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule{}
-	mi := &file_cordiumv1_proto_msgTypes[213]
+	mi := &file_cordiumv1_proto_msgTypes[215]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15537,7 +15707,7 @@ func (x *ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule) String()
 func (*ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[213]
+	mi := &file_cordiumv1_proto_msgTypes[215]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15550,7 +15720,7 @@ func (x *ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule) ProtoRef
 
 // Deprecated: Use ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 1, 0, 1, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 1, 0, 1, 0}
 }
 
 func (x *ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule) GetCondition() *Condition {
@@ -15580,7 +15750,7 @@ type ClusterConfig_Spec_Volume_Storage struct {
 
 func (x *ClusterConfig_Spec_Volume_Storage) Reset() {
 	*x = ClusterConfig_Spec_Volume_Storage{}
-	mi := &file_cordiumv1_proto_msgTypes[214]
+	mi := &file_cordiumv1_proto_msgTypes[216]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15592,7 +15762,7 @@ func (x *ClusterConfig_Spec_Volume_Storage) String() string {
 func (*ClusterConfig_Spec_Volume_Storage) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec_Volume_Storage) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[214]
+	mi := &file_cordiumv1_proto_msgTypes[216]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15605,7 +15775,7 @@ func (x *ClusterConfig_Spec_Volume_Storage) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ClusterConfig_Spec_Volume_Storage.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec_Volume_Storage) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 2, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 2, 0}
 }
 
 func (x *ClusterConfig_Spec_Volume_Storage) GetStorageClass() *ClusterConfig_Spec_Volume_Storage_StorageClass {
@@ -15637,7 +15807,7 @@ type ClusterConfig_Spec_Volume_Limit struct {
 
 func (x *ClusterConfig_Spec_Volume_Limit) Reset() {
 	*x = ClusterConfig_Spec_Volume_Limit{}
-	mi := &file_cordiumv1_proto_msgTypes[215]
+	mi := &file_cordiumv1_proto_msgTypes[217]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15649,7 +15819,7 @@ func (x *ClusterConfig_Spec_Volume_Limit) String() string {
 func (*ClusterConfig_Spec_Volume_Limit) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec_Volume_Limit) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[215]
+	mi := &file_cordiumv1_proto_msgTypes[217]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15662,7 +15832,7 @@ func (x *ClusterConfig_Spec_Volume_Limit) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClusterConfig_Spec_Volume_Limit.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec_Volume_Limit) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 2, 1}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 2, 1}
 }
 
 func (x *ClusterConfig_Spec_Volume_Limit) GetMaxPerSpace() uint32 {
@@ -15709,7 +15879,7 @@ type ClusterConfig_Spec_Volume_Storage_StorageClass struct {
 
 func (x *ClusterConfig_Spec_Volume_Storage_StorageClass) Reset() {
 	*x = ClusterConfig_Spec_Volume_Storage_StorageClass{}
-	mi := &file_cordiumv1_proto_msgTypes[216]
+	mi := &file_cordiumv1_proto_msgTypes[218]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15721,7 +15891,7 @@ func (x *ClusterConfig_Spec_Volume_Storage_StorageClass) String() string {
 func (*ClusterConfig_Spec_Volume_Storage_StorageClass) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec_Volume_Storage_StorageClass) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[216]
+	mi := &file_cordiumv1_proto_msgTypes[218]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15734,7 +15904,7 @@ func (x *ClusterConfig_Spec_Volume_Storage_StorageClass) ProtoReflect() protoref
 
 // Deprecated: Use ClusterConfig_Spec_Volume_Storage_StorageClass.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec_Volume_Storage_StorageClass) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 2, 0, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 2, 0, 0}
 }
 
 func (x *ClusterConfig_Spec_Volume_Storage_StorageClass) GetRules() []*ClusterConfig_Spec_Volume_Storage_StorageClass_Rule {
@@ -15760,7 +15930,7 @@ type ClusterConfig_Spec_Volume_Storage_StorageClass_Rule struct {
 
 func (x *ClusterConfig_Spec_Volume_Storage_StorageClass_Rule) Reset() {
 	*x = ClusterConfig_Spec_Volume_Storage_StorageClass_Rule{}
-	mi := &file_cordiumv1_proto_msgTypes[217]
+	mi := &file_cordiumv1_proto_msgTypes[219]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15772,7 +15942,7 @@ func (x *ClusterConfig_Spec_Volume_Storage_StorageClass_Rule) String() string {
 func (*ClusterConfig_Spec_Volume_Storage_StorageClass_Rule) ProtoMessage() {}
 
 func (x *ClusterConfig_Spec_Volume_Storage_StorageClass_Rule) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[217]
+	mi := &file_cordiumv1_proto_msgTypes[219]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15785,7 +15955,7 @@ func (x *ClusterConfig_Spec_Volume_Storage_StorageClass_Rule) ProtoReflect() pro
 
 // Deprecated: Use ClusterConfig_Spec_Volume_Storage_StorageClass_Rule.ProtoReflect.Descriptor instead.
 func (*ClusterConfig_Spec_Volume_Storage_StorageClass_Rule) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{67, 0, 2, 0, 0, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 2, 0, 0, 0}
 }
 
 func (x *ClusterConfig_Spec_Volume_Storage_StorageClass_Rule) GetCondition() *Condition {
@@ -15802,6 +15972,64 @@ func (x *ClusterConfig_Spec_Volume_Storage_StorageClass_Rule) GetStorageClass() 
 	return ""
 }
 
+// LLM sets the default LLM of the agent
+type ClusterConfig_Spec_Agent_LLM struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Service is the name of the LLM-mode Octelium Service (e.g.
+	// `llm.default`) that is used by the agent via the Octelium identity
+	// of its Workspace.
+	Service string `protobuf:"bytes,1,opt,name=service,proto3" json:"service,omitempty"`
+	// Model is the name of the model that is used by default (e.g.
+	// `gpt-5.1`). If unset, the agent discovers it from the Service.
+	Model         string `protobuf:"bytes,2,opt,name=model,proto3" json:"model,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClusterConfig_Spec_Agent_LLM) Reset() {
+	*x = ClusterConfig_Spec_Agent_LLM{}
+	mi := &file_cordiumv1_proto_msgTypes[220]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClusterConfig_Spec_Agent_LLM) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClusterConfig_Spec_Agent_LLM) ProtoMessage() {}
+
+func (x *ClusterConfig_Spec_Agent_LLM) ProtoReflect() protoreflect.Message {
+	mi := &file_cordiumv1_proto_msgTypes[220]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClusterConfig_Spec_Agent_LLM.ProtoReflect.Descriptor instead.
+func (*ClusterConfig_Spec_Agent_LLM) Descriptor() ([]byte, []int) {
+	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0, 3, 0}
+}
+
+func (x *ClusterConfig_Spec_Agent_LLM) GetService() string {
+	if x != nil {
+		return x.Service
+	}
+	return ""
+}
+
+func (x *ClusterConfig_Spec_Agent_LLM) GetModel() string {
+	if x != nil {
+		return x.Model
+	}
+	return ""
+}
+
 // All acts as a logical AND operator on its list of Conditions.
 type Condition_All struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -15813,7 +16041,7 @@ type Condition_All struct {
 
 func (x *Condition_All) Reset() {
 	*x = Condition_All{}
-	mi := &file_cordiumv1_proto_msgTypes[218]
+	mi := &file_cordiumv1_proto_msgTypes[221]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15825,7 +16053,7 @@ func (x *Condition_All) String() string {
 func (*Condition_All) ProtoMessage() {}
 
 func (x *Condition_All) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[218]
+	mi := &file_cordiumv1_proto_msgTypes[221]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15838,7 +16066,7 @@ func (x *Condition_All) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Condition_All.ProtoReflect.Descriptor instead.
 func (*Condition_All) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 0}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{69, 0}
 }
 
 func (x *Condition_All) GetOf() []*Condition {
@@ -15859,7 +16087,7 @@ type Condition_Any struct {
 
 func (x *Condition_Any) Reset() {
 	*x = Condition_Any{}
-	mi := &file_cordiumv1_proto_msgTypes[219]
+	mi := &file_cordiumv1_proto_msgTypes[222]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15871,7 +16099,7 @@ func (x *Condition_Any) String() string {
 func (*Condition_Any) ProtoMessage() {}
 
 func (x *Condition_Any) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[219]
+	mi := &file_cordiumv1_proto_msgTypes[222]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15884,7 +16112,7 @@ func (x *Condition_Any) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Condition_Any.ProtoReflect.Descriptor instead.
 func (*Condition_Any) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 1}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{69, 1}
 }
 
 func (x *Condition_Any) GetOf() []*Condition {
@@ -15905,7 +16133,7 @@ type Condition_None struct {
 
 func (x *Condition_None) Reset() {
 	*x = Condition_None{}
-	mi := &file_cordiumv1_proto_msgTypes[220]
+	mi := &file_cordiumv1_proto_msgTypes[223]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15917,7 +16145,7 @@ func (x *Condition_None) String() string {
 func (*Condition_None) ProtoMessage() {}
 
 func (x *Condition_None) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[220]
+	mi := &file_cordiumv1_proto_msgTypes[223]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15930,7 +16158,7 @@ func (x *Condition_None) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Condition_None.ProtoReflect.Descriptor instead.
 func (*Condition_None) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 2}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{69, 2}
 }
 
 func (x *Condition_None) GetOf() []*Condition {
@@ -15955,7 +16183,7 @@ type Condition_OPA struct {
 
 func (x *Condition_OPA) Reset() {
 	*x = Condition_OPA{}
-	mi := &file_cordiumv1_proto_msgTypes[221]
+	mi := &file_cordiumv1_proto_msgTypes[224]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -15967,7 +16195,7 @@ func (x *Condition_OPA) String() string {
 func (*Condition_OPA) ProtoMessage() {}
 
 func (x *Condition_OPA) ProtoReflect() protoreflect.Message {
-	mi := &file_cordiumv1_proto_msgTypes[221]
+	mi := &file_cordiumv1_proto_msgTypes[224]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -15980,7 +16208,7 @@ func (x *Condition_OPA) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Condition_OPA.ProtoReflect.Descriptor instead.
 func (*Condition_OPA) Descriptor() ([]byte, []int) {
-	return file_cordiumv1_proto_rawDescGZIP(), []int{68, 3}
+	return file_cordiumv1_proto_rawDescGZIP(), []int{69, 3}
 }
 
 func (x *Condition_OPA) GetType() isCondition_OPA_Type {
@@ -17773,7 +18001,7 @@ var file_cordiumv1_proto_rawDesc = []byte{
 	0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65,
 	0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x66, 0x65,
 	0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x08, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x22,
-	0xbf, 0x0a, 0x0a, 0x0a, 0x55, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x1e,
+	0x99, 0x0b, 0x0a, 0x0a, 0x55, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x1e,
 	0x0a, 0x0a, 0x61, 0x70, 0x69, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01,
 	0x28, 0x09, 0x52, 0x0a, 0x61, 0x70, 0x69, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x12,
 	0x0a, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6b, 0x69,
@@ -17846,7 +18074,7 @@ var file_cordiumv1_proto_rawDesc = []byte{
 	0x75, 0x65, 0x12, 0x28, 0x0a, 0x0e, 0x66, 0x72, 0x6f, 0x6d, 0x55, 0x73, 0x65, 0x72, 0x53, 0x65,
 	0x63, 0x72, 0x65, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52, 0x0e, 0x66, 0x72,
 	0x6f, 0x6d, 0x55, 0x73, 0x65, 0x72, 0x53, 0x65, 0x63, 0x72, 0x65, 0x74, 0x42, 0x06, 0x0a, 0x04,
-	0x74, 0x79, 0x70, 0x65, 0x1a, 0xaa, 0x01, 0x0a, 0x06, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12,
+	0x74, 0x79, 0x70, 0x65, 0x1a, 0x84, 0x02, 0x0a, 0x06, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12,
 	0x44, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x52, 0x65, 0x66, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
 	0x32, 0x2a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e,
 	0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62, 0x6a,
@@ -17857,548 +18085,590 @@ var file_cordiumv1_proto_rawDesc = []byte{
 	0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62,
 	0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x12, 0x70,
 	0x72, 0x65, 0x66, 0x65, 0x72, 0x72, 0x65, 0x64, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x52, 0x65,
-	0x66, 0x22, 0x16, 0x0a, 0x14, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66,
-	0x69, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x90, 0x02, 0x0a, 0x19, 0x53, 0x68,
-	0x61, 0x72, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x50, 0x6f, 0x72, 0x74,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4e, 0x0a, 0x0c, 0x77, 0x6f, 0x72, 0x6b, 0x73,
-	0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2a, 0x2e,
-	0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69,
-	0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74,
-	0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x0c, 0x77, 0x6f, 0x72, 0x6b, 0x73,
-	0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x12, 0x50, 0x0a, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x3c, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d,
-	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75,
-	0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x68, 0x61, 0x72, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70,
-	0x61, 0x63, 0x65, 0x50, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x4d,
-	0x6f, 0x64, 0x65, 0x52, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x12, 0x28, 0x0a, 0x0f, 0x61, 0x70, 0x70,
-	0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x0f, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4e,
-	0x61, 0x6d, 0x65, 0x22, 0x27, 0x0a, 0x04, 0x4d, 0x6f, 0x64, 0x65, 0x12, 0x09, 0x0a, 0x05, 0x55,
-	0x4e, 0x53, 0x45, 0x54, 0x10, 0x00, 0x12, 0x0b, 0x0a, 0x07, 0x4d, 0x45, 0x4d, 0x42, 0x45, 0x52,
-	0x53, 0x10, 0x01, 0x12, 0x07, 0x0a, 0x03, 0x41, 0x4c, 0x4c, 0x10, 0x02, 0x22, 0x1c, 0x0a, 0x1a,
-	0x53, 0x68, 0x61, 0x72, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x50, 0x6f,
-	0x72, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x97, 0x01, 0x0a, 0x1b, 0x55,
-	0x6e, 0x73, 0x68, 0x61, 0x72, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x50,
-	0x6f, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4e, 0x0a, 0x0c, 0x77, 0x6f,
-	0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x2a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e,
-	0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62, 0x6a,
-	0x65, 0x63, 0x74, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x0c, 0x77, 0x6f,
-	0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x12, 0x28, 0x0a, 0x0f, 0x61, 0x70,
-	0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x0f, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e,
-	0x4e, 0x61, 0x6d, 0x65, 0x22, 0x1e, 0x0a, 0x1c, 0x55, 0x6e, 0x73, 0x68, 0x61, 0x72, 0x65, 0x57,
-	0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x50, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x5b, 0x0a, 0x11, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x53, 0x70, 0x61,
-	0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x46, 0x0a, 0x08, 0x73, 0x70, 0x61,
-	0x63, 0x65, 0x52, 0x65, 0x66, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2a, 0x2e, 0x6f, 0x63,
-	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
-	0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65,
-	0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x08, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65,
-	0x66, 0x22, 0x14, 0x0a, 0x12, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x53, 0x70, 0x61, 0x63, 0x65, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xc1, 0x02, 0x0a, 0x06, 0x52, 0x65, 0x67, 0x69,
-	0x6f, 0x6e, 0x12, 0x1e, 0x0a, 0x0a, 0x61, 0x70, 0x69, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x61, 0x70, 0x69, 0x56, 0x65, 0x72, 0x73, 0x69,
-	0x6f, 0x6e, 0x12, 0x12, 0x0a, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x12, 0x3f, 0x0a, 0x08, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61,
-	0x74, 0x61, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
-	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74,
-	0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x52, 0x08, 0x6d,
-	0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x12, 0x3d, 0x0a, 0x04, 0x73, 0x70, 0x65, 0x63, 0x18,
-	0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x29, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d,
-	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75,
-	0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x2e, 0x53, 0x70, 0x65, 0x63,
-	0x52, 0x04, 0x73, 0x70, 0x65, 0x63, 0x12, 0x43, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73,
-	0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2b, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
-	0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69,
-	0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x2e, 0x53, 0x74, 0x61,
-	0x74, 0x75, 0x73, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x1a, 0x06, 0x0a, 0x04, 0x53,
-	0x70, 0x65, 0x63, 0x1a, 0x36, 0x0a, 0x06, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x18, 0x0a,
-	0x07, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x72, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07,
-	0x63, 0x6f, 0x75, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x12, 0x0a, 0x04, 0x63, 0x69, 0x74, 0x79, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x63, 0x69, 0x74, 0x79, 0x22, 0xd5, 0x01, 0x0a, 0x0a,
-	0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x1e, 0x0a, 0x0a, 0x61, 0x70,
-	0x69, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a,
-	0x61, 0x70, 0x69, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x12, 0x0a, 0x04, 0x6b, 0x69,
-	0x6e, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x12, 0x3a,
-	0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x24, 0x2e,
-	0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69,
-	0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x67,
-	0x69, 0x6f, 0x6e, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x12, 0x57, 0x0a, 0x10, 0x6c, 0x69,
-	0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x4d, 0x65, 0x74, 0x61, 0x18, 0x04,
-	0x20, 0x01, 0x28, 0x0b, 0x32, 0x2b, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e,
-	0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31,
-	0x2e, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x4d, 0x65, 0x74,
-	0x61, 0x52, 0x10, 0x6c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x4d,
-	0x65, 0x74, 0x61, 0x22, 0x59, 0x0a, 0x11, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x6f,
-	0x6e, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x44, 0x0a, 0x06, 0x63, 0x6f, 0x6d, 0x6d,
-	0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2c, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
-	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74,
-	0x61, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x4c, 0x69, 0x73, 0x74, 0x4f,
-	0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x06, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x22, 0x8f,
-	0x01, 0x0a, 0x15, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61,
-	0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4e, 0x0a, 0x0c, 0x77, 0x6f, 0x72, 0x6b,
-	0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2a,
-	0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61,
-	0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62, 0x6a, 0x65, 0x63,
-	0x74, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x0c, 0x77, 0x6f, 0x72, 0x6b,
-	0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x12, 0x12, 0x0a, 0x04, 0x63, 0x6f, 0x6c, 0x73,
-	0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x04, 0x63, 0x6f, 0x6c, 0x73, 0x12, 0x12, 0x0a, 0x04,
-	0x72, 0x6f, 0x77, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x04, 0x72, 0x6f, 0x77, 0x73,
-	0x22, 0x1a, 0x0a, 0x08, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x12, 0x0e, 0x0a, 0x02,
-	0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x22, 0x28, 0x0a, 0x16,
-	0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x22, 0x27, 0x0a, 0x15, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65,
-	0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
-	0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x22,
-	0x18, 0x0a, 0x16, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61,
-	0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x65, 0x0a, 0x13, 0x4c, 0x69, 0x73,
-	0x74, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x12, 0x4e, 0x0a, 0x0c, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
-	0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e,
-	0x76, 0x31, 0x2e, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e,
-	0x63, 0x65, 0x52, 0x0c, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66,
-	0x22, 0x54, 0x0a, 0x14, 0x4c, 0x69, 0x73, 0x74, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3c, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d,
-	0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x26, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69,
-	0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64,
-	0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52,
-	0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x22, 0x1b, 0x0a, 0x19, 0x57, 0x72, 0x69, 0x74, 0x65, 0x54,
-	0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x44, 0x61, 0x74, 0x61, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x22, 0x56, 0x0a, 0x1c, 0x53, 0x65, 0x74, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e,
-	0x61, 0x6c, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x53, 0x69, 0x7a, 0x65, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x63, 0x6f, 0x6c, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28,
-	0x0d, 0x52, 0x04, 0x63, 0x6f, 0x6c, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x72, 0x6f, 0x77, 0x73, 0x18,
-	0x03, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x04, 0x72, 0x6f, 0x77, 0x73, 0x22, 0x1f, 0x0a, 0x1d, 0x53,
-	0x65, 0x74, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77,
-	0x53, 0x69, 0x7a, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x3e, 0x0a, 0x18,
-	0x57, 0x72, 0x69, 0x74, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x44, 0x61, 0x74,
-	0x61, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61,
-	0x18, 0x02, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x22, 0x27, 0x0a, 0x15,
-	0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x02, 0x69, 0x64, 0x22, 0x8b, 0x03, 0x0a, 0x16, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e,
-	0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x12, 0x55, 0x0a, 0x06, 0x73, 0x74, 0x64, 0x6f, 0x75, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x3b, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e,
-	0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e,
-	0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x53, 0x74, 0x64, 0x6f, 0x75, 0x74, 0x48, 0x00, 0x52,
-	0x06, 0x73, 0x74, 0x64, 0x6f, 0x75, 0x74, 0x12, 0x61, 0x0a, 0x0a, 0x77, 0x69, 0x6e, 0x64, 0x6f,
-	0x77, 0x53, 0x69, 0x7a, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x3f, 0x2e, 0x6f, 0x63,
-	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
-	0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x65,
-	0x6e, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x2e, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x53, 0x69, 0x7a, 0x65, 0x48, 0x00, 0x52, 0x0a,
-	0x77, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x53, 0x69, 0x7a, 0x65, 0x12, 0x52, 0x0a, 0x05, 0x63, 0x6c,
-	0x6f, 0x73, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x3a, 0x2e, 0x6f, 0x63, 0x74, 0x65,
+	0x66, 0x12, 0x58, 0x0a, 0x11, 0x61, 0x67, 0x65, 0x6e, 0x74, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70,
+	0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2a, 0x2e, 0x6f,
+	0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e,
+	0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x52,
+	0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x11, 0x61, 0x67, 0x65, 0x6e, 0x74, 0x57,
+	0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x22, 0x16, 0x0a, 0x14, 0x47,
+	0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x22, 0x68, 0x0a, 0x16, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a,
+	0x65, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4e, 0x0a,
+	0x0c, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x2a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e,
+	0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52,
+	0x0c, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x22, 0x90, 0x02,
+	0x0a, 0x19, 0x53, 0x68, 0x61, 0x72, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65,
+	0x50, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4e, 0x0a, 0x0c, 0x77,
+	0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x2a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69,
+	0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62,
+	0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x0c, 0x77,
+	0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x12, 0x50, 0x0a, 0x04, 0x6d,
+	0x6f, 0x64, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x3c, 0x2e, 0x6f, 0x63, 0x74, 0x65,
 	0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f,
-	0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x54,
-	0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e,
-	0x43, 0x6c, 0x6f, 0x73, 0x65, 0x48, 0x00, 0x52, 0x05, 0x63, 0x6c, 0x6f, 0x73, 0x65, 0x1a, 0x1c,
-	0x0a, 0x06, 0x53, 0x74, 0x64, 0x6f, 0x75, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x1a, 0x34, 0x0a, 0x0a,
-	0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x53, 0x69, 0x7a, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x63, 0x6f,
-	0x6c, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x04, 0x63, 0x6f, 0x6c, 0x73, 0x12, 0x12,
-	0x0a, 0x04, 0x72, 0x6f, 0x77, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x04, 0x72, 0x6f,
-	0x77, 0x73, 0x1a, 0x07, 0x0a, 0x05, 0x43, 0x6c, 0x6f, 0x73, 0x65, 0x42, 0x06, 0x0a, 0x04, 0x74,
-	0x79, 0x70, 0x65, 0x22, 0x62, 0x0a, 0x10, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x4c, 0x6f, 0x67,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4e, 0x0a, 0x0c, 0x77, 0x6f, 0x72, 0x6b, 0x73,
-	0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2a, 0x2e,
-	0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69,
-	0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74,
-	0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x0c, 0x77, 0x6f, 0x72, 0x6b, 0x73,
-	0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x22, 0xa2, 0x03, 0x0a, 0x11, 0x4c, 0x69, 0x73, 0x74,
-	0x65, 0x6e, 0x4c, 0x6f, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x38, 0x0a,
-	0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
-	0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x52, 0x09, 0x63, 0x72,
-	0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x48, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x34, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d,
-	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75,
-	0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x4c, 0x6f, 0x67, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x54, 0x79, 0x70, 0x65, 0x52, 0x04, 0x74, 0x79, 0x70,
-	0x65, 0x12, 0x48, 0x0a, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0e, 0x32,
-	0x34, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d,
-	0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x4c,
-	0x69, 0x73, 0x74, 0x65, 0x6e, 0x4c, 0x6f, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x2e, 0x4d, 0x6f, 0x64, 0x65, 0x52, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x64,
-	0x61, 0x74, 0x61, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x22,
-	0x3a, 0x0a, 0x04, 0x4d, 0x6f, 0x64, 0x65, 0x12, 0x10, 0x0a, 0x0c, 0x4d, 0x4f, 0x44, 0x45, 0x5f,
-	0x55, 0x4e, 0x4b, 0x4e, 0x4f, 0x57, 0x4e, 0x10, 0x00, 0x12, 0x0f, 0x0a, 0x0b, 0x4d, 0x4f, 0x44,
-	0x45, 0x5f, 0x53, 0x54, 0x44, 0x4f, 0x55, 0x54, 0x10, 0x01, 0x12, 0x0f, 0x0a, 0x0b, 0x4d, 0x4f,
-	0x44, 0x45, 0x5f, 0x53, 0x54, 0x44, 0x45, 0x52, 0x52, 0x10, 0x02, 0x22, 0x6f, 0x0a, 0x04, 0x54,
-	0x79, 0x70, 0x65, 0x12, 0x10, 0x0a, 0x0c, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x55, 0x4e, 0x4b, 0x4e,
-	0x4f, 0x57, 0x4e, 0x10, 0x00, 0x12, 0x15, 0x0a, 0x11, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x43, 0x4c,
-	0x4f, 0x4e, 0x49, 0x4e, 0x47, 0x5f, 0x52, 0x45, 0x50, 0x4f, 0x10, 0x01, 0x12, 0x16, 0x0a, 0x12,
-	0x54, 0x59, 0x50, 0x45, 0x5f, 0x50, 0x55, 0x4c, 0x4c, 0x49, 0x4e, 0x47, 0x5f, 0x49, 0x4d, 0x41,
-	0x47, 0x45, 0x10, 0x02, 0x12, 0x17, 0x0a, 0x13, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x42, 0x55, 0x49,
-	0x4c, 0x44, 0x49, 0x4e, 0x47, 0x5f, 0x49, 0x4d, 0x41, 0x47, 0x45, 0x10, 0x03, 0x12, 0x0d, 0x0a,
-	0x09, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x54, 0x41, 0x53, 0x4b, 0x10, 0x04, 0x22, 0x67, 0x0a, 0x15,
-	0x57, 0x61, 0x74, 0x63, 0x68, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4e, 0x0a, 0x0c, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61,
-	0x63, 0x65, 0x52, 0x65, 0x66, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2a, 0x2e, 0x6f, 0x63,
-	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
-	0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65,
-	0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x0c, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61,
-	0x63, 0x65, 0x52, 0x65, 0x66, 0x22, 0xc4, 0x04, 0x0a, 0x16, 0x57, 0x61, 0x74, 0x63, 0x68, 0x57,
-	0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x12, 0x55, 0x0a, 0x06, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x3b, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e,
-	0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e,
-	0x57, 0x61, 0x74, 0x63, 0x68, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x48, 0x00, 0x52,
-	0x06, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x12, 0x55, 0x0a, 0x06, 0x75, 0x70, 0x64, 0x61, 0x74,
-	0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x3b, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69,
-	0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64,
-	0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x61, 0x74, 0x63, 0x68, 0x57, 0x6f, 0x72, 0x6b,
-	0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x55, 0x70,
-	0x64, 0x61, 0x74, 0x65, 0x48, 0x00, 0x52, 0x06, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x12, 0x55,
-	0x0a, 0x06, 0x64, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x3b,
-	0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61,
-	0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x61,
-	0x74, 0x63, 0x68, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x48, 0x00, 0x52, 0x06, 0x64,
-	0x65, 0x6c, 0x65, 0x74, 0x65, 0x1a, 0x45, 0x0a, 0x06, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x12,
-	0x3b, 0x0a, 0x04, 0x69, 0x74, 0x65, 0x6d, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e,
-	0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69,
-	0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72,
-	0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x04, 0x69, 0x74, 0x65, 0x6d, 0x1a, 0x8e, 0x01, 0x0a,
-	0x06, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x12, 0x41, 0x0a, 0x07, 0x6e, 0x65, 0x77, 0x49, 0x74,
-	0x65, 0x6d, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
-	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72,
-	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63,
-	0x65, 0x52, 0x07, 0x6e, 0x65, 0x77, 0x49, 0x74, 0x65, 0x6d, 0x12, 0x41, 0x0a, 0x07, 0x6f, 0x6c,
-	0x64, 0x49, 0x74, 0x65, 0x6d, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e, 0x6f, 0x63,
-	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
-	0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73,
-	0x70, 0x61, 0x63, 0x65, 0x52, 0x07, 0x6f, 0x6c, 0x64, 0x49, 0x74, 0x65, 0x6d, 0x1a, 0x45, 0x0a,
-	0x06, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x12, 0x3b, 0x0a, 0x04, 0x69, 0x74, 0x65, 0x6d, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d,
-	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75,
-	0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x04,
-	0x69, 0x74, 0x65, 0x6d, 0x42, 0x06, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x22, 0x6a, 0x0a, 0x1a,
-	0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x54, 0x65, 0x6d, 0x70, 0x6c,
-	0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4c, 0x0a, 0x0b, 0x74, 0x65,
-	0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x52, 0x65, 0x66, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
-	0x2a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d,
-	0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62, 0x6a, 0x65,
-	0x63, 0x74, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x0b, 0x74, 0x65, 0x6d,
-	0x70, 0x6c, 0x61, 0x74, 0x65, 0x52, 0x65, 0x66, 0x22, 0xfe, 0x04, 0x0a, 0x0b, 0x45, 0x78, 0x65,
-	0x63, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4d, 0x0a, 0x07, 0x72, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x31, 0x2e, 0x6f, 0x63, 0x74, 0x65,
-	0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f,
-	0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x65, 0x63, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x2e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x48, 0x00, 0x52, 0x07,
-	0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x53, 0x0a, 0x09, 0x77, 0x72, 0x69, 0x74, 0x65,
-	0x44, 0x61, 0x74, 0x61, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x33, 0x2e, 0x6f, 0x63, 0x74,
-	0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63,
-	0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x65, 0x63, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x57, 0x72, 0x69, 0x74, 0x65, 0x44, 0x61, 0x74, 0x61, 0x48,
-	0x00, 0x52, 0x09, 0x77, 0x72, 0x69, 0x74, 0x65, 0x44, 0x61, 0x74, 0x61, 0x12, 0x44, 0x0a, 0x04,
-	0x6b, 0x69, 0x6c, 0x6c, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2e, 0x2e, 0x6f, 0x63, 0x74,
-	0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63,
-	0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x65, 0x63, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x4b, 0x69, 0x6c, 0x6c, 0x48, 0x00, 0x52, 0x04, 0x6b, 0x69,
-	0x6c, 0x6c, 0x1a, 0xd3, 0x02, 0x0a, 0x07, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4e,
+	0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x68, 0x61, 0x72, 0x65, 0x57, 0x6f,
+	0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x50, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x2e, 0x4d, 0x6f, 0x64, 0x65, 0x52, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x12, 0x28, 0x0a,
+	0x0f, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4e, 0x61, 0x6d, 0x65,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0f, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x4e, 0x61, 0x6d, 0x65, 0x22, 0x27, 0x0a, 0x04, 0x4d, 0x6f, 0x64, 0x65, 0x12,
+	0x09, 0x0a, 0x05, 0x55, 0x4e, 0x53, 0x45, 0x54, 0x10, 0x00, 0x12, 0x0b, 0x0a, 0x07, 0x4d, 0x45,
+	0x4d, 0x42, 0x45, 0x52, 0x53, 0x10, 0x01, 0x12, 0x07, 0x0a, 0x03, 0x41, 0x4c, 0x4c, 0x10, 0x02,
+	0x22, 0x1c, 0x0a, 0x1a, 0x53, 0x68, 0x61, 0x72, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61,
+	0x63, 0x65, 0x50, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x97,
+	0x01, 0x0a, 0x1b, 0x55, 0x6e, 0x73, 0x68, 0x61, 0x72, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70,
+	0x61, 0x63, 0x65, 0x50, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4e,
 	0x0a, 0x0c, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x18, 0x01,
 	0x20, 0x01, 0x28, 0x0b, 0x32, 0x2a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e,
 	0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31,
 	0x2e, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65,
-	0x52, 0x0c, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x12, 0x18,
-	0x0a, 0x07, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x07, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12, 0x1e, 0x0a, 0x0a, 0x77, 0x6f, 0x72, 0x6b,
-	0x69, 0x6e, 0x67, 0x44, 0x69, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x77, 0x6f,
-	0x72, 0x6b, 0x69, 0x6e, 0x67, 0x44, 0x69, 0x72, 0x12, 0x52, 0x0a, 0x07, 0x65, 0x6e, 0x76, 0x56,
-	0x61, 0x72, 0x73, 0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x38, 0x2e, 0x6f, 0x63, 0x74, 0x65,
+	0x52, 0x0c, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x12, 0x28,
+	0x0a, 0x0f, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x4e, 0x61, 0x6d,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0f, 0x61, 0x70, 0x70, 0x6c, 0x69, 0x63, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x4e, 0x61, 0x6d, 0x65, 0x22, 0x1e, 0x0a, 0x1c, 0x55, 0x6e, 0x73, 0x68,
+	0x61, 0x72, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x50, 0x6f, 0x72, 0x74,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x5b, 0x0a, 0x11, 0x4c, 0x65, 0x61, 0x76,
+	0x65, 0x53, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x46, 0x0a,
+	0x08, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x2a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d,
+	0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62, 0x6a, 0x65,
+	0x63, 0x74, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x08, 0x73, 0x70, 0x61,
+	0x63, 0x65, 0x52, 0x65, 0x66, 0x22, 0x14, 0x0a, 0x12, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x53, 0x70,
+	0x61, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xc1, 0x02, 0x0a, 0x06,
+	0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x12, 0x1e, 0x0a, 0x0a, 0x61, 0x70, 0x69, 0x56, 0x65, 0x72,
+	0x73, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x61, 0x70, 0x69, 0x56,
+	0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x12, 0x0a, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x12, 0x3f, 0x0a, 0x08, 0x6d, 0x65,
+	0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x6f,
+	0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e,
+	0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74,
+	0x61, 0x52, 0x08, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x12, 0x3d, 0x0a, 0x04, 0x73,
+	0x70, 0x65, 0x63, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x29, 0x2e, 0x6f, 0x63, 0x74, 0x65,
 	0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f,
-	0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x65, 0x63, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x2e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x45, 0x6e, 0x76,
-	0x56, 0x61, 0x72, 0x52, 0x07, 0x65, 0x6e, 0x76, 0x56, 0x61, 0x72, 0x73, 0x12, 0x1c, 0x0a, 0x09,
-	0x72, 0x75, 0x6e, 0x41, 0x73, 0x52, 0x6f, 0x6f, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x08, 0x52,
-	0x09, 0x72, 0x75, 0x6e, 0x41, 0x73, 0x52, 0x6f, 0x6f, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x68, 0x61,
-	0x73, 0x53, 0x74, 0x64, 0x69, 0x6e, 0x18, 0x06, 0x20, 0x01, 0x28, 0x08, 0x52, 0x08, 0x68, 0x61,
-	0x73, 0x53, 0x74, 0x64, 0x69, 0x6e, 0x1a, 0x30, 0x0a, 0x06, 0x45, 0x6e, 0x76, 0x56, 0x61, 0x72,
-	0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b,
-	0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x1a, 0x06, 0x0a, 0x04, 0x4b, 0x69, 0x6c, 0x6c,
-	0x1a, 0x1f, 0x0a, 0x09, 0x57, 0x72, 0x69, 0x74, 0x65, 0x44, 0x61, 0x74, 0x61, 0x12, 0x12, 0x0a,
-	0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x64, 0x61, 0x74,
-	0x61, 0x42, 0x06, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x22, 0xcf, 0x02, 0x0a, 0x0c, 0x45, 0x78,
-	0x65, 0x63, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x4b, 0x0a, 0x06, 0x73, 0x74,
-	0x64, 0x6f, 0x75, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x31, 0x2e, 0x6f, 0x63, 0x74,
+	0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x2e,
+	0x53, 0x70, 0x65, 0x63, 0x52, 0x04, 0x73, 0x70, 0x65, 0x63, 0x12, 0x43, 0x0a, 0x06, 0x73, 0x74,
+	0x61, 0x74, 0x75, 0x73, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2b, 0x2e, 0x6f, 0x63, 0x74,
 	0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63,
-	0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x65, 0x63, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x53, 0x74, 0x64, 0x6f, 0x75, 0x74, 0x48, 0x00, 0x52,
-	0x06, 0x73, 0x74, 0x64, 0x6f, 0x75, 0x74, 0x12, 0x4b, 0x0a, 0x06, 0x73, 0x74, 0x64, 0x65, 0x72,
-	0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x31, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69,
-	0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64,
-	0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x65, 0x63, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x2e, 0x53, 0x74, 0x64, 0x65, 0x72, 0x72, 0x48, 0x00, 0x52, 0x06, 0x73, 0x74,
-	0x64, 0x65, 0x72, 0x72, 0x12, 0x45, 0x0a, 0x04, 0x65, 0x78, 0x69, 0x74, 0x18, 0x03, 0x20, 0x01,
-	0x28, 0x0b, 0x32, 0x2f, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70,
-	0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76,
-	0x31, 0x2e, 0x45, 0x78, 0x65, 0x63, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x45,
-	0x78, 0x69, 0x74, 0x48, 0x00, 0x52, 0x04, 0x65, 0x78, 0x69, 0x74, 0x1a, 0x1c, 0x0a, 0x06, 0x53,
-	0x74, 0x64, 0x6f, 0x75, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x0c, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x1a, 0x1c, 0x0a, 0x06, 0x53, 0x74, 0x64,
-	0x65, 0x72, 0x72, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x0c, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x1a, 0x1a, 0x0a, 0x04, 0x45, 0x78, 0x69, 0x74, 0x12,
-	0x12, 0x0a, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x63,
-	0x6f, 0x64, 0x65, 0x42, 0x06, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x22, 0x93, 0x1f, 0x0a, 0x0d,
-	0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x1e, 0x0a,
-	0x0a, 0x61, 0x70, 0x69, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x0a, 0x61, 0x70, 0x69, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x12, 0x0a,
-	0x04, 0x6b, 0x69, 0x6e, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6b, 0x69, 0x6e,
-	0x64, 0x12, 0x3f, 0x0a, 0x08, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x18, 0x03, 0x20,
-	0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61,
-	0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e,
-	0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x52, 0x08, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61,
-	0x74, 0x61, 0x12, 0x44, 0x0a, 0x04, 0x73, 0x70, 0x65, 0x63, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x30, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e,
-	0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e,
-	0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70,
-	0x65, 0x63, 0x52, 0x04, 0x73, 0x70, 0x65, 0x63, 0x12, 0x4a, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74,
-	0x75, 0x73, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x32, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
-	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72,
-	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43,
-	0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x06, 0x73, 0x74,
-	0x61, 0x74, 0x75, 0x73, 0x1a, 0xf0, 0x1c, 0x0a, 0x04, 0x53, 0x70, 0x65, 0x63, 0x12, 0x4c, 0x0a,
-	0x05, 0x73, 0x70, 0x61, 0x63, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x36, 0x2e, 0x6f,
+	0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e,
+	0x2e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x1a,
+	0x06, 0x0a, 0x04, 0x53, 0x70, 0x65, 0x63, 0x1a, 0x36, 0x0a, 0x06, 0x53, 0x74, 0x61, 0x74, 0x75,
+	0x73, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x72, 0x79, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x12, 0x0a, 0x04, 0x63,
+	0x69, 0x74, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x63, 0x69, 0x74, 0x79, 0x22,
+	0xd5, 0x01, 0x0a, 0x0a, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x1e,
+	0x0a, 0x0a, 0x61, 0x70, 0x69, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x0a, 0x61, 0x70, 0x69, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x12,
+	0x0a, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6b, 0x69,
+	0x6e, 0x64, 0x12, 0x3a, 0x0a, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28,
+	0x0b, 0x32, 0x24, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69,
+	0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31,
+	0x2e, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x12, 0x57,
+	0x0a, 0x10, 0x6c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x4d, 0x65,
+	0x74, 0x61, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2b, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
+	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74,
+	0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x4d, 0x65, 0x74, 0x61, 0x52, 0x10, 0x6c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x4d, 0x65, 0x74, 0x61, 0x22, 0x59, 0x0a, 0x11, 0x4c, 0x69, 0x73, 0x74, 0x52,
+	0x65, 0x67, 0x69, 0x6f, 0x6e, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x44, 0x0a, 0x06,
+	0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2c, 0x2e, 0x6f,
 	0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e,
-	0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73,
-	0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x53,
-	0x70, 0x61, 0x63, 0x65, 0x52, 0x05, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x58, 0x0a, 0x09, 0x77,
-	0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x3a,
-	0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61,
-	0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c,
-	0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63,
-	0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x09, 0x77, 0x6f, 0x72, 0x6b,
-	0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x4f, 0x0a, 0x06, 0x76, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x18,
-	0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x37, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d,
-	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75,
-	0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66,
-	0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x52, 0x06,
-	0x76, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x1a, 0xb4, 0x03, 0x0a, 0x05, 0x53, 0x70, 0x61, 0x63, 0x65,
-	0x12, 0x5e, 0x0a, 0x09, 0x6f, 0x77, 0x6e, 0x65, 0x72, 0x73, 0x68, 0x69, 0x70, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x0b, 0x32, 0x40, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61,
-	0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e,
-	0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67,
-	0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x53, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x4f, 0x77, 0x6e, 0x65,
-	0x72, 0x73, 0x68, 0x69, 0x70, 0x52, 0x09, 0x6f, 0x77, 0x6e, 0x65, 0x72, 0x73, 0x68, 0x69, 0x70,
-	0x1a, 0xca, 0x02, 0x0a, 0x09, 0x4f, 0x77, 0x6e, 0x65, 0x72, 0x73, 0x68, 0x69, 0x70, 0x12, 0x5b,
-	0x0a, 0x05, 0x72, 0x75, 0x6c, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x45, 0x2e,
-	0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69,
-	0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75,
-	0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e,
-	0x53, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x4f, 0x77, 0x6e, 0x65, 0x72, 0x73, 0x68, 0x69, 0x70, 0x2e,
-	0x52, 0x75, 0x6c, 0x65, 0x52, 0x05, 0x72, 0x75, 0x6c, 0x65, 0x73, 0x1a, 0xdf, 0x01, 0x0a, 0x04,
-	0x52, 0x75, 0x6c, 0x65, 0x12, 0x64, 0x0a, 0x06, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x0e, 0x32, 0x4c, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e,
+	0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x4c,
+	0x69, 0x73, 0x74, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x06, 0x63, 0x6f, 0x6d, 0x6d,
+	0x6f, 0x6e, 0x22, 0x8f, 0x01, 0x0a, 0x15, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54, 0x65, 0x72,
+	0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4e, 0x0a, 0x0c,
+	0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x2a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70,
+	0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f,
+	0x62, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x0c,
+	0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x12, 0x12, 0x0a, 0x04,
+	0x63, 0x6f, 0x6c, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x04, 0x63, 0x6f, 0x6c, 0x73,
+	0x12, 0x12, 0x0a, 0x04, 0x72, 0x6f, 0x77, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x04,
+	0x72, 0x6f, 0x77, 0x73, 0x22, 0x1a, 0x0a, 0x08, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c,
+	0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64,
+	0x22, 0x28, 0x0a, 0x16, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e,
+	0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x22, 0x27, 0x0a, 0x15, 0x52, 0x65,
+	0x6d, 0x6f, 0x76, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x02, 0x69, 0x64, 0x22, 0x18, 0x0a, 0x16, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x54, 0x65, 0x72,
+	0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x65, 0x0a,
+	0x13, 0x4c, 0x69, 0x73, 0x74, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x4e, 0x0a, 0x0c, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63,
+	0x65, 0x52, 0x65, 0x66, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2a, 0x2e, 0x6f, 0x63, 0x74,
+	0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d,
+	0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x66,
+	0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x0c, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63,
+	0x65, 0x52, 0x65, 0x66, 0x22, 0x54, 0x0a, 0x14, 0x4c, 0x69, 0x73, 0x74, 0x54, 0x65, 0x72, 0x6d,
+	0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3c, 0x0a, 0x05,
+	0x69, 0x74, 0x65, 0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x26, 0x2e, 0x6f, 0x63,
+	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
+	0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x54, 0x65, 0x72, 0x6d, 0x69,
+	0x6e, 0x61, 0x6c, 0x52, 0x05, 0x69, 0x74, 0x65, 0x6d, 0x73, 0x22, 0x1b, 0x0a, 0x19, 0x57, 0x72,
+	0x69, 0x74, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x44, 0x61, 0x74, 0x61, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x56, 0x0a, 0x1c, 0x53, 0x65, 0x74, 0x54, 0x65,
+	0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x53, 0x69, 0x7a, 0x65,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x63, 0x6f, 0x6c, 0x73, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x04, 0x63, 0x6f, 0x6c, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x72,
+	0x6f, 0x77, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x04, 0x72, 0x6f, 0x77, 0x73, 0x22,
+	0x1f, 0x0a, 0x1d, 0x53, 0x65, 0x74, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x57, 0x69,
+	0x6e, 0x64, 0x6f, 0x77, 0x53, 0x69, 0x7a, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x22, 0x3e, 0x0a, 0x18, 0x57, 0x72, 0x69, 0x74, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61,
+	0x6c, 0x44, 0x61, 0x74, 0x61, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02,
+	0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04,
+	0x64, 0x61, 0x74, 0x61, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61,
+	0x22, 0x27, 0x0a, 0x15, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e,
+	0x61, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x22, 0x8b, 0x03, 0x0a, 0x16, 0x4c, 0x69,
+	0x73, 0x74, 0x65, 0x6e, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x55, 0x0a, 0x06, 0x73, 0x74, 0x64, 0x6f, 0x75, 0x74, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x3b, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e,
 	0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d,
-	0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69,
-	0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x53, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x4f, 0x77, 0x6e,
-	0x65, 0x72, 0x73, 0x68, 0x69, 0x70, 0x2e, 0x52, 0x75, 0x6c, 0x65, 0x2e, 0x45, 0x66, 0x66, 0x65,
-	0x63, 0x74, 0x52, 0x06, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x12, 0x45, 0x0a, 0x09, 0x63, 0x6f,
-	0x6e, 0x64, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e,
+	0x2e, 0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e,
+	0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x53, 0x74, 0x64, 0x6f, 0x75,
+	0x74, 0x48, 0x00, 0x52, 0x06, 0x73, 0x74, 0x64, 0x6f, 0x75, 0x74, 0x12, 0x61, 0x0a, 0x0a, 0x77,
+	0x69, 0x6e, 0x64, 0x6f, 0x77, 0x53, 0x69, 0x7a, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x3f, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d,
+	0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x4c,
+	0x69, 0x73, 0x74, 0x65, 0x6e, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x53, 0x69, 0x7a, 0x65,
+	0x48, 0x00, 0x52, 0x0a, 0x77, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x53, 0x69, 0x7a, 0x65, 0x12, 0x52,
+	0x0a, 0x05, 0x63, 0x6c, 0x6f, 0x73, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x3a, 0x2e,
 	0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69,
-	0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6f, 0x6e,
-	0x64, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x09, 0x63, 0x6f, 0x6e, 0x64, 0x69, 0x74, 0x69, 0x6f,
-	0x6e, 0x22, 0x2a, 0x0a, 0x06, 0x45, 0x66, 0x66, 0x65, 0x63, 0x74, 0x12, 0x0b, 0x0a, 0x07, 0x55,
-	0x4e, 0x4b, 0x4e, 0x4f, 0x57, 0x4e, 0x10, 0x00, 0x12, 0x09, 0x0a, 0x05, 0x41, 0x4c, 0x4c, 0x4f,
-	0x57, 0x10, 0x01, 0x12, 0x08, 0x0a, 0x04, 0x44, 0x45, 0x4e, 0x59, 0x10, 0x02, 0x1a, 0x93, 0x11,
-	0x0a, 0x09, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x5c, 0x0a, 0x07, 0x73,
-	0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x42, 0x2e, 0x6f,
-	0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e,
-	0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73,
-	0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x57,
-	0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65,
-	0x52, 0x07, 0x73, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x12, 0x56, 0x0a, 0x05, 0x6c, 0x69, 0x6d,
-	0x69, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x40, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
-	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72,
-	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43,
-	0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73,
-	0x70, 0x61, 0x63, 0x65, 0x2e, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x52, 0x05, 0x6c, 0x69, 0x6d, 0x69,
-	0x74, 0x12, 0x5c, 0x0a, 0x07, 0x74, 0x69, 0x6d, 0x65, 0x6f, 0x75, 0x74, 0x18, 0x03, 0x20, 0x01,
-	0x28, 0x0b, 0x32, 0x42, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70,
-	0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76,
-	0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e,
-	0x53, 0x70, 0x65, 0x63, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x54,
-	0x69, 0x6d, 0x65, 0x6f, 0x75, 0x74, 0x52, 0x07, 0x74, 0x69, 0x6d, 0x65, 0x6f, 0x75, 0x74, 0x12,
-	0x5c, 0x0a, 0x07, 0x72, 0x75, 0x6e, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x42, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e,
-	0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e,
-	0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70,
-	0x65, 0x63, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x52, 0x75, 0x6e,
-	0x74, 0x69, 0x6d, 0x65, 0x52, 0x07, 0x72, 0x75, 0x6e, 0x74, 0x69, 0x6d, 0x65, 0x1a, 0x85, 0x06,
-	0x0a, 0x07, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x12, 0x73, 0x0a, 0x0c, 0x73, 0x74, 0x6f,
-	0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
-	0x4f, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d,
-	0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43,
-	0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65,
-	0x63, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72,
-	0x61, 0x67, 0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73,
-	0x52, 0x0c, 0x73, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x12, 0x88,
-	0x01, 0x0a, 0x13, 0x76, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f,
-	0x74, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x56, 0x2e, 0x6f,
-	0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e,
-	0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73,
-	0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x57,
-	0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65,
-	0x2e, 0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f, 0x74, 0x43,
-	0x6c, 0x61, 0x73, 0x73, 0x52, 0x13, 0x76, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x53, 0x6e, 0x61, 0x70,
-	0x73, 0x68, 0x6f, 0x74, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x1a, 0xed, 0x01, 0x0a, 0x0c, 0x53, 0x74,
-	0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x12, 0x6a, 0x0a, 0x05, 0x72, 0x75,
-	0x6c, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x54, 0x2e, 0x6f, 0x63, 0x74, 0x65,
+	0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73,
+	0x74, 0x65, 0x6e, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x2e, 0x43, 0x6c, 0x6f, 0x73, 0x65, 0x48, 0x00, 0x52, 0x05, 0x63, 0x6c, 0x6f,
+	0x73, 0x65, 0x1a, 0x1c, 0x0a, 0x06, 0x53, 0x74, 0x64, 0x6f, 0x75, 0x74, 0x12, 0x12, 0x0a, 0x04,
+	0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61,
+	0x1a, 0x34, 0x0a, 0x0a, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x53, 0x69, 0x7a, 0x65, 0x12, 0x12,
+	0x0a, 0x04, 0x63, 0x6f, 0x6c, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x04, 0x63, 0x6f,
+	0x6c, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x72, 0x6f, 0x77, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d,
+	0x52, 0x04, 0x72, 0x6f, 0x77, 0x73, 0x1a, 0x07, 0x0a, 0x05, 0x43, 0x6c, 0x6f, 0x73, 0x65, 0x42,
+	0x06, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x22, 0x62, 0x0a, 0x10, 0x4c, 0x69, 0x73, 0x74, 0x65,
+	0x6e, 0x4c, 0x6f, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4e, 0x0a, 0x0c, 0x77,
+	0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x2a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69,
+	0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62,
+	0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x0c, 0x77,
+	0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x22, 0xa2, 0x03, 0x0a, 0x11,
+	0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x4c, 0x6f, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x12, 0x38, 0x0a, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70,
+	0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x48, 0x0a, 0x04, 0x74,
+	0x79, 0x70, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x34, 0x2e, 0x6f, 0x63, 0x74, 0x65,
 	0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f,
-	0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72,
-	0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x57, 0x6f, 0x72, 0x6b,
-	0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x2e, 0x53, 0x74,
-	0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x2e, 0x52, 0x75, 0x6c, 0x65, 0x52,
-	0x05, 0x72, 0x75, 0x6c, 0x65, 0x73, 0x1a, 0x71, 0x0a, 0x04, 0x52, 0x75, 0x6c, 0x65, 0x12, 0x45,
-	0x0a, 0x09, 0x63, 0x6f, 0x6e, 0x64, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x4c,
+	0x6f, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x54, 0x79, 0x70, 0x65, 0x52,
+	0x04, 0x74, 0x79, 0x70, 0x65, 0x12, 0x48, 0x0a, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x0e, 0x32, 0x34, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e,
+	0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x4c, 0x6f, 0x67, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x4d, 0x6f, 0x64, 0x65, 0x52, 0x04, 0x6d, 0x6f, 0x64, 0x65, 0x12,
+	0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x64,
+	0x61, 0x74, 0x61, 0x22, 0x3a, 0x0a, 0x04, 0x4d, 0x6f, 0x64, 0x65, 0x12, 0x10, 0x0a, 0x0c, 0x4d,
+	0x4f, 0x44, 0x45, 0x5f, 0x55, 0x4e, 0x4b, 0x4e, 0x4f, 0x57, 0x4e, 0x10, 0x00, 0x12, 0x0f, 0x0a,
+	0x0b, 0x4d, 0x4f, 0x44, 0x45, 0x5f, 0x53, 0x54, 0x44, 0x4f, 0x55, 0x54, 0x10, 0x01, 0x12, 0x0f,
+	0x0a, 0x0b, 0x4d, 0x4f, 0x44, 0x45, 0x5f, 0x53, 0x54, 0x44, 0x45, 0x52, 0x52, 0x10, 0x02, 0x22,
+	0x6f, 0x0a, 0x04, 0x54, 0x79, 0x70, 0x65, 0x12, 0x10, 0x0a, 0x0c, 0x54, 0x59, 0x50, 0x45, 0x5f,
+	0x55, 0x4e, 0x4b, 0x4e, 0x4f, 0x57, 0x4e, 0x10, 0x00, 0x12, 0x15, 0x0a, 0x11, 0x54, 0x59, 0x50,
+	0x45, 0x5f, 0x43, 0x4c, 0x4f, 0x4e, 0x49, 0x4e, 0x47, 0x5f, 0x52, 0x45, 0x50, 0x4f, 0x10, 0x01,
+	0x12, 0x16, 0x0a, 0x12, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x50, 0x55, 0x4c, 0x4c, 0x49, 0x4e, 0x47,
+	0x5f, 0x49, 0x4d, 0x41, 0x47, 0x45, 0x10, 0x02, 0x12, 0x17, 0x0a, 0x13, 0x54, 0x59, 0x50, 0x45,
+	0x5f, 0x42, 0x55, 0x49, 0x4c, 0x44, 0x49, 0x4e, 0x47, 0x5f, 0x49, 0x4d, 0x41, 0x47, 0x45, 0x10,
+	0x03, 0x12, 0x0d, 0x0a, 0x09, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x54, 0x41, 0x53, 0x4b, 0x10, 0x04,
+	0x22, 0x67, 0x0a, 0x15, 0x57, 0x61, 0x74, 0x63, 0x68, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61,
+	0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4e, 0x0a, 0x0c, 0x77, 0x6f, 0x72,
+	0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x2a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d,
+	0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62, 0x6a, 0x65,
+	0x63, 0x74, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52, 0x0c, 0x77, 0x6f, 0x72,
+	0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x66, 0x22, 0xc4, 0x04, 0x0a, 0x16, 0x57, 0x61,
+	0x74, 0x63, 0x68, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x55, 0x0a, 0x06, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x18, 0x03,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x3b, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e,
+	0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d,
+	0x2e, 0x76, 0x31, 0x2e, 0x57, 0x61, 0x74, 0x63, 0x68, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61,
+	0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74,
+	0x65, 0x48, 0x00, 0x52, 0x06, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x12, 0x55, 0x0a, 0x06, 0x75,
+	0x70, 0x64, 0x61, 0x74, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x3b, 0x2e, 0x6f, 0x63,
+	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
+	0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x61, 0x74, 0x63, 0x68,
+	0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x48, 0x00, 0x52, 0x06, 0x75, 0x70, 0x64, 0x61,
+	0x74, 0x65, 0x12, 0x55, 0x0a, 0x06, 0x64, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x18, 0x05, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x3b, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70,
+	0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76,
+	0x31, 0x2e, 0x57, 0x61, 0x74, 0x63, 0x68, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x48,
+	0x00, 0x52, 0x06, 0x64, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x1a, 0x45, 0x0a, 0x06, 0x43, 0x72, 0x65,
+	0x61, 0x74, 0x65, 0x12, 0x3b, 0x0a, 0x04, 0x69, 0x74, 0x65, 0x6d, 0x18, 0x01, 0x20, 0x01, 0x28,
 	0x0b, 0x32, 0x27, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69,
 	0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31,
-	0x2e, 0x43, 0x6f, 0x6e, 0x64, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x09, 0x63, 0x6f, 0x6e, 0x64,
-	0x69, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x22, 0x0a, 0x0c, 0x73, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65,
-	0x43, 0x6c, 0x61, 0x73, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x73, 0x74, 0x6f,
-	0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x1a, 0x89, 0x02, 0x0a, 0x13, 0x56, 0x6f,
-	0x6c, 0x75, 0x6d, 0x65, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f, 0x74, 0x43, 0x6c, 0x61, 0x73,
-	0x73, 0x12, 0x71, 0x0a, 0x05, 0x72, 0x75, 0x6c, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b,
-	0x32, 0x5b, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e,
+	0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x04, 0x69, 0x74, 0x65, 0x6d,
+	0x1a, 0x8e, 0x01, 0x0a, 0x06, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x12, 0x41, 0x0a, 0x07, 0x6e,
+	0x65, 0x77, 0x49, 0x74, 0x65, 0x6d, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e, 0x6f,
+	0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e,
+	0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b,
+	0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x07, 0x6e, 0x65, 0x77, 0x49, 0x74, 0x65, 0x6d, 0x12, 0x41,
+	0x0a, 0x07, 0x6f, 0x6c, 0x64, 0x49, 0x74, 0x65, 0x6d, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x27, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d,
+	0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57,
+	0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x07, 0x6f, 0x6c, 0x64, 0x49, 0x74, 0x65,
+	0x6d, 0x1a, 0x45, 0x0a, 0x06, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x12, 0x3b, 0x0a, 0x04, 0x69,
+	0x74, 0x65, 0x6d, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e, 0x6f, 0x63, 0x74, 0x65,
+	0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f,
+	0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61,
+	0x63, 0x65, 0x52, 0x04, 0x69, 0x74, 0x65, 0x6d, 0x42, 0x06, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65,
+	0x22, 0x6a, 0x0a, 0x1a, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x42, 0x75, 0x69, 0x6c, 0x64, 0x54,
+	0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4c,
+	0x0a, 0x0b, 0x74, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x52, 0x65, 0x66, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x2a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e,
+	0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x52,
+	0x0b, 0x74, 0x65, 0x6d, 0x70, 0x6c, 0x61, 0x74, 0x65, 0x52, 0x65, 0x66, 0x22, 0xfe, 0x04, 0x0a,
+	0x0b, 0x45, 0x78, 0x65, 0x63, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x4d, 0x0a, 0x07,
+	0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x31, 0x2e,
+	0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69,
+	0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x65,
+	0x63, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x48, 0x00, 0x52, 0x07, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x53, 0x0a, 0x09, 0x77,
+	0x72, 0x69, 0x74, 0x65, 0x44, 0x61, 0x74, 0x61, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x33,
+	0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61,
+	0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78,
+	0x65, 0x63, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x57, 0x72, 0x69, 0x74, 0x65, 0x44,
+	0x61, 0x74, 0x61, 0x48, 0x00, 0x52, 0x09, 0x77, 0x72, 0x69, 0x74, 0x65, 0x44, 0x61, 0x74, 0x61,
+	0x12, 0x44, 0x0a, 0x04, 0x6b, 0x69, 0x6c, 0x6c, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2e,
+	0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61,
+	0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78,
+	0x65, 0x63, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x4b, 0x69, 0x6c, 0x6c, 0x48, 0x00,
+	0x52, 0x04, 0x6b, 0x69, 0x6c, 0x6c, 0x1a, 0xd3, 0x02, 0x0a, 0x07, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x12, 0x4e, 0x0a, 0x0c, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52,
+	0x65, 0x66, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
+	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74,
+	0x61, 0x2e, 0x76, 0x31, 0x2e, 0x4f, 0x62, 0x6a, 0x65, 0x63, 0x74, 0x52, 0x65, 0x66, 0x65, 0x72,
+	0x65, 0x6e, 0x63, 0x65, 0x52, 0x0c, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52,
+	0x65, 0x66, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12, 0x1e, 0x0a, 0x0a,
+	0x77, 0x6f, 0x72, 0x6b, 0x69, 0x6e, 0x67, 0x44, 0x69, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x0a, 0x77, 0x6f, 0x72, 0x6b, 0x69, 0x6e, 0x67, 0x44, 0x69, 0x72, 0x12, 0x52, 0x0a, 0x07,
+	0x65, 0x6e, 0x76, 0x56, 0x61, 0x72, 0x73, 0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x38, 0x2e,
+	0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69,
+	0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x65,
+	0x63, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x2e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x2e, 0x45, 0x6e, 0x76, 0x56, 0x61, 0x72, 0x52, 0x07, 0x65, 0x6e, 0x76, 0x56, 0x61, 0x72, 0x73,
+	0x12, 0x1c, 0x0a, 0x09, 0x72, 0x75, 0x6e, 0x41, 0x73, 0x52, 0x6f, 0x6f, 0x74, 0x18, 0x05, 0x20,
+	0x01, 0x28, 0x08, 0x52, 0x09, 0x72, 0x75, 0x6e, 0x41, 0x73, 0x52, 0x6f, 0x6f, 0x74, 0x12, 0x1a,
+	0x0a, 0x08, 0x68, 0x61, 0x73, 0x53, 0x74, 0x64, 0x69, 0x6e, 0x18, 0x06, 0x20, 0x01, 0x28, 0x08,
+	0x52, 0x08, 0x68, 0x61, 0x73, 0x53, 0x74, 0x64, 0x69, 0x6e, 0x1a, 0x30, 0x0a, 0x06, 0x45, 0x6e,
+	0x76, 0x56, 0x61, 0x72, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x1a, 0x06, 0x0a, 0x04,
+	0x4b, 0x69, 0x6c, 0x6c, 0x1a, 0x1f, 0x0a, 0x09, 0x57, 0x72, 0x69, 0x74, 0x65, 0x44, 0x61, 0x74,
+	0x61, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0c, 0x52,
+	0x04, 0x64, 0x61, 0x74, 0x61, 0x42, 0x06, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x22, 0xcf, 0x02,
+	0x0a, 0x0c, 0x45, 0x78, 0x65, 0x63, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x4b,
+	0x0a, 0x06, 0x73, 0x74, 0x64, 0x6f, 0x75, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x31,
+	0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61,
+	0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78,
+	0x65, 0x63, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x53, 0x74, 0x64, 0x6f, 0x75,
+	0x74, 0x48, 0x00, 0x52, 0x06, 0x73, 0x74, 0x64, 0x6f, 0x75, 0x74, 0x12, 0x4b, 0x0a, 0x06, 0x73,
+	0x74, 0x64, 0x65, 0x72, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x31, 0x2e, 0x6f, 0x63,
+	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
+	0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x65, 0x63, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x2e, 0x53, 0x74, 0x64, 0x65, 0x72, 0x72, 0x48, 0x00,
+	0x52, 0x06, 0x73, 0x74, 0x64, 0x65, 0x72, 0x72, 0x12, 0x45, 0x0a, 0x04, 0x65, 0x78, 0x69, 0x74,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2f, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
+	0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69,
+	0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x65, 0x63, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x2e, 0x45, 0x78, 0x69, 0x74, 0x48, 0x00, 0x52, 0x04, 0x65, 0x78, 0x69, 0x74, 0x1a,
+	0x1c, 0x0a, 0x06, 0x53, 0x74, 0x64, 0x6f, 0x75, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74,
+	0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x1a, 0x1c, 0x0a,
+	0x06, 0x53, 0x74, 0x64, 0x65, 0x72, 0x72, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x1a, 0x1a, 0x0a, 0x04, 0x45,
+	0x78, 0x69, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x05, 0x52, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x42, 0x06, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x22,
+	0xef, 0x22, 0x0a, 0x0d, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69,
+	0x67, 0x12, 0x1e, 0x0a, 0x0a, 0x61, 0x70, 0x69, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x61, 0x70, 0x69, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f,
+	0x6e, 0x12, 0x12, 0x0a, 0x04, 0x6b, 0x69, 0x6e, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x04, 0x6b, 0x69, 0x6e, 0x64, 0x12, 0x3f, 0x0a, 0x08, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74,
+	0x61, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69,
+	0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61,
+	0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x52, 0x08, 0x6d, 0x65,
+	0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x12, 0x44, 0x0a, 0x04, 0x73, 0x70, 0x65, 0x63, 0x18, 0x04,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x30, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e,
+	0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d,
+	0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69,
+	0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x52, 0x04, 0x73, 0x70, 0x65, 0x63, 0x12, 0x4a, 0x0a, 0x06,
+	0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x32, 0x2e, 0x6f,
+	0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e,
+	0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73,
+	0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73,
+	0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x1a, 0xcc, 0x20, 0x0a, 0x04, 0x53, 0x70, 0x65,
+	0x63, 0x12, 0x4c, 0x0a, 0x05, 0x73, 0x70, 0x61, 0x63, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x36, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e,
 	0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e,
 	0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70,
-	0x65, 0x63, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x53, 0x74, 0x6f,
-	0x72, 0x61, 0x67, 0x65, 0x2e, 0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x53, 0x6e, 0x61, 0x70, 0x73,
-	0x68, 0x6f, 0x74, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x2e, 0x52, 0x75, 0x6c, 0x65, 0x52, 0x05, 0x72,
-	0x75, 0x6c, 0x65, 0x73, 0x1a, 0x7f, 0x0a, 0x04, 0x52, 0x75, 0x6c, 0x65, 0x12, 0x45, 0x0a, 0x09,
-	0x63, 0x6f, 0x6e, 0x64, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x65, 0x63, 0x2e, 0x53, 0x70, 0x61, 0x63, 0x65, 0x52, 0x05, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12,
+	0x58, 0x0a, 0x09, 0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x3a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70,
+	0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76,
+	0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e,
+	0x53, 0x70, 0x65, 0x63, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x09,
+	0x77, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x4f, 0x0a, 0x06, 0x76, 0x6f, 0x6c,
+	0x75, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x37, 0x2e, 0x6f, 0x63, 0x74, 0x65,
+	0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f,
+	0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72,
+	0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x56, 0x6f, 0x6c, 0x75,
+	0x6d, 0x65, 0x52, 0x06, 0x76, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x12, 0x4c, 0x0a, 0x05, 0x61, 0x67,
+	0x65, 0x6e, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x36, 0x2e, 0x6f, 0x63, 0x74, 0x65,
+	0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f,
+	0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72,
+	0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x41, 0x67, 0x65, 0x6e,
+	0x74, 0x52, 0x05, 0x61, 0x67, 0x65, 0x6e, 0x74, 0x1a, 0xb4, 0x03, 0x0a, 0x05, 0x53, 0x70, 0x61,
+	0x63, 0x65, 0x12, 0x5e, 0x0a, 0x09, 0x6f, 0x77, 0x6e, 0x65, 0x72, 0x73, 0x68, 0x69, 0x70, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x40, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d,
+	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75,
+	0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66,
+	0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x53, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x4f, 0x77,
+	0x6e, 0x65, 0x72, 0x73, 0x68, 0x69, 0x70, 0x52, 0x09, 0x6f, 0x77, 0x6e, 0x65, 0x72, 0x73, 0x68,
+	0x69, 0x70, 0x1a, 0xca, 0x02, 0x0a, 0x09, 0x4f, 0x77, 0x6e, 0x65, 0x72, 0x73, 0x68, 0x69, 0x70,
+	0x12, 0x5b, 0x0a, 0x05, 0x72, 0x75, 0x6c, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32,
+	0x45, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d,
+	0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43,
+	0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65,
+	0x63, 0x2e, 0x53, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x4f, 0x77, 0x6e, 0x65, 0x72, 0x73, 0x68, 0x69,
+	0x70, 0x2e, 0x52, 0x75, 0x6c, 0x65, 0x52, 0x05, 0x72, 0x75, 0x6c, 0x65, 0x73, 0x1a, 0xdf, 0x01,
+	0x0a, 0x04, 0x52, 0x75, 0x6c, 0x65, 0x12, 0x64, 0x0a, 0x06, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x4c, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
+	0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69,
+	0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e,
+	0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x53, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x4f,
+	0x77, 0x6e, 0x65, 0x72, 0x73, 0x68, 0x69, 0x70, 0x2e, 0x52, 0x75, 0x6c, 0x65, 0x2e, 0x45, 0x66,
+	0x66, 0x65, 0x63, 0x74, 0x52, 0x06, 0x65, 0x66, 0x66, 0x65, 0x63, 0x74, 0x12, 0x45, 0x0a, 0x09,
+	0x63, 0x6f, 0x6e, 0x64, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32,
 	0x27, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d,
 	0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43,
 	0x6f, 0x6e, 0x64, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x09, 0x63, 0x6f, 0x6e, 0x64, 0x69, 0x74,
-	0x69, 0x6f, 0x6e, 0x12, 0x30, 0x0a, 0x13, 0x76, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x53, 0x6e, 0x61,
-	0x70, 0x73, 0x68, 0x6f, 0x74, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x13, 0x76, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f, 0x74,
-	0x43, 0x6c, 0x61, 0x73, 0x73, 0x1a, 0x8d, 0x04, 0x0a, 0x05, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12,
-	0x1e, 0x0a, 0x0a, 0x6d, 0x61, 0x78, 0x50, 0x65, 0x72, 0x55, 0x73, 0x65, 0x72, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x0d, 0x52, 0x0a, 0x6d, 0x61, 0x78, 0x50, 0x65, 0x72, 0x55, 0x73, 0x65, 0x72, 0x12,
-	0x2a, 0x0a, 0x10, 0x6d, 0x61, 0x78, 0x41, 0x63, 0x74, 0x69, 0x76, 0x65, 0x50, 0x65, 0x72, 0x55,
-	0x73, 0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x10, 0x6d, 0x61, 0x78, 0x41, 0x63,
-	0x74, 0x69, 0x76, 0x65, 0x50, 0x65, 0x72, 0x55, 0x73, 0x65, 0x72, 0x12, 0x52, 0x0a, 0x0a, 0x62,
-	0x75, 0x69, 0x6c, 0x64, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32,
-	0x32, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d,
-	0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57,
-	0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x4c, 0x69,
-	0x6d, 0x69, 0x74, 0x52, 0x0a, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12,
-	0x78, 0x0a, 0x1d, 0x64, 0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69,
-	0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x70, 0x61, 0x63, 0x65, 0x4c, 0x69, 0x6d, 0x69, 0x74,
-	0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x32, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
-	0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69,
-	0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e,
-	0x53, 0x70, 0x65, 0x63, 0x2e, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x52, 0x1d, 0x64, 0x65, 0x66, 0x61,
-	0x75, 0x6c, 0x74, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53,
-	0x70, 0x61, 0x63, 0x65, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x68, 0x0a, 0x15, 0x64, 0x65, 0x66,
-	0x61, 0x75, 0x6c, 0x74, 0x55, 0x73, 0x65, 0x72, 0x53, 0x70, 0x61, 0x63, 0x65, 0x4c, 0x69, 0x6d,
-	0x69, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x32, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
-	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72,
-	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63,
-	0x65, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x52, 0x15, 0x64, 0x65,
-	0x66, 0x61, 0x75, 0x6c, 0x74, 0x55, 0x73, 0x65, 0x72, 0x53, 0x70, 0x61, 0x63, 0x65, 0x4c, 0x69,
-	0x6d, 0x69, 0x74, 0x12, 0x4e, 0x0a, 0x08, 0x6d, 0x61, 0x78, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x18,
-	0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x32, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d,
-	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75,
-	0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x53,
-	0x70, 0x65, 0x63, 0x2e, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x52, 0x08, 0x6d, 0x61, 0x78, 0x4c, 0x69,
-	0x6d, 0x69, 0x74, 0x12, 0x30, 0x0a, 0x13, 0x6d, 0x61, 0x78, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68,
-	0x6f, 0x74, 0x73, 0x50, 0x65, 0x72, 0x55, 0x73, 0x65, 0x72, 0x18, 0x07, 0x20, 0x01, 0x28, 0x0d,
-	0x52, 0x13, 0x6d, 0x61, 0x78, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f, 0x74, 0x73, 0x50, 0x65,
-	0x72, 0x55, 0x73, 0x65, 0x72, 0x1a, 0x89, 0x03, 0x0a, 0x07, 0x54, 0x69, 0x6d, 0x65, 0x6f, 0x75,
-	0x74, 0x12, 0x4d, 0x0a, 0x0f, 0x64, 0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x44, 0x75, 0x72, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x6f, 0x63, 0x74,
-	0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d,
-	0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52,
-	0x0f, 0x64, 0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e,
-	0x12, 0x51, 0x0a, 0x11, 0x75, 0x73, 0x65, 0x72, 0x53, 0x70, 0x61, 0x63, 0x65, 0x44, 0x75, 0x72,
-	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x6f, 0x63,
-	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
-	0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e,
-	0x52, 0x11, 0x75, 0x73, 0x65, 0x72, 0x53, 0x70, 0x61, 0x63, 0x65, 0x44, 0x75, 0x72, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x12, 0x61, 0x0a, 0x19, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x53, 0x70, 0x61, 0x63, 0x65, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e,
-	0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
-	0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e,
-	0x76, 0x31, 0x2e, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x19, 0x6f, 0x72, 0x67,
-	0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x70, 0x61, 0x63, 0x65, 0x44, 0x75,
-	0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x51, 0x0a, 0x11, 0x6d, 0x61, 0x78, 0x41, 0x63, 0x74,
-	0x69, 0x76, 0x65, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x04, 0x20, 0x01, 0x28,
-	0x0b, 0x32, 0x23, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69,
-	0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x44, 0x75,
-	0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x11, 0x6d, 0x61, 0x78, 0x41, 0x63, 0x74, 0x69, 0x76,
-	0x65, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x26, 0x0a, 0x0e, 0x61, 0x6c, 0x6c,
-	0x6f, 0x77, 0x4e, 0x6f, 0x54, 0x69, 0x6d, 0x65, 0x6f, 0x75, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28,
-	0x08, 0x52, 0x0e, 0x61, 0x6c, 0x6c, 0x6f, 0x77, 0x4e, 0x6f, 0x54, 0x69, 0x6d, 0x65, 0x6f, 0x75,
-	0x74, 0x1a, 0x70, 0x0a, 0x07, 0x52, 0x75, 0x6e, 0x74, 0x69, 0x6d, 0x65, 0x12, 0x65, 0x0a, 0x0c,
-	0x63, 0x61, 0x70, 0x61, 0x62, 0x69, 0x6c, 0x69, 0x74, 0x69, 0x65, 0x73, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x0b, 0x32, 0x41, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70,
+	0x69, 0x6f, 0x6e, 0x22, 0x2a, 0x0a, 0x06, 0x45, 0x66, 0x66, 0x65, 0x63, 0x74, 0x12, 0x0b, 0x0a,
+	0x07, 0x55, 0x4e, 0x4b, 0x4e, 0x4f, 0x57, 0x4e, 0x10, 0x00, 0x12, 0x09, 0x0a, 0x05, 0x41, 0x4c,
+	0x4c, 0x4f, 0x57, 0x10, 0x01, 0x12, 0x08, 0x0a, 0x04, 0x44, 0x45, 0x4e, 0x59, 0x10, 0x02, 0x1a,
+	0x93, 0x11, 0x0a, 0x09, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x5c, 0x0a,
+	0x07, 0x73, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x42,
+	0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61,
+	0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c,
+	0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63,
+	0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x61,
+	0x67, 0x65, 0x52, 0x07, 0x73, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x12, 0x56, 0x0a, 0x05, 0x6c,
+	0x69, 0x6d, 0x69, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x40, 0x2e, 0x6f, 0x63, 0x74,
+	0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63,
+	0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65,
+	0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x57, 0x6f, 0x72,
+	0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x52, 0x05, 0x6c, 0x69,
+	0x6d, 0x69, 0x74, 0x12, 0x5c, 0x0a, 0x07, 0x74, 0x69, 0x6d, 0x65, 0x6f, 0x75, 0x74, 0x18, 0x03,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x42, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e,
+	0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d,
+	0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69,
+	0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65,
+	0x2e, 0x54, 0x69, 0x6d, 0x65, 0x6f, 0x75, 0x74, 0x52, 0x07, 0x74, 0x69, 0x6d, 0x65, 0x6f, 0x75,
+	0x74, 0x12, 0x5c, 0x0a, 0x07, 0x72, 0x75, 0x6e, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x04, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x42, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70,
 	0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76,
-	0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x53, 0x70, 0x65, 0x63,
-	0x2e, 0x52, 0x75, 0x6e, 0x74, 0x69, 0x6d, 0x65, 0x2e, 0x43, 0x61, 0x70, 0x61, 0x62, 0x69, 0x6c,
-	0x69, 0x74, 0x69, 0x65, 0x73, 0x52, 0x0c, 0x63, 0x61, 0x70, 0x61, 0x62, 0x69, 0x6c, 0x69, 0x74,
-	0x69, 0x65, 0x73, 0x1a, 0xa1, 0x06, 0x0a, 0x06, 0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x12, 0x59,
-	0x0a, 0x07, 0x73, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
-	0x3f, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d,
-	0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43,
-	0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65,
-	0x63, 0x2e, 0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65,
-	0x52, 0x07, 0x73, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x12, 0x53, 0x0a, 0x05, 0x6c, 0x69, 0x6d,
-	0x69, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x3d, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
-	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72,
-	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43,
-	0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x56, 0x6f, 0x6c, 0x75, 0x6d,
-	0x65, 0x2e, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x52, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x1a, 0xe8,
-	0x02, 0x0a, 0x07, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x12, 0x70, 0x0a, 0x0c, 0x73, 0x74,
-	0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x4c, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e,
-	0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e,
-	0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70,
-	0x65, 0x63, 0x2e, 0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67,
-	0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x52, 0x0c,
-	0x73, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x1a, 0xea, 0x01, 0x0a,
-	0x0c, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x12, 0x67, 0x0a,
-	0x05, 0x72, 0x75, 0x6c, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x51, 0x2e, 0x6f,
-	0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e,
-	0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73,
-	0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x56,
-	0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x2e, 0x53, 0x74,
-	0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x2e, 0x52, 0x75, 0x6c, 0x65, 0x52,
-	0x05, 0x72, 0x75, 0x6c, 0x65, 0x73, 0x1a, 0x71, 0x0a, 0x04, 0x52, 0x75, 0x6c, 0x65, 0x12, 0x45,
+	0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e,
+	0x53, 0x70, 0x65, 0x63, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x52,
+	0x75, 0x6e, 0x74, 0x69, 0x6d, 0x65, 0x52, 0x07, 0x72, 0x75, 0x6e, 0x74, 0x69, 0x6d, 0x65, 0x1a,
+	0x85, 0x06, 0x0a, 0x07, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x12, 0x73, 0x0a, 0x0c, 0x73,
+	0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x4f, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69,
+	0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31,
+	0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53,
+	0x70, 0x65, 0x63, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x53, 0x74,
+	0x6f, 0x72, 0x61, 0x67, 0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61,
+	0x73, 0x73, 0x52, 0x0c, 0x73, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73,
+	0x12, 0x88, 0x01, 0x0a, 0x13, 0x76, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x53, 0x6e, 0x61, 0x70, 0x73,
+	0x68, 0x6f, 0x74, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x56,
+	0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61,
+	0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c,
+	0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63,
+	0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x61,
+	0x67, 0x65, 0x2e, 0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f,
+	0x74, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x52, 0x13, 0x76, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x53, 0x6e,
+	0x61, 0x70, 0x73, 0x68, 0x6f, 0x74, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x1a, 0xed, 0x01, 0x0a, 0x0c,
+	0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x12, 0x6a, 0x0a, 0x05,
+	0x72, 0x75, 0x6c, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x54, 0x2e, 0x6f, 0x63,
+	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
+	0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74,
+	0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x57, 0x6f,
+	0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x2e,
+	0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x2e, 0x52, 0x75, 0x6c,
+	0x65, 0x52, 0x05, 0x72, 0x75, 0x6c, 0x65, 0x73, 0x1a, 0x71, 0x0a, 0x04, 0x52, 0x75, 0x6c, 0x65,
+	0x12, 0x45, 0x0a, 0x09, 0x63, 0x6f, 0x6e, 0x64, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e,
+	0x76, 0x31, 0x2e, 0x43, 0x6f, 0x6e, 0x64, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x09, 0x63, 0x6f,
+	0x6e, 0x64, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x22, 0x0a, 0x0c, 0x73, 0x74, 0x6f, 0x72, 0x61,
+	0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x73,
+	0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x1a, 0x89, 0x02, 0x0a, 0x13,
+	0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f, 0x74, 0x43, 0x6c,
+	0x61, 0x73, 0x73, 0x12, 0x71, 0x0a, 0x05, 0x72, 0x75, 0x6c, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03,
+	0x28, 0x0b, 0x32, 0x5b, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70,
+	0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76,
+	0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e,
+	0x53, 0x70, 0x65, 0x63, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x53,
+	0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x2e, 0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x53, 0x6e, 0x61,
+	0x70, 0x73, 0x68, 0x6f, 0x74, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x2e, 0x52, 0x75, 0x6c, 0x65, 0x52,
+	0x05, 0x72, 0x75, 0x6c, 0x65, 0x73, 0x1a, 0x7f, 0x0a, 0x04, 0x52, 0x75, 0x6c, 0x65, 0x12, 0x45,
 	0x0a, 0x09, 0x63, 0x6f, 0x6e, 0x64, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28,
 	0x0b, 0x32, 0x27, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69,
 	0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31,
 	0x2e, 0x43, 0x6f, 0x6e, 0x64, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x09, 0x63, 0x6f, 0x6e, 0x64,
-	0x69, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x22, 0x0a, 0x0c, 0x73, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65,
-	0x43, 0x6c, 0x61, 0x73, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x73, 0x74, 0x6f,
-	0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x1a, 0xfb, 0x01, 0x0a, 0x05, 0x4c, 0x69,
-	0x6d, 0x69, 0x74, 0x12, 0x20, 0x0a, 0x0b, 0x6d, 0x61, 0x78, 0x50, 0x65, 0x72, 0x53, 0x70, 0x61,
-	0x63, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0b, 0x6d, 0x61, 0x78, 0x50, 0x65, 0x72,
-	0x53, 0x70, 0x61, 0x63, 0x65, 0x12, 0x48, 0x0a, 0x07, 0x6d, 0x61, 0x78, 0x53, 0x69, 0x7a, 0x65,
-	0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2e, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
+	0x69, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x30, 0x0a, 0x13, 0x76, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x53,
+	0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f, 0x74, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x13, 0x76, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68,
+	0x6f, 0x74, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x1a, 0x8d, 0x04, 0x0a, 0x05, 0x4c, 0x69, 0x6d, 0x69,
+	0x74, 0x12, 0x1e, 0x0a, 0x0a, 0x6d, 0x61, 0x78, 0x50, 0x65, 0x72, 0x55, 0x73, 0x65, 0x72, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0a, 0x6d, 0x61, 0x78, 0x50, 0x65, 0x72, 0x55, 0x73, 0x65,
+	0x72, 0x12, 0x2a, 0x0a, 0x10, 0x6d, 0x61, 0x78, 0x41, 0x63, 0x74, 0x69, 0x76, 0x65, 0x50, 0x65,
+	0x72, 0x55, 0x73, 0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x10, 0x6d, 0x61, 0x78,
+	0x41, 0x63, 0x74, 0x69, 0x76, 0x65, 0x50, 0x65, 0x72, 0x55, 0x73, 0x65, 0x72, 0x12, 0x52, 0x0a,
+	0x0a, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x32, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69,
+	0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31,
+	0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e,
+	0x4c, 0x69, 0x6d, 0x69, 0x74, 0x52, 0x0a, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x4c, 0x69, 0x6d, 0x69,
+	0x74, 0x12, 0x78, 0x0a, 0x1d, 0x64, 0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x4f, 0x72, 0x67, 0x61,
+	0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x70, 0x61, 0x63, 0x65, 0x4c, 0x69, 0x6d,
+	0x69, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x32, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
+	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72,
+	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63,
+	0x65, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x52, 0x1d, 0x64, 0x65,
+	0x66, 0x61, 0x75, 0x6c, 0x74, 0x4f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x53, 0x70, 0x61, 0x63, 0x65, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x68, 0x0a, 0x15, 0x64,
+	0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x55, 0x73, 0x65, 0x72, 0x53, 0x70, 0x61, 0x63, 0x65, 0x4c,
+	0x69, 0x6d, 0x69, 0x74, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x32, 0x2e, 0x6f, 0x63, 0x74,
+	0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63,
+	0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70,
+	0x61, 0x63, 0x65, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x52, 0x15,
+	0x64, 0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x55, 0x73, 0x65, 0x72, 0x53, 0x70, 0x61, 0x63, 0x65,
+	0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x4e, 0x0a, 0x08, 0x6d, 0x61, 0x78, 0x4c, 0x69, 0x6d, 0x69,
+	0x74, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x32, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69,
+	0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64,
+	0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65,
+	0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x52, 0x08, 0x6d, 0x61, 0x78,
+	0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x30, 0x0a, 0x13, 0x6d, 0x61, 0x78, 0x53, 0x6e, 0x61, 0x70,
+	0x73, 0x68, 0x6f, 0x74, 0x73, 0x50, 0x65, 0x72, 0x55, 0x73, 0x65, 0x72, 0x18, 0x07, 0x20, 0x01,
+	0x28, 0x0d, 0x52, 0x13, 0x6d, 0x61, 0x78, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f, 0x74, 0x73,
+	0x50, 0x65, 0x72, 0x55, 0x73, 0x65, 0x72, 0x1a, 0x89, 0x03, 0x0a, 0x07, 0x54, 0x69, 0x6d, 0x65,
+	0x6f, 0x75, 0x74, 0x12, 0x4d, 0x0a, 0x0f, 0x64, 0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x44, 0x75,
+	0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x6f,
+	0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e,
+	0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x52, 0x0f, 0x64, 0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x12, 0x51, 0x0a, 0x11, 0x75, 0x73, 0x65, 0x72, 0x53, 0x70, 0x61, 0x63, 0x65, 0x44,
+	0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e,
+	0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69,
+	0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x52, 0x11, 0x75, 0x73, 0x65, 0x72, 0x53, 0x70, 0x61, 0x63, 0x65, 0x44, 0x75, 0x72,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x61, 0x0a, 0x19, 0x6f, 0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x70, 0x61, 0x63, 0x65, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
+	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74,
+	0x61, 0x2e, 0x76, 0x31, 0x2e, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x19, 0x6f,
+	0x72, 0x67, 0x61, 0x6e, 0x69, 0x7a, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x70, 0x61, 0x63, 0x65,
+	0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x51, 0x0a, 0x11, 0x6d, 0x61, 0x78, 0x41,
+	0x63, 0x74, 0x69, 0x76, 0x65, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x04, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x6d, 0x65, 0x74, 0x61, 0x2e, 0x76, 0x31, 0x2e,
+	0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x11, 0x6d, 0x61, 0x78, 0x41, 0x63, 0x74,
+	0x69, 0x76, 0x65, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x26, 0x0a, 0x0e, 0x61,
+	0x6c, 0x6c, 0x6f, 0x77, 0x4e, 0x6f, 0x54, 0x69, 0x6d, 0x65, 0x6f, 0x75, 0x74, 0x18, 0x05, 0x20,
+	0x01, 0x28, 0x08, 0x52, 0x0e, 0x61, 0x6c, 0x6c, 0x6f, 0x77, 0x4e, 0x6f, 0x54, 0x69, 0x6d, 0x65,
+	0x6f, 0x75, 0x74, 0x1a, 0x70, 0x0a, 0x07, 0x52, 0x75, 0x6e, 0x74, 0x69, 0x6d, 0x65, 0x12, 0x65,
+	0x0a, 0x0c, 0x63, 0x61, 0x70, 0x61, 0x62, 0x69, 0x6c, 0x69, 0x74, 0x69, 0x65, 0x73, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x41, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e,
+	0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d,
+	0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x53, 0x70,
+	0x65, 0x63, 0x2e, 0x52, 0x75, 0x6e, 0x74, 0x69, 0x6d, 0x65, 0x2e, 0x43, 0x61, 0x70, 0x61, 0x62,
+	0x69, 0x6c, 0x69, 0x74, 0x69, 0x65, 0x73, 0x52, 0x0c, 0x63, 0x61, 0x70, 0x61, 0x62, 0x69, 0x6c,
+	0x69, 0x74, 0x69, 0x65, 0x73, 0x1a, 0xa1, 0x06, 0x0a, 0x06, 0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65,
+	0x12, 0x59, 0x0a, 0x07, 0x73, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x3f, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69,
+	0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31,
+	0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53,
+	0x70, 0x65, 0x63, 0x2e, 0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x61,
+	0x67, 0x65, 0x52, 0x07, 0x73, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x12, 0x53, 0x0a, 0x05, 0x6c,
+	0x69, 0x6d, 0x69, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x3d, 0x2e, 0x6f, 0x63, 0x74,
+	0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63,
+	0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65,
+	0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x56, 0x6f, 0x6c,
+	0x75, 0x6d, 0x65, 0x2e, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x52, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74,
+	0x1a, 0xe8, 0x02, 0x0a, 0x07, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x12, 0x70, 0x0a, 0x0c,
+	0x73, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x4c, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70,
+	0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76,
+	0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e,
+	0x53, 0x70, 0x65, 0x63, 0x2e, 0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72,
+	0x61, 0x67, 0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73,
+	0x52, 0x0c, 0x73, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x1a, 0xea,
+	0x01, 0x0a, 0x0c, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x12,
+	0x67, 0x0a, 0x05, 0x72, 0x75, 0x6c, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x51,
+	0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61,
+	0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c,
+	0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70, 0x65, 0x63,
+	0x2e, 0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x2e,
+	0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x2e, 0x52, 0x75, 0x6c,
+	0x65, 0x52, 0x05, 0x72, 0x75, 0x6c, 0x65, 0x73, 0x1a, 0x71, 0x0a, 0x04, 0x52, 0x75, 0x6c, 0x65,
+	0x12, 0x45, 0x0a, 0x09, 0x63, 0x6f, 0x6e, 0x64, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61,
+	0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e,
+	0x76, 0x31, 0x2e, 0x43, 0x6f, 0x6e, 0x64, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x09, 0x63, 0x6f,
+	0x6e, 0x64, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x22, 0x0a, 0x0c, 0x73, 0x74, 0x6f, 0x72, 0x61,
+	0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x73,
+	0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x43, 0x6c, 0x61, 0x73, 0x73, 0x1a, 0xfb, 0x01, 0x0a, 0x05,
+	0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x20, 0x0a, 0x0b, 0x6d, 0x61, 0x78, 0x50, 0x65, 0x72, 0x53,
+	0x70, 0x61, 0x63, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0b, 0x6d, 0x61, 0x78, 0x50,
+	0x65, 0x72, 0x53, 0x70, 0x61, 0x63, 0x65, 0x12, 0x48, 0x0a, 0x07, 0x6d, 0x61, 0x78, 0x53, 0x69,
+	0x7a, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2e, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
+	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72,
+	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x2e, 0x53,
+	0x70, 0x65, 0x63, 0x2e, 0x53, 0x69, 0x7a, 0x65, 0x52, 0x07, 0x6d, 0x61, 0x78, 0x53, 0x69, 0x7a,
+	0x65, 0x12, 0x50, 0x0a, 0x0b, 0x64, 0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x53, 0x69, 0x7a, 0x65,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2e, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
 	0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69,
 	0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x2e, 0x53, 0x70, 0x65,
-	0x63, 0x2e, 0x53, 0x69, 0x7a, 0x65, 0x52, 0x07, 0x6d, 0x61, 0x78, 0x53, 0x69, 0x7a, 0x65, 0x12,
-	0x50, 0x0a, 0x0b, 0x64, 0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x53, 0x69, 0x7a, 0x65, 0x18, 0x03,
-	0x20, 0x01, 0x28, 0x0b, 0x32, 0x2e, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e,
+	0x63, 0x2e, 0x53, 0x69, 0x7a, 0x65, 0x52, 0x0b, 0x64, 0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x53,
+	0x69, 0x7a, 0x65, 0x12, 0x34, 0x0a, 0x15, 0x6d, 0x61, 0x78, 0x4d, 0x6f, 0x75, 0x6e, 0x74, 0x73,
+	0x50, 0x65, 0x72, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x18, 0x04, 0x20, 0x01,
+	0x28, 0x0d, 0x52, 0x15, 0x6d, 0x61, 0x78, 0x4d, 0x6f, 0x75, 0x6e, 0x74, 0x73, 0x50, 0x65, 0x72,
+	0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x1a, 0x8b, 0x03, 0x0a, 0x05, 0x41, 0x67,
+	0x65, 0x6e, 0x74, 0x12, 0x1e, 0x0a, 0x0a, 0x69, 0x73, 0x44, 0x69, 0x73, 0x61, 0x62, 0x6c, 0x65,
+	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0a, 0x69, 0x73, 0x44, 0x69, 0x73, 0x61, 0x62,
+	0x6c, 0x65, 0x64, 0x12, 0x4c, 0x0a, 0x03, 0x6c, 0x6c, 0x6d, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x3a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e,
+	0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e,
+	0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x53, 0x70,
+	0x65, 0x63, 0x2e, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x2e, 0x4c, 0x4c, 0x4d, 0x52, 0x03, 0x6c, 0x6c,
+	0x6d, 0x12, 0x18, 0x0a, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x07, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x12, 0x48, 0x0a, 0x05, 0x69,
+	0x6d, 0x61, 0x67, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x32, 0x2e, 0x6f, 0x63, 0x74,
+	0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63,
+	0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70,
+	0x61, 0x63, 0x65, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x49, 0x6d, 0x61, 0x67, 0x65, 0x52, 0x05,
+	0x69, 0x6d, 0x61, 0x67, 0x65, 0x12, 0x48, 0x0a, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x05,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x32, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e,
 	0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d,
-	0x2e, 0x76, 0x31, 0x2e, 0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x2e, 0x53, 0x70, 0x65, 0x63, 0x2e,
-	0x53, 0x69, 0x7a, 0x65, 0x52, 0x0b, 0x64, 0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x53, 0x69, 0x7a,
-	0x65, 0x12, 0x34, 0x0a, 0x15, 0x6d, 0x61, 0x78, 0x4d, 0x6f, 0x75, 0x6e, 0x74, 0x73, 0x50, 0x65,
-	0x72, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0d,
-	0x52, 0x15, 0x6d, 0x61, 0x78, 0x4d, 0x6f, 0x75, 0x6e, 0x74, 0x73, 0x50, 0x65, 0x72, 0x57, 0x6f,
-	0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x1a, 0x08, 0x0a, 0x06, 0x53, 0x74, 0x61, 0x74, 0x75,
+	0x2e, 0x76, 0x31, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x2e, 0x53, 0x70,
+	0x65, 0x63, 0x2e, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x52, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x12,
+	0x2f, 0x0a, 0x06, 0x63, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x17, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
+	0x66, 0x2e, 0x53, 0x74, 0x72, 0x75, 0x63, 0x74, 0x52, 0x06, 0x63, 0x6f, 0x6e, 0x66, 0x69, 0x67,
+	0x1a, 0x35, 0x0a, 0x03, 0x4c, 0x4c, 0x4d, 0x12, 0x18, 0x0a, 0x07, 0x73, 0x65, 0x72, 0x76, 0x69,
+	0x63, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63,
+	0x65, 0x12, 0x14, 0x0a, 0x05, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x05, 0x6d, 0x6f, 0x64, 0x65, 0x6c, 0x1a, 0x08, 0x0a, 0x06, 0x53, 0x74, 0x61, 0x74, 0x75,
 	0x73, 0x22, 0xce, 0x04, 0x0a, 0x09, 0x43, 0x6f, 0x6e, 0x64, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x12,
 	0x1c, 0x0a, 0x08, 0x6d, 0x61, 0x74, 0x63, 0x68, 0x41, 0x6e, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28,
 	0x08, 0x48, 0x00, 0x52, 0x08, 0x6d, 0x61, 0x74, 0x63, 0x68, 0x41, 0x6e, 0x79, 0x12, 0x16, 0x0a,
@@ -18461,7 +18731,7 @@ var file_cordiumv1_proto_rawDesc = []byte{
 	0x65, 0x54, 0x79, 0x70, 0x65, 0x22, 0x2d, 0x0a, 0x0d, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x45,
 	0x78, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x1c, 0x0a, 0x09, 0x69, 0x73, 0x45, 0x6e, 0x61, 0x62,
 	0x6c, 0x65, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x09, 0x69, 0x73, 0x45, 0x6e, 0x61,
-	0x62, 0x6c, 0x65, 0x64, 0x32, 0x89, 0x2f, 0x0a, 0x0b, 0x4d, 0x61, 0x69, 0x6e, 0x53, 0x65, 0x72,
+	0x62, 0x6c, 0x65, 0x64, 0x32, 0xfe, 0x2f, 0x0a, 0x0b, 0x4d, 0x61, 0x69, 0x6e, 0x53, 0x65, 0x72,
 	0x76, 0x69, 0x63, 0x65, 0x12, 0x5c, 0x0a, 0x0c, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x53, 0x65,
 	0x63, 0x72, 0x65, 0x74, 0x12, 0x24, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e,
 	0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d,
@@ -18823,106 +19093,113 @@ var file_cordiumv1_proto_rawDesc = []byte{
 	0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x1a, 0x28, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
 	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72,
 	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66,
-	0x69, 0x67, 0x22, 0x00, 0x12, 0x69, 0x0a, 0x0a, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69,
-	0x6f, 0x6e, 0x12, 0x2f, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70,
-	0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76,
-	0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x4f, 0x70, 0x74, 0x69,
-	0x6f, 0x6e, 0x73, 0x1a, 0x28, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61,
-	0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e,
-	0x76, 0x31, 0x2e, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x4c, 0x69, 0x73, 0x74, 0x22, 0x00, 0x12,
-	0x7f, 0x0a, 0x0e, 0x57, 0x61, 0x74, 0x63, 0x68, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63,
-	0x65, 0x12, 0x33, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69,
-	0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31,
-	0x2e, 0x57, 0x61, 0x74, 0x63, 0x68, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x34, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
+	0x69, 0x67, 0x22, 0x00, 0x12, 0x73, 0x0a, 0x0f, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69,
+	0x7a, 0x65, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x12, 0x34, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69,
+	0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64,
+	0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x6c, 0x69, 0x7a,
+	0x65, 0x41, 0x67, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x28, 0x2e,
+	0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69,
+	0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x55, 0x73, 0x65,
+	0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x22, 0x00, 0x12, 0x69, 0x0a, 0x0a, 0x4c, 0x69, 0x73,
+	0x74, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x12, 0x2f, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69,
+	0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64,
+	0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x67, 0x69, 0x6f,
+	0x6e, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x1a, 0x28, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
+	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72,
+	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x4c, 0x69,
+	0x73, 0x74, 0x22, 0x00, 0x12, 0x7f, 0x0a, 0x0e, 0x57, 0x61, 0x74, 0x63, 0x68, 0x57, 0x6f, 0x72,
+	0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x12, 0x33, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
 	0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69,
 	0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x61, 0x74, 0x63, 0x68, 0x57, 0x6f, 0x72, 0x6b, 0x73,
-	0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x30, 0x01,
-	0x32, 0xff, 0x07, 0x0a, 0x10, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x53, 0x65,
-	0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x7d, 0x0a, 0x0e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54,
-	0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x12, 0x33, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69,
-	0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64,
-	0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54, 0x65, 0x72,
-	0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x34, 0x2e, 0x6f,
+	0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x34, 0x2e, 0x6f, 0x63,
+	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
+	0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x61, 0x74, 0x63, 0x68,
+	0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70, 0x61, 0x63, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x22, 0x00, 0x30, 0x01, 0x32, 0xff, 0x07, 0x0a, 0x10, 0x57, 0x6f, 0x72, 0x6b, 0x73, 0x70,
+	0x61, 0x63, 0x65, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x7d, 0x0a, 0x0e, 0x43, 0x72,
+	0x65, 0x61, 0x74, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x12, 0x33, 0x2e, 0x6f,
 	0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e,
 	0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x72, 0x65, 0x61,
-	0x74, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x22, 0x00, 0x12, 0x7d, 0x0a, 0x0e, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x54, 0x65,
-	0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x12, 0x33, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
-	0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69,
-	0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x54, 0x65, 0x72, 0x6d,
-	0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x34, 0x2e, 0x6f, 0x63,
-	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
-	0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x6d, 0x6f, 0x76,
-	0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x22, 0x00, 0x12, 0x77, 0x0a, 0x0c, 0x4c, 0x69, 0x73, 0x74, 0x54, 0x65, 0x72, 0x6d, 0x69,
-	0x6e, 0x61, 0x6c, 0x12, 0x31, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61,
-	0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e,
-	0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x32, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
-	0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69,
-	0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e,
-	0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x86, 0x01, 0x0a,
-	0x11, 0x57, 0x72, 0x69, 0x74, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x44, 0x61,
-	0x74, 0x61, 0x12, 0x36, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70,
-	0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76,
-	0x31, 0x2e, 0x57, 0x72, 0x69, 0x74, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x44,
-	0x61, 0x74, 0x61, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x37, 0x2e, 0x6f, 0x63, 0x74,
-	0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63,
-	0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x72, 0x69, 0x74, 0x65, 0x54,
-	0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x44, 0x61, 0x74, 0x61, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x92, 0x01, 0x0a, 0x15, 0x53, 0x65, 0x74, 0x54, 0x65, 0x72,
-	0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x53, 0x69, 0x7a, 0x65, 0x12,
-	0x3a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d,
-	0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x53,
-	0x65, 0x74, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77,
-	0x53, 0x69, 0x7a, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x3b, 0x2e, 0x6f, 0x63,
-	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
-	0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x65, 0x74, 0x54, 0x65,
-	0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77, 0x53, 0x69, 0x7a, 0x65,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x7f, 0x0a, 0x0e, 0x4c, 0x69,
-	0x73, 0x74, 0x65, 0x6e, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x12, 0x33, 0x2e, 0x6f,
-	0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e,
-	0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74,
-	0x65, 0x6e, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
 	0x74, 0x1a, 0x34, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69,
 	0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31,
-	0x2e, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x30, 0x01, 0x12, 0x70, 0x0a, 0x09, 0x4c,
-	0x69, 0x73, 0x74, 0x65, 0x6e, 0x4c, 0x6f, 0x67, 0x12, 0x2e, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
-	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72,
-	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x4c, 0x6f,
-	0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x2f, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
-	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72,
-	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x4c, 0x6f,
-	0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x30, 0x01, 0x12, 0x63, 0x0a,
-	0x04, 0x45, 0x78, 0x65, 0x63, 0x12, 0x29, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d,
-	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75,
-	0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x65, 0x63, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x1a, 0x2a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e,
+	0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x7d, 0x0a, 0x0e, 0x52, 0x65, 0x6d,
+	0x6f, 0x76, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x12, 0x33, 0x2e, 0x6f, 0x63,
+	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
+	0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x6d, 0x6f, 0x76,
+	0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x34, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e,
 	0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e,
-	0x45, 0x78, 0x65, 0x63, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x28, 0x01,
-	0x30, 0x01, 0x32, 0x80, 0x02, 0x0a, 0x11, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e,
-	0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x78, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x43,
-	0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x35, 0x2e, 0x6f,
-	0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e,
-	0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x47, 0x65, 0x74, 0x43,
-	0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x1a, 0x2b, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61,
-	0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e,
-	0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67,
-	0x22, 0x00, 0x12, 0x71, 0x0a, 0x13, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x43, 0x6c, 0x75, 0x73,
-	0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x2b, 0x2e, 0x6f, 0x63, 0x74, 0x65,
-	0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f,
-	0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72,
-	0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x1a, 0x2b, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
+	0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65,
+	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x77, 0x0a, 0x0c, 0x4c, 0x69, 0x73, 0x74,
+	0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x12, 0x31, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
+	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72,
+	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x54, 0x65, 0x72, 0x6d,
+	0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x32, 0x2e, 0x6f, 0x63,
+	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
+	0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x54,
+	0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22,
+	0x00, 0x12, 0x86, 0x01, 0x0a, 0x11, 0x57, 0x72, 0x69, 0x74, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69,
+	0x6e, 0x61, 0x6c, 0x44, 0x61, 0x74, 0x61, 0x12, 0x36, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69,
+	0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64,
+	0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57, 0x72, 0x69, 0x74, 0x65, 0x54, 0x65, 0x72, 0x6d,
+	0x69, 0x6e, 0x61, 0x6c, 0x44, 0x61, 0x74, 0x61, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x37, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d,
+	0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x57,
+	0x72, 0x69, 0x74, 0x65, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x44, 0x61, 0x74, 0x61,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x92, 0x01, 0x0a, 0x15, 0x53,
+	0x65, 0x74, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x57, 0x69, 0x6e, 0x64, 0x6f, 0x77,
+	0x53, 0x69, 0x7a, 0x65, 0x12, 0x3a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e,
+	0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d,
+	0x2e, 0x76, 0x31, 0x2e, 0x53, 0x65, 0x74, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x57,
+	0x69, 0x6e, 0x64, 0x6f, 0x77, 0x53, 0x69, 0x7a, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x3b, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e,
+	0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e,
+	0x53, 0x65, 0x74, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x57, 0x69, 0x6e, 0x64, 0x6f,
+	0x77, 0x53, 0x69, 0x7a, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12,
+	0x7f, 0x0a, 0x0e, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61,
+	0x6c, 0x12, 0x33, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69,
+	0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31,
+	0x2e, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x54, 0x65, 0x72, 0x6d, 0x69, 0x6e, 0x61, 0x6c, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x34, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
 	0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69,
-	0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e,
-	0x66, 0x69, 0x67, 0x22, 0x00, 0x42, 0x32, 0x5a, 0x30, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e,
-	0x63, 0x6f, 0x6d, 0x2f, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2f, 0x6f, 0x63, 0x74,
-	0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2f, 0x61, 0x70, 0x69, 0x73, 0x2f, 0x6d, 0x61, 0x69, 0x6e, 0x2f,
-	0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x76, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x33,
+	0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x54, 0x65, 0x72, 0x6d,
+	0x69, 0x6e, 0x61, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x30, 0x01,
+	0x12, 0x70, 0x0a, 0x09, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x4c, 0x6f, 0x67, 0x12, 0x2e, 0x2e,
+	0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69,
+	0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73,
+	0x74, 0x65, 0x6e, 0x4c, 0x6f, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x2f, 0x2e,
+	0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69,
+	0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x4c, 0x69, 0x73,
+	0x74, 0x65, 0x6e, 0x4c, 0x6f, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00,
+	0x30, 0x01, 0x12, 0x63, 0x0a, 0x04, 0x45, 0x78, 0x65, 0x63, 0x12, 0x29, 0x2e, 0x6f, 0x63, 0x74,
+	0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63,
+	0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x65, 0x63, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x2a, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d,
+	0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75,
+	0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x78, 0x65, 0x63, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x22, 0x00, 0x28, 0x01, 0x30, 0x01, 0x32, 0x80, 0x02, 0x0a, 0x11, 0x4d, 0x61, 0x6e, 0x61,
+	0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x78, 0x0a,
+	0x10, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69,
+	0x67, 0x12, 0x35, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69,
+	0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31,
+	0x2e, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69,
+	0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x2b, 0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c,
+	0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72,
+	0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43,
+	0x6f, 0x6e, 0x66, 0x69, 0x67, 0x22, 0x00, 0x12, 0x71, 0x0a, 0x13, 0x55, 0x70, 0x64, 0x61, 0x74,
+	0x65, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x12, 0x2b,
+	0x2e, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61,
+	0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c,
+	0x75, 0x73, 0x74, 0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x1a, 0x2b, 0x2e, 0x6f, 0x63,
+	0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2e, 0x61, 0x70, 0x69, 0x2e, 0x6d, 0x61, 0x69, 0x6e, 0x2e,
+	0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x2e, 0x76, 0x31, 0x2e, 0x43, 0x6c, 0x75, 0x73, 0x74,
+	0x65, 0x72, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x22, 0x00, 0x42, 0x32, 0x5a, 0x30, 0x67, 0x69,
+	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75,
+	0x6d, 0x2f, 0x6f, 0x63, 0x74, 0x65, 0x6c, 0x69, 0x75, 0x6d, 0x2f, 0x61, 0x70, 0x69, 0x73, 0x2f,
+	0x6d, 0x61, 0x69, 0x6e, 0x2f, 0x63, 0x6f, 0x72, 0x64, 0x69, 0x75, 0x6d, 0x76, 0x31, 0x62, 0x06,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -18938,7 +19215,7 @@ func file_cordiumv1_proto_rawDescGZIP() []byte {
 }
 
 var file_cordiumv1_proto_enumTypes = make([]protoimpl.EnumInfo, 22)
-var file_cordiumv1_proto_msgTypes = make([]protoimpl.MessageInfo, 222)
+var file_cordiumv1_proto_msgTypes = make([]protoimpl.MessageInfo, 225)
 var file_cordiumv1_proto_goTypes = []any{
 	(Workspace_Spec_Runtime_Task_Type)(0),                                 // 0: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task.Type
 	(Workspace_Spec_Runtime_Task_OnFailure)(0),                            // 1: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task.OnFailure
@@ -19000,680 +19277,692 @@ var file_cordiumv1_proto_goTypes = []any{
 	(*GetSpaceMembershipRequest)(nil),                                     // 57: octelium.api.main.cordium.v1.GetSpaceMembershipRequest
 	(*UserConfig)(nil),                                                    // 58: octelium.api.main.cordium.v1.UserConfig
 	(*GetUserConfigRequest)(nil),                                          // 59: octelium.api.main.cordium.v1.GetUserConfigRequest
-	(*ShareWorkspacePortRequest)(nil),                                     // 60: octelium.api.main.cordium.v1.ShareWorkspacePortRequest
-	(*ShareWorkspacePortResponse)(nil),                                    // 61: octelium.api.main.cordium.v1.ShareWorkspacePortResponse
-	(*UnshareWorkspacePortRequest)(nil),                                   // 62: octelium.api.main.cordium.v1.UnshareWorkspacePortRequest
-	(*UnshareWorkspacePortResponse)(nil),                                  // 63: octelium.api.main.cordium.v1.UnshareWorkspacePortResponse
-	(*LeaveSpaceRequest)(nil),                                             // 64: octelium.api.main.cordium.v1.LeaveSpaceRequest
-	(*LeaveSpaceResponse)(nil),                                            // 65: octelium.api.main.cordium.v1.LeaveSpaceResponse
-	(*Region)(nil),                                                        // 66: octelium.api.main.cordium.v1.Region
-	(*RegionList)(nil),                                                    // 67: octelium.api.main.cordium.v1.RegionList
-	(*ListRegionOptions)(nil),                                             // 68: octelium.api.main.cordium.v1.ListRegionOptions
-	(*CreateTerminalRequest)(nil),                                         // 69: octelium.api.main.cordium.v1.CreateTerminalRequest
-	(*Terminal)(nil),                                                      // 70: octelium.api.main.cordium.v1.Terminal
-	(*CreateTerminalResponse)(nil),                                        // 71: octelium.api.main.cordium.v1.CreateTerminalResponse
-	(*RemoveTerminalRequest)(nil),                                         // 72: octelium.api.main.cordium.v1.RemoveTerminalRequest
-	(*RemoveTerminalResponse)(nil),                                        // 73: octelium.api.main.cordium.v1.RemoveTerminalResponse
-	(*ListTerminalRequest)(nil),                                           // 74: octelium.api.main.cordium.v1.ListTerminalRequest
-	(*ListTerminalResponse)(nil),                                          // 75: octelium.api.main.cordium.v1.ListTerminalResponse
-	(*WriteTerminalDataResponse)(nil),                                     // 76: octelium.api.main.cordium.v1.WriteTerminalDataResponse
-	(*SetTerminalWindowSizeRequest)(nil),                                  // 77: octelium.api.main.cordium.v1.SetTerminalWindowSizeRequest
-	(*SetTerminalWindowSizeResponse)(nil),                                 // 78: octelium.api.main.cordium.v1.SetTerminalWindowSizeResponse
-	(*WriteTerminalDataRequest)(nil),                                      // 79: octelium.api.main.cordium.v1.WriteTerminalDataRequest
-	(*ListenTerminalRequest)(nil),                                         // 80: octelium.api.main.cordium.v1.ListenTerminalRequest
-	(*ListenTerminalResponse)(nil),                                        // 81: octelium.api.main.cordium.v1.ListenTerminalResponse
-	(*ListenLogRequest)(nil),                                              // 82: octelium.api.main.cordium.v1.ListenLogRequest
-	(*ListenLogResponse)(nil),                                             // 83: octelium.api.main.cordium.v1.ListenLogResponse
-	(*WatchWorkspaceRequest)(nil),                                         // 84: octelium.api.main.cordium.v1.WatchWorkspaceRequest
-	(*WatchWorkspaceResponse)(nil),                                        // 85: octelium.api.main.cordium.v1.WatchWorkspaceResponse
-	(*CancelBuildTemplateRequest)(nil),                                    // 86: octelium.api.main.cordium.v1.CancelBuildTemplateRequest
-	(*ExecRequest)(nil),                                                   // 87: octelium.api.main.cordium.v1.ExecRequest
-	(*ExecResponse)(nil),                                                  // 88: octelium.api.main.cordium.v1.ExecResponse
-	(*ClusterConfig)(nil),                                                 // 89: octelium.api.main.cordium.v1.ClusterConfig
-	(*Condition)(nil),                                                     // 90: octelium.api.main.cordium.v1.Condition
-	(*GetClusterConfigRequest)(nil),                                       // 91: octelium.api.main.cordium.v1.GetClusterConfigRequest
-	(*SessionExtInfo)(nil),                                                // 92: octelium.api.main.cordium.v1.SessionExtInfo
-	(*RegionExtInfo)(nil),                                                 // 93: octelium.api.main.cordium.v1.RegionExtInfo
-	(*Workspace_Spec)(nil),                                                // 94: octelium.api.main.cordium.v1.Workspace.Spec
-	(*Workspace_Status)(nil),                                              // 95: octelium.api.main.cordium.v1.Workspace.Status
-	(*Workspace_Spec_Image)(nil),                                          // 96: octelium.api.main.cordium.v1.Workspace.Spec.Image
-	(*Workspace_Spec_Repository)(nil),                                     // 97: octelium.api.main.cordium.v1.Workspace.Spec.Repository
-	(*Workspace_Spec_AdditionalRepository)(nil),                           // 98: octelium.api.main.cordium.v1.Workspace.Spec.AdditionalRepository
-	(*Workspace_Spec_Runtime)(nil),                                        // 99: octelium.api.main.cordium.v1.Workspace.Spec.Runtime
-	(*Workspace_Spec_Application)(nil),                                    // 100: octelium.api.main.cordium.v1.Workspace.Spec.Application
-	(*Workspace_Spec_Limit)(nil),                                          // 101: octelium.api.main.cordium.v1.Workspace.Spec.Limit
-	(*Workspace_Spec_Var)(nil),                                            // 102: octelium.api.main.cordium.v1.Workspace.Spec.Var
-	(*Workspace_Spec_Image_Dockerfile)(nil),                               // 103: octelium.api.main.cordium.v1.Workspace.Spec.Image.Dockerfile
-	(*Workspace_Spec_Image_Git)(nil),                                      // 104: octelium.api.main.cordium.v1.Workspace.Spec.Image.Git
-	(*Workspace_Spec_Image_Registry)(nil),                                 // 105: octelium.api.main.cordium.v1.Workspace.Spec.Image.Registry
-	(*Workspace_Spec_Image_Repository)(nil),                               // 106: octelium.api.main.cordium.v1.Workspace.Spec.Image.Repository
-	(*Workspace_Spec_Image_Registry_Authentication)(nil),                  // 107: octelium.api.main.cordium.v1.Workspace.Spec.Image.Registry.Authentication
-	(*Workspace_Spec_Image_Registry_Authentication_Password)(nil),         // 108: octelium.api.main.cordium.v1.Workspace.Spec.Image.Registry.Authentication.Password
-	(*Workspace_Spec_Image_Repository_Devcontainer)(nil),                  // 109: octelium.api.main.cordium.v1.Workspace.Spec.Image.Repository.Devcontainer
-	(*Workspace_Spec_Image_Repository_Dockerfile)(nil),                    // 110: octelium.api.main.cordium.v1.Workspace.Spec.Image.Repository.Dockerfile
-	(*Workspace_Spec_Repository_Authentication)(nil),                      // 111: octelium.api.main.cordium.v1.Workspace.Spec.Repository.Authentication
-	(*Workspace_Spec_Repository_CloneOptions)(nil),                        // 112: octelium.api.main.cordium.v1.Workspace.Spec.Repository.CloneOptions
-	(*Workspace_Spec_Repository_Authentication_HTTP)(nil),                 // 113: octelium.api.main.cordium.v1.Workspace.Spec.Repository.Authentication.HTTP
-	(*Workspace_Spec_Repository_Authentication_HTTP_Password)(nil),        // 114: octelium.api.main.cordium.v1.Workspace.Spec.Repository.Authentication.HTTP.Password
-	(*Workspace_Spec_Runtime_EnvVar)(nil),                                 // 115: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.EnvVar
-	(*Workspace_Spec_Runtime_Task)(nil),                                   // 116: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task
-	(*Workspace_Spec_Runtime_VolumeMount)(nil),                            // 117: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.VolumeMount
-	(*Workspace_Spec_Runtime_Devcontainers)(nil),                          // 118: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers
-	(*Workspace_Spec_Runtime_Octelium)(nil),                               // 119: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Octelium
-	(*Workspace_Spec_Runtime_Network)(nil),                                // 120: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network
-	(*Workspace_Spec_Runtime_Filesystem)(nil),                             // 121: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Filesystem
-	(*Workspace_Spec_Runtime_Capabilities)(nil),                           // 122: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities
-	(*Workspace_Spec_Runtime_Timeout)(nil),                                // 123: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Timeout
-	(*Workspace_Spec_Runtime_Task_EnvVar)(nil),                            // 124: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task.EnvVar
-	(*Workspace_Spec_Runtime_Devcontainers_Feature)(nil),                  // 125: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers.Feature
-	(*Workspace_Spec_Runtime_Devcontainers_Feature_Option)(nil),           // 126: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers.Feature.Option
-	(*Workspace_Spec_Runtime_Network_Rule)(nil),                           // 127: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule
-	(*Workspace_Spec_Runtime_Network_Egress)(nil),                         // 128: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Egress
-	(*Workspace_Spec_Limit_CPU)(nil),                                      // 129: octelium.api.main.cordium.v1.Workspace.Spec.Limit.CPU
-	(*Workspace_Spec_Limit_Memory)(nil),                                   // 130: octelium.api.main.cordium.v1.Workspace.Spec.Limit.Memory
-	(*Workspace_Spec_Limit_Storage)(nil),                                  // 131: octelium.api.main.cordium.v1.Workspace.Spec.Limit.Storage
-	(*Workspace_Status_Failure)(nil),                                      // 132: octelium.api.main.cordium.v1.Workspace.Status.Failure
-	(*Workspace_Status_SharedPort)(nil),                                   // 133: octelium.api.main.cordium.v1.Workspace.Status.SharedPort
-	(*Workspace_Status_Run)(nil),                                          // 134: octelium.api.main.cordium.v1.Workspace.Status.Run
-	(*Workspace_Status_Failure_ImageBuild)(nil),                           // 135: octelium.api.main.cordium.v1.Workspace.Status.Failure.ImageBuild
-	(*Workspace_Status_Failure_ImagePull)(nil),                            // 136: octelium.api.main.cordium.v1.Workspace.Status.Failure.ImagePull
-	(*Workspace_Status_Failure_RepoClone)(nil),                            // 137: octelium.api.main.cordium.v1.Workspace.Status.Failure.RepoClone
-	(*Workspace_Status_Failure_RepoCheckout)(nil),                         // 138: octelium.api.main.cordium.v1.Workspace.Status.Failure.RepoCheckout
-	(*Workspace_Status_Failure_BuildTimeoutExceeded)(nil),                 // 139: octelium.api.main.cordium.v1.Workspace.Status.Failure.BuildTimeoutExceeded
-	(*Workspace_Status_Failure_Task)(nil),                                 // 140: octelium.api.main.cordium.v1.Workspace.Status.Failure.Task
-	(*Workspace_Status_Failure_StartupUnknown)(nil),                       // 141: octelium.api.main.cordium.v1.Workspace.Status.Failure.StartupUnknown
-	(*Workspace_Status_Failure_StartupTimeoutExceeded)(nil),               // 142: octelium.api.main.cordium.v1.Workspace.Status.Failure.StartupTimeoutExceeded
-	(*Workspace_Status_Failure_LoadStorage)(nil),                          // 143: octelium.api.main.cordium.v1.Workspace.Status.Failure.LoadStorage
-	(*Workspace_Status_Failure_SaveStorage)(nil),                          // 144: octelium.api.main.cordium.v1.Workspace.Status.Failure.SaveStorage
-	(*Workspace_Status_Failure_StoppageTimeoutExceeded)(nil),              // 145: octelium.api.main.cordium.v1.Workspace.Status.Failure.StoppageTimeoutExceeded
-	(*Workspace_Status_Failure_RunContainer)(nil),                         // 146: octelium.api.main.cordium.v1.Workspace.Status.Failure.RunContainer
-	(*Workspace_Status_Failure_HealthCheck)(nil),                          // 147: octelium.api.main.cordium.v1.Workspace.Status.Failure.HealthCheck
-	(*Workspace_Status_Failure_Unknown)(nil),                              // 148: octelium.api.main.cordium.v1.Workspace.Status.Failure.Unknown
-	(*Workspace_Status_Failure_AdditionalRepoClone)(nil),                  // 149: octelium.api.main.cordium.v1.Workspace.Status.Failure.AdditionalRepoClone
-	(*Workspace_Status_Failure_NetworkPolicy)(nil),                        // 150: octelium.api.main.cordium.v1.Workspace.Status.Failure.NetworkPolicy
-	(*Workspace_Status_Failure_Volume)(nil),                               // 151: octelium.api.main.cordium.v1.Workspace.Status.Failure.Volume
-	(*WorkspaceSnapshot_Spec)(nil),                                        // 152: octelium.api.main.cordium.v1.WorkspaceSnapshot.Spec
-	(*WorkspaceSnapshot_Status)(nil),                                      // 153: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status
-	(*WorkspaceSnapshot_Status_Failure)(nil),                              // 154: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure
-	(*WorkspaceSnapshot_Status_Failure_Unsupported)(nil),                  // 155: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.Unsupported
-	(*WorkspaceSnapshot_Status_Failure_SourceNotFound)(nil),               // 156: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.SourceNotFound
-	(*WorkspaceSnapshot_Status_Failure_Storage)(nil),                      // 157: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.Storage
-	(*WorkspaceSnapshot_Status_Failure_Unknown)(nil),                      // 158: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.Unknown
-	(*Volume_Spec)(nil),                                                   // 159: octelium.api.main.cordium.v1.Volume.Spec
-	(*Volume_Status)(nil),                                                 // 160: octelium.api.main.cordium.v1.Volume.Status
-	(*Volume_Spec_Size)(nil),                                              // 161: octelium.api.main.cordium.v1.Volume.Spec.Size
-	(*Volume_Status_Failure)(nil),                                         // 162: octelium.api.main.cordium.v1.Volume.Status.Failure
-	(*Volume_Status_Failure_Unsupported)(nil),                             // 163: octelium.api.main.cordium.v1.Volume.Status.Failure.Unsupported
-	(*Volume_Status_Failure_Storage)(nil),                                 // 164: octelium.api.main.cordium.v1.Volume.Status.Failure.Storage
-	(*Volume_Status_Failure_Unknown)(nil),                                 // 165: octelium.api.main.cordium.v1.Volume.Status.Failure.Unknown
-	(*Secret_Spec)(nil),                                                   // 166: octelium.api.main.cordium.v1.Secret.Spec
-	(*Secret_Status)(nil),                                                 // 167: octelium.api.main.cordium.v1.Secret.Status
-	(*Secret_Data)(nil),                                                   // 168: octelium.api.main.cordium.v1.Secret.Data
-	(*ClientMessage_ListenTerminalEndRequest)(nil),                        // 169: octelium.api.main.cordium.v1.ClientMessage.ListenTerminalEndRequest
-	(*ServerMessage_WorkspaceUpdate)(nil),                                 // 170: octelium.api.main.cordium.v1.ServerMessage.WorkspaceUpdate
-	(*ServerMessage_ListenTerminalEvent)(nil),                             // 171: octelium.api.main.cordium.v1.ServerMessage.ListenTerminalEvent
-	(*StartWorkspaceRequest_Config)(nil),                                  // 172: octelium.api.main.cordium.v1.StartWorkspaceRequest.Config
-	(*Template_Spec)(nil),                                                 // 173: octelium.api.main.cordium.v1.Template.Spec
-	(*Template_Status)(nil),                                               // 174: octelium.api.main.cordium.v1.Template.Status
-	(*Template_Status_BuildInfo)(nil),                                     // 175: octelium.api.main.cordium.v1.Template.Status.BuildInfo
-	(*Template_Status_BuildInfo_Build)(nil),                               // 176: octelium.api.main.cordium.v1.Template.Status.BuildInfo.Build
-	(*Space_Spec)(nil),                                                    // 177: octelium.api.main.cordium.v1.Space.Spec
-	(*Space_Status)(nil),                                                  // 178: octelium.api.main.cordium.v1.Space.Status
-	(*Space_Spec_Limit)(nil),                                              // 179: octelium.api.main.cordium.v1.Space.Spec.Limit
-	(*Space_Spec_Runtime)(nil),                                            // 180: octelium.api.main.cordium.v1.Space.Spec.Runtime
-	(*Space_Spec_Authorization)(nil),                                      // 181: octelium.api.main.cordium.v1.Space.Spec.Authorization
-	(*Membership_Spec)(nil),                                               // 182: octelium.api.main.cordium.v1.Membership.Spec
-	(*Membership_Status)(nil),                                             // 183: octelium.api.main.cordium.v1.Membership.Status
-	(*Membership_Status_GitProviderState)(nil),                            // 184: octelium.api.main.cordium.v1.Membership.Status.GitProviderState
-	(*Membership_Status_UserInfo)(nil),                                    // 185: octelium.api.main.cordium.v1.Membership.Status.UserInfo
-	nil,                                                                   // 186: octelium.api.main.cordium.v1.Membership.Status.GitProviderStateMapEntry
-	(*GitProvider_Spec)(nil),                                              // 187: octelium.api.main.cordium.v1.GitProvider.Spec
-	(*GitProvider_Status)(nil),                                            // 188: octelium.api.main.cordium.v1.GitProvider.Status
-	(*GitProvider_Spec_Github)(nil),                                       // 189: octelium.api.main.cordium.v1.GitProvider.Spec.Github
-	(*GitProvider_Spec_Gitlab)(nil),                                       // 190: octelium.api.main.cordium.v1.GitProvider.Spec.Gitlab
-	(*GitProvider_Spec_OAuth2)(nil),                                       // 191: octelium.api.main.cordium.v1.GitProvider.Spec.OAuth2
-	(*GitProvider_Spec_Github_ClientSecret)(nil),                          // 192: octelium.api.main.cordium.v1.GitProvider.Spec.Github.ClientSecret
-	(*GitProvider_Spec_Gitlab_ClientSecret)(nil),                          // 193: octelium.api.main.cordium.v1.GitProvider.Spec.Gitlab.ClientSecret
-	(*GitProvider_Spec_OAuth2_ClientSecret)(nil),                          // 194: octelium.api.main.cordium.v1.GitProvider.Spec.OAuth2.ClientSecret
-	(*UserSecret_Spec)(nil),                                               // 195: octelium.api.main.cordium.v1.UserSecret.Spec
-	(*UserSecret_Status)(nil),                                             // 196: octelium.api.main.cordium.v1.UserSecret.Status
-	(*UserSecret_Data)(nil),                                               // 197: octelium.api.main.cordium.v1.UserSecret.Data
-	(*UserSecret_Status_SSHKey)(nil),                                      // 198: octelium.api.main.cordium.v1.UserSecret.Status.SSHKey
-	(*UserConfig_Spec)(nil),                                               // 199: octelium.api.main.cordium.v1.UserConfig.Spec
-	(*UserConfig_Status)(nil),                                             // 200: octelium.api.main.cordium.v1.UserConfig.Status
-	(*UserConfig_Spec_Dotfiles)(nil),                                      // 201: octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles
-	(*UserConfig_Spec_EnvVar)(nil),                                        // 202: octelium.api.main.cordium.v1.UserConfig.Spec.EnvVar
-	(*UserConfig_Spec_Dotfiles_Authentication)(nil),                       // 203: octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.Authentication
-	(*UserConfig_Spec_Dotfiles_Authentication_HTTP)(nil),                  // 204: octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.Authentication.HTTP
-	(*UserConfig_Spec_Dotfiles_Authentication_HTTP_Password)(nil),         // 205: octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.Authentication.HTTP.Password
-	(*Region_Spec)(nil),                                                   // 206: octelium.api.main.cordium.v1.Region.Spec
-	(*Region_Status)(nil),                                                 // 207: octelium.api.main.cordium.v1.Region.Status
-	(*ListenTerminalResponse_Stdout)(nil),                                 // 208: octelium.api.main.cordium.v1.ListenTerminalResponse.Stdout
-	(*ListenTerminalResponse_WindowSize)(nil),                             // 209: octelium.api.main.cordium.v1.ListenTerminalResponse.WindowSize
-	(*ListenTerminalResponse_Close)(nil),                                  // 210: octelium.api.main.cordium.v1.ListenTerminalResponse.Close
-	(*WatchWorkspaceResponse_Create)(nil),                                 // 211: octelium.api.main.cordium.v1.WatchWorkspaceResponse.Create
-	(*WatchWorkspaceResponse_Update)(nil),                                 // 212: octelium.api.main.cordium.v1.WatchWorkspaceResponse.Update
-	(*WatchWorkspaceResponse_Delete)(nil),                                 // 213: octelium.api.main.cordium.v1.WatchWorkspaceResponse.Delete
-	(*ExecRequest_Request)(nil),                                           // 214: octelium.api.main.cordium.v1.ExecRequest.Request
-	(*ExecRequest_Kill)(nil),                                              // 215: octelium.api.main.cordium.v1.ExecRequest.Kill
-	(*ExecRequest_WriteData)(nil),                                         // 216: octelium.api.main.cordium.v1.ExecRequest.WriteData
-	(*ExecRequest_Request_EnvVar)(nil),                                    // 217: octelium.api.main.cordium.v1.ExecRequest.Request.EnvVar
-	(*ExecResponse_Stdout)(nil),                                           // 218: octelium.api.main.cordium.v1.ExecResponse.Stdout
-	(*ExecResponse_Stderr)(nil),                                           // 219: octelium.api.main.cordium.v1.ExecResponse.Stderr
-	(*ExecResponse_Exit)(nil),                                             // 220: octelium.api.main.cordium.v1.ExecResponse.Exit
-	(*ClusterConfig_Spec)(nil),                                            // 221: octelium.api.main.cordium.v1.ClusterConfig.Spec
-	(*ClusterConfig_Status)(nil),                                          // 222: octelium.api.main.cordium.v1.ClusterConfig.Status
-	(*ClusterConfig_Spec_Space)(nil),                                      // 223: octelium.api.main.cordium.v1.ClusterConfig.Spec.Space
-	(*ClusterConfig_Spec_Workspace)(nil),                                  // 224: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace
-	(*ClusterConfig_Spec_Volume)(nil),                                     // 225: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume
-	(*ClusterConfig_Spec_Space_Ownership)(nil),                            // 226: octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.Ownership
-	(*ClusterConfig_Spec_Space_Ownership_Rule)(nil),                       // 227: octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.Ownership.Rule
-	(*ClusterConfig_Spec_Workspace_Storage)(nil),                          // 228: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage
-	(*ClusterConfig_Spec_Workspace_Limit)(nil),                            // 229: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit
-	(*ClusterConfig_Spec_Workspace_Timeout)(nil),                          // 230: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout
-	(*ClusterConfig_Spec_Workspace_Runtime)(nil),                          // 231: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Runtime
-	(*ClusterConfig_Spec_Workspace_Storage_StorageClass)(nil),             // 232: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass
-	(*ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass)(nil),      // 233: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass
-	(*ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule)(nil),        // 234: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass.Rule
-	(*ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule)(nil), // 235: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass.Rule
-	(*ClusterConfig_Spec_Volume_Storage)(nil),                             // 236: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage
-	(*ClusterConfig_Spec_Volume_Limit)(nil),                               // 237: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Limit
-	(*ClusterConfig_Spec_Volume_Storage_StorageClass)(nil),                // 238: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage.StorageClass
-	(*ClusterConfig_Spec_Volume_Storage_StorageClass_Rule)(nil),           // 239: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage.StorageClass.Rule
-	(*Condition_All)(nil),                                                 // 240: octelium.api.main.cordium.v1.Condition.All
-	(*Condition_Any)(nil),                                                 // 241: octelium.api.main.cordium.v1.Condition.Any
-	(*Condition_None)(nil),                                                // 242: octelium.api.main.cordium.v1.Condition.None
-	(*Condition_OPA)(nil),                                                 // 243: octelium.api.main.cordium.v1.Condition.OPA
-	(*metav1.Metadata)(nil),                                               // 244: octelium.api.main.meta.v1.Metadata
-	(*metav1.ListResponseMeta)(nil),                                       // 245: octelium.api.main.meta.v1.ListResponseMeta
-	(*metav1.CommonListOptions)(nil),                                      // 246: octelium.api.main.meta.v1.CommonListOptions
-	(*metav1.ObjectReference)(nil),                                        // 247: octelium.api.main.meta.v1.ObjectReference
-	(*timestamppb.Timestamp)(nil),                                         // 248: google.protobuf.Timestamp
-	(*metav1.Duration)(nil),                                               // 249: octelium.api.main.meta.v1.Duration
-	(*structpb.Struct)(nil),                                               // 250: google.protobuf.Struct
-	(*metav1.DeleteOptions)(nil),                                          // 251: octelium.api.main.meta.v1.DeleteOptions
-	(*metav1.GetOptions)(nil),                                             // 252: octelium.api.main.meta.v1.GetOptions
-	(*metav1.OperationResult)(nil),                                        // 253: octelium.api.main.meta.v1.OperationResult
+	(*InitializeAgentRequest)(nil),                                        // 60: octelium.api.main.cordium.v1.InitializeAgentRequest
+	(*ShareWorkspacePortRequest)(nil),                                     // 61: octelium.api.main.cordium.v1.ShareWorkspacePortRequest
+	(*ShareWorkspacePortResponse)(nil),                                    // 62: octelium.api.main.cordium.v1.ShareWorkspacePortResponse
+	(*UnshareWorkspacePortRequest)(nil),                                   // 63: octelium.api.main.cordium.v1.UnshareWorkspacePortRequest
+	(*UnshareWorkspacePortResponse)(nil),                                  // 64: octelium.api.main.cordium.v1.UnshareWorkspacePortResponse
+	(*LeaveSpaceRequest)(nil),                                             // 65: octelium.api.main.cordium.v1.LeaveSpaceRequest
+	(*LeaveSpaceResponse)(nil),                                            // 66: octelium.api.main.cordium.v1.LeaveSpaceResponse
+	(*Region)(nil),                                                        // 67: octelium.api.main.cordium.v1.Region
+	(*RegionList)(nil),                                                    // 68: octelium.api.main.cordium.v1.RegionList
+	(*ListRegionOptions)(nil),                                             // 69: octelium.api.main.cordium.v1.ListRegionOptions
+	(*CreateTerminalRequest)(nil),                                         // 70: octelium.api.main.cordium.v1.CreateTerminalRequest
+	(*Terminal)(nil),                                                      // 71: octelium.api.main.cordium.v1.Terminal
+	(*CreateTerminalResponse)(nil),                                        // 72: octelium.api.main.cordium.v1.CreateTerminalResponse
+	(*RemoveTerminalRequest)(nil),                                         // 73: octelium.api.main.cordium.v1.RemoveTerminalRequest
+	(*RemoveTerminalResponse)(nil),                                        // 74: octelium.api.main.cordium.v1.RemoveTerminalResponse
+	(*ListTerminalRequest)(nil),                                           // 75: octelium.api.main.cordium.v1.ListTerminalRequest
+	(*ListTerminalResponse)(nil),                                          // 76: octelium.api.main.cordium.v1.ListTerminalResponse
+	(*WriteTerminalDataResponse)(nil),                                     // 77: octelium.api.main.cordium.v1.WriteTerminalDataResponse
+	(*SetTerminalWindowSizeRequest)(nil),                                  // 78: octelium.api.main.cordium.v1.SetTerminalWindowSizeRequest
+	(*SetTerminalWindowSizeResponse)(nil),                                 // 79: octelium.api.main.cordium.v1.SetTerminalWindowSizeResponse
+	(*WriteTerminalDataRequest)(nil),                                      // 80: octelium.api.main.cordium.v1.WriteTerminalDataRequest
+	(*ListenTerminalRequest)(nil),                                         // 81: octelium.api.main.cordium.v1.ListenTerminalRequest
+	(*ListenTerminalResponse)(nil),                                        // 82: octelium.api.main.cordium.v1.ListenTerminalResponse
+	(*ListenLogRequest)(nil),                                              // 83: octelium.api.main.cordium.v1.ListenLogRequest
+	(*ListenLogResponse)(nil),                                             // 84: octelium.api.main.cordium.v1.ListenLogResponse
+	(*WatchWorkspaceRequest)(nil),                                         // 85: octelium.api.main.cordium.v1.WatchWorkspaceRequest
+	(*WatchWorkspaceResponse)(nil),                                        // 86: octelium.api.main.cordium.v1.WatchWorkspaceResponse
+	(*CancelBuildTemplateRequest)(nil),                                    // 87: octelium.api.main.cordium.v1.CancelBuildTemplateRequest
+	(*ExecRequest)(nil),                                                   // 88: octelium.api.main.cordium.v1.ExecRequest
+	(*ExecResponse)(nil),                                                  // 89: octelium.api.main.cordium.v1.ExecResponse
+	(*ClusterConfig)(nil),                                                 // 90: octelium.api.main.cordium.v1.ClusterConfig
+	(*Condition)(nil),                                                     // 91: octelium.api.main.cordium.v1.Condition
+	(*GetClusterConfigRequest)(nil),                                       // 92: octelium.api.main.cordium.v1.GetClusterConfigRequest
+	(*SessionExtInfo)(nil),                                                // 93: octelium.api.main.cordium.v1.SessionExtInfo
+	(*RegionExtInfo)(nil),                                                 // 94: octelium.api.main.cordium.v1.RegionExtInfo
+	(*Workspace_Spec)(nil),                                                // 95: octelium.api.main.cordium.v1.Workspace.Spec
+	(*Workspace_Status)(nil),                                              // 96: octelium.api.main.cordium.v1.Workspace.Status
+	(*Workspace_Spec_Image)(nil),                                          // 97: octelium.api.main.cordium.v1.Workspace.Spec.Image
+	(*Workspace_Spec_Repository)(nil),                                     // 98: octelium.api.main.cordium.v1.Workspace.Spec.Repository
+	(*Workspace_Spec_AdditionalRepository)(nil),                           // 99: octelium.api.main.cordium.v1.Workspace.Spec.AdditionalRepository
+	(*Workspace_Spec_Runtime)(nil),                                        // 100: octelium.api.main.cordium.v1.Workspace.Spec.Runtime
+	(*Workspace_Spec_Application)(nil),                                    // 101: octelium.api.main.cordium.v1.Workspace.Spec.Application
+	(*Workspace_Spec_Limit)(nil),                                          // 102: octelium.api.main.cordium.v1.Workspace.Spec.Limit
+	(*Workspace_Spec_Var)(nil),                                            // 103: octelium.api.main.cordium.v1.Workspace.Spec.Var
+	(*Workspace_Spec_Image_Dockerfile)(nil),                               // 104: octelium.api.main.cordium.v1.Workspace.Spec.Image.Dockerfile
+	(*Workspace_Spec_Image_Git)(nil),                                      // 105: octelium.api.main.cordium.v1.Workspace.Spec.Image.Git
+	(*Workspace_Spec_Image_Registry)(nil),                                 // 106: octelium.api.main.cordium.v1.Workspace.Spec.Image.Registry
+	(*Workspace_Spec_Image_Repository)(nil),                               // 107: octelium.api.main.cordium.v1.Workspace.Spec.Image.Repository
+	(*Workspace_Spec_Image_Registry_Authentication)(nil),                  // 108: octelium.api.main.cordium.v1.Workspace.Spec.Image.Registry.Authentication
+	(*Workspace_Spec_Image_Registry_Authentication_Password)(nil),         // 109: octelium.api.main.cordium.v1.Workspace.Spec.Image.Registry.Authentication.Password
+	(*Workspace_Spec_Image_Repository_Devcontainer)(nil),                  // 110: octelium.api.main.cordium.v1.Workspace.Spec.Image.Repository.Devcontainer
+	(*Workspace_Spec_Image_Repository_Dockerfile)(nil),                    // 111: octelium.api.main.cordium.v1.Workspace.Spec.Image.Repository.Dockerfile
+	(*Workspace_Spec_Repository_Authentication)(nil),                      // 112: octelium.api.main.cordium.v1.Workspace.Spec.Repository.Authentication
+	(*Workspace_Spec_Repository_CloneOptions)(nil),                        // 113: octelium.api.main.cordium.v1.Workspace.Spec.Repository.CloneOptions
+	(*Workspace_Spec_Repository_Authentication_HTTP)(nil),                 // 114: octelium.api.main.cordium.v1.Workspace.Spec.Repository.Authentication.HTTP
+	(*Workspace_Spec_Repository_Authentication_HTTP_Password)(nil),        // 115: octelium.api.main.cordium.v1.Workspace.Spec.Repository.Authentication.HTTP.Password
+	(*Workspace_Spec_Runtime_EnvVar)(nil),                                 // 116: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.EnvVar
+	(*Workspace_Spec_Runtime_Task)(nil),                                   // 117: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task
+	(*Workspace_Spec_Runtime_VolumeMount)(nil),                            // 118: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.VolumeMount
+	(*Workspace_Spec_Runtime_Devcontainers)(nil),                          // 119: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers
+	(*Workspace_Spec_Runtime_Octelium)(nil),                               // 120: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Octelium
+	(*Workspace_Spec_Runtime_Network)(nil),                                // 121: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network
+	(*Workspace_Spec_Runtime_Filesystem)(nil),                             // 122: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Filesystem
+	(*Workspace_Spec_Runtime_Capabilities)(nil),                           // 123: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities
+	(*Workspace_Spec_Runtime_Timeout)(nil),                                // 124: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Timeout
+	(*Workspace_Spec_Runtime_Task_EnvVar)(nil),                            // 125: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task.EnvVar
+	(*Workspace_Spec_Runtime_Devcontainers_Feature)(nil),                  // 126: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers.Feature
+	(*Workspace_Spec_Runtime_Devcontainers_Feature_Option)(nil),           // 127: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers.Feature.Option
+	(*Workspace_Spec_Runtime_Network_Rule)(nil),                           // 128: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule
+	(*Workspace_Spec_Runtime_Network_Egress)(nil),                         // 129: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Egress
+	(*Workspace_Spec_Limit_CPU)(nil),                                      // 130: octelium.api.main.cordium.v1.Workspace.Spec.Limit.CPU
+	(*Workspace_Spec_Limit_Memory)(nil),                                   // 131: octelium.api.main.cordium.v1.Workspace.Spec.Limit.Memory
+	(*Workspace_Spec_Limit_Storage)(nil),                                  // 132: octelium.api.main.cordium.v1.Workspace.Spec.Limit.Storage
+	(*Workspace_Status_Failure)(nil),                                      // 133: octelium.api.main.cordium.v1.Workspace.Status.Failure
+	(*Workspace_Status_SharedPort)(nil),                                   // 134: octelium.api.main.cordium.v1.Workspace.Status.SharedPort
+	(*Workspace_Status_Run)(nil),                                          // 135: octelium.api.main.cordium.v1.Workspace.Status.Run
+	(*Workspace_Status_Failure_ImageBuild)(nil),                           // 136: octelium.api.main.cordium.v1.Workspace.Status.Failure.ImageBuild
+	(*Workspace_Status_Failure_ImagePull)(nil),                            // 137: octelium.api.main.cordium.v1.Workspace.Status.Failure.ImagePull
+	(*Workspace_Status_Failure_RepoClone)(nil),                            // 138: octelium.api.main.cordium.v1.Workspace.Status.Failure.RepoClone
+	(*Workspace_Status_Failure_RepoCheckout)(nil),                         // 139: octelium.api.main.cordium.v1.Workspace.Status.Failure.RepoCheckout
+	(*Workspace_Status_Failure_BuildTimeoutExceeded)(nil),                 // 140: octelium.api.main.cordium.v1.Workspace.Status.Failure.BuildTimeoutExceeded
+	(*Workspace_Status_Failure_Task)(nil),                                 // 141: octelium.api.main.cordium.v1.Workspace.Status.Failure.Task
+	(*Workspace_Status_Failure_StartupUnknown)(nil),                       // 142: octelium.api.main.cordium.v1.Workspace.Status.Failure.StartupUnknown
+	(*Workspace_Status_Failure_StartupTimeoutExceeded)(nil),               // 143: octelium.api.main.cordium.v1.Workspace.Status.Failure.StartupTimeoutExceeded
+	(*Workspace_Status_Failure_LoadStorage)(nil),                          // 144: octelium.api.main.cordium.v1.Workspace.Status.Failure.LoadStorage
+	(*Workspace_Status_Failure_SaveStorage)(nil),                          // 145: octelium.api.main.cordium.v1.Workspace.Status.Failure.SaveStorage
+	(*Workspace_Status_Failure_StoppageTimeoutExceeded)(nil),              // 146: octelium.api.main.cordium.v1.Workspace.Status.Failure.StoppageTimeoutExceeded
+	(*Workspace_Status_Failure_RunContainer)(nil),                         // 147: octelium.api.main.cordium.v1.Workspace.Status.Failure.RunContainer
+	(*Workspace_Status_Failure_HealthCheck)(nil),                          // 148: octelium.api.main.cordium.v1.Workspace.Status.Failure.HealthCheck
+	(*Workspace_Status_Failure_Unknown)(nil),                              // 149: octelium.api.main.cordium.v1.Workspace.Status.Failure.Unknown
+	(*Workspace_Status_Failure_AdditionalRepoClone)(nil),                  // 150: octelium.api.main.cordium.v1.Workspace.Status.Failure.AdditionalRepoClone
+	(*Workspace_Status_Failure_NetworkPolicy)(nil),                        // 151: octelium.api.main.cordium.v1.Workspace.Status.Failure.NetworkPolicy
+	(*Workspace_Status_Failure_Volume)(nil),                               // 152: octelium.api.main.cordium.v1.Workspace.Status.Failure.Volume
+	(*WorkspaceSnapshot_Spec)(nil),                                        // 153: octelium.api.main.cordium.v1.WorkspaceSnapshot.Spec
+	(*WorkspaceSnapshot_Status)(nil),                                      // 154: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status
+	(*WorkspaceSnapshot_Status_Failure)(nil),                              // 155: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure
+	(*WorkspaceSnapshot_Status_Failure_Unsupported)(nil),                  // 156: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.Unsupported
+	(*WorkspaceSnapshot_Status_Failure_SourceNotFound)(nil),               // 157: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.SourceNotFound
+	(*WorkspaceSnapshot_Status_Failure_Storage)(nil),                      // 158: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.Storage
+	(*WorkspaceSnapshot_Status_Failure_Unknown)(nil),                      // 159: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.Unknown
+	(*Volume_Spec)(nil),                                                   // 160: octelium.api.main.cordium.v1.Volume.Spec
+	(*Volume_Status)(nil),                                                 // 161: octelium.api.main.cordium.v1.Volume.Status
+	(*Volume_Spec_Size)(nil),                                              // 162: octelium.api.main.cordium.v1.Volume.Spec.Size
+	(*Volume_Status_Failure)(nil),                                         // 163: octelium.api.main.cordium.v1.Volume.Status.Failure
+	(*Volume_Status_Failure_Unsupported)(nil),                             // 164: octelium.api.main.cordium.v1.Volume.Status.Failure.Unsupported
+	(*Volume_Status_Failure_Storage)(nil),                                 // 165: octelium.api.main.cordium.v1.Volume.Status.Failure.Storage
+	(*Volume_Status_Failure_Unknown)(nil),                                 // 166: octelium.api.main.cordium.v1.Volume.Status.Failure.Unknown
+	(*Secret_Spec)(nil),                                                   // 167: octelium.api.main.cordium.v1.Secret.Spec
+	(*Secret_Status)(nil),                                                 // 168: octelium.api.main.cordium.v1.Secret.Status
+	(*Secret_Data)(nil),                                                   // 169: octelium.api.main.cordium.v1.Secret.Data
+	(*ClientMessage_ListenTerminalEndRequest)(nil),                        // 170: octelium.api.main.cordium.v1.ClientMessage.ListenTerminalEndRequest
+	(*ServerMessage_WorkspaceUpdate)(nil),                                 // 171: octelium.api.main.cordium.v1.ServerMessage.WorkspaceUpdate
+	(*ServerMessage_ListenTerminalEvent)(nil),                             // 172: octelium.api.main.cordium.v1.ServerMessage.ListenTerminalEvent
+	(*StartWorkspaceRequest_Config)(nil),                                  // 173: octelium.api.main.cordium.v1.StartWorkspaceRequest.Config
+	(*Template_Spec)(nil),                                                 // 174: octelium.api.main.cordium.v1.Template.Spec
+	(*Template_Status)(nil),                                               // 175: octelium.api.main.cordium.v1.Template.Status
+	(*Template_Status_BuildInfo)(nil),                                     // 176: octelium.api.main.cordium.v1.Template.Status.BuildInfo
+	(*Template_Status_BuildInfo_Build)(nil),                               // 177: octelium.api.main.cordium.v1.Template.Status.BuildInfo.Build
+	(*Space_Spec)(nil),                                                    // 178: octelium.api.main.cordium.v1.Space.Spec
+	(*Space_Status)(nil),                                                  // 179: octelium.api.main.cordium.v1.Space.Status
+	(*Space_Spec_Limit)(nil),                                              // 180: octelium.api.main.cordium.v1.Space.Spec.Limit
+	(*Space_Spec_Runtime)(nil),                                            // 181: octelium.api.main.cordium.v1.Space.Spec.Runtime
+	(*Space_Spec_Authorization)(nil),                                      // 182: octelium.api.main.cordium.v1.Space.Spec.Authorization
+	(*Membership_Spec)(nil),                                               // 183: octelium.api.main.cordium.v1.Membership.Spec
+	(*Membership_Status)(nil),                                             // 184: octelium.api.main.cordium.v1.Membership.Status
+	(*Membership_Status_GitProviderState)(nil),                            // 185: octelium.api.main.cordium.v1.Membership.Status.GitProviderState
+	(*Membership_Status_UserInfo)(nil),                                    // 186: octelium.api.main.cordium.v1.Membership.Status.UserInfo
+	nil,                                                                   // 187: octelium.api.main.cordium.v1.Membership.Status.GitProviderStateMapEntry
+	(*GitProvider_Spec)(nil),                                              // 188: octelium.api.main.cordium.v1.GitProvider.Spec
+	(*GitProvider_Status)(nil),                                            // 189: octelium.api.main.cordium.v1.GitProvider.Status
+	(*GitProvider_Spec_Github)(nil),                                       // 190: octelium.api.main.cordium.v1.GitProvider.Spec.Github
+	(*GitProvider_Spec_Gitlab)(nil),                                       // 191: octelium.api.main.cordium.v1.GitProvider.Spec.Gitlab
+	(*GitProvider_Spec_OAuth2)(nil),                                       // 192: octelium.api.main.cordium.v1.GitProvider.Spec.OAuth2
+	(*GitProvider_Spec_Github_ClientSecret)(nil),                          // 193: octelium.api.main.cordium.v1.GitProvider.Spec.Github.ClientSecret
+	(*GitProvider_Spec_Gitlab_ClientSecret)(nil),                          // 194: octelium.api.main.cordium.v1.GitProvider.Spec.Gitlab.ClientSecret
+	(*GitProvider_Spec_OAuth2_ClientSecret)(nil),                          // 195: octelium.api.main.cordium.v1.GitProvider.Spec.OAuth2.ClientSecret
+	(*UserSecret_Spec)(nil),                                               // 196: octelium.api.main.cordium.v1.UserSecret.Spec
+	(*UserSecret_Status)(nil),                                             // 197: octelium.api.main.cordium.v1.UserSecret.Status
+	(*UserSecret_Data)(nil),                                               // 198: octelium.api.main.cordium.v1.UserSecret.Data
+	(*UserSecret_Status_SSHKey)(nil),                                      // 199: octelium.api.main.cordium.v1.UserSecret.Status.SSHKey
+	(*UserConfig_Spec)(nil),                                               // 200: octelium.api.main.cordium.v1.UserConfig.Spec
+	(*UserConfig_Status)(nil),                                             // 201: octelium.api.main.cordium.v1.UserConfig.Status
+	(*UserConfig_Spec_Dotfiles)(nil),                                      // 202: octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles
+	(*UserConfig_Spec_EnvVar)(nil),                                        // 203: octelium.api.main.cordium.v1.UserConfig.Spec.EnvVar
+	(*UserConfig_Spec_Dotfiles_Authentication)(nil),                       // 204: octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.Authentication
+	(*UserConfig_Spec_Dotfiles_Authentication_HTTP)(nil),                  // 205: octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.Authentication.HTTP
+	(*UserConfig_Spec_Dotfiles_Authentication_HTTP_Password)(nil),         // 206: octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.Authentication.HTTP.Password
+	(*Region_Spec)(nil),                                                   // 207: octelium.api.main.cordium.v1.Region.Spec
+	(*Region_Status)(nil),                                                 // 208: octelium.api.main.cordium.v1.Region.Status
+	(*ListenTerminalResponse_Stdout)(nil),                                 // 209: octelium.api.main.cordium.v1.ListenTerminalResponse.Stdout
+	(*ListenTerminalResponse_WindowSize)(nil),                             // 210: octelium.api.main.cordium.v1.ListenTerminalResponse.WindowSize
+	(*ListenTerminalResponse_Close)(nil),                                  // 211: octelium.api.main.cordium.v1.ListenTerminalResponse.Close
+	(*WatchWorkspaceResponse_Create)(nil),                                 // 212: octelium.api.main.cordium.v1.WatchWorkspaceResponse.Create
+	(*WatchWorkspaceResponse_Update)(nil),                                 // 213: octelium.api.main.cordium.v1.WatchWorkspaceResponse.Update
+	(*WatchWorkspaceResponse_Delete)(nil),                                 // 214: octelium.api.main.cordium.v1.WatchWorkspaceResponse.Delete
+	(*ExecRequest_Request)(nil),                                           // 215: octelium.api.main.cordium.v1.ExecRequest.Request
+	(*ExecRequest_Kill)(nil),                                              // 216: octelium.api.main.cordium.v1.ExecRequest.Kill
+	(*ExecRequest_WriteData)(nil),                                         // 217: octelium.api.main.cordium.v1.ExecRequest.WriteData
+	(*ExecRequest_Request_EnvVar)(nil),                                    // 218: octelium.api.main.cordium.v1.ExecRequest.Request.EnvVar
+	(*ExecResponse_Stdout)(nil),                                           // 219: octelium.api.main.cordium.v1.ExecResponse.Stdout
+	(*ExecResponse_Stderr)(nil),                                           // 220: octelium.api.main.cordium.v1.ExecResponse.Stderr
+	(*ExecResponse_Exit)(nil),                                             // 221: octelium.api.main.cordium.v1.ExecResponse.Exit
+	(*ClusterConfig_Spec)(nil),                                            // 222: octelium.api.main.cordium.v1.ClusterConfig.Spec
+	(*ClusterConfig_Status)(nil),                                          // 223: octelium.api.main.cordium.v1.ClusterConfig.Status
+	(*ClusterConfig_Spec_Space)(nil),                                      // 224: octelium.api.main.cordium.v1.ClusterConfig.Spec.Space
+	(*ClusterConfig_Spec_Workspace)(nil),                                  // 225: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace
+	(*ClusterConfig_Spec_Volume)(nil),                                     // 226: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume
+	(*ClusterConfig_Spec_Agent)(nil),                                      // 227: octelium.api.main.cordium.v1.ClusterConfig.Spec.Agent
+	(*ClusterConfig_Spec_Space_Ownership)(nil),                            // 228: octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.Ownership
+	(*ClusterConfig_Spec_Space_Ownership_Rule)(nil),                       // 229: octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.Ownership.Rule
+	(*ClusterConfig_Spec_Workspace_Storage)(nil),                          // 230: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage
+	(*ClusterConfig_Spec_Workspace_Limit)(nil),                            // 231: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit
+	(*ClusterConfig_Spec_Workspace_Timeout)(nil),                          // 232: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout
+	(*ClusterConfig_Spec_Workspace_Runtime)(nil),                          // 233: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Runtime
+	(*ClusterConfig_Spec_Workspace_Storage_StorageClass)(nil),             // 234: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass
+	(*ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass)(nil),      // 235: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass
+	(*ClusterConfig_Spec_Workspace_Storage_StorageClass_Rule)(nil),        // 236: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass.Rule
+	(*ClusterConfig_Spec_Workspace_Storage_VolumeSnapshotClass_Rule)(nil), // 237: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass.Rule
+	(*ClusterConfig_Spec_Volume_Storage)(nil),                             // 238: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage
+	(*ClusterConfig_Spec_Volume_Limit)(nil),                               // 239: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Limit
+	(*ClusterConfig_Spec_Volume_Storage_StorageClass)(nil),                // 240: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage.StorageClass
+	(*ClusterConfig_Spec_Volume_Storage_StorageClass_Rule)(nil),           // 241: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage.StorageClass.Rule
+	(*ClusterConfig_Spec_Agent_LLM)(nil),                                  // 242: octelium.api.main.cordium.v1.ClusterConfig.Spec.Agent.LLM
+	(*Condition_All)(nil),                                                 // 243: octelium.api.main.cordium.v1.Condition.All
+	(*Condition_Any)(nil),                                                 // 244: octelium.api.main.cordium.v1.Condition.Any
+	(*Condition_None)(nil),                                                // 245: octelium.api.main.cordium.v1.Condition.None
+	(*Condition_OPA)(nil),                                                 // 246: octelium.api.main.cordium.v1.Condition.OPA
+	(*metav1.Metadata)(nil),                                               // 247: octelium.api.main.meta.v1.Metadata
+	(*metav1.ListResponseMeta)(nil),                                       // 248: octelium.api.main.meta.v1.ListResponseMeta
+	(*metav1.CommonListOptions)(nil),                                      // 249: octelium.api.main.meta.v1.CommonListOptions
+	(*metav1.ObjectReference)(nil),                                        // 250: octelium.api.main.meta.v1.ObjectReference
+	(*timestamppb.Timestamp)(nil),                                         // 251: google.protobuf.Timestamp
+	(*metav1.Duration)(nil),                                               // 252: octelium.api.main.meta.v1.Duration
+	(*structpb.Struct)(nil),                                               // 253: google.protobuf.Struct
+	(*metav1.DeleteOptions)(nil),                                          // 254: octelium.api.main.meta.v1.DeleteOptions
+	(*metav1.GetOptions)(nil),                                             // 255: octelium.api.main.meta.v1.GetOptions
+	(*metav1.OperationResult)(nil),                                        // 256: octelium.api.main.meta.v1.OperationResult
 }
 var file_cordiumv1_proto_depIdxs = []int32{
-	244, // 0: octelium.api.main.cordium.v1.Workspace.metadata:type_name -> octelium.api.main.meta.v1.Metadata
-	94,  // 1: octelium.api.main.cordium.v1.Workspace.spec:type_name -> octelium.api.main.cordium.v1.Workspace.Spec
-	95,  // 2: octelium.api.main.cordium.v1.Workspace.status:type_name -> octelium.api.main.cordium.v1.Workspace.Status
+	247, // 0: octelium.api.main.cordium.v1.Workspace.metadata:type_name -> octelium.api.main.meta.v1.Metadata
+	95,  // 1: octelium.api.main.cordium.v1.Workspace.spec:type_name -> octelium.api.main.cordium.v1.Workspace.Spec
+	96,  // 2: octelium.api.main.cordium.v1.Workspace.status:type_name -> octelium.api.main.cordium.v1.Workspace.Status
 	22,  // 3: octelium.api.main.cordium.v1.WorkspaceList.items:type_name -> octelium.api.main.cordium.v1.Workspace
-	245, // 4: octelium.api.main.cordium.v1.WorkspaceList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
-	246, // 5: octelium.api.main.cordium.v1.ListWorkspaceOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
-	247, // 6: octelium.api.main.cordium.v1.ListWorkspaceOptions.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 7: octelium.api.main.cordium.v1.ListWorkspaceOptions.templateRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	244, // 8: octelium.api.main.cordium.v1.WorkspaceSnapshot.metadata:type_name -> octelium.api.main.meta.v1.Metadata
-	152, // 9: octelium.api.main.cordium.v1.WorkspaceSnapshot.spec:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Spec
-	153, // 10: octelium.api.main.cordium.v1.WorkspaceSnapshot.status:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Status
+	248, // 4: octelium.api.main.cordium.v1.WorkspaceList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
+	249, // 5: octelium.api.main.cordium.v1.ListWorkspaceOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
+	250, // 6: octelium.api.main.cordium.v1.ListWorkspaceOptions.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 7: octelium.api.main.cordium.v1.ListWorkspaceOptions.templateRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	247, // 8: octelium.api.main.cordium.v1.WorkspaceSnapshot.metadata:type_name -> octelium.api.main.meta.v1.Metadata
+	153, // 9: octelium.api.main.cordium.v1.WorkspaceSnapshot.spec:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Spec
+	154, // 10: octelium.api.main.cordium.v1.WorkspaceSnapshot.status:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Status
 	25,  // 11: octelium.api.main.cordium.v1.WorkspaceSnapshotList.items:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot
-	245, // 12: octelium.api.main.cordium.v1.WorkspaceSnapshotList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
-	246, // 13: octelium.api.main.cordium.v1.ListWorkspaceSnapshotOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
-	247, // 14: octelium.api.main.cordium.v1.ListWorkspaceSnapshotOptions.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 15: octelium.api.main.cordium.v1.ListWorkspaceSnapshotOptions.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	244, // 16: octelium.api.main.cordium.v1.Volume.metadata:type_name -> octelium.api.main.meta.v1.Metadata
-	159, // 17: octelium.api.main.cordium.v1.Volume.spec:type_name -> octelium.api.main.cordium.v1.Volume.Spec
-	160, // 18: octelium.api.main.cordium.v1.Volume.status:type_name -> octelium.api.main.cordium.v1.Volume.Status
+	248, // 12: octelium.api.main.cordium.v1.WorkspaceSnapshotList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
+	249, // 13: octelium.api.main.cordium.v1.ListWorkspaceSnapshotOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
+	250, // 14: octelium.api.main.cordium.v1.ListWorkspaceSnapshotOptions.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 15: octelium.api.main.cordium.v1.ListWorkspaceSnapshotOptions.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	247, // 16: octelium.api.main.cordium.v1.Volume.metadata:type_name -> octelium.api.main.meta.v1.Metadata
+	160, // 17: octelium.api.main.cordium.v1.Volume.spec:type_name -> octelium.api.main.cordium.v1.Volume.Spec
+	161, // 18: octelium.api.main.cordium.v1.Volume.status:type_name -> octelium.api.main.cordium.v1.Volume.Status
 	28,  // 19: octelium.api.main.cordium.v1.VolumeList.items:type_name -> octelium.api.main.cordium.v1.Volume
-	245, // 20: octelium.api.main.cordium.v1.VolumeList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
-	246, // 21: octelium.api.main.cordium.v1.ListVolumeOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
-	247, // 22: octelium.api.main.cordium.v1.ListVolumeOptions.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	244, // 23: octelium.api.main.cordium.v1.Secret.metadata:type_name -> octelium.api.main.meta.v1.Metadata
-	166, // 24: octelium.api.main.cordium.v1.Secret.spec:type_name -> octelium.api.main.cordium.v1.Secret.Spec
-	167, // 25: octelium.api.main.cordium.v1.Secret.status:type_name -> octelium.api.main.cordium.v1.Secret.Status
-	168, // 26: octelium.api.main.cordium.v1.Secret.data:type_name -> octelium.api.main.cordium.v1.Secret.Data
-	246, // 27: octelium.api.main.cordium.v1.ListSecretOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
-	247, // 28: octelium.api.main.cordium.v1.ListSecretOptions.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	248, // 20: octelium.api.main.cordium.v1.VolumeList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
+	249, // 21: octelium.api.main.cordium.v1.ListVolumeOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
+	250, // 22: octelium.api.main.cordium.v1.ListVolumeOptions.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	247, // 23: octelium.api.main.cordium.v1.Secret.metadata:type_name -> octelium.api.main.meta.v1.Metadata
+	167, // 24: octelium.api.main.cordium.v1.Secret.spec:type_name -> octelium.api.main.cordium.v1.Secret.Spec
+	168, // 25: octelium.api.main.cordium.v1.Secret.status:type_name -> octelium.api.main.cordium.v1.Secret.Status
+	169, // 26: octelium.api.main.cordium.v1.Secret.data:type_name -> octelium.api.main.cordium.v1.Secret.Data
+	249, // 27: octelium.api.main.cordium.v1.ListSecretOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
+	250, // 28: octelium.api.main.cordium.v1.ListSecretOptions.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
 	31,  // 29: octelium.api.main.cordium.v1.SecretList.items:type_name -> octelium.api.main.cordium.v1.Secret
-	245, // 30: octelium.api.main.cordium.v1.SecretList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
-	79,  // 31: octelium.api.main.cordium.v1.ClientMessage.writeTerminalDataRequest:type_name -> octelium.api.main.cordium.v1.WriteTerminalDataRequest
-	77,  // 32: octelium.api.main.cordium.v1.ClientMessage.setTerminalWindowSizeRequest:type_name -> octelium.api.main.cordium.v1.SetTerminalWindowSizeRequest
-	80,  // 33: octelium.api.main.cordium.v1.ClientMessage.listenTerminalRequest:type_name -> octelium.api.main.cordium.v1.ListenTerminalRequest
-	169, // 34: octelium.api.main.cordium.v1.ClientMessage.listenTerminalEndRequest:type_name -> octelium.api.main.cordium.v1.ClientMessage.ListenTerminalEndRequest
-	170, // 35: octelium.api.main.cordium.v1.ServerMessage.workspaceUpdate:type_name -> octelium.api.main.cordium.v1.ServerMessage.WorkspaceUpdate
-	171, // 36: octelium.api.main.cordium.v1.ServerMessage.listenTerminalEvent:type_name -> octelium.api.main.cordium.v1.ServerMessage.ListenTerminalEvent
-	247, // 37: octelium.api.main.cordium.v1.StartWorkspaceRequest.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	172, // 38: octelium.api.main.cordium.v1.StartWorkspaceRequest.config:type_name -> octelium.api.main.cordium.v1.StartWorkspaceRequest.Config
-	247, // 39: octelium.api.main.cordium.v1.StopWorkspaceRequest.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	244, // 40: octelium.api.main.cordium.v1.Template.metadata:type_name -> octelium.api.main.meta.v1.Metadata
-	173, // 41: octelium.api.main.cordium.v1.Template.spec:type_name -> octelium.api.main.cordium.v1.Template.Spec
-	174, // 42: octelium.api.main.cordium.v1.Template.status:type_name -> octelium.api.main.cordium.v1.Template.Status
+	248, // 30: octelium.api.main.cordium.v1.SecretList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
+	80,  // 31: octelium.api.main.cordium.v1.ClientMessage.writeTerminalDataRequest:type_name -> octelium.api.main.cordium.v1.WriteTerminalDataRequest
+	78,  // 32: octelium.api.main.cordium.v1.ClientMessage.setTerminalWindowSizeRequest:type_name -> octelium.api.main.cordium.v1.SetTerminalWindowSizeRequest
+	81,  // 33: octelium.api.main.cordium.v1.ClientMessage.listenTerminalRequest:type_name -> octelium.api.main.cordium.v1.ListenTerminalRequest
+	170, // 34: octelium.api.main.cordium.v1.ClientMessage.listenTerminalEndRequest:type_name -> octelium.api.main.cordium.v1.ClientMessage.ListenTerminalEndRequest
+	171, // 35: octelium.api.main.cordium.v1.ServerMessage.workspaceUpdate:type_name -> octelium.api.main.cordium.v1.ServerMessage.WorkspaceUpdate
+	172, // 36: octelium.api.main.cordium.v1.ServerMessage.listenTerminalEvent:type_name -> octelium.api.main.cordium.v1.ServerMessage.ListenTerminalEvent
+	250, // 37: octelium.api.main.cordium.v1.StartWorkspaceRequest.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	173, // 38: octelium.api.main.cordium.v1.StartWorkspaceRequest.config:type_name -> octelium.api.main.cordium.v1.StartWorkspaceRequest.Config
+	250, // 39: octelium.api.main.cordium.v1.StopWorkspaceRequest.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	247, // 40: octelium.api.main.cordium.v1.Template.metadata:type_name -> octelium.api.main.meta.v1.Metadata
+	174, // 41: octelium.api.main.cordium.v1.Template.spec:type_name -> octelium.api.main.cordium.v1.Template.Spec
+	175, // 42: octelium.api.main.cordium.v1.Template.status:type_name -> octelium.api.main.cordium.v1.Template.Status
 	40,  // 43: octelium.api.main.cordium.v1.TemplateList.items:type_name -> octelium.api.main.cordium.v1.Template
-	245, // 44: octelium.api.main.cordium.v1.TemplateList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
-	246, // 45: octelium.api.main.cordium.v1.ListTemplateOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
-	247, // 46: octelium.api.main.cordium.v1.ListTemplateOptions.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 47: octelium.api.main.cordium.v1.BuildTemplateRequest.templateRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	244, // 48: octelium.api.main.cordium.v1.Space.metadata:type_name -> octelium.api.main.meta.v1.Metadata
-	177, // 49: octelium.api.main.cordium.v1.Space.spec:type_name -> octelium.api.main.cordium.v1.Space.Spec
-	178, // 50: octelium.api.main.cordium.v1.Space.status:type_name -> octelium.api.main.cordium.v1.Space.Status
+	248, // 44: octelium.api.main.cordium.v1.TemplateList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
+	249, // 45: octelium.api.main.cordium.v1.ListTemplateOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
+	250, // 46: octelium.api.main.cordium.v1.ListTemplateOptions.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 47: octelium.api.main.cordium.v1.BuildTemplateRequest.templateRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	247, // 48: octelium.api.main.cordium.v1.Space.metadata:type_name -> octelium.api.main.meta.v1.Metadata
+	178, // 49: octelium.api.main.cordium.v1.Space.spec:type_name -> octelium.api.main.cordium.v1.Space.Spec
+	179, // 50: octelium.api.main.cordium.v1.Space.status:type_name -> octelium.api.main.cordium.v1.Space.Status
 	44,  // 51: octelium.api.main.cordium.v1.SpaceList.items:type_name -> octelium.api.main.cordium.v1.Space
-	245, // 52: octelium.api.main.cordium.v1.SpaceList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
-	246, // 53: octelium.api.main.cordium.v1.ListSpaceOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
+	248, // 52: octelium.api.main.cordium.v1.SpaceList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
+	249, // 53: octelium.api.main.cordium.v1.ListSpaceOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
 	13,  // 54: octelium.api.main.cordium.v1.ListSpaceOptions.type:type_name -> octelium.api.main.cordium.v1.Space.Status.Type
 	14,  // 55: octelium.api.main.cordium.v1.ListSpaceOptions.mode:type_name -> octelium.api.main.cordium.v1.ListSpaceOptions.Mode
-	244, // 56: octelium.api.main.cordium.v1.Membership.metadata:type_name -> octelium.api.main.meta.v1.Metadata
-	182, // 57: octelium.api.main.cordium.v1.Membership.spec:type_name -> octelium.api.main.cordium.v1.Membership.Spec
-	183, // 58: octelium.api.main.cordium.v1.Membership.status:type_name -> octelium.api.main.cordium.v1.Membership.Status
+	247, // 56: octelium.api.main.cordium.v1.Membership.metadata:type_name -> octelium.api.main.meta.v1.Metadata
+	183, // 57: octelium.api.main.cordium.v1.Membership.spec:type_name -> octelium.api.main.cordium.v1.Membership.Spec
+	184, // 58: octelium.api.main.cordium.v1.Membership.status:type_name -> octelium.api.main.cordium.v1.Membership.Status
 	47,  // 59: octelium.api.main.cordium.v1.MembershipList.items:type_name -> octelium.api.main.cordium.v1.Membership
-	245, // 60: octelium.api.main.cordium.v1.MembershipList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
-	246, // 61: octelium.api.main.cordium.v1.ListMembershipOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
-	247, // 62: octelium.api.main.cordium.v1.ListMembershipOptions.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	248, // 60: octelium.api.main.cordium.v1.MembershipList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
+	249, // 61: octelium.api.main.cordium.v1.ListMembershipOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
+	250, // 62: octelium.api.main.cordium.v1.ListMembershipOptions.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
 	16,  // 63: octelium.api.main.cordium.v1.CreateMembershipRequest.role:type_name -> octelium.api.main.cordium.v1.CreateMembershipRequest.Role
-	247, // 64: octelium.api.main.cordium.v1.CreateMembershipRequest.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 65: octelium.api.main.cordium.v1.CreateMembershipRequest.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	244, // 66: octelium.api.main.cordium.v1.GitProvider.metadata:type_name -> octelium.api.main.meta.v1.Metadata
-	187, // 67: octelium.api.main.cordium.v1.GitProvider.spec:type_name -> octelium.api.main.cordium.v1.GitProvider.Spec
-	188, // 68: octelium.api.main.cordium.v1.GitProvider.status:type_name -> octelium.api.main.cordium.v1.GitProvider.Status
+	250, // 64: octelium.api.main.cordium.v1.CreateMembershipRequest.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 65: octelium.api.main.cordium.v1.CreateMembershipRequest.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	247, // 66: octelium.api.main.cordium.v1.GitProvider.metadata:type_name -> octelium.api.main.meta.v1.Metadata
+	188, // 67: octelium.api.main.cordium.v1.GitProvider.spec:type_name -> octelium.api.main.cordium.v1.GitProvider.Spec
+	189, // 68: octelium.api.main.cordium.v1.GitProvider.status:type_name -> octelium.api.main.cordium.v1.GitProvider.Status
 	51,  // 69: octelium.api.main.cordium.v1.GitProviderList.items:type_name -> octelium.api.main.cordium.v1.GitProvider
-	245, // 70: octelium.api.main.cordium.v1.GitProviderList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
-	246, // 71: octelium.api.main.cordium.v1.ListGitProviderOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
-	247, // 72: octelium.api.main.cordium.v1.ListGitProviderOptions.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	244, // 73: octelium.api.main.cordium.v1.UserSecret.metadata:type_name -> octelium.api.main.meta.v1.Metadata
-	195, // 74: octelium.api.main.cordium.v1.UserSecret.spec:type_name -> octelium.api.main.cordium.v1.UserSecret.Spec
-	196, // 75: octelium.api.main.cordium.v1.UserSecret.status:type_name -> octelium.api.main.cordium.v1.UserSecret.Status
-	197, // 76: octelium.api.main.cordium.v1.UserSecret.data:type_name -> octelium.api.main.cordium.v1.UserSecret.Data
-	246, // 77: octelium.api.main.cordium.v1.ListUserSecretOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
+	248, // 70: octelium.api.main.cordium.v1.GitProviderList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
+	249, // 71: octelium.api.main.cordium.v1.ListGitProviderOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
+	250, // 72: octelium.api.main.cordium.v1.ListGitProviderOptions.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	247, // 73: octelium.api.main.cordium.v1.UserSecret.metadata:type_name -> octelium.api.main.meta.v1.Metadata
+	196, // 74: octelium.api.main.cordium.v1.UserSecret.spec:type_name -> octelium.api.main.cordium.v1.UserSecret.Spec
+	197, // 75: octelium.api.main.cordium.v1.UserSecret.status:type_name -> octelium.api.main.cordium.v1.UserSecret.Status
+	198, // 76: octelium.api.main.cordium.v1.UserSecret.data:type_name -> octelium.api.main.cordium.v1.UserSecret.Data
+	249, // 77: octelium.api.main.cordium.v1.ListUserSecretOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
 	54,  // 78: octelium.api.main.cordium.v1.UserSecretList.items:type_name -> octelium.api.main.cordium.v1.UserSecret
-	245, // 79: octelium.api.main.cordium.v1.UserSecretList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
-	247, // 80: octelium.api.main.cordium.v1.GetSpaceMembershipRequest.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	244, // 81: octelium.api.main.cordium.v1.UserConfig.metadata:type_name -> octelium.api.main.meta.v1.Metadata
-	199, // 82: octelium.api.main.cordium.v1.UserConfig.spec:type_name -> octelium.api.main.cordium.v1.UserConfig.Spec
-	200, // 83: octelium.api.main.cordium.v1.UserConfig.status:type_name -> octelium.api.main.cordium.v1.UserConfig.Status
-	247, // 84: octelium.api.main.cordium.v1.ShareWorkspacePortRequest.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	18,  // 85: octelium.api.main.cordium.v1.ShareWorkspacePortRequest.mode:type_name -> octelium.api.main.cordium.v1.ShareWorkspacePortRequest.Mode
-	247, // 86: octelium.api.main.cordium.v1.UnshareWorkspacePortRequest.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 87: octelium.api.main.cordium.v1.LeaveSpaceRequest.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	244, // 88: octelium.api.main.cordium.v1.Region.metadata:type_name -> octelium.api.main.meta.v1.Metadata
-	206, // 89: octelium.api.main.cordium.v1.Region.spec:type_name -> octelium.api.main.cordium.v1.Region.Spec
-	207, // 90: octelium.api.main.cordium.v1.Region.status:type_name -> octelium.api.main.cordium.v1.Region.Status
-	66,  // 91: octelium.api.main.cordium.v1.RegionList.items:type_name -> octelium.api.main.cordium.v1.Region
-	245, // 92: octelium.api.main.cordium.v1.RegionList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
-	246, // 93: octelium.api.main.cordium.v1.ListRegionOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
-	247, // 94: octelium.api.main.cordium.v1.CreateTerminalRequest.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 95: octelium.api.main.cordium.v1.ListTerminalRequest.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	70,  // 96: octelium.api.main.cordium.v1.ListTerminalResponse.items:type_name -> octelium.api.main.cordium.v1.Terminal
-	208, // 97: octelium.api.main.cordium.v1.ListenTerminalResponse.stdout:type_name -> octelium.api.main.cordium.v1.ListenTerminalResponse.Stdout
-	209, // 98: octelium.api.main.cordium.v1.ListenTerminalResponse.windowSize:type_name -> octelium.api.main.cordium.v1.ListenTerminalResponse.WindowSize
-	210, // 99: octelium.api.main.cordium.v1.ListenTerminalResponse.close:type_name -> octelium.api.main.cordium.v1.ListenTerminalResponse.Close
-	247, // 100: octelium.api.main.cordium.v1.ListenLogRequest.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	248, // 101: octelium.api.main.cordium.v1.ListenLogResponse.createdAt:type_name -> google.protobuf.Timestamp
-	20,  // 102: octelium.api.main.cordium.v1.ListenLogResponse.type:type_name -> octelium.api.main.cordium.v1.ListenLogResponse.Type
-	19,  // 103: octelium.api.main.cordium.v1.ListenLogResponse.mode:type_name -> octelium.api.main.cordium.v1.ListenLogResponse.Mode
-	247, // 104: octelium.api.main.cordium.v1.WatchWorkspaceRequest.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	211, // 105: octelium.api.main.cordium.v1.WatchWorkspaceResponse.create:type_name -> octelium.api.main.cordium.v1.WatchWorkspaceResponse.Create
-	212, // 106: octelium.api.main.cordium.v1.WatchWorkspaceResponse.update:type_name -> octelium.api.main.cordium.v1.WatchWorkspaceResponse.Update
-	213, // 107: octelium.api.main.cordium.v1.WatchWorkspaceResponse.delete:type_name -> octelium.api.main.cordium.v1.WatchWorkspaceResponse.Delete
-	247, // 108: octelium.api.main.cordium.v1.CancelBuildTemplateRequest.templateRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	214, // 109: octelium.api.main.cordium.v1.ExecRequest.request:type_name -> octelium.api.main.cordium.v1.ExecRequest.Request
-	216, // 110: octelium.api.main.cordium.v1.ExecRequest.writeData:type_name -> octelium.api.main.cordium.v1.ExecRequest.WriteData
-	215, // 111: octelium.api.main.cordium.v1.ExecRequest.kill:type_name -> octelium.api.main.cordium.v1.ExecRequest.Kill
-	218, // 112: octelium.api.main.cordium.v1.ExecResponse.stdout:type_name -> octelium.api.main.cordium.v1.ExecResponse.Stdout
-	219, // 113: octelium.api.main.cordium.v1.ExecResponse.stderr:type_name -> octelium.api.main.cordium.v1.ExecResponse.Stderr
-	220, // 114: octelium.api.main.cordium.v1.ExecResponse.exit:type_name -> octelium.api.main.cordium.v1.ExecResponse.Exit
-	244, // 115: octelium.api.main.cordium.v1.ClusterConfig.metadata:type_name -> octelium.api.main.meta.v1.Metadata
-	221, // 116: octelium.api.main.cordium.v1.ClusterConfig.spec:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec
-	222, // 117: octelium.api.main.cordium.v1.ClusterConfig.status:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Status
-	240, // 118: octelium.api.main.cordium.v1.Condition.all:type_name -> octelium.api.main.cordium.v1.Condition.All
-	241, // 119: octelium.api.main.cordium.v1.Condition.any:type_name -> octelium.api.main.cordium.v1.Condition.Any
-	242, // 120: octelium.api.main.cordium.v1.Condition.none:type_name -> octelium.api.main.cordium.v1.Condition.None
-	243, // 121: octelium.api.main.cordium.v1.Condition.opa:type_name -> octelium.api.main.cordium.v1.Condition.OPA
-	247, // 122: octelium.api.main.cordium.v1.SessionExtInfo.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 123: octelium.api.main.cordium.v1.SessionExtInfo.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 124: octelium.api.main.cordium.v1.SessionExtInfo.templateRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	13,  // 125: octelium.api.main.cordium.v1.SessionExtInfo.spaceType:type_name -> octelium.api.main.cordium.v1.Space.Status.Type
-	96,  // 126: octelium.api.main.cordium.v1.Workspace.Spec.image:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image
-	99,  // 127: octelium.api.main.cordium.v1.Workspace.Spec.runtime:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime
-	97,  // 128: octelium.api.main.cordium.v1.Workspace.Spec.repository:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Repository
-	98,  // 129: octelium.api.main.cordium.v1.Workspace.Spec.additionalRepositories:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.AdditionalRepository
-	100, // 130: octelium.api.main.cordium.v1.Workspace.Spec.applications:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Application
-	101, // 131: octelium.api.main.cordium.v1.Workspace.Spec.limit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
-	102, // 132: octelium.api.main.cordium.v1.Workspace.Spec.vars:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Var
-	5,   // 133: octelium.api.main.cordium.v1.Workspace.Status.state:type_name -> octelium.api.main.cordium.v1.Workspace.Status.State
-	247, // 134: octelium.api.main.cordium.v1.Workspace.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 135: octelium.api.main.cordium.v1.Workspace.Status.sessionRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 136: octelium.api.main.cordium.v1.Workspace.Status.regionRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	248, // 137: octelium.api.main.cordium.v1.Workspace.Status.lastInitializedAt:type_name -> google.protobuf.Timestamp
-	248, // 138: octelium.api.main.cordium.v1.Workspace.Status.lastActivityAt:type_name -> google.protobuf.Timestamp
-	248, // 139: octelium.api.main.cordium.v1.Workspace.Status.lastStoppedAt:type_name -> google.protobuf.Timestamp
-	247, // 140: octelium.api.main.cordium.v1.Workspace.Status.templateRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 141: octelium.api.main.cordium.v1.Workspace.Status.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	249, // 142: octelium.api.main.cordium.v1.Workspace.Status.totalLastRunsDuration:type_name -> octelium.api.main.meta.v1.Duration
-	5,   // 143: octelium.api.main.cordium.v1.Workspace.Status.lastState:type_name -> octelium.api.main.cordium.v1.Workspace.Status.State
-	248, // 144: octelium.api.main.cordium.v1.Workspace.Status.currentStateSetAt:type_name -> google.protobuf.Timestamp
-	248, // 145: octelium.api.main.cordium.v1.Workspace.Status.lastStateSetAt:type_name -> google.protobuf.Timestamp
-	248, // 146: octelium.api.main.cordium.v1.Workspace.Status.lastRunningAt:type_name -> google.protobuf.Timestamp
-	132, // 147: octelium.api.main.cordium.v1.Workspace.Status.failure:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure
-	101, // 148: octelium.api.main.cordium.v1.Workspace.Status.limit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
-	133, // 149: octelium.api.main.cordium.v1.Workspace.Status.sharedPorts:type_name -> octelium.api.main.cordium.v1.Workspace.Status.SharedPort
-	13,  // 150: octelium.api.main.cordium.v1.Workspace.Status.spaceType:type_name -> octelium.api.main.cordium.v1.Space.Status.Type
-	6,   // 151: octelium.api.main.cordium.v1.Workspace.Status.stoppingReason:type_name -> octelium.api.main.cordium.v1.Workspace.Status.StoppingReason
-	6,   // 152: octelium.api.main.cordium.v1.Workspace.Status.lastStoppingReason:type_name -> octelium.api.main.cordium.v1.Workspace.Status.StoppingReason
-	134, // 153: octelium.api.main.cordium.v1.Workspace.Status.run:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Run
-	134, // 154: octelium.api.main.cordium.v1.Workspace.Status.lastRuns:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Run
-	247, // 155: octelium.api.main.cordium.v1.Workspace.Status.workspaceSnapshotRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 156: octelium.api.main.cordium.v1.Workspace.Status.lastRegionRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	103, // 157: octelium.api.main.cordium.v1.Workspace.Spec.Image.dockerfile:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image.Dockerfile
-	105, // 158: octelium.api.main.cordium.v1.Workspace.Spec.Image.registry:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image.Registry
-	104, // 159: octelium.api.main.cordium.v1.Workspace.Spec.Image.git:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image.Git
-	106, // 160: octelium.api.main.cordium.v1.Workspace.Spec.Image.repository:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image.Repository
-	112, // 161: octelium.api.main.cordium.v1.Workspace.Spec.Repository.cloneOptions:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Repository.CloneOptions
-	111, // 162: octelium.api.main.cordium.v1.Workspace.Spec.Repository.authentication:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Repository.Authentication
-	97,  // 163: octelium.api.main.cordium.v1.Workspace.Spec.AdditionalRepository.repository:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Repository
-	115, // 164: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.envVars:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.EnvVar
-	116, // 165: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.tasks:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task
-	118, // 166: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.devcontainers:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers
-	119, // 167: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.octelium:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Octelium
-	120, // 168: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.network:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network
-	121, // 169: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.filesystem:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Filesystem
-	122, // 170: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.capabilities:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities
-	123, // 171: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.timeout:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Timeout
-	117, // 172: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.volumeMounts:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.VolumeMount
-	129, // 173: octelium.api.main.cordium.v1.Workspace.Spec.Limit.cpu:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit.CPU
-	130, // 174: octelium.api.main.cordium.v1.Workspace.Spec.Limit.memory:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit.Memory
-	131, // 175: octelium.api.main.cordium.v1.Workspace.Spec.Limit.storage:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit.Storage
-	107, // 176: octelium.api.main.cordium.v1.Workspace.Spec.Image.Registry.authentication:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image.Registry.Authentication
-	109, // 177: octelium.api.main.cordium.v1.Workspace.Spec.Image.Repository.devcontainer:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image.Repository.Devcontainer
-	110, // 178: octelium.api.main.cordium.v1.Workspace.Spec.Image.Repository.dockerfile:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image.Repository.Dockerfile
-	108, // 179: octelium.api.main.cordium.v1.Workspace.Spec.Image.Registry.Authentication.password:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image.Registry.Authentication.Password
-	113, // 180: octelium.api.main.cordium.v1.Workspace.Spec.Repository.Authentication.http:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Repository.Authentication.HTTP
-	114, // 181: octelium.api.main.cordium.v1.Workspace.Spec.Repository.Authentication.HTTP.password:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Repository.Authentication.HTTP.Password
-	0,   // 182: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task.type:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task.Type
-	124, // 183: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task.envVars:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task.EnvVar
-	1,   // 184: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task.onFailure:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task.OnFailure
-	247, // 185: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.VolumeMount.volumeRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	125, // 186: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers.features:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers.Feature
-	128, // 187: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.egress:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Egress
-	4,   // 188: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Timeout.mode:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Timeout.Mode
-	126, // 189: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers.Feature.options:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers.Feature.Option
-	2,   // 190: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule.action:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule.Action
-	127, // 191: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Egress.rules:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule
-	3,   // 192: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Egress.defaultAction:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Egress.DefaultAction
-	135, // 193: octelium.api.main.cordium.v1.Workspace.Status.Failure.imageBuild:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.ImageBuild
-	136, // 194: octelium.api.main.cordium.v1.Workspace.Status.Failure.imagePull:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.ImagePull
-	137, // 195: octelium.api.main.cordium.v1.Workspace.Status.Failure.repoClone:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.RepoClone
-	139, // 196: octelium.api.main.cordium.v1.Workspace.Status.Failure.buildTimeoutExceeded:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.BuildTimeoutExceeded
-	140, // 197: octelium.api.main.cordium.v1.Workspace.Status.Failure.task:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.Task
-	141, // 198: octelium.api.main.cordium.v1.Workspace.Status.Failure.startupUnknown:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.StartupUnknown
-	142, // 199: octelium.api.main.cordium.v1.Workspace.Status.Failure.startupTimeoutExceeded:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.StartupTimeoutExceeded
-	143, // 200: octelium.api.main.cordium.v1.Workspace.Status.Failure.loadStorage:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.LoadStorage
-	144, // 201: octelium.api.main.cordium.v1.Workspace.Status.Failure.saveStorage:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.SaveStorage
-	145, // 202: octelium.api.main.cordium.v1.Workspace.Status.Failure.stoppageTimeoutExceeded:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.StoppageTimeoutExceeded
-	146, // 203: octelium.api.main.cordium.v1.Workspace.Status.Failure.runContainer:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.RunContainer
-	147, // 204: octelium.api.main.cordium.v1.Workspace.Status.Failure.healthCheck:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.HealthCheck
-	148, // 205: octelium.api.main.cordium.v1.Workspace.Status.Failure.unknown:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.Unknown
-	149, // 206: octelium.api.main.cordium.v1.Workspace.Status.Failure.additionalRepoClone:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.AdditionalRepoClone
-	150, // 207: octelium.api.main.cordium.v1.Workspace.Status.Failure.networkPolicy:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.NetworkPolicy
-	151, // 208: octelium.api.main.cordium.v1.Workspace.Status.Failure.volume:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.Volume
-	7,   // 209: octelium.api.main.cordium.v1.Workspace.Status.SharedPort.mode:type_name -> octelium.api.main.cordium.v1.Workspace.Status.SharedPort.Mode
-	248, // 210: octelium.api.main.cordium.v1.Workspace.Status.Run.initializedAt:type_name -> google.protobuf.Timestamp
-	248, // 211: octelium.api.main.cordium.v1.Workspace.Status.Run.stoppedAt:type_name -> google.protobuf.Timestamp
-	132, // 212: octelium.api.main.cordium.v1.Workspace.Status.Run.failure:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure
-	172, // 213: octelium.api.main.cordium.v1.Workspace.Status.Run.config:type_name -> octelium.api.main.cordium.v1.StartWorkspaceRequest.Config
-	8,   // 214: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.state:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.State
-	247, // 215: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 216: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 217: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 218: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.templateRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 219: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.regionRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	248, // 220: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.snapshotAt:type_name -> google.protobuf.Timestamp
-	248, // 221: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.readyAt:type_name -> google.protobuf.Timestamp
-	9,   // 222: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.consistency:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Consistency
-	154, // 223: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.failure:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure
-	155, // 224: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.unsupported:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.Unsupported
-	156, // 225: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.sourceNotFound:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.SourceNotFound
-	157, // 226: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.storage:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.Storage
-	158, // 227: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.unknown:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.Unknown
-	161, // 228: octelium.api.main.cordium.v1.Volume.Spec.size:type_name -> octelium.api.main.cordium.v1.Volume.Spec.Size
-	10,  // 229: octelium.api.main.cordium.v1.Volume.Spec.accessMode:type_name -> octelium.api.main.cordium.v1.Volume.AccessMode
-	11,  // 230: octelium.api.main.cordium.v1.Volume.Status.state:type_name -> octelium.api.main.cordium.v1.Volume.Status.State
-	247, // 231: octelium.api.main.cordium.v1.Volume.Status.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 232: octelium.api.main.cordium.v1.Volume.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 233: octelium.api.main.cordium.v1.Volume.Status.regionRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	161, // 234: octelium.api.main.cordium.v1.Volume.Status.capacity:type_name -> octelium.api.main.cordium.v1.Volume.Spec.Size
-	248, // 235: octelium.api.main.cordium.v1.Volume.Status.readyAt:type_name -> google.protobuf.Timestamp
-	162, // 236: octelium.api.main.cordium.v1.Volume.Status.failure:type_name -> octelium.api.main.cordium.v1.Volume.Status.Failure
-	163, // 237: octelium.api.main.cordium.v1.Volume.Status.Failure.unsupported:type_name -> octelium.api.main.cordium.v1.Volume.Status.Failure.Unsupported
-	164, // 238: octelium.api.main.cordium.v1.Volume.Status.Failure.storage:type_name -> octelium.api.main.cordium.v1.Volume.Status.Failure.Storage
-	165, // 239: octelium.api.main.cordium.v1.Volume.Status.Failure.unknown:type_name -> octelium.api.main.cordium.v1.Volume.Status.Failure.Unknown
-	247, // 240: octelium.api.main.cordium.v1.Secret.Status.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 241: octelium.api.main.cordium.v1.Secret.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	250, // 242: octelium.api.main.cordium.v1.Secret.Data.attrs:type_name -> google.protobuf.Struct
-	22,  // 243: octelium.api.main.cordium.v1.ServerMessage.WorkspaceUpdate.workspace:type_name -> octelium.api.main.cordium.v1.Workspace
-	81,  // 244: octelium.api.main.cordium.v1.ServerMessage.ListenTerminalEvent.listenTerminalResponse:type_name -> octelium.api.main.cordium.v1.ListenTerminalResponse
-	102, // 245: octelium.api.main.cordium.v1.StartWorkspaceRequest.Config.vars:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Var
-	247, // 246: octelium.api.main.cordium.v1.StartWorkspaceRequest.Config.regionRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	96,  // 247: octelium.api.main.cordium.v1.Template.Spec.image:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image
-	99,  // 248: octelium.api.main.cordium.v1.Template.Spec.runtime:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime
-	97,  // 249: octelium.api.main.cordium.v1.Template.Spec.repository:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Repository
-	98,  // 250: octelium.api.main.cordium.v1.Template.Spec.additionalRepositories:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.AdditionalRepository
-	101, // 251: octelium.api.main.cordium.v1.Template.Spec.limit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
-	102, // 252: octelium.api.main.cordium.v1.Template.Spec.vars:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Var
-	247, // 253: octelium.api.main.cordium.v1.Template.Status.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 254: octelium.api.main.cordium.v1.Template.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 255: octelium.api.main.cordium.v1.Template.Status.gitProviderRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	175, // 256: octelium.api.main.cordium.v1.Template.Status.buildInfo:type_name -> octelium.api.main.cordium.v1.Template.Status.BuildInfo
-	176, // 257: octelium.api.main.cordium.v1.Template.Status.BuildInfo.builds:type_name -> octelium.api.main.cordium.v1.Template.Status.BuildInfo.Build
-	248, // 258: octelium.api.main.cordium.v1.Template.Status.BuildInfo.Build.startedAt:type_name -> google.protobuf.Timestamp
-	248, // 259: octelium.api.main.cordium.v1.Template.Status.BuildInfo.Build.doneAt:type_name -> google.protobuf.Timestamp
-	132, // 260: octelium.api.main.cordium.v1.Template.Status.BuildInfo.Build.failure:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure
-	12,  // 261: octelium.api.main.cordium.v1.Template.Status.BuildInfo.Build.state:type_name -> octelium.api.main.cordium.v1.Template.Status.BuildInfo.Build.State
-	179, // 262: octelium.api.main.cordium.v1.Space.Spec.limit:type_name -> octelium.api.main.cordium.v1.Space.Spec.Limit
-	180, // 263: octelium.api.main.cordium.v1.Space.Spec.runtime:type_name -> octelium.api.main.cordium.v1.Space.Spec.Runtime
-	181, // 264: octelium.api.main.cordium.v1.Space.Spec.authorization:type_name -> octelium.api.main.cordium.v1.Space.Spec.Authorization
-	247, // 265: octelium.api.main.cordium.v1.Space.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	13,  // 266: octelium.api.main.cordium.v1.Space.Status.type:type_name -> octelium.api.main.cordium.v1.Space.Status.Type
-	101, // 267: octelium.api.main.cordium.v1.Space.Spec.Limit.defaultLimit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
-	101, // 268: octelium.api.main.cordium.v1.Space.Spec.Limit.maxLimit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
-	115, // 269: octelium.api.main.cordium.v1.Space.Spec.Runtime.envVars:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.EnvVar
-	116, // 270: octelium.api.main.cordium.v1.Space.Spec.Runtime.tasks:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task
-	122, // 271: octelium.api.main.cordium.v1.Space.Spec.Runtime.capabilities:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities
-	15,  // 272: octelium.api.main.cordium.v1.Membership.Spec.role:type_name -> octelium.api.main.cordium.v1.Membership.Spec.Role
-	247, // 273: octelium.api.main.cordium.v1.Membership.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 274: octelium.api.main.cordium.v1.Membership.Status.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	185, // 275: octelium.api.main.cordium.v1.Membership.Status.userInfo:type_name -> octelium.api.main.cordium.v1.Membership.Status.UserInfo
-	186, // 276: octelium.api.main.cordium.v1.Membership.Status.gitProviderStateMap:type_name -> octelium.api.main.cordium.v1.Membership.Status.GitProviderStateMapEntry
-	247, // 277: octelium.api.main.cordium.v1.Membership.Status.GitProviderState.gitProviderRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 278: octelium.api.main.cordium.v1.Membership.Status.GitProviderState.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	248, // 279: octelium.api.main.cordium.v1.Membership.Status.GitProviderState.createdAt:type_name -> google.protobuf.Timestamp
-	184, // 280: octelium.api.main.cordium.v1.Membership.Status.GitProviderStateMapEntry.value:type_name -> octelium.api.main.cordium.v1.Membership.Status.GitProviderState
-	189, // 281: octelium.api.main.cordium.v1.GitProvider.Spec.github:type_name -> octelium.api.main.cordium.v1.GitProvider.Spec.Github
-	190, // 282: octelium.api.main.cordium.v1.GitProvider.Spec.gitlab:type_name -> octelium.api.main.cordium.v1.GitProvider.Spec.Gitlab
-	191, // 283: octelium.api.main.cordium.v1.GitProvider.Spec.oauth2:type_name -> octelium.api.main.cordium.v1.GitProvider.Spec.OAuth2
-	247, // 284: octelium.api.main.cordium.v1.GitProvider.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 285: octelium.api.main.cordium.v1.GitProvider.Status.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	192, // 286: octelium.api.main.cordium.v1.GitProvider.Spec.Github.clientSecret:type_name -> octelium.api.main.cordium.v1.GitProvider.Spec.Github.ClientSecret
-	193, // 287: octelium.api.main.cordium.v1.GitProvider.Spec.Gitlab.clientSecret:type_name -> octelium.api.main.cordium.v1.GitProvider.Spec.Gitlab.ClientSecret
-	194, // 288: octelium.api.main.cordium.v1.GitProvider.Spec.OAuth2.clientSecret:type_name -> octelium.api.main.cordium.v1.GitProvider.Spec.OAuth2.ClientSecret
-	17,  // 289: octelium.api.main.cordium.v1.UserSecret.Spec.type:type_name -> octelium.api.main.cordium.v1.UserSecret.Spec.Type
-	247, // 290: octelium.api.main.cordium.v1.UserSecret.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	198, // 291: octelium.api.main.cordium.v1.UserSecret.Status.sshKey:type_name -> octelium.api.main.cordium.v1.UserSecret.Status.SSHKey
-	250, // 292: octelium.api.main.cordium.v1.UserSecret.Data.attrs:type_name -> google.protobuf.Struct
-	201, // 293: octelium.api.main.cordium.v1.UserConfig.Spec.dotfiles:type_name -> octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles
-	202, // 294: octelium.api.main.cordium.v1.UserConfig.Spec.envVars:type_name -> octelium.api.main.cordium.v1.UserConfig.Spec.EnvVar
-	116, // 295: octelium.api.main.cordium.v1.UserConfig.Spec.tasks:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task
-	247, // 296: octelium.api.main.cordium.v1.UserConfig.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	247, // 297: octelium.api.main.cordium.v1.UserConfig.Status.preferredRegionRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	203, // 298: octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.authentication:type_name -> octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.Authentication
-	204, // 299: octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.Authentication.http:type_name -> octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.Authentication.HTTP
-	205, // 300: octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.Authentication.HTTP.password:type_name -> octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.Authentication.HTTP.Password
-	22,  // 301: octelium.api.main.cordium.v1.WatchWorkspaceResponse.Create.item:type_name -> octelium.api.main.cordium.v1.Workspace
-	22,  // 302: octelium.api.main.cordium.v1.WatchWorkspaceResponse.Update.newItem:type_name -> octelium.api.main.cordium.v1.Workspace
-	22,  // 303: octelium.api.main.cordium.v1.WatchWorkspaceResponse.Update.oldItem:type_name -> octelium.api.main.cordium.v1.Workspace
-	22,  // 304: octelium.api.main.cordium.v1.WatchWorkspaceResponse.Delete.item:type_name -> octelium.api.main.cordium.v1.Workspace
-	247, // 305: octelium.api.main.cordium.v1.ExecRequest.Request.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
-	217, // 306: octelium.api.main.cordium.v1.ExecRequest.Request.envVars:type_name -> octelium.api.main.cordium.v1.ExecRequest.Request.EnvVar
-	223, // 307: octelium.api.main.cordium.v1.ClusterConfig.Spec.space:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Space
-	224, // 308: octelium.api.main.cordium.v1.ClusterConfig.Spec.workspace:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace
-	225, // 309: octelium.api.main.cordium.v1.ClusterConfig.Spec.volume:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume
-	226, // 310: octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.ownership:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.Ownership
-	228, // 311: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.storage:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage
-	229, // 312: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.limit:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit
-	230, // 313: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.timeout:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout
-	231, // 314: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.runtime:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Runtime
-	236, // 315: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.storage:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage
-	237, // 316: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.limit:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Limit
-	227, // 317: octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.Ownership.rules:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.Ownership.Rule
-	21,  // 318: octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.Ownership.Rule.effect:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.Ownership.Rule.Effect
-	90,  // 319: octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.Ownership.Rule.condition:type_name -> octelium.api.main.cordium.v1.Condition
-	232, // 320: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.storageClass:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass
-	233, // 321: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.volumeSnapshotClass:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass
-	101, // 322: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.buildLimit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
-	101, // 323: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.defaultOrganizationSpaceLimit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
-	101, // 324: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.defaultUserSpaceLimit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
-	101, // 325: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.maxLimit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
-	249, // 326: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout.defaultDuration:type_name -> octelium.api.main.meta.v1.Duration
-	249, // 327: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout.userSpaceDuration:type_name -> octelium.api.main.meta.v1.Duration
-	249, // 328: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout.organizationSpaceDuration:type_name -> octelium.api.main.meta.v1.Duration
-	249, // 329: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout.maxActiveDuration:type_name -> octelium.api.main.meta.v1.Duration
-	122, // 330: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Runtime.capabilities:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities
-	234, // 331: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass.rules:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass.Rule
-	235, // 332: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass.rules:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass.Rule
-	90,  // 333: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass.Rule.condition:type_name -> octelium.api.main.cordium.v1.Condition
-	90,  // 334: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass.Rule.condition:type_name -> octelium.api.main.cordium.v1.Condition
-	238, // 335: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage.storageClass:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage.StorageClass
-	161, // 336: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Limit.maxSize:type_name -> octelium.api.main.cordium.v1.Volume.Spec.Size
-	161, // 337: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Limit.defaultSize:type_name -> octelium.api.main.cordium.v1.Volume.Spec.Size
-	239, // 338: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage.StorageClass.rules:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage.StorageClass.Rule
-	90,  // 339: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage.StorageClass.Rule.condition:type_name -> octelium.api.main.cordium.v1.Condition
-	90,  // 340: octelium.api.main.cordium.v1.Condition.All.of:type_name -> octelium.api.main.cordium.v1.Condition
-	90,  // 341: octelium.api.main.cordium.v1.Condition.Any.of:type_name -> octelium.api.main.cordium.v1.Condition
-	90,  // 342: octelium.api.main.cordium.v1.Condition.None.of:type_name -> octelium.api.main.cordium.v1.Condition
-	31,  // 343: octelium.api.main.cordium.v1.MainService.CreateSecret:input_type -> octelium.api.main.cordium.v1.Secret
-	32,  // 344: octelium.api.main.cordium.v1.MainService.ListSecret:input_type -> octelium.api.main.cordium.v1.ListSecretOptions
-	251, // 345: octelium.api.main.cordium.v1.MainService.DeleteSecret:input_type -> octelium.api.main.meta.v1.DeleteOptions
-	252, // 346: octelium.api.main.cordium.v1.MainService.GetSecret:input_type -> octelium.api.main.meta.v1.GetOptions
-	40,  // 347: octelium.api.main.cordium.v1.MainService.CreateTemplate:input_type -> octelium.api.main.cordium.v1.Template
-	40,  // 348: octelium.api.main.cordium.v1.MainService.UpdateTemplate:input_type -> octelium.api.main.cordium.v1.Template
-	251, // 349: octelium.api.main.cordium.v1.MainService.DeleteTemplate:input_type -> octelium.api.main.meta.v1.DeleteOptions
-	43,  // 350: octelium.api.main.cordium.v1.MainService.BuildTemplate:input_type -> octelium.api.main.cordium.v1.BuildTemplateRequest
-	86,  // 351: octelium.api.main.cordium.v1.MainService.CancelBuildTemplate:input_type -> octelium.api.main.cordium.v1.CancelBuildTemplateRequest
-	44,  // 352: octelium.api.main.cordium.v1.MainService.CreateSpace:input_type -> octelium.api.main.cordium.v1.Space
-	44,  // 353: octelium.api.main.cordium.v1.MainService.UpdateSpace:input_type -> octelium.api.main.cordium.v1.Space
-	251, // 354: octelium.api.main.cordium.v1.MainService.DeleteSpace:input_type -> octelium.api.main.meta.v1.DeleteOptions
-	50,  // 355: octelium.api.main.cordium.v1.MainService.CreateMembership:input_type -> octelium.api.main.cordium.v1.CreateMembershipRequest
-	251, // 356: octelium.api.main.cordium.v1.MainService.DeleteMembership:input_type -> octelium.api.main.meta.v1.DeleteOptions
-	57,  // 357: octelium.api.main.cordium.v1.MainService.GetSpaceMembership:input_type -> octelium.api.main.cordium.v1.GetSpaceMembershipRequest
-	47,  // 358: octelium.api.main.cordium.v1.MainService.UpdateMembership:input_type -> octelium.api.main.cordium.v1.Membership
-	51,  // 359: octelium.api.main.cordium.v1.MainService.CreateGitProvider:input_type -> octelium.api.main.cordium.v1.GitProvider
-	51,  // 360: octelium.api.main.cordium.v1.MainService.UpdateGitProvider:input_type -> octelium.api.main.cordium.v1.GitProvider
-	251, // 361: octelium.api.main.cordium.v1.MainService.DeleteGitProvider:input_type -> octelium.api.main.meta.v1.DeleteOptions
-	22,  // 362: octelium.api.main.cordium.v1.MainService.CreateWorkspace:input_type -> octelium.api.main.cordium.v1.Workspace
-	22,  // 363: octelium.api.main.cordium.v1.MainService.UpdateWorkspace:input_type -> octelium.api.main.cordium.v1.Workspace
-	251, // 364: octelium.api.main.cordium.v1.MainService.DeleteWorkspace:input_type -> octelium.api.main.meta.v1.DeleteOptions
-	24,  // 365: octelium.api.main.cordium.v1.MainService.ListWorkspace:input_type -> octelium.api.main.cordium.v1.ListWorkspaceOptions
-	25,  // 366: octelium.api.main.cordium.v1.MainService.CreateWorkspaceSnapshot:input_type -> octelium.api.main.cordium.v1.WorkspaceSnapshot
-	251, // 367: octelium.api.main.cordium.v1.MainService.DeleteWorkspaceSnapshot:input_type -> octelium.api.main.meta.v1.DeleteOptions
-	27,  // 368: octelium.api.main.cordium.v1.MainService.ListWorkspaceSnapshot:input_type -> octelium.api.main.cordium.v1.ListWorkspaceSnapshotOptions
-	252, // 369: octelium.api.main.cordium.v1.MainService.GetWorkspaceSnapshot:input_type -> octelium.api.main.meta.v1.GetOptions
-	28,  // 370: octelium.api.main.cordium.v1.MainService.CreateVolume:input_type -> octelium.api.main.cordium.v1.Volume
-	28,  // 371: octelium.api.main.cordium.v1.MainService.UpdateVolume:input_type -> octelium.api.main.cordium.v1.Volume
-	251, // 372: octelium.api.main.cordium.v1.MainService.DeleteVolume:input_type -> octelium.api.main.meta.v1.DeleteOptions
-	30,  // 373: octelium.api.main.cordium.v1.MainService.ListVolume:input_type -> octelium.api.main.cordium.v1.ListVolumeOptions
-	252, // 374: octelium.api.main.cordium.v1.MainService.GetVolume:input_type -> octelium.api.main.meta.v1.GetOptions
-	36,  // 375: octelium.api.main.cordium.v1.MainService.StartWorkspace:input_type -> octelium.api.main.cordium.v1.StartWorkspaceRequest
-	38,  // 376: octelium.api.main.cordium.v1.MainService.StopWorkspace:input_type -> octelium.api.main.cordium.v1.StopWorkspaceRequest
-	60,  // 377: octelium.api.main.cordium.v1.MainService.ShareWorkspacePort:input_type -> octelium.api.main.cordium.v1.ShareWorkspacePortRequest
-	62,  // 378: octelium.api.main.cordium.v1.MainService.UnshareWorkspacePort:input_type -> octelium.api.main.cordium.v1.UnshareWorkspacePortRequest
-	46,  // 379: octelium.api.main.cordium.v1.MainService.ListSpace:input_type -> octelium.api.main.cordium.v1.ListSpaceOptions
-	42,  // 380: octelium.api.main.cordium.v1.MainService.ListTemplate:input_type -> octelium.api.main.cordium.v1.ListTemplateOptions
-	49,  // 381: octelium.api.main.cordium.v1.MainService.ListMembership:input_type -> octelium.api.main.cordium.v1.ListMembershipOptions
-	53,  // 382: octelium.api.main.cordium.v1.MainService.ListGitProvider:input_type -> octelium.api.main.cordium.v1.ListGitProviderOptions
-	252, // 383: octelium.api.main.cordium.v1.MainService.GetSpace:input_type -> octelium.api.main.meta.v1.GetOptions
-	252, // 384: octelium.api.main.cordium.v1.MainService.GetWorkspace:input_type -> octelium.api.main.meta.v1.GetOptions
-	252, // 385: octelium.api.main.cordium.v1.MainService.GetTemplate:input_type -> octelium.api.main.meta.v1.GetOptions
-	252, // 386: octelium.api.main.cordium.v1.MainService.GetGitProvider:input_type -> octelium.api.main.meta.v1.GetOptions
-	252, // 387: octelium.api.main.cordium.v1.MainService.GetMembership:input_type -> octelium.api.main.meta.v1.GetOptions
-	64,  // 388: octelium.api.main.cordium.v1.MainService.LeaveSpace:input_type -> octelium.api.main.cordium.v1.LeaveSpaceRequest
-	54,  // 389: octelium.api.main.cordium.v1.MainService.CreateUserSecret:input_type -> octelium.api.main.cordium.v1.UserSecret
-	54,  // 390: octelium.api.main.cordium.v1.MainService.UpdateUserSecret:input_type -> octelium.api.main.cordium.v1.UserSecret
-	251, // 391: octelium.api.main.cordium.v1.MainService.DeleteUserSecret:input_type -> octelium.api.main.meta.v1.DeleteOptions
-	55,  // 392: octelium.api.main.cordium.v1.MainService.ListUserSecret:input_type -> octelium.api.main.cordium.v1.ListUserSecretOptions
-	252, // 393: octelium.api.main.cordium.v1.MainService.GetUserSecret:input_type -> octelium.api.main.meta.v1.GetOptions
-	59,  // 394: octelium.api.main.cordium.v1.MainService.GetUserConfig:input_type -> octelium.api.main.cordium.v1.GetUserConfigRequest
-	58,  // 395: octelium.api.main.cordium.v1.MainService.UpdateUserConfig:input_type -> octelium.api.main.cordium.v1.UserConfig
-	68,  // 396: octelium.api.main.cordium.v1.MainService.ListRegion:input_type -> octelium.api.main.cordium.v1.ListRegionOptions
-	84,  // 397: octelium.api.main.cordium.v1.MainService.WatchWorkspace:input_type -> octelium.api.main.cordium.v1.WatchWorkspaceRequest
-	69,  // 398: octelium.api.main.cordium.v1.WorkspaceService.CreateTerminal:input_type -> octelium.api.main.cordium.v1.CreateTerminalRequest
-	72,  // 399: octelium.api.main.cordium.v1.WorkspaceService.RemoveTerminal:input_type -> octelium.api.main.cordium.v1.RemoveTerminalRequest
-	74,  // 400: octelium.api.main.cordium.v1.WorkspaceService.ListTerminal:input_type -> octelium.api.main.cordium.v1.ListTerminalRequest
-	79,  // 401: octelium.api.main.cordium.v1.WorkspaceService.WriteTerminalData:input_type -> octelium.api.main.cordium.v1.WriteTerminalDataRequest
-	77,  // 402: octelium.api.main.cordium.v1.WorkspaceService.SetTerminalWindowSize:input_type -> octelium.api.main.cordium.v1.SetTerminalWindowSizeRequest
-	80,  // 403: octelium.api.main.cordium.v1.WorkspaceService.ListenTerminal:input_type -> octelium.api.main.cordium.v1.ListenTerminalRequest
-	82,  // 404: octelium.api.main.cordium.v1.WorkspaceService.ListenLog:input_type -> octelium.api.main.cordium.v1.ListenLogRequest
-	87,  // 405: octelium.api.main.cordium.v1.WorkspaceService.Exec:input_type -> octelium.api.main.cordium.v1.ExecRequest
-	91,  // 406: octelium.api.main.cordium.v1.ManagementService.GetClusterConfig:input_type -> octelium.api.main.cordium.v1.GetClusterConfigRequest
-	89,  // 407: octelium.api.main.cordium.v1.ManagementService.UpdateClusterConfig:input_type -> octelium.api.main.cordium.v1.ClusterConfig
-	31,  // 408: octelium.api.main.cordium.v1.MainService.CreateSecret:output_type -> octelium.api.main.cordium.v1.Secret
-	33,  // 409: octelium.api.main.cordium.v1.MainService.ListSecret:output_type -> octelium.api.main.cordium.v1.SecretList
-	253, // 410: octelium.api.main.cordium.v1.MainService.DeleteSecret:output_type -> octelium.api.main.meta.v1.OperationResult
-	31,  // 411: octelium.api.main.cordium.v1.MainService.GetSecret:output_type -> octelium.api.main.cordium.v1.Secret
-	40,  // 412: octelium.api.main.cordium.v1.MainService.CreateTemplate:output_type -> octelium.api.main.cordium.v1.Template
-	40,  // 413: octelium.api.main.cordium.v1.MainService.UpdateTemplate:output_type -> octelium.api.main.cordium.v1.Template
-	253, // 414: octelium.api.main.cordium.v1.MainService.DeleteTemplate:output_type -> octelium.api.main.meta.v1.OperationResult
-	40,  // 415: octelium.api.main.cordium.v1.MainService.BuildTemplate:output_type -> octelium.api.main.cordium.v1.Template
-	40,  // 416: octelium.api.main.cordium.v1.MainService.CancelBuildTemplate:output_type -> octelium.api.main.cordium.v1.Template
-	44,  // 417: octelium.api.main.cordium.v1.MainService.CreateSpace:output_type -> octelium.api.main.cordium.v1.Space
-	44,  // 418: octelium.api.main.cordium.v1.MainService.UpdateSpace:output_type -> octelium.api.main.cordium.v1.Space
-	253, // 419: octelium.api.main.cordium.v1.MainService.DeleteSpace:output_type -> octelium.api.main.meta.v1.OperationResult
-	47,  // 420: octelium.api.main.cordium.v1.MainService.CreateMembership:output_type -> octelium.api.main.cordium.v1.Membership
-	253, // 421: octelium.api.main.cordium.v1.MainService.DeleteMembership:output_type -> octelium.api.main.meta.v1.OperationResult
-	47,  // 422: octelium.api.main.cordium.v1.MainService.GetSpaceMembership:output_type -> octelium.api.main.cordium.v1.Membership
-	47,  // 423: octelium.api.main.cordium.v1.MainService.UpdateMembership:output_type -> octelium.api.main.cordium.v1.Membership
-	51,  // 424: octelium.api.main.cordium.v1.MainService.CreateGitProvider:output_type -> octelium.api.main.cordium.v1.GitProvider
-	51,  // 425: octelium.api.main.cordium.v1.MainService.UpdateGitProvider:output_type -> octelium.api.main.cordium.v1.GitProvider
-	253, // 426: octelium.api.main.cordium.v1.MainService.DeleteGitProvider:output_type -> octelium.api.main.meta.v1.OperationResult
-	22,  // 427: octelium.api.main.cordium.v1.MainService.CreateWorkspace:output_type -> octelium.api.main.cordium.v1.Workspace
-	22,  // 428: octelium.api.main.cordium.v1.MainService.UpdateWorkspace:output_type -> octelium.api.main.cordium.v1.Workspace
-	253, // 429: octelium.api.main.cordium.v1.MainService.DeleteWorkspace:output_type -> octelium.api.main.meta.v1.OperationResult
-	23,  // 430: octelium.api.main.cordium.v1.MainService.ListWorkspace:output_type -> octelium.api.main.cordium.v1.WorkspaceList
-	25,  // 431: octelium.api.main.cordium.v1.MainService.CreateWorkspaceSnapshot:output_type -> octelium.api.main.cordium.v1.WorkspaceSnapshot
-	253, // 432: octelium.api.main.cordium.v1.MainService.DeleteWorkspaceSnapshot:output_type -> octelium.api.main.meta.v1.OperationResult
-	26,  // 433: octelium.api.main.cordium.v1.MainService.ListWorkspaceSnapshot:output_type -> octelium.api.main.cordium.v1.WorkspaceSnapshotList
-	25,  // 434: octelium.api.main.cordium.v1.MainService.GetWorkspaceSnapshot:output_type -> octelium.api.main.cordium.v1.WorkspaceSnapshot
-	28,  // 435: octelium.api.main.cordium.v1.MainService.CreateVolume:output_type -> octelium.api.main.cordium.v1.Volume
-	28,  // 436: octelium.api.main.cordium.v1.MainService.UpdateVolume:output_type -> octelium.api.main.cordium.v1.Volume
-	253, // 437: octelium.api.main.cordium.v1.MainService.DeleteVolume:output_type -> octelium.api.main.meta.v1.OperationResult
-	29,  // 438: octelium.api.main.cordium.v1.MainService.ListVolume:output_type -> octelium.api.main.cordium.v1.VolumeList
-	28,  // 439: octelium.api.main.cordium.v1.MainService.GetVolume:output_type -> octelium.api.main.cordium.v1.Volume
-	37,  // 440: octelium.api.main.cordium.v1.MainService.StartWorkspace:output_type -> octelium.api.main.cordium.v1.StartWorkspaceResponse
-	39,  // 441: octelium.api.main.cordium.v1.MainService.StopWorkspace:output_type -> octelium.api.main.cordium.v1.StopWorkspaceResponse
-	61,  // 442: octelium.api.main.cordium.v1.MainService.ShareWorkspacePort:output_type -> octelium.api.main.cordium.v1.ShareWorkspacePortResponse
-	63,  // 443: octelium.api.main.cordium.v1.MainService.UnshareWorkspacePort:output_type -> octelium.api.main.cordium.v1.UnshareWorkspacePortResponse
-	45,  // 444: octelium.api.main.cordium.v1.MainService.ListSpace:output_type -> octelium.api.main.cordium.v1.SpaceList
-	41,  // 445: octelium.api.main.cordium.v1.MainService.ListTemplate:output_type -> octelium.api.main.cordium.v1.TemplateList
-	48,  // 446: octelium.api.main.cordium.v1.MainService.ListMembership:output_type -> octelium.api.main.cordium.v1.MembershipList
-	52,  // 447: octelium.api.main.cordium.v1.MainService.ListGitProvider:output_type -> octelium.api.main.cordium.v1.GitProviderList
-	44,  // 448: octelium.api.main.cordium.v1.MainService.GetSpace:output_type -> octelium.api.main.cordium.v1.Space
-	22,  // 449: octelium.api.main.cordium.v1.MainService.GetWorkspace:output_type -> octelium.api.main.cordium.v1.Workspace
-	40,  // 450: octelium.api.main.cordium.v1.MainService.GetTemplate:output_type -> octelium.api.main.cordium.v1.Template
-	51,  // 451: octelium.api.main.cordium.v1.MainService.GetGitProvider:output_type -> octelium.api.main.cordium.v1.GitProvider
-	47,  // 452: octelium.api.main.cordium.v1.MainService.GetMembership:output_type -> octelium.api.main.cordium.v1.Membership
-	65,  // 453: octelium.api.main.cordium.v1.MainService.LeaveSpace:output_type -> octelium.api.main.cordium.v1.LeaveSpaceResponse
-	54,  // 454: octelium.api.main.cordium.v1.MainService.CreateUserSecret:output_type -> octelium.api.main.cordium.v1.UserSecret
-	54,  // 455: octelium.api.main.cordium.v1.MainService.UpdateUserSecret:output_type -> octelium.api.main.cordium.v1.UserSecret
-	253, // 456: octelium.api.main.cordium.v1.MainService.DeleteUserSecret:output_type -> octelium.api.main.meta.v1.OperationResult
-	56,  // 457: octelium.api.main.cordium.v1.MainService.ListUserSecret:output_type -> octelium.api.main.cordium.v1.UserSecretList
-	54,  // 458: octelium.api.main.cordium.v1.MainService.GetUserSecret:output_type -> octelium.api.main.cordium.v1.UserSecret
-	58,  // 459: octelium.api.main.cordium.v1.MainService.GetUserConfig:output_type -> octelium.api.main.cordium.v1.UserConfig
-	58,  // 460: octelium.api.main.cordium.v1.MainService.UpdateUserConfig:output_type -> octelium.api.main.cordium.v1.UserConfig
-	67,  // 461: octelium.api.main.cordium.v1.MainService.ListRegion:output_type -> octelium.api.main.cordium.v1.RegionList
-	85,  // 462: octelium.api.main.cordium.v1.MainService.WatchWorkspace:output_type -> octelium.api.main.cordium.v1.WatchWorkspaceResponse
-	71,  // 463: octelium.api.main.cordium.v1.WorkspaceService.CreateTerminal:output_type -> octelium.api.main.cordium.v1.CreateTerminalResponse
-	73,  // 464: octelium.api.main.cordium.v1.WorkspaceService.RemoveTerminal:output_type -> octelium.api.main.cordium.v1.RemoveTerminalResponse
-	75,  // 465: octelium.api.main.cordium.v1.WorkspaceService.ListTerminal:output_type -> octelium.api.main.cordium.v1.ListTerminalResponse
-	76,  // 466: octelium.api.main.cordium.v1.WorkspaceService.WriteTerminalData:output_type -> octelium.api.main.cordium.v1.WriteTerminalDataResponse
-	78,  // 467: octelium.api.main.cordium.v1.WorkspaceService.SetTerminalWindowSize:output_type -> octelium.api.main.cordium.v1.SetTerminalWindowSizeResponse
-	81,  // 468: octelium.api.main.cordium.v1.WorkspaceService.ListenTerminal:output_type -> octelium.api.main.cordium.v1.ListenTerminalResponse
-	83,  // 469: octelium.api.main.cordium.v1.WorkspaceService.ListenLog:output_type -> octelium.api.main.cordium.v1.ListenLogResponse
-	88,  // 470: octelium.api.main.cordium.v1.WorkspaceService.Exec:output_type -> octelium.api.main.cordium.v1.ExecResponse
-	89,  // 471: octelium.api.main.cordium.v1.ManagementService.GetClusterConfig:output_type -> octelium.api.main.cordium.v1.ClusterConfig
-	89,  // 472: octelium.api.main.cordium.v1.ManagementService.UpdateClusterConfig:output_type -> octelium.api.main.cordium.v1.ClusterConfig
-	408, // [408:473] is the sub-list for method output_type
-	343, // [343:408] is the sub-list for method input_type
-	343, // [343:343] is the sub-list for extension type_name
-	343, // [343:343] is the sub-list for extension extendee
-	0,   // [0:343] is the sub-list for field type_name
+	248, // 79: octelium.api.main.cordium.v1.UserSecretList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
+	250, // 80: octelium.api.main.cordium.v1.GetSpaceMembershipRequest.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	247, // 81: octelium.api.main.cordium.v1.UserConfig.metadata:type_name -> octelium.api.main.meta.v1.Metadata
+	200, // 82: octelium.api.main.cordium.v1.UserConfig.spec:type_name -> octelium.api.main.cordium.v1.UserConfig.Spec
+	201, // 83: octelium.api.main.cordium.v1.UserConfig.status:type_name -> octelium.api.main.cordium.v1.UserConfig.Status
+	250, // 84: octelium.api.main.cordium.v1.InitializeAgentRequest.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 85: octelium.api.main.cordium.v1.ShareWorkspacePortRequest.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	18,  // 86: octelium.api.main.cordium.v1.ShareWorkspacePortRequest.mode:type_name -> octelium.api.main.cordium.v1.ShareWorkspacePortRequest.Mode
+	250, // 87: octelium.api.main.cordium.v1.UnshareWorkspacePortRequest.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 88: octelium.api.main.cordium.v1.LeaveSpaceRequest.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	247, // 89: octelium.api.main.cordium.v1.Region.metadata:type_name -> octelium.api.main.meta.v1.Metadata
+	207, // 90: octelium.api.main.cordium.v1.Region.spec:type_name -> octelium.api.main.cordium.v1.Region.Spec
+	208, // 91: octelium.api.main.cordium.v1.Region.status:type_name -> octelium.api.main.cordium.v1.Region.Status
+	67,  // 92: octelium.api.main.cordium.v1.RegionList.items:type_name -> octelium.api.main.cordium.v1.Region
+	248, // 93: octelium.api.main.cordium.v1.RegionList.listResponseMeta:type_name -> octelium.api.main.meta.v1.ListResponseMeta
+	249, // 94: octelium.api.main.cordium.v1.ListRegionOptions.common:type_name -> octelium.api.main.meta.v1.CommonListOptions
+	250, // 95: octelium.api.main.cordium.v1.CreateTerminalRequest.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 96: octelium.api.main.cordium.v1.ListTerminalRequest.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	71,  // 97: octelium.api.main.cordium.v1.ListTerminalResponse.items:type_name -> octelium.api.main.cordium.v1.Terminal
+	209, // 98: octelium.api.main.cordium.v1.ListenTerminalResponse.stdout:type_name -> octelium.api.main.cordium.v1.ListenTerminalResponse.Stdout
+	210, // 99: octelium.api.main.cordium.v1.ListenTerminalResponse.windowSize:type_name -> octelium.api.main.cordium.v1.ListenTerminalResponse.WindowSize
+	211, // 100: octelium.api.main.cordium.v1.ListenTerminalResponse.close:type_name -> octelium.api.main.cordium.v1.ListenTerminalResponse.Close
+	250, // 101: octelium.api.main.cordium.v1.ListenLogRequest.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	251, // 102: octelium.api.main.cordium.v1.ListenLogResponse.createdAt:type_name -> google.protobuf.Timestamp
+	20,  // 103: octelium.api.main.cordium.v1.ListenLogResponse.type:type_name -> octelium.api.main.cordium.v1.ListenLogResponse.Type
+	19,  // 104: octelium.api.main.cordium.v1.ListenLogResponse.mode:type_name -> octelium.api.main.cordium.v1.ListenLogResponse.Mode
+	250, // 105: octelium.api.main.cordium.v1.WatchWorkspaceRequest.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	212, // 106: octelium.api.main.cordium.v1.WatchWorkspaceResponse.create:type_name -> octelium.api.main.cordium.v1.WatchWorkspaceResponse.Create
+	213, // 107: octelium.api.main.cordium.v1.WatchWorkspaceResponse.update:type_name -> octelium.api.main.cordium.v1.WatchWorkspaceResponse.Update
+	214, // 108: octelium.api.main.cordium.v1.WatchWorkspaceResponse.delete:type_name -> octelium.api.main.cordium.v1.WatchWorkspaceResponse.Delete
+	250, // 109: octelium.api.main.cordium.v1.CancelBuildTemplateRequest.templateRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	215, // 110: octelium.api.main.cordium.v1.ExecRequest.request:type_name -> octelium.api.main.cordium.v1.ExecRequest.Request
+	217, // 111: octelium.api.main.cordium.v1.ExecRequest.writeData:type_name -> octelium.api.main.cordium.v1.ExecRequest.WriteData
+	216, // 112: octelium.api.main.cordium.v1.ExecRequest.kill:type_name -> octelium.api.main.cordium.v1.ExecRequest.Kill
+	219, // 113: octelium.api.main.cordium.v1.ExecResponse.stdout:type_name -> octelium.api.main.cordium.v1.ExecResponse.Stdout
+	220, // 114: octelium.api.main.cordium.v1.ExecResponse.stderr:type_name -> octelium.api.main.cordium.v1.ExecResponse.Stderr
+	221, // 115: octelium.api.main.cordium.v1.ExecResponse.exit:type_name -> octelium.api.main.cordium.v1.ExecResponse.Exit
+	247, // 116: octelium.api.main.cordium.v1.ClusterConfig.metadata:type_name -> octelium.api.main.meta.v1.Metadata
+	222, // 117: octelium.api.main.cordium.v1.ClusterConfig.spec:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec
+	223, // 118: octelium.api.main.cordium.v1.ClusterConfig.status:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Status
+	243, // 119: octelium.api.main.cordium.v1.Condition.all:type_name -> octelium.api.main.cordium.v1.Condition.All
+	244, // 120: octelium.api.main.cordium.v1.Condition.any:type_name -> octelium.api.main.cordium.v1.Condition.Any
+	245, // 121: octelium.api.main.cordium.v1.Condition.none:type_name -> octelium.api.main.cordium.v1.Condition.None
+	246, // 122: octelium.api.main.cordium.v1.Condition.opa:type_name -> octelium.api.main.cordium.v1.Condition.OPA
+	250, // 123: octelium.api.main.cordium.v1.SessionExtInfo.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 124: octelium.api.main.cordium.v1.SessionExtInfo.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 125: octelium.api.main.cordium.v1.SessionExtInfo.templateRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	13,  // 126: octelium.api.main.cordium.v1.SessionExtInfo.spaceType:type_name -> octelium.api.main.cordium.v1.Space.Status.Type
+	97,  // 127: octelium.api.main.cordium.v1.Workspace.Spec.image:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image
+	100, // 128: octelium.api.main.cordium.v1.Workspace.Spec.runtime:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime
+	98,  // 129: octelium.api.main.cordium.v1.Workspace.Spec.repository:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Repository
+	99,  // 130: octelium.api.main.cordium.v1.Workspace.Spec.additionalRepositories:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.AdditionalRepository
+	101, // 131: octelium.api.main.cordium.v1.Workspace.Spec.applications:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Application
+	102, // 132: octelium.api.main.cordium.v1.Workspace.Spec.limit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
+	103, // 133: octelium.api.main.cordium.v1.Workspace.Spec.vars:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Var
+	5,   // 134: octelium.api.main.cordium.v1.Workspace.Status.state:type_name -> octelium.api.main.cordium.v1.Workspace.Status.State
+	250, // 135: octelium.api.main.cordium.v1.Workspace.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 136: octelium.api.main.cordium.v1.Workspace.Status.sessionRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 137: octelium.api.main.cordium.v1.Workspace.Status.regionRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	251, // 138: octelium.api.main.cordium.v1.Workspace.Status.lastInitializedAt:type_name -> google.protobuf.Timestamp
+	251, // 139: octelium.api.main.cordium.v1.Workspace.Status.lastActivityAt:type_name -> google.protobuf.Timestamp
+	251, // 140: octelium.api.main.cordium.v1.Workspace.Status.lastStoppedAt:type_name -> google.protobuf.Timestamp
+	250, // 141: octelium.api.main.cordium.v1.Workspace.Status.templateRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 142: octelium.api.main.cordium.v1.Workspace.Status.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	252, // 143: octelium.api.main.cordium.v1.Workspace.Status.totalLastRunsDuration:type_name -> octelium.api.main.meta.v1.Duration
+	5,   // 144: octelium.api.main.cordium.v1.Workspace.Status.lastState:type_name -> octelium.api.main.cordium.v1.Workspace.Status.State
+	251, // 145: octelium.api.main.cordium.v1.Workspace.Status.currentStateSetAt:type_name -> google.protobuf.Timestamp
+	251, // 146: octelium.api.main.cordium.v1.Workspace.Status.lastStateSetAt:type_name -> google.protobuf.Timestamp
+	251, // 147: octelium.api.main.cordium.v1.Workspace.Status.lastRunningAt:type_name -> google.protobuf.Timestamp
+	133, // 148: octelium.api.main.cordium.v1.Workspace.Status.failure:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure
+	102, // 149: octelium.api.main.cordium.v1.Workspace.Status.limit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
+	134, // 150: octelium.api.main.cordium.v1.Workspace.Status.sharedPorts:type_name -> octelium.api.main.cordium.v1.Workspace.Status.SharedPort
+	13,  // 151: octelium.api.main.cordium.v1.Workspace.Status.spaceType:type_name -> octelium.api.main.cordium.v1.Space.Status.Type
+	6,   // 152: octelium.api.main.cordium.v1.Workspace.Status.stoppingReason:type_name -> octelium.api.main.cordium.v1.Workspace.Status.StoppingReason
+	6,   // 153: octelium.api.main.cordium.v1.Workspace.Status.lastStoppingReason:type_name -> octelium.api.main.cordium.v1.Workspace.Status.StoppingReason
+	135, // 154: octelium.api.main.cordium.v1.Workspace.Status.run:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Run
+	135, // 155: octelium.api.main.cordium.v1.Workspace.Status.lastRuns:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Run
+	250, // 156: octelium.api.main.cordium.v1.Workspace.Status.workspaceSnapshotRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 157: octelium.api.main.cordium.v1.Workspace.Status.lastRegionRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	104, // 158: octelium.api.main.cordium.v1.Workspace.Spec.Image.dockerfile:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image.Dockerfile
+	106, // 159: octelium.api.main.cordium.v1.Workspace.Spec.Image.registry:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image.Registry
+	105, // 160: octelium.api.main.cordium.v1.Workspace.Spec.Image.git:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image.Git
+	107, // 161: octelium.api.main.cordium.v1.Workspace.Spec.Image.repository:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image.Repository
+	113, // 162: octelium.api.main.cordium.v1.Workspace.Spec.Repository.cloneOptions:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Repository.CloneOptions
+	112, // 163: octelium.api.main.cordium.v1.Workspace.Spec.Repository.authentication:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Repository.Authentication
+	98,  // 164: octelium.api.main.cordium.v1.Workspace.Spec.AdditionalRepository.repository:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Repository
+	116, // 165: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.envVars:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.EnvVar
+	117, // 166: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.tasks:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task
+	119, // 167: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.devcontainers:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers
+	120, // 168: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.octelium:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Octelium
+	121, // 169: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.network:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network
+	122, // 170: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.filesystem:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Filesystem
+	123, // 171: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.capabilities:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities
+	124, // 172: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.timeout:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Timeout
+	118, // 173: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.volumeMounts:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.VolumeMount
+	130, // 174: octelium.api.main.cordium.v1.Workspace.Spec.Limit.cpu:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit.CPU
+	131, // 175: octelium.api.main.cordium.v1.Workspace.Spec.Limit.memory:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit.Memory
+	132, // 176: octelium.api.main.cordium.v1.Workspace.Spec.Limit.storage:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit.Storage
+	108, // 177: octelium.api.main.cordium.v1.Workspace.Spec.Image.Registry.authentication:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image.Registry.Authentication
+	110, // 178: octelium.api.main.cordium.v1.Workspace.Spec.Image.Repository.devcontainer:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image.Repository.Devcontainer
+	111, // 179: octelium.api.main.cordium.v1.Workspace.Spec.Image.Repository.dockerfile:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image.Repository.Dockerfile
+	109, // 180: octelium.api.main.cordium.v1.Workspace.Spec.Image.Registry.Authentication.password:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image.Registry.Authentication.Password
+	114, // 181: octelium.api.main.cordium.v1.Workspace.Spec.Repository.Authentication.http:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Repository.Authentication.HTTP
+	115, // 182: octelium.api.main.cordium.v1.Workspace.Spec.Repository.Authentication.HTTP.password:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Repository.Authentication.HTTP.Password
+	0,   // 183: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task.type:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task.Type
+	125, // 184: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task.envVars:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task.EnvVar
+	1,   // 185: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task.onFailure:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task.OnFailure
+	250, // 186: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.VolumeMount.volumeRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	126, // 187: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers.features:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers.Feature
+	129, // 188: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.egress:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Egress
+	4,   // 189: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Timeout.mode:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Timeout.Mode
+	127, // 190: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers.Feature.options:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Devcontainers.Feature.Option
+	2,   // 191: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule.action:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule.Action
+	128, // 192: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Egress.rules:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Rule
+	3,   // 193: octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Egress.defaultAction:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Network.Egress.DefaultAction
+	136, // 194: octelium.api.main.cordium.v1.Workspace.Status.Failure.imageBuild:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.ImageBuild
+	137, // 195: octelium.api.main.cordium.v1.Workspace.Status.Failure.imagePull:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.ImagePull
+	138, // 196: octelium.api.main.cordium.v1.Workspace.Status.Failure.repoClone:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.RepoClone
+	140, // 197: octelium.api.main.cordium.v1.Workspace.Status.Failure.buildTimeoutExceeded:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.BuildTimeoutExceeded
+	141, // 198: octelium.api.main.cordium.v1.Workspace.Status.Failure.task:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.Task
+	142, // 199: octelium.api.main.cordium.v1.Workspace.Status.Failure.startupUnknown:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.StartupUnknown
+	143, // 200: octelium.api.main.cordium.v1.Workspace.Status.Failure.startupTimeoutExceeded:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.StartupTimeoutExceeded
+	144, // 201: octelium.api.main.cordium.v1.Workspace.Status.Failure.loadStorage:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.LoadStorage
+	145, // 202: octelium.api.main.cordium.v1.Workspace.Status.Failure.saveStorage:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.SaveStorage
+	146, // 203: octelium.api.main.cordium.v1.Workspace.Status.Failure.stoppageTimeoutExceeded:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.StoppageTimeoutExceeded
+	147, // 204: octelium.api.main.cordium.v1.Workspace.Status.Failure.runContainer:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.RunContainer
+	148, // 205: octelium.api.main.cordium.v1.Workspace.Status.Failure.healthCheck:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.HealthCheck
+	149, // 206: octelium.api.main.cordium.v1.Workspace.Status.Failure.unknown:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.Unknown
+	150, // 207: octelium.api.main.cordium.v1.Workspace.Status.Failure.additionalRepoClone:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.AdditionalRepoClone
+	151, // 208: octelium.api.main.cordium.v1.Workspace.Status.Failure.networkPolicy:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.NetworkPolicy
+	152, // 209: octelium.api.main.cordium.v1.Workspace.Status.Failure.volume:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure.Volume
+	7,   // 210: octelium.api.main.cordium.v1.Workspace.Status.SharedPort.mode:type_name -> octelium.api.main.cordium.v1.Workspace.Status.SharedPort.Mode
+	251, // 211: octelium.api.main.cordium.v1.Workspace.Status.Run.initializedAt:type_name -> google.protobuf.Timestamp
+	251, // 212: octelium.api.main.cordium.v1.Workspace.Status.Run.stoppedAt:type_name -> google.protobuf.Timestamp
+	133, // 213: octelium.api.main.cordium.v1.Workspace.Status.Run.failure:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure
+	173, // 214: octelium.api.main.cordium.v1.Workspace.Status.Run.config:type_name -> octelium.api.main.cordium.v1.StartWorkspaceRequest.Config
+	8,   // 215: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.state:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.State
+	250, // 216: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 217: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 218: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 219: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.templateRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 220: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.regionRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	251, // 221: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.snapshotAt:type_name -> google.protobuf.Timestamp
+	251, // 222: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.readyAt:type_name -> google.protobuf.Timestamp
+	9,   // 223: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.consistency:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Consistency
+	155, // 224: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.failure:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure
+	156, // 225: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.unsupported:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.Unsupported
+	157, // 226: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.sourceNotFound:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.SourceNotFound
+	158, // 227: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.storage:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.Storage
+	159, // 228: octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.unknown:type_name -> octelium.api.main.cordium.v1.WorkspaceSnapshot.Status.Failure.Unknown
+	162, // 229: octelium.api.main.cordium.v1.Volume.Spec.size:type_name -> octelium.api.main.cordium.v1.Volume.Spec.Size
+	10,  // 230: octelium.api.main.cordium.v1.Volume.Spec.accessMode:type_name -> octelium.api.main.cordium.v1.Volume.AccessMode
+	11,  // 231: octelium.api.main.cordium.v1.Volume.Status.state:type_name -> octelium.api.main.cordium.v1.Volume.Status.State
+	250, // 232: octelium.api.main.cordium.v1.Volume.Status.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 233: octelium.api.main.cordium.v1.Volume.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 234: octelium.api.main.cordium.v1.Volume.Status.regionRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	162, // 235: octelium.api.main.cordium.v1.Volume.Status.capacity:type_name -> octelium.api.main.cordium.v1.Volume.Spec.Size
+	251, // 236: octelium.api.main.cordium.v1.Volume.Status.readyAt:type_name -> google.protobuf.Timestamp
+	163, // 237: octelium.api.main.cordium.v1.Volume.Status.failure:type_name -> octelium.api.main.cordium.v1.Volume.Status.Failure
+	164, // 238: octelium.api.main.cordium.v1.Volume.Status.Failure.unsupported:type_name -> octelium.api.main.cordium.v1.Volume.Status.Failure.Unsupported
+	165, // 239: octelium.api.main.cordium.v1.Volume.Status.Failure.storage:type_name -> octelium.api.main.cordium.v1.Volume.Status.Failure.Storage
+	166, // 240: octelium.api.main.cordium.v1.Volume.Status.Failure.unknown:type_name -> octelium.api.main.cordium.v1.Volume.Status.Failure.Unknown
+	250, // 241: octelium.api.main.cordium.v1.Secret.Status.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 242: octelium.api.main.cordium.v1.Secret.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	253, // 243: octelium.api.main.cordium.v1.Secret.Data.attrs:type_name -> google.protobuf.Struct
+	22,  // 244: octelium.api.main.cordium.v1.ServerMessage.WorkspaceUpdate.workspace:type_name -> octelium.api.main.cordium.v1.Workspace
+	82,  // 245: octelium.api.main.cordium.v1.ServerMessage.ListenTerminalEvent.listenTerminalResponse:type_name -> octelium.api.main.cordium.v1.ListenTerminalResponse
+	103, // 246: octelium.api.main.cordium.v1.StartWorkspaceRequest.Config.vars:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Var
+	250, // 247: octelium.api.main.cordium.v1.StartWorkspaceRequest.Config.regionRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	97,  // 248: octelium.api.main.cordium.v1.Template.Spec.image:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image
+	100, // 249: octelium.api.main.cordium.v1.Template.Spec.runtime:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime
+	98,  // 250: octelium.api.main.cordium.v1.Template.Spec.repository:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Repository
+	99,  // 251: octelium.api.main.cordium.v1.Template.Spec.additionalRepositories:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.AdditionalRepository
+	102, // 252: octelium.api.main.cordium.v1.Template.Spec.limit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
+	103, // 253: octelium.api.main.cordium.v1.Template.Spec.vars:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Var
+	250, // 254: octelium.api.main.cordium.v1.Template.Status.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 255: octelium.api.main.cordium.v1.Template.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 256: octelium.api.main.cordium.v1.Template.Status.gitProviderRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	176, // 257: octelium.api.main.cordium.v1.Template.Status.buildInfo:type_name -> octelium.api.main.cordium.v1.Template.Status.BuildInfo
+	177, // 258: octelium.api.main.cordium.v1.Template.Status.BuildInfo.builds:type_name -> octelium.api.main.cordium.v1.Template.Status.BuildInfo.Build
+	251, // 259: octelium.api.main.cordium.v1.Template.Status.BuildInfo.Build.startedAt:type_name -> google.protobuf.Timestamp
+	251, // 260: octelium.api.main.cordium.v1.Template.Status.BuildInfo.Build.doneAt:type_name -> google.protobuf.Timestamp
+	133, // 261: octelium.api.main.cordium.v1.Template.Status.BuildInfo.Build.failure:type_name -> octelium.api.main.cordium.v1.Workspace.Status.Failure
+	12,  // 262: octelium.api.main.cordium.v1.Template.Status.BuildInfo.Build.state:type_name -> octelium.api.main.cordium.v1.Template.Status.BuildInfo.Build.State
+	180, // 263: octelium.api.main.cordium.v1.Space.Spec.limit:type_name -> octelium.api.main.cordium.v1.Space.Spec.Limit
+	181, // 264: octelium.api.main.cordium.v1.Space.Spec.runtime:type_name -> octelium.api.main.cordium.v1.Space.Spec.Runtime
+	182, // 265: octelium.api.main.cordium.v1.Space.Spec.authorization:type_name -> octelium.api.main.cordium.v1.Space.Spec.Authorization
+	250, // 266: octelium.api.main.cordium.v1.Space.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	13,  // 267: octelium.api.main.cordium.v1.Space.Status.type:type_name -> octelium.api.main.cordium.v1.Space.Status.Type
+	102, // 268: octelium.api.main.cordium.v1.Space.Spec.Limit.defaultLimit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
+	102, // 269: octelium.api.main.cordium.v1.Space.Spec.Limit.maxLimit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
+	116, // 270: octelium.api.main.cordium.v1.Space.Spec.Runtime.envVars:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.EnvVar
+	117, // 271: octelium.api.main.cordium.v1.Space.Spec.Runtime.tasks:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task
+	123, // 272: octelium.api.main.cordium.v1.Space.Spec.Runtime.capabilities:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities
+	15,  // 273: octelium.api.main.cordium.v1.Membership.Spec.role:type_name -> octelium.api.main.cordium.v1.Membership.Spec.Role
+	250, // 274: octelium.api.main.cordium.v1.Membership.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 275: octelium.api.main.cordium.v1.Membership.Status.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	186, // 276: octelium.api.main.cordium.v1.Membership.Status.userInfo:type_name -> octelium.api.main.cordium.v1.Membership.Status.UserInfo
+	187, // 277: octelium.api.main.cordium.v1.Membership.Status.gitProviderStateMap:type_name -> octelium.api.main.cordium.v1.Membership.Status.GitProviderStateMapEntry
+	250, // 278: octelium.api.main.cordium.v1.Membership.Status.GitProviderState.gitProviderRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 279: octelium.api.main.cordium.v1.Membership.Status.GitProviderState.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	251, // 280: octelium.api.main.cordium.v1.Membership.Status.GitProviderState.createdAt:type_name -> google.protobuf.Timestamp
+	185, // 281: octelium.api.main.cordium.v1.Membership.Status.GitProviderStateMapEntry.value:type_name -> octelium.api.main.cordium.v1.Membership.Status.GitProviderState
+	190, // 282: octelium.api.main.cordium.v1.GitProvider.Spec.github:type_name -> octelium.api.main.cordium.v1.GitProvider.Spec.Github
+	191, // 283: octelium.api.main.cordium.v1.GitProvider.Spec.gitlab:type_name -> octelium.api.main.cordium.v1.GitProvider.Spec.Gitlab
+	192, // 284: octelium.api.main.cordium.v1.GitProvider.Spec.oauth2:type_name -> octelium.api.main.cordium.v1.GitProvider.Spec.OAuth2
+	250, // 285: octelium.api.main.cordium.v1.GitProvider.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 286: octelium.api.main.cordium.v1.GitProvider.Status.spaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	193, // 287: octelium.api.main.cordium.v1.GitProvider.Spec.Github.clientSecret:type_name -> octelium.api.main.cordium.v1.GitProvider.Spec.Github.ClientSecret
+	194, // 288: octelium.api.main.cordium.v1.GitProvider.Spec.Gitlab.clientSecret:type_name -> octelium.api.main.cordium.v1.GitProvider.Spec.Gitlab.ClientSecret
+	195, // 289: octelium.api.main.cordium.v1.GitProvider.Spec.OAuth2.clientSecret:type_name -> octelium.api.main.cordium.v1.GitProvider.Spec.OAuth2.ClientSecret
+	17,  // 290: octelium.api.main.cordium.v1.UserSecret.Spec.type:type_name -> octelium.api.main.cordium.v1.UserSecret.Spec.Type
+	250, // 291: octelium.api.main.cordium.v1.UserSecret.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	199, // 292: octelium.api.main.cordium.v1.UserSecret.Status.sshKey:type_name -> octelium.api.main.cordium.v1.UserSecret.Status.SSHKey
+	253, // 293: octelium.api.main.cordium.v1.UserSecret.Data.attrs:type_name -> google.protobuf.Struct
+	202, // 294: octelium.api.main.cordium.v1.UserConfig.Spec.dotfiles:type_name -> octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles
+	203, // 295: octelium.api.main.cordium.v1.UserConfig.Spec.envVars:type_name -> octelium.api.main.cordium.v1.UserConfig.Spec.EnvVar
+	117, // 296: octelium.api.main.cordium.v1.UserConfig.Spec.tasks:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Task
+	250, // 297: octelium.api.main.cordium.v1.UserConfig.Status.userRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 298: octelium.api.main.cordium.v1.UserConfig.Status.preferredRegionRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	250, // 299: octelium.api.main.cordium.v1.UserConfig.Status.agentWorkspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	204, // 300: octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.authentication:type_name -> octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.Authentication
+	205, // 301: octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.Authentication.http:type_name -> octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.Authentication.HTTP
+	206, // 302: octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.Authentication.HTTP.password:type_name -> octelium.api.main.cordium.v1.UserConfig.Spec.Dotfiles.Authentication.HTTP.Password
+	22,  // 303: octelium.api.main.cordium.v1.WatchWorkspaceResponse.Create.item:type_name -> octelium.api.main.cordium.v1.Workspace
+	22,  // 304: octelium.api.main.cordium.v1.WatchWorkspaceResponse.Update.newItem:type_name -> octelium.api.main.cordium.v1.Workspace
+	22,  // 305: octelium.api.main.cordium.v1.WatchWorkspaceResponse.Update.oldItem:type_name -> octelium.api.main.cordium.v1.Workspace
+	22,  // 306: octelium.api.main.cordium.v1.WatchWorkspaceResponse.Delete.item:type_name -> octelium.api.main.cordium.v1.Workspace
+	250, // 307: octelium.api.main.cordium.v1.ExecRequest.Request.workspaceRef:type_name -> octelium.api.main.meta.v1.ObjectReference
+	218, // 308: octelium.api.main.cordium.v1.ExecRequest.Request.envVars:type_name -> octelium.api.main.cordium.v1.ExecRequest.Request.EnvVar
+	224, // 309: octelium.api.main.cordium.v1.ClusterConfig.Spec.space:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Space
+	225, // 310: octelium.api.main.cordium.v1.ClusterConfig.Spec.workspace:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace
+	226, // 311: octelium.api.main.cordium.v1.ClusterConfig.Spec.volume:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume
+	227, // 312: octelium.api.main.cordium.v1.ClusterConfig.Spec.agent:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Agent
+	228, // 313: octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.ownership:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.Ownership
+	230, // 314: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.storage:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage
+	231, // 315: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.limit:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit
+	232, // 316: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.timeout:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout
+	233, // 317: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.runtime:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Runtime
+	238, // 318: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.storage:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage
+	239, // 319: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.limit:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Limit
+	242, // 320: octelium.api.main.cordium.v1.ClusterConfig.Spec.Agent.llm:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Agent.LLM
+	97,  // 321: octelium.api.main.cordium.v1.ClusterConfig.Spec.Agent.image:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Image
+	102, // 322: octelium.api.main.cordium.v1.ClusterConfig.Spec.Agent.limit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
+	253, // 323: octelium.api.main.cordium.v1.ClusterConfig.Spec.Agent.config:type_name -> google.protobuf.Struct
+	229, // 324: octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.Ownership.rules:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.Ownership.Rule
+	21,  // 325: octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.Ownership.Rule.effect:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.Ownership.Rule.Effect
+	91,  // 326: octelium.api.main.cordium.v1.ClusterConfig.Spec.Space.Ownership.Rule.condition:type_name -> octelium.api.main.cordium.v1.Condition
+	234, // 327: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.storageClass:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass
+	235, // 328: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.volumeSnapshotClass:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass
+	102, // 329: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.buildLimit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
+	102, // 330: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.defaultOrganizationSpaceLimit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
+	102, // 331: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.defaultUserSpaceLimit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
+	102, // 332: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Limit.maxLimit:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Limit
+	252, // 333: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout.defaultDuration:type_name -> octelium.api.main.meta.v1.Duration
+	252, // 334: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout.userSpaceDuration:type_name -> octelium.api.main.meta.v1.Duration
+	252, // 335: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout.organizationSpaceDuration:type_name -> octelium.api.main.meta.v1.Duration
+	252, // 336: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Timeout.maxActiveDuration:type_name -> octelium.api.main.meta.v1.Duration
+	123, // 337: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Runtime.capabilities:type_name -> octelium.api.main.cordium.v1.Workspace.Spec.Runtime.Capabilities
+	236, // 338: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass.rules:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass.Rule
+	237, // 339: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass.rules:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass.Rule
+	91,  // 340: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.StorageClass.Rule.condition:type_name -> octelium.api.main.cordium.v1.Condition
+	91,  // 341: octelium.api.main.cordium.v1.ClusterConfig.Spec.Workspace.Storage.VolumeSnapshotClass.Rule.condition:type_name -> octelium.api.main.cordium.v1.Condition
+	240, // 342: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage.storageClass:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage.StorageClass
+	162, // 343: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Limit.maxSize:type_name -> octelium.api.main.cordium.v1.Volume.Spec.Size
+	162, // 344: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Limit.defaultSize:type_name -> octelium.api.main.cordium.v1.Volume.Spec.Size
+	241, // 345: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage.StorageClass.rules:type_name -> octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage.StorageClass.Rule
+	91,  // 346: octelium.api.main.cordium.v1.ClusterConfig.Spec.Volume.Storage.StorageClass.Rule.condition:type_name -> octelium.api.main.cordium.v1.Condition
+	91,  // 347: octelium.api.main.cordium.v1.Condition.All.of:type_name -> octelium.api.main.cordium.v1.Condition
+	91,  // 348: octelium.api.main.cordium.v1.Condition.Any.of:type_name -> octelium.api.main.cordium.v1.Condition
+	91,  // 349: octelium.api.main.cordium.v1.Condition.None.of:type_name -> octelium.api.main.cordium.v1.Condition
+	31,  // 350: octelium.api.main.cordium.v1.MainService.CreateSecret:input_type -> octelium.api.main.cordium.v1.Secret
+	32,  // 351: octelium.api.main.cordium.v1.MainService.ListSecret:input_type -> octelium.api.main.cordium.v1.ListSecretOptions
+	254, // 352: octelium.api.main.cordium.v1.MainService.DeleteSecret:input_type -> octelium.api.main.meta.v1.DeleteOptions
+	255, // 353: octelium.api.main.cordium.v1.MainService.GetSecret:input_type -> octelium.api.main.meta.v1.GetOptions
+	40,  // 354: octelium.api.main.cordium.v1.MainService.CreateTemplate:input_type -> octelium.api.main.cordium.v1.Template
+	40,  // 355: octelium.api.main.cordium.v1.MainService.UpdateTemplate:input_type -> octelium.api.main.cordium.v1.Template
+	254, // 356: octelium.api.main.cordium.v1.MainService.DeleteTemplate:input_type -> octelium.api.main.meta.v1.DeleteOptions
+	43,  // 357: octelium.api.main.cordium.v1.MainService.BuildTemplate:input_type -> octelium.api.main.cordium.v1.BuildTemplateRequest
+	87,  // 358: octelium.api.main.cordium.v1.MainService.CancelBuildTemplate:input_type -> octelium.api.main.cordium.v1.CancelBuildTemplateRequest
+	44,  // 359: octelium.api.main.cordium.v1.MainService.CreateSpace:input_type -> octelium.api.main.cordium.v1.Space
+	44,  // 360: octelium.api.main.cordium.v1.MainService.UpdateSpace:input_type -> octelium.api.main.cordium.v1.Space
+	254, // 361: octelium.api.main.cordium.v1.MainService.DeleteSpace:input_type -> octelium.api.main.meta.v1.DeleteOptions
+	50,  // 362: octelium.api.main.cordium.v1.MainService.CreateMembership:input_type -> octelium.api.main.cordium.v1.CreateMembershipRequest
+	254, // 363: octelium.api.main.cordium.v1.MainService.DeleteMembership:input_type -> octelium.api.main.meta.v1.DeleteOptions
+	57,  // 364: octelium.api.main.cordium.v1.MainService.GetSpaceMembership:input_type -> octelium.api.main.cordium.v1.GetSpaceMembershipRequest
+	47,  // 365: octelium.api.main.cordium.v1.MainService.UpdateMembership:input_type -> octelium.api.main.cordium.v1.Membership
+	51,  // 366: octelium.api.main.cordium.v1.MainService.CreateGitProvider:input_type -> octelium.api.main.cordium.v1.GitProvider
+	51,  // 367: octelium.api.main.cordium.v1.MainService.UpdateGitProvider:input_type -> octelium.api.main.cordium.v1.GitProvider
+	254, // 368: octelium.api.main.cordium.v1.MainService.DeleteGitProvider:input_type -> octelium.api.main.meta.v1.DeleteOptions
+	22,  // 369: octelium.api.main.cordium.v1.MainService.CreateWorkspace:input_type -> octelium.api.main.cordium.v1.Workspace
+	22,  // 370: octelium.api.main.cordium.v1.MainService.UpdateWorkspace:input_type -> octelium.api.main.cordium.v1.Workspace
+	254, // 371: octelium.api.main.cordium.v1.MainService.DeleteWorkspace:input_type -> octelium.api.main.meta.v1.DeleteOptions
+	24,  // 372: octelium.api.main.cordium.v1.MainService.ListWorkspace:input_type -> octelium.api.main.cordium.v1.ListWorkspaceOptions
+	25,  // 373: octelium.api.main.cordium.v1.MainService.CreateWorkspaceSnapshot:input_type -> octelium.api.main.cordium.v1.WorkspaceSnapshot
+	254, // 374: octelium.api.main.cordium.v1.MainService.DeleteWorkspaceSnapshot:input_type -> octelium.api.main.meta.v1.DeleteOptions
+	27,  // 375: octelium.api.main.cordium.v1.MainService.ListWorkspaceSnapshot:input_type -> octelium.api.main.cordium.v1.ListWorkspaceSnapshotOptions
+	255, // 376: octelium.api.main.cordium.v1.MainService.GetWorkspaceSnapshot:input_type -> octelium.api.main.meta.v1.GetOptions
+	28,  // 377: octelium.api.main.cordium.v1.MainService.CreateVolume:input_type -> octelium.api.main.cordium.v1.Volume
+	28,  // 378: octelium.api.main.cordium.v1.MainService.UpdateVolume:input_type -> octelium.api.main.cordium.v1.Volume
+	254, // 379: octelium.api.main.cordium.v1.MainService.DeleteVolume:input_type -> octelium.api.main.meta.v1.DeleteOptions
+	30,  // 380: octelium.api.main.cordium.v1.MainService.ListVolume:input_type -> octelium.api.main.cordium.v1.ListVolumeOptions
+	255, // 381: octelium.api.main.cordium.v1.MainService.GetVolume:input_type -> octelium.api.main.meta.v1.GetOptions
+	36,  // 382: octelium.api.main.cordium.v1.MainService.StartWorkspace:input_type -> octelium.api.main.cordium.v1.StartWorkspaceRequest
+	38,  // 383: octelium.api.main.cordium.v1.MainService.StopWorkspace:input_type -> octelium.api.main.cordium.v1.StopWorkspaceRequest
+	61,  // 384: octelium.api.main.cordium.v1.MainService.ShareWorkspacePort:input_type -> octelium.api.main.cordium.v1.ShareWorkspacePortRequest
+	63,  // 385: octelium.api.main.cordium.v1.MainService.UnshareWorkspacePort:input_type -> octelium.api.main.cordium.v1.UnshareWorkspacePortRequest
+	46,  // 386: octelium.api.main.cordium.v1.MainService.ListSpace:input_type -> octelium.api.main.cordium.v1.ListSpaceOptions
+	42,  // 387: octelium.api.main.cordium.v1.MainService.ListTemplate:input_type -> octelium.api.main.cordium.v1.ListTemplateOptions
+	49,  // 388: octelium.api.main.cordium.v1.MainService.ListMembership:input_type -> octelium.api.main.cordium.v1.ListMembershipOptions
+	53,  // 389: octelium.api.main.cordium.v1.MainService.ListGitProvider:input_type -> octelium.api.main.cordium.v1.ListGitProviderOptions
+	255, // 390: octelium.api.main.cordium.v1.MainService.GetSpace:input_type -> octelium.api.main.meta.v1.GetOptions
+	255, // 391: octelium.api.main.cordium.v1.MainService.GetWorkspace:input_type -> octelium.api.main.meta.v1.GetOptions
+	255, // 392: octelium.api.main.cordium.v1.MainService.GetTemplate:input_type -> octelium.api.main.meta.v1.GetOptions
+	255, // 393: octelium.api.main.cordium.v1.MainService.GetGitProvider:input_type -> octelium.api.main.meta.v1.GetOptions
+	255, // 394: octelium.api.main.cordium.v1.MainService.GetMembership:input_type -> octelium.api.main.meta.v1.GetOptions
+	65,  // 395: octelium.api.main.cordium.v1.MainService.LeaveSpace:input_type -> octelium.api.main.cordium.v1.LeaveSpaceRequest
+	54,  // 396: octelium.api.main.cordium.v1.MainService.CreateUserSecret:input_type -> octelium.api.main.cordium.v1.UserSecret
+	54,  // 397: octelium.api.main.cordium.v1.MainService.UpdateUserSecret:input_type -> octelium.api.main.cordium.v1.UserSecret
+	254, // 398: octelium.api.main.cordium.v1.MainService.DeleteUserSecret:input_type -> octelium.api.main.meta.v1.DeleteOptions
+	55,  // 399: octelium.api.main.cordium.v1.MainService.ListUserSecret:input_type -> octelium.api.main.cordium.v1.ListUserSecretOptions
+	255, // 400: octelium.api.main.cordium.v1.MainService.GetUserSecret:input_type -> octelium.api.main.meta.v1.GetOptions
+	59,  // 401: octelium.api.main.cordium.v1.MainService.GetUserConfig:input_type -> octelium.api.main.cordium.v1.GetUserConfigRequest
+	58,  // 402: octelium.api.main.cordium.v1.MainService.UpdateUserConfig:input_type -> octelium.api.main.cordium.v1.UserConfig
+	60,  // 403: octelium.api.main.cordium.v1.MainService.InitializeAgent:input_type -> octelium.api.main.cordium.v1.InitializeAgentRequest
+	69,  // 404: octelium.api.main.cordium.v1.MainService.ListRegion:input_type -> octelium.api.main.cordium.v1.ListRegionOptions
+	85,  // 405: octelium.api.main.cordium.v1.MainService.WatchWorkspace:input_type -> octelium.api.main.cordium.v1.WatchWorkspaceRequest
+	70,  // 406: octelium.api.main.cordium.v1.WorkspaceService.CreateTerminal:input_type -> octelium.api.main.cordium.v1.CreateTerminalRequest
+	73,  // 407: octelium.api.main.cordium.v1.WorkspaceService.RemoveTerminal:input_type -> octelium.api.main.cordium.v1.RemoveTerminalRequest
+	75,  // 408: octelium.api.main.cordium.v1.WorkspaceService.ListTerminal:input_type -> octelium.api.main.cordium.v1.ListTerminalRequest
+	80,  // 409: octelium.api.main.cordium.v1.WorkspaceService.WriteTerminalData:input_type -> octelium.api.main.cordium.v1.WriteTerminalDataRequest
+	78,  // 410: octelium.api.main.cordium.v1.WorkspaceService.SetTerminalWindowSize:input_type -> octelium.api.main.cordium.v1.SetTerminalWindowSizeRequest
+	81,  // 411: octelium.api.main.cordium.v1.WorkspaceService.ListenTerminal:input_type -> octelium.api.main.cordium.v1.ListenTerminalRequest
+	83,  // 412: octelium.api.main.cordium.v1.WorkspaceService.ListenLog:input_type -> octelium.api.main.cordium.v1.ListenLogRequest
+	88,  // 413: octelium.api.main.cordium.v1.WorkspaceService.Exec:input_type -> octelium.api.main.cordium.v1.ExecRequest
+	92,  // 414: octelium.api.main.cordium.v1.ManagementService.GetClusterConfig:input_type -> octelium.api.main.cordium.v1.GetClusterConfigRequest
+	90,  // 415: octelium.api.main.cordium.v1.ManagementService.UpdateClusterConfig:input_type -> octelium.api.main.cordium.v1.ClusterConfig
+	31,  // 416: octelium.api.main.cordium.v1.MainService.CreateSecret:output_type -> octelium.api.main.cordium.v1.Secret
+	33,  // 417: octelium.api.main.cordium.v1.MainService.ListSecret:output_type -> octelium.api.main.cordium.v1.SecretList
+	256, // 418: octelium.api.main.cordium.v1.MainService.DeleteSecret:output_type -> octelium.api.main.meta.v1.OperationResult
+	31,  // 419: octelium.api.main.cordium.v1.MainService.GetSecret:output_type -> octelium.api.main.cordium.v1.Secret
+	40,  // 420: octelium.api.main.cordium.v1.MainService.CreateTemplate:output_type -> octelium.api.main.cordium.v1.Template
+	40,  // 421: octelium.api.main.cordium.v1.MainService.UpdateTemplate:output_type -> octelium.api.main.cordium.v1.Template
+	256, // 422: octelium.api.main.cordium.v1.MainService.DeleteTemplate:output_type -> octelium.api.main.meta.v1.OperationResult
+	40,  // 423: octelium.api.main.cordium.v1.MainService.BuildTemplate:output_type -> octelium.api.main.cordium.v1.Template
+	40,  // 424: octelium.api.main.cordium.v1.MainService.CancelBuildTemplate:output_type -> octelium.api.main.cordium.v1.Template
+	44,  // 425: octelium.api.main.cordium.v1.MainService.CreateSpace:output_type -> octelium.api.main.cordium.v1.Space
+	44,  // 426: octelium.api.main.cordium.v1.MainService.UpdateSpace:output_type -> octelium.api.main.cordium.v1.Space
+	256, // 427: octelium.api.main.cordium.v1.MainService.DeleteSpace:output_type -> octelium.api.main.meta.v1.OperationResult
+	47,  // 428: octelium.api.main.cordium.v1.MainService.CreateMembership:output_type -> octelium.api.main.cordium.v1.Membership
+	256, // 429: octelium.api.main.cordium.v1.MainService.DeleteMembership:output_type -> octelium.api.main.meta.v1.OperationResult
+	47,  // 430: octelium.api.main.cordium.v1.MainService.GetSpaceMembership:output_type -> octelium.api.main.cordium.v1.Membership
+	47,  // 431: octelium.api.main.cordium.v1.MainService.UpdateMembership:output_type -> octelium.api.main.cordium.v1.Membership
+	51,  // 432: octelium.api.main.cordium.v1.MainService.CreateGitProvider:output_type -> octelium.api.main.cordium.v1.GitProvider
+	51,  // 433: octelium.api.main.cordium.v1.MainService.UpdateGitProvider:output_type -> octelium.api.main.cordium.v1.GitProvider
+	256, // 434: octelium.api.main.cordium.v1.MainService.DeleteGitProvider:output_type -> octelium.api.main.meta.v1.OperationResult
+	22,  // 435: octelium.api.main.cordium.v1.MainService.CreateWorkspace:output_type -> octelium.api.main.cordium.v1.Workspace
+	22,  // 436: octelium.api.main.cordium.v1.MainService.UpdateWorkspace:output_type -> octelium.api.main.cordium.v1.Workspace
+	256, // 437: octelium.api.main.cordium.v1.MainService.DeleteWorkspace:output_type -> octelium.api.main.meta.v1.OperationResult
+	23,  // 438: octelium.api.main.cordium.v1.MainService.ListWorkspace:output_type -> octelium.api.main.cordium.v1.WorkspaceList
+	25,  // 439: octelium.api.main.cordium.v1.MainService.CreateWorkspaceSnapshot:output_type -> octelium.api.main.cordium.v1.WorkspaceSnapshot
+	256, // 440: octelium.api.main.cordium.v1.MainService.DeleteWorkspaceSnapshot:output_type -> octelium.api.main.meta.v1.OperationResult
+	26,  // 441: octelium.api.main.cordium.v1.MainService.ListWorkspaceSnapshot:output_type -> octelium.api.main.cordium.v1.WorkspaceSnapshotList
+	25,  // 442: octelium.api.main.cordium.v1.MainService.GetWorkspaceSnapshot:output_type -> octelium.api.main.cordium.v1.WorkspaceSnapshot
+	28,  // 443: octelium.api.main.cordium.v1.MainService.CreateVolume:output_type -> octelium.api.main.cordium.v1.Volume
+	28,  // 444: octelium.api.main.cordium.v1.MainService.UpdateVolume:output_type -> octelium.api.main.cordium.v1.Volume
+	256, // 445: octelium.api.main.cordium.v1.MainService.DeleteVolume:output_type -> octelium.api.main.meta.v1.OperationResult
+	29,  // 446: octelium.api.main.cordium.v1.MainService.ListVolume:output_type -> octelium.api.main.cordium.v1.VolumeList
+	28,  // 447: octelium.api.main.cordium.v1.MainService.GetVolume:output_type -> octelium.api.main.cordium.v1.Volume
+	37,  // 448: octelium.api.main.cordium.v1.MainService.StartWorkspace:output_type -> octelium.api.main.cordium.v1.StartWorkspaceResponse
+	39,  // 449: octelium.api.main.cordium.v1.MainService.StopWorkspace:output_type -> octelium.api.main.cordium.v1.StopWorkspaceResponse
+	62,  // 450: octelium.api.main.cordium.v1.MainService.ShareWorkspacePort:output_type -> octelium.api.main.cordium.v1.ShareWorkspacePortResponse
+	64,  // 451: octelium.api.main.cordium.v1.MainService.UnshareWorkspacePort:output_type -> octelium.api.main.cordium.v1.UnshareWorkspacePortResponse
+	45,  // 452: octelium.api.main.cordium.v1.MainService.ListSpace:output_type -> octelium.api.main.cordium.v1.SpaceList
+	41,  // 453: octelium.api.main.cordium.v1.MainService.ListTemplate:output_type -> octelium.api.main.cordium.v1.TemplateList
+	48,  // 454: octelium.api.main.cordium.v1.MainService.ListMembership:output_type -> octelium.api.main.cordium.v1.MembershipList
+	52,  // 455: octelium.api.main.cordium.v1.MainService.ListGitProvider:output_type -> octelium.api.main.cordium.v1.GitProviderList
+	44,  // 456: octelium.api.main.cordium.v1.MainService.GetSpace:output_type -> octelium.api.main.cordium.v1.Space
+	22,  // 457: octelium.api.main.cordium.v1.MainService.GetWorkspace:output_type -> octelium.api.main.cordium.v1.Workspace
+	40,  // 458: octelium.api.main.cordium.v1.MainService.GetTemplate:output_type -> octelium.api.main.cordium.v1.Template
+	51,  // 459: octelium.api.main.cordium.v1.MainService.GetGitProvider:output_type -> octelium.api.main.cordium.v1.GitProvider
+	47,  // 460: octelium.api.main.cordium.v1.MainService.GetMembership:output_type -> octelium.api.main.cordium.v1.Membership
+	66,  // 461: octelium.api.main.cordium.v1.MainService.LeaveSpace:output_type -> octelium.api.main.cordium.v1.LeaveSpaceResponse
+	54,  // 462: octelium.api.main.cordium.v1.MainService.CreateUserSecret:output_type -> octelium.api.main.cordium.v1.UserSecret
+	54,  // 463: octelium.api.main.cordium.v1.MainService.UpdateUserSecret:output_type -> octelium.api.main.cordium.v1.UserSecret
+	256, // 464: octelium.api.main.cordium.v1.MainService.DeleteUserSecret:output_type -> octelium.api.main.meta.v1.OperationResult
+	56,  // 465: octelium.api.main.cordium.v1.MainService.ListUserSecret:output_type -> octelium.api.main.cordium.v1.UserSecretList
+	54,  // 466: octelium.api.main.cordium.v1.MainService.GetUserSecret:output_type -> octelium.api.main.cordium.v1.UserSecret
+	58,  // 467: octelium.api.main.cordium.v1.MainService.GetUserConfig:output_type -> octelium.api.main.cordium.v1.UserConfig
+	58,  // 468: octelium.api.main.cordium.v1.MainService.UpdateUserConfig:output_type -> octelium.api.main.cordium.v1.UserConfig
+	58,  // 469: octelium.api.main.cordium.v1.MainService.InitializeAgent:output_type -> octelium.api.main.cordium.v1.UserConfig
+	68,  // 470: octelium.api.main.cordium.v1.MainService.ListRegion:output_type -> octelium.api.main.cordium.v1.RegionList
+	86,  // 471: octelium.api.main.cordium.v1.MainService.WatchWorkspace:output_type -> octelium.api.main.cordium.v1.WatchWorkspaceResponse
+	72,  // 472: octelium.api.main.cordium.v1.WorkspaceService.CreateTerminal:output_type -> octelium.api.main.cordium.v1.CreateTerminalResponse
+	74,  // 473: octelium.api.main.cordium.v1.WorkspaceService.RemoveTerminal:output_type -> octelium.api.main.cordium.v1.RemoveTerminalResponse
+	76,  // 474: octelium.api.main.cordium.v1.WorkspaceService.ListTerminal:output_type -> octelium.api.main.cordium.v1.ListTerminalResponse
+	77,  // 475: octelium.api.main.cordium.v1.WorkspaceService.WriteTerminalData:output_type -> octelium.api.main.cordium.v1.WriteTerminalDataResponse
+	79,  // 476: octelium.api.main.cordium.v1.WorkspaceService.SetTerminalWindowSize:output_type -> octelium.api.main.cordium.v1.SetTerminalWindowSizeResponse
+	82,  // 477: octelium.api.main.cordium.v1.WorkspaceService.ListenTerminal:output_type -> octelium.api.main.cordium.v1.ListenTerminalResponse
+	84,  // 478: octelium.api.main.cordium.v1.WorkspaceService.ListenLog:output_type -> octelium.api.main.cordium.v1.ListenLogResponse
+	89,  // 479: octelium.api.main.cordium.v1.WorkspaceService.Exec:output_type -> octelium.api.main.cordium.v1.ExecResponse
+	90,  // 480: octelium.api.main.cordium.v1.ManagementService.GetClusterConfig:output_type -> octelium.api.main.cordium.v1.ClusterConfig
+	90,  // 481: octelium.api.main.cordium.v1.ManagementService.UpdateClusterConfig:output_type -> octelium.api.main.cordium.v1.ClusterConfig
+	416, // [416:482] is the sub-list for method output_type
+	350, // [350:416] is the sub-list for method input_type
+	350, // [350:350] is the sub-list for extension type_name
+	350, // [350:350] is the sub-list for extension extendee
+	0,   // [0:350] is the sub-list for field type_name
 }
 
 func init() { file_cordiumv1_proto_init() }
@@ -19703,27 +19992,27 @@ func file_cordiumv1_proto_init() {
 		(*CreateMembershipRequest_UserRef)(nil),
 		(*CreateMembershipRequest_Email)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[59].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[60].OneofWrappers = []any{
 		(*ListenTerminalResponse_Stdout_)(nil),
 		(*ListenTerminalResponse_WindowSize_)(nil),
 		(*ListenTerminalResponse_Close_)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[63].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[64].OneofWrappers = []any{
 		(*WatchWorkspaceResponse_Create_)(nil),
 		(*WatchWorkspaceResponse_Update_)(nil),
 		(*WatchWorkspaceResponse_Delete_)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[65].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[66].OneofWrappers = []any{
 		(*ExecRequest_Request_)(nil),
 		(*ExecRequest_WriteData_)(nil),
 		(*ExecRequest_Kill_)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[66].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[67].OneofWrappers = []any{
 		(*ExecResponse_Stdout_)(nil),
 		(*ExecResponse_Stderr_)(nil),
 		(*ExecResponse_Exit_)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[68].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[69].OneofWrappers = []any{
 		(*Condition_MatchAny)(nil),
 		(*Condition_Match)(nil),
 		(*Condition_All_)(nil),
@@ -19732,34 +20021,34 @@ func file_cordiumv1_proto_init() {
 		(*Condition_None_)(nil),
 		(*Condition_Opa)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[74].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[75].OneofWrappers = []any{
 		(*Workspace_Spec_Image_Dockerfile_)(nil),
 		(*Workspace_Spec_Image_Registry_)(nil),
 		(*Workspace_Spec_Image_Git_)(nil),
 		(*Workspace_Spec_Image_Repository_)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[81].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[82].OneofWrappers = []any{
 		(*Workspace_Spec_Image_Dockerfile_Inline)(nil),
 		(*Workspace_Spec_Image_Dockerfile_Url)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[84].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[85].OneofWrappers = []any{
 		(*Workspace_Spec_Image_Repository_Devcontainer_)(nil),
 		(*Workspace_Spec_Image_Repository_Dockerfile_)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[86].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[87].OneofWrappers = []any{
 		(*Workspace_Spec_Image_Registry_Authentication_Password_FromSecret)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[89].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[90].OneofWrappers = []any{
 		(*Workspace_Spec_Repository_Authentication_Http)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[92].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[93].OneofWrappers = []any{
 		(*Workspace_Spec_Repository_Authentication_HTTP_Password_FromSecret)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[93].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[94].OneofWrappers = []any{
 		(*Workspace_Spec_Runtime_EnvVar_Value)(nil),
 		(*Workspace_Spec_Runtime_EnvVar_FromSecret)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[110].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[111].OneofWrappers = []any{
 		(*Workspace_Status_Failure_ImageBuild_)(nil),
 		(*Workspace_Status_Failure_ImagePull_)(nil),
 		(*Workspace_Status_Failure_RepoClone_)(nil),
@@ -19777,55 +20066,55 @@ func file_cordiumv1_proto_init() {
 		(*Workspace_Status_Failure_NetworkPolicy_)(nil),
 		(*Workspace_Status_Failure_Volume_)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[132].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[133].OneofWrappers = []any{
 		(*WorkspaceSnapshot_Status_Failure_Unsupported_)(nil),
 		(*WorkspaceSnapshot_Status_Failure_SourceNotFound_)(nil),
 		(*WorkspaceSnapshot_Status_Failure_Storage_)(nil),
 		(*WorkspaceSnapshot_Status_Failure_Unknown_)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[140].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[141].OneofWrappers = []any{
 		(*Volume_Status_Failure_Unsupported_)(nil),
 		(*Volume_Status_Failure_Storage_)(nil),
 		(*Volume_Status_Failure_Unknown_)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[146].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[147].OneofWrappers = []any{
 		(*Secret_Data_Value)(nil),
 		(*Secret_Data_ValueBytes)(nil),
 		(*Secret_Data_Attrs)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[165].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[166].OneofWrappers = []any{
 		(*GitProvider_Spec_Github_)(nil),
 		(*GitProvider_Spec_Gitlab_)(nil),
 		(*GitProvider_Spec_Oauth2)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[170].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[171].OneofWrappers = []any{
 		(*GitProvider_Spec_Github_ClientSecret_FromSecret)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[171].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[172].OneofWrappers = []any{
 		(*GitProvider_Spec_Gitlab_ClientSecret_FromSecret)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[172].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[173].OneofWrappers = []any{
 		(*GitProvider_Spec_OAuth2_ClientSecret_FromSecret)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[174].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[175].OneofWrappers = []any{
 		(*UserSecret_Status_SshKey)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[175].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[176].OneofWrappers = []any{
 		(*UserSecret_Data_Value)(nil),
 		(*UserSecret_Data_ValueBytes)(nil),
 		(*UserSecret_Data_Attrs)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[180].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[181].OneofWrappers = []any{
 		(*UserConfig_Spec_EnvVar_Value)(nil),
 		(*UserConfig_Spec_EnvVar_FromUserSecret)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[181].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[182].OneofWrappers = []any{
 		(*UserConfig_Spec_Dotfiles_Authentication_Http)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[183].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[184].OneofWrappers = []any{
 		(*UserConfig_Spec_Dotfiles_Authentication_HTTP_Password_FromUserSecret)(nil),
 	}
-	file_cordiumv1_proto_msgTypes[221].OneofWrappers = []any{
+	file_cordiumv1_proto_msgTypes[224].OneofWrappers = []any{
 		(*Condition_OPA_Inline)(nil),
 	}
 	type x struct{}
@@ -19834,7 +20123,7 @@ func file_cordiumv1_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_cordiumv1_proto_rawDesc,
 			NumEnums:      22,
-			NumMessages:   222,
+			NumMessages:   225,
 			NumExtensions: 0,
 			NumServices:   3,
 		},

@@ -92,10 +92,12 @@ func NewClient(ctx context.Context, opts *Opts) (*Client, error) {
 	}
 
 	ret := &Client{
-		coreC:    rcorev1.NewResourceServiceClient(grpcConn),
-		cacheC:   rcachev1.NewMainServiceClient(grpcConn),
-		vectorC:  rvectorv1.NewMainServiceClient(grpcConn),
-		cordiumC: rcordiumv1.NewResourceServiceClient(grpcConn),
+		coreC:      rcorev1.NewResourceServiceClient(grpcConn),
+		cacheC:     rcachev1.NewMainServiceClient(grpcConn),
+		rateLimitC: rratelimitv1.NewMainServiceClient(grpcConn),
+		lockC:      rlockv1.NewMainServiceClient(grpcConn),
+		vectorC:    rvectorv1.NewMainServiceClient(grpcConn),
+		cordiumC:   rcordiumv1.NewResourceServiceClient(grpcConn),
 
 		coreV1UtilsC:    &coreV1UtilsC{},
 		cordiumV1UtilsC: &cordiumV1UtilsC{},

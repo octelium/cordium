@@ -1,4 +1,5 @@
 import { RouteObject } from "react-router-dom";
+import routerAgent from "./Agent/router";
 import Home from "./Home";
 import routerServices from "./Services/router";
 import routerSettings from "./Settings/router";
@@ -14,6 +15,7 @@ const routerRoot = (): RouteObject => {
     element: <Root />,
     children: [
       { path: "", element: <Home /> },
+      routerAgent(),
       routerWorkspaces(),
       routerSnapshots(),
       routerSpaces(),

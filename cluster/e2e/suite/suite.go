@@ -33,6 +33,7 @@ func Phases() []suite.Phase {
 		{Name: "Template", Run: testTemplate},
 		{Name: "Secret", Run: testSecret},
 		{Name: "UserSecret", Run: testUserSecret},
+		{Name: "Agent", Run: testAgent},
 
 		{Name: "WorkspaceAPI", Run: testWorkspaceAPI},
 		{Name: "WorkspaceValidation", Run: testWorkspaceValidation},

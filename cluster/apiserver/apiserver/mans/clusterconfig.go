@@ -19,6 +19,7 @@ package mans
 import (
 	"context"
 
+	"github.com/octelium/cordium/cluster/apiserver/apiserver/mains"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	apisrvcommon "github.com/octelium/octelium/cluster/apiserver/apiserver/common"
 	"github.com/octelium/octelium/cluster/apiserver/apiserver/serr"
@@ -60,6 +61,10 @@ func (s *Server) validateClusterConfig(ctx context.Context, req *cordiumv1.Clust
 
 	if req.Spec == nil {
 		return grpcutils.InvalidArg("Nil spec")
+	}
+
+	if err := mains.ValidateAgentConfig(req.Spec.Agent); err != nil {
+		return err
 	}
 
 	return nil

@@ -1,0 +1,68 @@
+{
+  "name": "@octelium/cordium-agent",
+  "version": "0.1.0",
+  "description": "The Cordium AI agent that runs inside a Cordium Workspace and manages the User's Workspaces",
+  "type": "module",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/octelium/cordium.git",
+    "directory": "cluster/agent"
+  },
+  "homepage": "https://octelium.com",
+  "keywords": [
+    "cordium",
+    "octelium",
+    "agent",
+    "sandbox",
+    "workspaces"
+  ],
+  "bin": {
+    "cordium-agent": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./protocol": {
+      "types": "./dist/protocol/index.d.ts",
+      "default": "./dist/protocol/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "apis",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "dev": "node src/cli.ts serve",
+    "start": "node dist/cli.js serve",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"src/**/*.test.ts\"",
+    "test:publish": "node --test scripts/publish-version.test.mjs",
+    "fmt": "prettier --write src scripts",
+    "protoc": "mkdir -p ./tmp && protoc --proto_path ../../ --include_imports --include_source_info --descriptor_set_out ./tmp/apis.binpb apis/protobuf/main/corev1/corev1.proto apis/protobuf/main/userv1/userv1.proto apis/protobuf/main/cordiumv1/cordiumv1.proto && node scripts/gen-apis.mjs ./tmp/apis.binpb ./apis/cordium.json && rm -rf ./tmp"
+  },
+  "dependencies": {
+    "@earendil-works/pi-ai": "1.0.1",
+    "@earendil-works/pi-coding-agent": "1.0.1",
+    "@grpc/grpc-js": "1.14.6",
+    "@octelium/apis": "^1.0.12",
+    "@octelium/cordium": "0.3.0",
+    "@protobuf-ts/runtime": "2.11.1",
+    "@protobuf-ts/runtime-rpc": "2.11.1",
+    "typebox": "1.3.27"
+  },
+  "devDependencies": {
+    "@bufbuild/protobuf": "2.16.0",
+    "@types/node": "^26.6.4",
+    "prettier": "^3.9.9",
+    "semver": "7.8.5",
+    "typescript": "~6.0.3"
+  }
+}

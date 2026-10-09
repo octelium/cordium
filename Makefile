@@ -167,7 +167,12 @@ gen-go-client:
 cp-pb:
 	cp -r ../pb/apis/protobuf ./apis
 
-gen-api: cp-pb gen-go-main gen-go-cluster gen-go-client gen-go-rsc
+gen-api-agent:
+	cd ./cluster/agent; test -d node_modules || npm ci; npm run protoc
+	mkdir -p ./cluster/portal/portal/web/package/src/apis/agent
+	cp ./cluster/agent/src/protocol/index.ts ./cluster/portal/portal/web/package/src/apis/agent/protocol.ts
+
+gen-api: cp-pb gen-go-main gen-go-cluster gen-go-client gen-go-rsc gen-api-agent
 	rm -rf ./apis/protobuf
 	go run unsorted/licenser/main.go
 

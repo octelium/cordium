@@ -93,6 +93,9 @@ func (s *Server) CreateSpace(ctx context.Context, req *cordiumv1.Space) (*cordiu
 	spaceType := cordiumv1.Space_Status_ORGANIZATION
 	switch nameArgs[1] {
 	case i.User.Metadata.Name:
+		if nameArgs[0] == agentSpaceBaseName {
+			return nil, grpcutils.InvalidArg("The Space name %s is reserved", agentSpaceBaseName)
+		}
 		spaceType = cordiumv1.Space_Status_USER
 	case "cordium":
 		spaceType = cordiumv1.Space_Status_ORGANIZATION
@@ -434,6 +437,10 @@ func (s *Server) deleteSpaceWorkspace(ctx context.Context, ws *cordiumv1.Workspa
 			return grpcutils.InternalWithErr(err)
 		}
 		return nil
+	}
+
+	if err := s.unsetAgentWorkspace(ctx, ws); err != nil {
+		return err
 	}
 
 	if ws.Status.SessionRef != nil {

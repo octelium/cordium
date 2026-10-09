@@ -66,6 +66,7 @@ func (s *Server) getCSPConnectSrc() string {
 		"'self'",
 		fmt.Sprintf("https://octelium-api.%s", s.clusterDomain),
 		fmt.Sprintf("https://*.octelium-api.%s", s.clusterDomain),
+		fmt.Sprintf("https://*.cordium.%s", s.clusterDomain),
 	}
 
 	if host := strings.TrimPrefix(s.rootURL, "https://"); host != "" && host != s.rootURL {
