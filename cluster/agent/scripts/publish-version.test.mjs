@@ -18,7 +18,7 @@ const defaults = {
 
 describe("publishing versions", () => {
   it("publishes each branch under its own npm tag", () => {
-    for (const refName of ["main", "dev", "b-feature"]) {
+    for (const refName of ["main", "dev", "b-feature", "b-w146"]) {
       assert.deepEqual(resolvePublishVersion({ ...defaults, refName }), {
         version: `0.1.0-${refName}.123.1`,
         tag: refName,

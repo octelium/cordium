@@ -2,6 +2,10 @@ name: Publish @octelium/cordium-agent
 
 on:
   push:
+    branches:
+      - main
+      - dev
+      - "b-*"
     tags:
       - "v*.*.*"
   release:

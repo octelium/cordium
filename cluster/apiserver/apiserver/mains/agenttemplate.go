@@ -49,11 +49,6 @@ const (
 
 var rgxAgentVersion = regexp.MustCompile(`^[0-9A-Za-z][0-9A-Za-z._+-]{0,127}$`)
 
-var rgxAgentSemVer = regexp.MustCompile(
-	`^v?((0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)` +
-		`(-(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(\.(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?` +
-		`(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?)$`)
-
 const agentInstallScript = `set -e
 if command -v apt-get >/dev/null 2>&1 && ! command -v rg >/dev/null 2>&1; then
   (apt-get update && apt-get install -y --no-install-recommends ripgrep fd-find git curl ca-certificates) >/dev/null 2>&1 || true
@@ -90,13 +85,6 @@ func getAgentVersion(cfg *cordiumv1.ClusterConfig_Spec_Agent) (string, error) {
 		}
 	} else if cfg.GetVersion() != "" {
 		ret = cfg.GetVersion()
-	} else {
-		for _, ver := range []string{ldflags.SemVer, ldflags.GitTag} {
-			if match := rgxAgentSemVer.FindStringSubmatch(ver); match != nil {
-				ret = match[1]
-				break
-			}
-		}
 	}
 
 	if !rgxAgentVersion.MatchString(ret) {

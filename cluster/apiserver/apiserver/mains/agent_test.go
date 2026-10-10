@@ -425,8 +425,11 @@ func TestGetAgentVersion(t *testing.T) {
 		ldflags.GitBranch = ""
 		assert.Equal(t, defaultAgentVersion, tstVersion(nil))
 
-		ldflags.GitBranch = "b-w01"
-		assert.Equal(t, "b-w01", tstVersion(nil))
+		for _, branch := range []string{"main", "dev", "b-w146"} {
+			ldflags.GitBranch = branch
+			assert.Equal(t, branch, tstVersion(nil))
+			assert.Equal(t, branch, tstVersion(&cordiumv1.ClusterConfig_Spec_Agent{}))
+		}
 		assert.Equal(t, "next", tstVersion(&cordiumv1.ClusterConfig_Spec_Agent{Version: "next"}))
 	}
 
@@ -437,18 +440,18 @@ func TestGetAgentVersion(t *testing.T) {
 		for _, tc := range []struct {
 			semVer string
 			gitTag string
-			want   string
 		}{
-			{want: "latest"},
-			{gitTag: "v0.17.0", want: "0.17.0"},
-			{gitTag: "0.17.0", want: "0.17.0"},
-			{semVer: "v1.2.3-rc.1", gitTag: "v0.17.0", want: "1.2.3-rc.1"},
-			{gitTag: "v01.2.3", want: "latest"},
-			{gitTag: "v1.2.3-01", want: "latest"},
-			{gitTag: "release", want: "latest"},
+			{},
+			{gitTag: "v0.17.0"},
+			{gitTag: "0.17.0"},
+			{semVer: "v1.2.3-rc.1", gitTag: "v0.17.0"},
+			{gitTag: "v01.2.3"},
+			{gitTag: "v1.2.3-01"},
+			{gitTag: "release"},
 		} {
 			ldflags.SemVer, ldflags.GitTag = tc.semVer, tc.gitTag
-			assert.Equal(t, tc.want, tstVersion(nil), "%+v", tc)
+			assert.Equal(t, "latest", tstVersion(nil), "%+v", tc)
+			assert.Equal(t, "latest", tstVersion(&cordiumv1.ClusterConfig_Spec_Agent{}), "%+v", tc)
 		}
 
 		ldflags.SemVer, ldflags.GitTag = "", "v0.17.0"

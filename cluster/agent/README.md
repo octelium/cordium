@@ -39,7 +39,7 @@ The Cordium `MainService.InitializeAgent` method provisions the agent of the cal
 | --- | --- |
 | `isDisabled` | Disables `InitializeAgent` |
 | `llm.service`, `llm.model` | The default LLM Service and model (i.e. `llm.service` and `llm.model` below) |
-| `version` | The `@octelium/cordium-agent` npm version or dist-tag. Development builds default to their Git branch (`dev` when unknown) and production builds to their semver (`latest` when unknown) |
+| `version` | The `@octelium/cordium-agent` npm version or dist-tag. Development builds default to their Git branch (`dev` when unknown) and production builds to `latest` |
 | `image`, `limit` | The Workspace image and compute resources |
 | `config` | Any additional configuration (same structure as `config.json`), passed via `CORDIUM_AGENT_CONFIG_JSON` |
 
@@ -154,7 +154,9 @@ A run appends one user message and one assistant message to the conversation. A 
 
 `.github/workflows/publish-agent.yaml` publishes the package using npm trusted publishing (GitHub OIDC). Configure the package's trusted publisher on npmjs.com with GitHub organization `octelium`, repository `cordium`, workflow filename `publish-agent.yaml`, no environment, and permission to run `npm publish`.
 
-Pushing a `v*.*.*` Git tag or publishing a GitHub release publishes the tag's semver, removing the leading `v`, which is the version that the API server of that release runs. Stable releases use `latest`; semver prereleases and GitHub prereleases use `next`. Automatic runs skip versions already published by another event.
+Every push to `main`, `dev` or `b-*` publishes a unique prerelease under the branch's npm dist-tag. For example, workflow run `123`, attempt `1`, on `b-w146` publishes `0.1.0-b-w146.123.1` as `@octelium/cordium-agent@b-w146`. The base version comes from `package.json`; retries receive a new version because npm versions cannot be overwritten.
+
+Pushing a `v*.*.*` Git tag or publishing a GitHub release publishes the tag's semver, removing the leading `v`. Stable releases use `latest`; semver prereleases and GitHub prereleases use `next`. Production API servers use `latest` unless `spec.agent.version` overrides it. Automatic runs skip versions already published by another event.
 
 To publish manually, run the workflow from GitHub Actions, select the branch or Git tag and supply the npm `tag` (e.g. `dev` or `main` for the development builds of the API server). An optional `version` sets an explicit semver. Without it, a selected Git tag supplies the version, while a selected branch produces a unique prerelease containing the npm tag.
 
