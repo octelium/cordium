@@ -245,6 +245,74 @@ describe("auth", () => {
     );
   });
 
+  it("uses the app name for new ChatGPT registrations", () => {
+    const url = new URL("https://auth.openai.com/api/accounts/authorize");
+    url.search = new URLSearchParams({
+      client_id: "dynamic_agent_client",
+      agent_name_hint: "Pi",
+      ext_agent_host_id: `urn:uuid:${mgr.getDeviceId()}`,
+      response_type: "code",
+      redirect_uri: "http://127.0.0.1:1455/auth/callback",
+      resource: "https://api.openai.com/v1",
+      scope:
+        "openid profile email offline_access resource.invoke chatgpt.tokens.use.direct",
+      state: "state",
+      code_challenge: "challenge",
+      code_challenge_method: "S256",
+      nonce: "nonce",
+    }).toString();
+    const event = toLoginEvent({
+      type: "auth_url",
+      url: url.toString(),
+      instructions: "Open the URL",
+    });
+    assert.equal(event.type, "auth_url");
+    if (event.type !== "auth_url") {
+      throw new Error("Expected an auth URL");
+    }
+    const renamed = new URL(event.url);
+    assert.equal(
+      renamed.searchParams.get("agent_name_hint"),
+      "Octelium Cordium",
+    );
+    assert.equal(event.instructions, "Open the URL");
+    assert.equal(url.searchParams.get("agent_name_hint"), "Pi");
+    renamed.searchParams.delete("agent_name_hint");
+    url.searchParams.delete("agent_name_hint");
+    assert.equal(renamed.toString(), url.toString());
+  });
+
+  it("preserves other authentication URLs", () => {
+    for (const url of [
+      "https://auth.openai.com/api/accounts/authorize?client_id=issued-client",
+      "https://auth.openai.com/oauth/authorize?client_id=dynamic_agent_client&originator=pi",
+      "https://auth.openai.com/api/accounts/authorize?agent_name_hint=Pi",
+      "https://auth.example.com/api/accounts/authorize?client_id=dynamic_agent_client&agent_name_hint=Pi",
+      "https://claude.ai/oauth/authorize?client_id=claude-client&state=state",
+      "/authorize?client_id=dynamic_agent_client&agent_name_hint=Pi",
+    ]) {
+      assert.deepEqual(toLoginEvent({ type: "auth_url", url }), {
+        type: "auth_url",
+        url,
+        instructions: undefined,
+      });
+    }
+  });
+
+  it("keeps separate device IDs for separate data directories", () => {
+    const other = new AuthManager({
+      modelRuntime,
+      dataDir: path.join(root, "other-data"),
+      logger,
+      providers: ["openai"],
+    });
+    const id = mgr.getDeviceId();
+    const otherId = other.getDeviceId();
+    assert.notEqual(otherId, id);
+    assert.equal(mgr.getDeviceId(), id);
+    assert.equal(other.getDeviceId(), otherId);
+  });
+
   it("maps the auth events", () => {
     assert.deepEqual(
       toLoginEvent({

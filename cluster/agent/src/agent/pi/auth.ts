@@ -54,6 +54,22 @@ export interface AuthManagerOptions {
   onLogout?(provider: string): Promise<void>;
 }
 
+const toLoginURL = (value: string): string => {
+  if (!URL.canParse(value)) {
+    return value;
+  }
+  const url = new URL(value);
+  if (
+    url.origin !== "https://auth.openai.com" ||
+    url.pathname !== "/api/accounts/authorize" ||
+    url.searchParams.get("client_id") !== "dynamic_agent_client"
+  ) {
+    return value;
+  }
+  url.searchParams.set("agent_name_hint", "Octelium Cordium");
+  return url.toString();
+};
+
 export const toLoginEvent = (event: AuthEvent): LoginEvent => {
   switch (event.type) {
     case "info":
@@ -65,7 +81,7 @@ export const toLoginEvent = (event: AuthEvent): LoginEvent => {
     case "auth_url":
       return {
         type: "auth_url",
-        url: event.url,
+        url: toLoginURL(event.url),
         instructions: event.instructions,
       };
     case "device_code":

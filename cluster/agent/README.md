@@ -104,6 +104,8 @@ The configuration is read, in increasing precedence, from the defaults, a JSON f
 | `skills.paths` | | Local skill directories |
 | `webSearch` | | `{"provider": "brave" \| "tavily" \| "searxng", "baseUrl", "apiKey" \| "apiKeyEnv"}` |
 
+New ChatGPT registrations use the app name "Octelium Cordium" through OpenAI's `agent_name_hint`. The name is display metadata; OpenAI identifies the registration by its issued client ID and the installation by the persistent `<dataDir>/device-id`. Existing registrations keep their previously approved name; sign in again to register under the new name. Keep each agent's `dataDir` and OAuth credentials separate. The current Pi Claude subscription flow uses a fixed OAuth client and does not support a custom app name.
+
 ## HTTP API
 
 All the types are exported from `@octelium/cordium-agent/protocol` (`src/protocol/index.ts`), which has no runtime dependencies. `make gen-api` copies it to the web portal.
