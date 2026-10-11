@@ -150,7 +150,7 @@ const buildChartOption = (spec: ChartSpec, theme: ChartTheme) => {
     color: theme.palette,
     aria: { enabled: true, decal: { show: false } },
     grid: {
-      top: legend.show ? 34 : 16,
+      top: legend.show ? 34 : spec.y?.label || spec.y?.unit ? 30 : 16,
       right: 14,
       bottom: 24,
       left: 8,
@@ -204,15 +204,41 @@ const buildChartOption = (spec: ChartSpec, theme: ChartTheme) => {
   };
 };
 
-const Chart = (props: { chart: ChartSpec }) => {
+export interface ChartHandle {
+  toPNG: () => string | undefined;
+}
+
+const Chart = ({
+  chart,
+  ref,
+}: {
+  chart: ChartSpec;
+  ref?: React.Ref<ChartHandle>;
+}) => {
   const scheme = useComputedColorScheme("light");
+  const echartsRef = React.useRef<ReactEChartsCore>(null);
+  const theme = React.useMemo(() => readTheme(scheme), [scheme]);
   const option = React.useMemo(
-    () => buildChartOption(props.chart, readTheme(scheme)),
-    [props.chart, scheme],
+    () => buildChartOption(chart, theme),
+    [chart, theme],
+  );
+
+  React.useImperativeHandle(
+    ref,
+    () => ({
+      toPNG: () =>
+        echartsRef.current?.getEchartsInstance().getDataURL({
+          type: "png",
+          pixelRatio: 2,
+          backgroundColor: theme.surface,
+        }),
+    }),
+    [theme],
   );
 
   return (
     <ReactEChartsCore
+      ref={echartsRef}
       echarts={echarts}
       option={option}
       notMerge

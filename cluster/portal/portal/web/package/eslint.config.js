@@ -39,4 +39,10 @@ export default [
       ],
     },
   },
+  {
+    files: ["tests/**/*.mjs"],
+    languageOptions: {
+      globals: { ...globals.node, ...globals.browser },
+    },
+  },
 ];

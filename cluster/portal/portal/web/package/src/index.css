@@ -37,6 +37,8 @@
   --app-scrollbar-hover: oklch(70.4% 0.04 256.788);
 
   --app-shadow-panel: 0 1px 3px rgb(15 23 42 / 0.05);
+  --app-shadow-raised: 0 4px 12px rgb(15 23 42 / 0.08);
+  --app-shadow-overlay: 0 16px 40px rgb(15 23 42 / 0.14);
   --app-shadow-console: 0 8px 24px rgb(15 23 42 / 0.16);
 
   --app-hue-emerald: oklch(50.8% 0.118 165.612);
@@ -113,6 +115,8 @@
   --app-scrollbar-hover: oklch(45% 0.007 286);
 
   --app-shadow-panel: 0 1px 3px rgb(0 0 0 / 0.5);
+  --app-shadow-raised: 0 4px 12px rgb(0 0 0 / 0.55);
+  --app-shadow-overlay: 0 16px 40px rgb(0 0 0 / 0.7);
   --app-shadow-console: 0 8px 24px rgb(0 0 0 / 0.6);
 
   --app-hue-emerald: oklch(84.5% 0.143 164.978);
@@ -217,7 +221,20 @@
   --color-console-chrome: var(--console-chrome);
 
   --shadow-panel: var(--app-shadow-panel);
+  --shadow-raised: var(--app-shadow-raised);
+  --shadow-overlay: var(--app-shadow-overlay);
   --shadow-console: var(--app-shadow-console);
+
+  --animate-shimmer: shimmer 2.4s linear infinite;
+
+  @keyframes shimmer {
+    from {
+      background-position: 100% 0;
+    }
+    to {
+      background-position: 0% 0;
+    }
+  }
 }
 
 html,
