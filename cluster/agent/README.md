@@ -162,6 +162,8 @@ Pushing a `v*.*.*` Git tag or publishing a GitHub release publishes the tag's se
 
 To publish manually, run the workflow from GitHub Actions, select the branch or Git tag and supply the npm `tag` (e.g. `dev` or `main` for the development builds of the API server). An optional `version` sets an explicit semver. Without it, a selected Git tag supplies the version, while a selected branch produces a unique prerelease containing the npm tag.
 
+Pi's companion packages are pinned as direct dependencies because Workspace installs through `npx` do not use this repository's `package-lock.json`. Update the Pi packages together to keep their APIs compatible. After building, run `npm run test:package` to pack the agent, install it in a temporary directory and check the CLI and HTTP server startup. This check downloads dependencies from npm and runs before publishing.
+
 ## Development
 
 ```bash
