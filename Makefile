@@ -72,6 +72,9 @@ E2E_SCENARIO ?= k3s-flannel-cordium
 
 # Wall-clock budget for the suite. Running Workspaces takes minutes each.
 E2E_TIMEOUT ?= 170m
+E2E_SPIFFE ?= false
+
+export OCTELIUM_E2E_SPIFFE = $(E2E_SPIFFE)
 
 install-cli:
 	curl -fsSL https://octelium.com/install.sh | bash

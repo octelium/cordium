@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/octelium/octelium/cluster/e2e/scenario"
@@ -38,6 +39,7 @@ const NodeLabel = "octelium.com/node-mode-cordium"
 const (
 	EnvCoreVersion    = "OCTELIUM_E2E_CORE_VERSION"
 	EnvPackageVersion = "OCTELIUM_E2E_PACKAGE_VERSION"
+	EnvSPIFFE         = "OCTELIUM_E2E_SPIFFE"
 )
 
 const VersionLatest = "latest"
@@ -65,7 +67,12 @@ func register(id string, o opts) {
 	packageVersions[id] = packageVersion()
 
 	scenario.Register(id, func() *scenario.Scenario {
-		ret := scenario.MustGet("k3s-flannel")
+		base := "k3s-flannel"
+		spiffe, _ := strconv.ParseBool(os.Getenv(EnvSPIFFE))
+		if spiffe {
+			base += "-spiffe"
+		}
+		ret := scenario.MustGet(base)
 
 		ret.Description = o.description
 		ret.Install.Version = coreVersion(o.coreVersion)

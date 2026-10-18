@@ -22,6 +22,7 @@ The main differentiator for Cordium, when compared to remote development environ
 - [CLI Usage](#cli-usage)
 - [Install CLI](#install-cli)
 - [Install your First Cluster](#install-your-first-cluster)
+- [End-to-end tests](#end-to-end-tests)
 - [Comparison with Other Platforms](#comparison-with-other-platforms)
 - [License](#license)
 
@@ -367,6 +368,18 @@ brew install octelium/tap/octelium
 brew install octelium/tap/cordium
 ```
 
+
+## End-to-end tests
+
+Enable the `spiffe` input when running the `tests-e2e` GitHub Actions workflow to install SPIRE and enable the SPIFFE CSI driver for either Cordium scenario.
+
+To provision a local environment and run the tests with SPIFFE enabled:
+
+```bash
+make e2e E2E_SPIFFE=true
+```
+
+When running `./bin/cordium-e2e` directly, set `OCTELIUM_E2E_SPIFFE=true` for each phase. SPIRE and the Cluster use the same trust domain, which defaults to `octelium.local` and can be overridden with `OCTELIUM_SPIFFE_TRUST_DOMAIN`.
 
 ## Comparison with Other Platforms
 
