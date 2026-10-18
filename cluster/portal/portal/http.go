@@ -21,6 +21,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io/fs"
 	"mime"
 	"net/http"
@@ -38,6 +39,18 @@ import (
 
 //go:embed web
 var fsWeb embed.FS
+
+type templateGlobals struct {
+	Cluster templateGlobalsCluster `json:"cluster,omitempty"`
+}
+
+type templateGlobalsCluster struct {
+	Domain string `json:"domain,omitempty"`
+}
+
+var indexTmpl = template.Must(template.New("state").Parse(
+	`<script nonce="{{ .Nonce }}">window.__OCTELIUM_GLOBALS__ = {{ .Globals }}</script>`,
+))
 
 type octeliumManifest struct {
 	Cluster octeliumManifestCluster `json:"cluster"`
@@ -101,17 +114,6 @@ func (s *Server) setSecurityHeaders(w http.ResponseWriter, nonce string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 }
 
-func (s *Server) setDomainCookie(w http.ResponseWriter) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     "octelium_domain",
-		Value:    s.clusterDomain,
-		Secure:   true,
-		Domain:   s.clusterDomain,
-		Path:     "/",
-		SameSite: http.SameSiteNoneMode,
-	})
-}
-
 func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	nonce := utilrand.GetRandomStringCanonical(24)
 
@@ -122,20 +124,19 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	out, err := setIndexNonce(blob, nonce)
+	out, err := s.renderIndex(blob, nonce)
 	if err != nil {
-		zap.L().Error("Could not set the index.html nonce", zap.Error(err))
+		zap.L().Error("Could not render index.html", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	s.setDomainCookie(w)
 	s.setSecurityHeaders(w, nonce)
 
 	w.Write(out)
 }
 
-func setIndexNonce(blob []byte, nonce string) ([]byte, error) {
+func (s *Server) renderIndex(blob []byte, nonce string) ([]byte, error) {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(blob))
 	if err != nil {
 		return nil, err
@@ -145,6 +146,28 @@ func setIndexNonce(blob []byte, nonce string) ([]byte, error) {
 	if head.Length() == 0 {
 		return nil, errors.Errorf("Could not find head in index.html")
 	}
+
+	globalsJSON, err := json.Marshal(&templateGlobals{
+		Cluster: templateGlobalsCluster{
+			Domain: s.clusterDomain,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var scripts bytes.Buffer
+	if err := indexTmpl.Execute(&scripts, struct {
+		Nonce   string
+		Globals template.JS
+	}{
+		Nonce:   nonce,
+		Globals: template.JS(globalsJSON),
+	}); err != nil {
+		return nil, err
+	}
+
+	head.AppendHtml(scripts.String())
 
 	doc.Find("script").Each(func(_ int, sel *goquery.Selection) {
 		sel.SetAttr("nonce", nonce)

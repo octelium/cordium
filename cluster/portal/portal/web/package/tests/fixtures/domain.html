@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <body>
+    <script type="module">
+      import { ListTerminalRequest } from "@octelium/apis/main/cordiumv1";
+      import { getDomain, isDev } from "/src/utils";
+      import {
+        getClientUser,
+        getClientWorkspace,
+        getClientWorkspaceSvc,
+      } from "/src/utils/client";
+
+      window.portalDomain = {
+        getDomain,
+        isDev,
+        getClientUser,
+        getClientWorkspace,
+        getClientWorkspaceSvc,
+        requestStatus: () => getClientUser().getStatus({}),
+        requestTerminals: (regionRef) =>
+          getClientWorkspaceSvc(regionRef).listTerminal(ListTerminalRequest.create({})),
+      };
+    </script>
+  </body>
+</html>

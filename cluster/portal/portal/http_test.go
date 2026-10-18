@@ -17,6 +17,7 @@
 package portal
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http/httptest"
@@ -24,6 +25,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -61,6 +63,8 @@ func TestHandleIndexHeaders(t *testing.T) {
 	s.handleIndex(w, req)
 
 	resp := w.Result()
+	defer resp.Body.Close()
+	assert.Empty(t, resp.Cookies())
 	assert.Equal(t, 200, resp.StatusCode)
 	assert.Equal(t, "nosniff", resp.Header.Get("X-Content-Type-Options"))
 	assert.Equal(t, "DENY", resp.Header.Get("X-Frame-Options"))
@@ -81,6 +85,7 @@ func TestHandleIndexHeaders(t *testing.T) {
 
 	body, err := io.ReadAll(resp.Body)
 	assert.Nil(t, err)
+	assert.Contains(t, string(body), `window.__OCTELIUM_GLOBALS__ = {"cluster":{"domain":"example.com"}}`)
 
 	nonce := regexp.MustCompile(`'nonce-([a-z0-9]+)'`).FindStringSubmatch(csp)
 	assert.Equal(t, 2, len(nonce), csp)
@@ -90,7 +95,11 @@ func TestHandleIndexHeaders(t *testing.T) {
 	}
 }
 
-func TestSetIndexNonce(t *testing.T) {
+func TestRenderIndex(t *testing.T) {
+	s := &Server{
+		clusterDomain: `example.com</script><script>alert("domain")</script>`,
+	}
+
 	blob := []byte(`<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -110,13 +119,13 @@ func TestSetIndexNonce(t *testing.T) {
 
 	nonce := "abcdef0123456789abcdef01"
 
-	out, err := setIndexNonce(blob, nonce)
+	out, err := s.renderIndex(blob, nonce)
 	assert.Nil(t, err)
 
 	ret := string(out)
 
 	tags := regexp.MustCompile(`<script[^>]*>`).FindAllString(ret, -1)
-	assert.Equal(t, 2, len(tags))
+	assert.Equal(t, 3, len(tags))
 	for _, tag := range tags {
 		assert.True(t, strings.Contains(tag, fmt.Sprintf(`nonce="%s"`, nonce)), tag)
 	}
@@ -129,4 +138,16 @@ func TestSetIndexNonce(t *testing.T) {
 
 	assert.True(t, strings.HasPrefix(ret, "<!DOCTYPE html>"))
 	assert.True(t, strings.Contains(ret, `id="root"`))
+
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(ret))
+	assert.Nil(t, err)
+	script := doc.Find("script").FilterFunction(func(_ int, sel *goquery.Selection) bool {
+		return strings.Contains(sel.Text(), "window.__OCTELIUM_GLOBALS__")
+	})
+	assert.Equal(t, 1, script.Length())
+	_, globalsJSON, found := strings.Cut(script.Text(), " = ")
+	assert.True(t, found)
+	var globals templateGlobals
+	assert.Nil(t, json.Unmarshal([]byte(globalsJSON), &globals))
+	assert.Equal(t, s.clusterDomain, globals.Cluster.Domain)
 }
