@@ -1,5 +1,5 @@
 import Footer from "@/components/Footer";
-import SideBar from "@/components/SideBar";
+import PortalShell from "@/components/SideBar/Shell";
 import TopBar from "@/components/TopBar";
 
 import { Navigate, Outlet, useMatch } from "react-router-dom";
@@ -13,8 +13,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 
 import { invalidateSpaces } from "@/utils/octelium";
-import { AppShell, Burger } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
 import {
   ListSpaceOptions,
   Space,
@@ -27,7 +25,6 @@ import "@fontsource/ubuntu/700.css";
 
 const Root = () => {
   const dispatch = useAppDispatch();
-  const [navOpened, { toggle: toggleNav, close: closeNav }] = useDisclosure();
   const consoleWide = useAppSelector((s) => s.settings.terminalFullscreen);
   const isAgent = !!useMatch({ path: "/agent", end: false });
 
@@ -61,59 +58,24 @@ const Root = () => {
   });
 
   return (
-    <AppShell
-      header={{ height: 60 }}
-      navbar={{
-        width: 232,
-        breakpoint: "md",
-        collapsed: { mobile: !navOpened },
-      }}
-      padding={0}
-      className="bg-canvas"
-    >
-      <AppShell.Header
-        className="border-b border-line bg-canvas"
-        style={{ backgroundColor: "var(--app-canvas)" }}
-      >
-        <div className="flex h-full items-center">
-          <Burger
-            opened={navOpened}
-            onClick={toggleNav}
-            hiddenFrom="md"
-            size="sm"
-            ml="sm"
-            aria-label="Toggle navigation"
-          />
-          <TopBar />
+    <PortalShell header={<TopBar />}>
+      {isAgent ? (
+        <div className="h-[calc(100dvh-60px)] w-full">
+          <Outlet />
         </div>
-      </AppShell.Header>
-
-      <AppShell.Navbar
-        className="border-r border-line bg-canvas p-3"
-        style={{ backgroundColor: "var(--app-canvas)" }}
-      >
-        <SideBar onNavigate={closeNav} />
-      </AppShell.Navbar>
-
-      <AppShell.Main className="bg-canvas">
-        {isAgent ? (
-          <div className="h-[calc(100dvh-60px)] w-full">
-            <Outlet />
-          </div>
-        ) : (
-          <div
-            className={
-              consoleWide
-                ? "w-full px-4 py-6 md:px-8"
-                : "mx-auto w-full max-w-[1400px] px-4 py-6 md:px-8"
-            }
-          >
-            <Outlet />
-            <Footer />
-          </div>
-        )}
-      </AppShell.Main>
-    </AppShell>
+      ) : (
+        <div
+          className={
+            consoleWide
+              ? "w-full px-4 py-6 md:px-8"
+              : "mx-auto w-full max-w-[1400px] px-4 py-6 md:px-8"
+          }
+        >
+          <Outlet />
+          <Footer />
+        </div>
+      )}
+    </PortalShell>
   );
 };
 

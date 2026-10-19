@@ -1,7 +1,8 @@
-import ConsoleShell, {
+import ConsoleShell from "@/components/ConsoleShell";
+import {
   consoleToolbarButtonClass,
   consoleToolbarButtonVars,
-} from "@/components/ConsoleShell";
+} from "@/components/ConsoleShell/toolbar";
 import Empty from "@/components/Empty";
 import LogConsole from "@/components/LogConsole";
 import { useAppSelector } from "@/utils/hooks";
@@ -33,7 +34,7 @@ const Page = () => {
     <ConsoleShell
       height={fullscreen ? undefined : 560}
       tabs={
-        <Text size="xs" fw={600} className="px-2 text-zinc-400">
+        <Text size="xs" fw={600} className="px-2 text-ink-muted">
           Startup and task logs · live
         </Text>
       }

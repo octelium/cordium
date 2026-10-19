@@ -1,12 +1,9 @@
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 
-import { clearTerminalGroup } from "@/features/terminalgroup/slice";
-import store from "@/store";
-import { isDev } from "@/utils";
+import type { ConnectionStatus } from "@/features/conn/slice";
 import emitter from "@/utils/event";
 import { invalidateWorkspace } from "@/utils/octelium";
 import { Emitter } from "nanoevents";
-import toast from "react-hot-toast";
 import ReconnectingWebSocket from "reconnecting-websocket";
 
 const TERMINAL_DATA_CHUNK_SIZE = 4096;
@@ -22,43 +19,43 @@ export class WebSocketCtl {
   ws: ReconnectingWebSocket;
   state: State;
   emitter: Emitter;
+  terminals = new Set<string>();
+  terminalSizes = new Map<string, { rows: number; cols: number }>();
 
-  constructor() {
+  constructor(onStateChange: (status: ConnectionStatus) => void = () => {}) {
     this.state = State.OPENING;
-    this.ws = this.doConnect();
     this.emitter = emitter;
+    this.ws = this.doConnect();
 
     this.ws.onopen = () => {
-      console.log("ws conn is now open");
       this.state = State.OPEN;
-      toast.remove("ws-err-term-group");
+      this.emitter.emit("terminal-reconnect");
+      for (const id of this.terminals) {
+        this.sendListenTerminal(id);
+        const size = this.terminalSizes.get(id);
+        if (size) this.sendMsgResizeTerminal(id, size.rows, size.cols);
+      }
+      onStateChange("connected");
     };
     this.ws.onclose = () => {
-      console.log("ws conn is now closed");
       this.state = State.CLOSED;
+      onStateChange("reconnecting");
     };
     this.ws.onmessage = (e) => {
       const payload = new Uint8Array(e.data);
 
       this.handleMessage(payload);
     };
-    this.ws.onerror = (err) => {
-      console.log("ws conn error", err);
+    this.ws.onerror = () => {
       this.state = State.ERROR;
-      store.dispatch(clearTerminalGroup({}));
-      if (!isDev()) {
-        toast.error("Websocket disconnected. Please restart the page", {
-          id: "ws-err-term-group",
-          duration: Infinity,
-        });
-      }
+      onStateChange("reconnecting");
     };
   }
 
   doConnect() {
     const scheme = location.protocol === "https:" ? "wss" : "ws";
 
-    let ret = new ReconnectingWebSocket(
+    const ret = new ReconnectingWebSocket(
       `${scheme}://${window.location.host}/connect`,
       [],
       {
@@ -80,7 +77,11 @@ export class WebSocketCtl {
   }
 
   sendMsgData(id: string, data: Uint8Array) {
-    for (let offset = 0; offset < data.length; offset += TERMINAL_DATA_CHUNK_SIZE) {
+    for (
+      let offset = 0;
+      offset < data.length;
+      offset += TERMINAL_DATA_CHUNK_SIZE
+    ) {
       const msg = WsPB.ClientMessage.create({
         type: {
           oneofKind: "writeTerminalDataRequest",
@@ -95,6 +96,7 @@ export class WebSocketCtl {
   }
 
   sendListenTerminal(id: string) {
+    this.terminals.add(id);
     const msg = WsPB.ClientMessage.create({
       type: {
         oneofKind: "listenTerminalRequest",
@@ -107,6 +109,8 @@ export class WebSocketCtl {
   }
 
   sendListenTerminalEnd(id: string) {
+    this.terminalSizes.delete(id);
+    if (!this.terminals.delete(id)) return;
     const msg = WsPB.ClientMessage.create({
       type: {
         oneofKind: "listenTerminalEndRequest",
@@ -119,6 +123,7 @@ export class WebSocketCtl {
   }
 
   sendMsgResizeTerminal(id: string, rows: number, cols: number) {
+    this.terminalSizes.set(id, { rows, cols });
     const msg = WsPB.ClientMessage.create({
       type: {
         oneofKind: "setTerminalWindowSizeRequest",
@@ -143,6 +148,13 @@ export class WebSocketCtl {
         break;
       }
       case "listenTerminalEvent": {
+        if (
+          msg.type.listenTerminalEvent.listenTerminalResponse?.type
+            .oneofKind === "close"
+        ) {
+          this.terminals.delete(msg.type.listenTerminalEvent.id);
+          this.terminalSizes.delete(msg.type.listenTerminalEvent.id);
+        }
         this.emitter.emit(
           `tg-${msg.type.listenTerminalEvent.id}`,
           msg.type.listenTerminalEvent,

@@ -1,226 +1,36 @@
-import ConsoleShell, {
-  consoleToolbarButtonClass,
-  consoleToolbarButtonVars,
-} from "@/components/ConsoleShell";
+import ConsoleShell from "@/components/ConsoleShell";
 import Empty from "@/components/Empty";
 import Terminal from "@/components/Terminal";
 import {
   addTerminal,
   initTerminalGroup,
-  removeTerminal,
   setActiveTerminal,
 } from "@/features/terminalgroup/slice";
-import { isDev, onError, truncateUtf8 } from "@/utils";
+import { isDev, onError } from "@/utils";
 import { getClientWorkspaceSvc } from "@/utils/client";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks";
 import { getResourceRef } from "@/utils/pb";
-import TerminalT from "@/utils/types/terminal";
-import { ActionIcon, Button, Tooltip } from "@mantine/core";
+import { Alert, Button, Tooltip } from "@mantine/core";
 import { useHotkeys, useOs } from "@mantine/hooks";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
-import {
-  IconPlus,
-  IconSquareRoundedPlus,
-  IconTerminal2,
-  IconX,
-} from "@tabler/icons-react";
+import { IconPlus, IconTerminal2 } from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import * as React from "react";
 import { twMerge } from "tailwind-merge";
 import { useContextWorkspace } from "../utils";
 import { canUseTerminals } from "./utils";
-
-const WHEEL_STEP_DELTA = 40;
-const WHEEL_STEP_COOLDOWN_MS = 90;
-
-const TabStrip = (props: {
-  workspace: WsPB.Workspace;
-  onCreate: () => void;
-  creating: boolean;
-  devMode: boolean;
-  newTerminalHint: string;
-  newTerminalKeys: string;
-}) => {
-  const dispatch = useAppDispatch();
-  const tg = useAppSelector((state) => state.terminalGroup);
-  const wsC = getClientWorkspaceSvc(props.workspace.status?.regionRef);
-  const scrollRef = React.useRef<HTMLDivElement>(null);
-  const wheelDelta = React.useRef(0);
-  const lastStepAt = React.useRef(0);
-
-  const groupRef = React.useRef(tg);
-  React.useEffect(() => {
-    groupRef.current = tg;
-  }, [tg]);
-
-  const handleRemove = async (id: string) => {
-    if (!props.devMode) {
-      await wsC.removeTerminal(WsPB.RemoveTerminalRequest.create({ id }));
-    }
-    dispatch(removeTerminal({ id }));
-  };
-
-  const stepTerminal = React.useCallback(
-    (direction: number) => {
-      const { terminals, activeTerminal } = groupRef.current;
-      if (terminals.length < 2) return;
-
-      const idx = terminals.findIndex((x) => x.id === activeTerminal);
-      if (idx < 0) return;
-
-      const next = Math.min(terminals.length - 1, Math.max(0, idx + direction));
-      if (next === idx) return;
-
-      dispatch(setActiveTerminal({ id: terminals[next].id }));
-    },
-    [dispatch],
-  );
-
-  const handleTabWheel = React.useCallback(
-    (event: WheelEvent) => {
-      event.preventDefault();
-
-      const raw =
-        Math.abs(event.deltaX) > Math.abs(event.deltaY)
-          ? event.deltaX
-          : event.deltaY;
-      if (!raw) return;
-
-      const delta = event.deltaMode === 0 ? raw : raw * 16;
-
-      if (Math.sign(delta) !== Math.sign(wheelDelta.current)) {
-        wheelDelta.current = 0;
-      }
-      wheelDelta.current += delta;
-
-      if (Math.abs(wheelDelta.current) < WHEEL_STEP_DELTA) return;
-
-      const direction = Math.sign(wheelDelta.current);
-      wheelDelta.current = 0;
-
-      if (event.timeStamp - lastStepAt.current < WHEEL_STEP_COOLDOWN_MS) return;
-      lastStepAt.current = event.timeStamp;
-
-      stepTerminal(direction);
-    },
-    [stepTerminal],
-  );
-
-  React.useEffect(() => {
-    const container = scrollRef.current;
-    if (!container) return;
-
-    container.addEventListener("wheel", handleTabWheel, { passive: false });
-    return () => container.removeEventListener("wheel", handleTabWheel);
-  }, [handleTabWheel]);
-
-  React.useEffect(() => {
-    const container = scrollRef.current;
-    if (!container || !tg.activeTerminal) return;
-
-    const tab = container.querySelector<HTMLElement>(
-      `[data-terminal-tab="${CSS.escape(tg.activeTerminal)}"]`,
-    );
-    tab?.scrollIntoView({ block: "nearest", inline: "nearest" });
-  }, [tg.activeTerminal, tg.terminals.length]);
-
-  return (
-    <div className="flex min-w-0 flex-1 items-center gap-1">
-      <div
-        ref={scrollRef}
-        role="tablist"
-        aria-label="Terminal sessions"
-        className="scrollbar-none flex min-w-0 flex-1 items-center gap-1 overflow-x-auto overscroll-none"
-      >
-        {tg.terminals.map((t) => {
-          const isActive = tg.activeTerminal === t.id;
-          return (
-            <div
-              key={t.id}
-              role="tab"
-              data-terminal-tab={t.id}
-              aria-selected={isActive}
-              onClick={() => dispatch(setActiveTerminal({ id: t.id }))}
-              className={twMerge(
-                "flex max-w-[11rem] shrink-0 cursor-pointer select-none items-center gap-1.5",
-                "rounded-md border px-2.5 py-1 transition-colors duration-150",
-                isActive
-                  ? "border-zinc-600 bg-zinc-700/70"
-                  : "border-transparent hover:bg-zinc-700/40",
-              )}
-            >
-              <IconTerminal2
-                size={12}
-                className={twMerge(
-                  "shrink-0",
-                  isActive ? "text-emerald-300" : "text-zinc-500",
-                )}
-              />
-              <span
-                className={twMerge(
-                  "truncate font-mono text-[0.72rem] font-semibold",
-                  isActive ? "text-zinc-100" : "text-zinc-400",
-                )}
-              >
-                {truncateUtf8(t.title, 24, { suffix: "…" })}
-              </span>
-              <ActionIcon
-                size={16}
-                variant="transparent"
-                aria-label="Close terminal"
-                className="shrink-0 text-zinc-500 transition-colors hover:bg-zinc-600/70 hover:text-rose-300"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemove(t.id);
-                }}
-              >
-                <IconX size={11} />
-              </ActionIcon>
-            </div>
-          );
-        })}
-        <div
-          className="min-w-4 shrink-0 self-stretch"
-          aria-hidden="true"
-          title="Double-click to open a new terminal"
-          onDoubleClick={() => {
-            if (!props.creating) props.onCreate();
-          }}
-        />
-
-        <div
-          className={twMerge(
-            "sticky right-0 z-10 shrink-0 self-stretch bg-console-chrome pl-1",
-            "before:pointer-events-none before:absolute before:right-full before:top-0",
-            "before:h-full before:w-6 before:bg-gradient-to-l before:from-console-chrome before:to-transparent",
-          )}
-        >
-          <Tooltip label={`New terminal (${props.newTerminalHint})`}>
-            <ActionIcon
-              size={27}
-              variant="transparent"
-              aria-label="New terminal"
-              aria-keyshortcuts={props.newTerminalKeys}
-              className={consoleToolbarButtonClass}
-              vars={consoleToolbarButtonVars}
-              loading={props.creating}
-              onClick={props.onCreate}
-            >
-              <IconSquareRoundedPlus size={15} stroke={1.9} />
-            </ActionIcon>
-          </Tooltip>
-        </div>
-      </div>
-    </div>
-  );
-};
+import TerminalTabs from "./TerminalTabs";
+import { restoreTerminalPreferences } from "@/features/terminalgroup/preferences";
+import QueryBoundary from "@/components/QueryBoundary";
 
 const TerminalGroup = (props: { workspace: WsPB.Workspace }) => {
   const item = props.workspace;
+  const workspaceID = item.metadata!.uid;
   const wsC = getClientWorkspaceSvc(item.status?.regionRef);
   const tg = useAppSelector((state) => state.terminalGroup);
   const fullscreen = useAppSelector((s) => s.settings.terminalFullscreen);
   const dispatch = useAppDispatch();
+  const connection = useAppSelector((state) => state.conn.status);
   const ready = canUseTerminals(item);
   const devMode = isDev();
   const isMac = useOs() === "macos";
@@ -228,37 +38,44 @@ const TerminalGroup = (props: { workspace: WsPB.Workspace }) => {
   const newTerminalKeys = isMac ? "Meta+Alt+T" : "Control+Alt+T";
 
   const qryListTerm = useQuery({
-    queryKey: ["workspace/ws/listTerminal", item.metadata!.uid],
+    queryKey: ["workspace/ws/listTerminal", workspaceID],
     gcTime: 0,
     queryFn: async () => {
       if (devMode) {
         const response = WsPB.ListTerminalResponse.create({
           items: [{ id: "dev-terminal-1" }],
         });
-        dispatch(
-          initTerminalGroup({
-            termList: response.items.map(
-              (x) => ({ id: x.id, title: "Dev terminal" }) as TerminalT,
-            ),
-          }),
-        );
         return response;
       }
 
       const { response } = await wsC.listTerminal(
         WsPB.ListTerminalRequest.create({ workspaceRef: getResourceRef(item) }),
       );
-      dispatch(
-        initTerminalGroup({
-          termList: response.items.map(
-            (x) => ({ id: x.id, title: "Terminal" }) as TerminalT,
-          ),
-        }),
-      );
       return response;
     },
     enabled: ready || devMode,
   });
+
+  React.useEffect(() => {
+    if (!qryListTerm.data) return;
+    dispatch(
+      initTerminalGroup({
+        workspaceID,
+        termList: restoreTerminalPreferences(
+          workspaceID,
+          qryListTerm.data.items.map((terminal) => ({
+            id: terminal.id,
+            title: devMode ? "Dev terminal" : "Terminal",
+          })),
+        ),
+      }),
+    );
+  }, [dispatch, qryListTerm.data, workspaceID, devMode]);
+
+  const refetchTerminals = qryListTerm.refetch;
+  React.useEffect(() => {
+    if (connection === "connected" && ready) void refetchTerminals();
+  }, [connection, ready, refetchTerminals]);
 
   const mutationCreate = useMutation({
     mutationFn: async () => {
@@ -305,7 +122,16 @@ const TerminalGroup = (props: { workspace: WsPB.Workspace }) => {
     );
   }
 
-  if (!qryListTerm.isSuccess) return null;
+  if (!qryListTerm.data || tg.workspaceID !== workspaceID) {
+    return (
+      <QueryBoundary
+        query={{
+          ...qryListTerm,
+          isPending: qryListTerm.isPending || tg.workspaceID !== workspaceID,
+        }}
+      />
+    );
+  }
 
   if (tg.terminals.length === 0) {
     return (
@@ -329,33 +155,58 @@ const TerminalGroup = (props: { workspace: WsPB.Workspace }) => {
   }
 
   return (
-    <ConsoleShell
-      height={fullscreen ? undefined : 560}
-      tabs={
-        <TabStrip
-          workspace={item}
-          creating={mutationCreate.isPending}
-          onCreate={() => mutationCreate.mutate()}
-          devMode={devMode}
-          newTerminalHint={newTerminalHint}
-          newTerminalKeys={newTerminalKeys}
-        />
-      }
-    >
-      <div className="relative h-full w-full">
-        {tg.terminals.map((x) => (
-          <div
-            key={x.id}
-            className={twMerge(
-              "absolute inset-0",
-              x.id !== tg.activeTerminal && "invisible",
-            )}
+    <>
+      {qryListTerm.isError && (
+        <Alert
+          color="yellow"
+          title="Could not refresh terminal sessions"
+          className="mb-3"
+        >
+          Existing sessions remain open.
+          <Button
+            size="compact-xs"
+            variant="subtle"
+            color="yellow"
+            ml="sm"
+            onClick={() => qryListTerm.refetch()}
           >
-            <Terminal id={x.id} isActive={x.id === tg.activeTerminal} />
-          </div>
-        ))}
-      </div>
-    </ConsoleShell>
+            Retry
+          </Button>
+        </Alert>
+      )}
+      <ConsoleShell
+        height={fullscreen ? undefined : 560}
+        tabs={
+          <TerminalTabs
+            workspace={item}
+            creating={mutationCreate.isPending}
+            onCreate={() => mutationCreate.mutate()}
+            devMode={devMode}
+            newTerminalHint={newTerminalHint}
+            newTerminalKeys={newTerminalKeys}
+          />
+        }
+      >
+        <div className="relative h-full w-full">
+          {tg.terminals.map((x) => (
+            <div
+              key={x.id}
+              role="tabpanel"
+              id={`terminal-panel-${x.id}`}
+              aria-labelledby={`terminal-tab-${x.id}`}
+              aria-hidden={x.id !== tg.activeTerminal}
+              inert={x.id !== tg.activeTerminal}
+              className={twMerge(
+                "absolute inset-0",
+                x.id !== tg.activeTerminal && "invisible",
+              )}
+            >
+              <Terminal id={x.id} isActive={x.id === tg.activeTerminal} />
+            </div>
+          ))}
+        </div>
+      </ConsoleShell>
+    </>
   );
 };
 

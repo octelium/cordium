@@ -1,13 +1,23 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-type State = Record<string, never>;
+export type ConnectionStatus = "connecting" | "connected" | "reconnecting";
+
+interface State {
+  status: ConnectionStatus;
+}
 
 const noop = () => {};
 
 export const slice = createSlice({
   name: "conn",
-  initialState: {} as State,
+  initialState: { status: "connecting" } as State,
   reducers: {
+    setConnectionStatus: (
+      state,
+      action: PayloadAction<{ status: ConnectionStatus }>,
+    ) => {
+      state.status = action.payload.status;
+    },
     sendTerminalData: (
       _state,
       _action: PayloadAction<{ uid: string; data: string }>,
@@ -30,6 +40,7 @@ export const slice = createSlice({
 });
 
 export const {
+  setConnectionStatus,
   sendTerminalData,
   sendCreateTerminal,
   sendSetTerminalSize,

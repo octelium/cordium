@@ -1,23 +1,47 @@
 import { Resource, resourceSpecToYAML, resourceToYAML } from "@/utils/pb";
-import { Button, Drawer, SegmentedControl, Stack } from "@mantine/core";
+import {
+  ActionIcon,
+  Button,
+  Drawer,
+  SegmentedControl,
+  Stack,
+  Tooltip,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconFileCode } from "@tabler/icons-react";
 import * as React from "react";
 import CodeEditor from "../CodeEditor";
 
-const YamlDrawer = (props: { item: Resource; label?: string }) => {
+const YamlDrawer = (props: {
+  item: Resource;
+  label?: string;
+  iconOnly?: boolean;
+}) => {
   const [opened, { open, close }] = useDisclosure(false);
   const [scope, setScope] = React.useState("full");
 
   return (
     <>
-      <Button
-        variant="default"
-        leftSection={<IconFileCode size={15} />}
-        onClick={open}
-      >
-        {props.label ?? "View YAML"}
-      </Button>
+      {props.iconOnly ? (
+        <Tooltip label="View YAML">
+          <ActionIcon
+            variant="default"
+            size={36}
+            aria-label="View YAML"
+            onClick={open}
+          >
+            <IconFileCode size={16} />
+          </ActionIcon>
+        </Tooltip>
+      ) : (
+        <Button
+          variant="default"
+          leftSection={<IconFileCode size={15} />}
+          onClick={open}
+        >
+          {props.label ?? "View YAML"}
+        </Button>
+      )}
 
       <Drawer
         opened={opened}

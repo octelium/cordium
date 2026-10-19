@@ -16,7 +16,12 @@ import {
   getWorkspaceURL,
   invalidateResource,
 } from "@/utils/octelium";
-import { canStopWorkspace, getResourceRef, getShortNameFromRef, isWorkspaceStopped } from "@/utils/pb";
+import {
+  canStopWorkspace,
+  getResourceRef,
+  getShortNameFromRef,
+  isWorkspaceStopped,
+} from "@/utils/pb";
 import { Button } from "@mantine/core";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import {
@@ -38,6 +43,7 @@ import { useContextWorkspace } from "../utils";
 export const StartStopButtons = (props: {
   item: WsPB.Workspace;
   fullWidth?: boolean;
+  compact?: boolean;
 }) => {
   const { item } = props;
   const dispatch = useAppDispatch();
@@ -89,6 +95,7 @@ export const StartStopButtons = (props: {
         triggerLabel="Stop"
         triggerIcon={<IconPlayerStop size={14} />}
         size="sm"
+        variant={props.compact ? "light" : undefined}
         fullWidth={props.fullWidth}
         title="Stop this workspace?"
         confirmLabel="Stop workspace"
@@ -151,22 +158,26 @@ const Page = () => {
               </>
             }
             actions={
-              <>
-                <YamlDrawer item={data} />
+              <div
+                role="group"
+                aria-label="Workspace actions"
+                className="flex items-center gap-2"
+              >
                 {url && !isWorkspaceStopped(data) && (
                   <Button
-                    variant="default"
+                    size="sm"
                     component="a"
                     href={url}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     leftSection={<IconExternalLink size={15} />}
                   >
                     Open
                   </Button>
                 )}
-                <StartStopButtons item={data} />
-              </>
+                <StartStopButtons item={data} compact />
+                <YamlDrawer item={data} iconOnly />
+              </div>
             }
           />
 

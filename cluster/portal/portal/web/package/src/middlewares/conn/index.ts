@@ -4,6 +4,7 @@ import {
   sendListenTerminalEnd,
   sendSetTerminalSize,
   sendTerminalData,
+  setConnectionStatus,
 } from "../../features/conn/slice";
 import { isDev } from "../../utils";
 
@@ -14,26 +15,31 @@ export default (): Middleware => {
     return () => (next) => (action) => next(action);
   }
 
-  const ws = new WebSocketCtl();
   const encoder = new TextEncoder();
 
-  return () => (next) => (action) => {
-    if (sendTerminalData.match(action)) {
-      const dataBytes = encoder.encode(action.payload.data);
+  return (api) => {
+    const ws = new WebSocketCtl((status) =>
+      api.dispatch(setConnectionStatus({ status })),
+    );
 
-      ws.sendMsgData(action.payload.uid, dataBytes);
-    } else if (sendSetTerminalSize.match(action)) {
-      ws.sendMsgResizeTerminal(
-        action.payload.uid,
-        action.payload.rows,
-        action.payload.cols,
-      );
-    } else if (sendListenTerminal.match(action)) {
-      ws.sendListenTerminal(action.payload.id);
-    } else if (sendListenTerminalEnd.match(action)) {
-      ws.sendListenTerminalEnd(action.payload.id);
-    }
+    return (next) => (action) => {
+      if (sendTerminalData.match(action)) {
+        const dataBytes = encoder.encode(action.payload.data);
 
-    next(action);
+        ws.sendMsgData(action.payload.uid, dataBytes);
+      } else if (sendSetTerminalSize.match(action)) {
+        ws.sendMsgResizeTerminal(
+          action.payload.uid,
+          action.payload.rows,
+          action.payload.cols,
+        );
+      } else if (sendListenTerminal.match(action)) {
+        ws.sendListenTerminal(action.payload.id);
+      } else if (sendListenTerminalEnd.match(action)) {
+        ws.sendListenTerminalEnd(action.payload.id);
+      }
+
+      return next(action);
+    };
   };
 };
