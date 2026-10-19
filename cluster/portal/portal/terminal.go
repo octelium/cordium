@@ -128,7 +128,7 @@ func (t *terminal) startSendLoop(ctx context.Context) {
 				if grpcerr.IsCanceled(err) {
 					return
 				}
-				zap.L().Error("Could not recv in terminal send loop. Exiting...", zap.Error(err))
+				zap.L().Debug("Could not recv in terminal send loop. Exiting...", zap.Error(err))
 				return
 			}
 			t.handleSend(msg)
