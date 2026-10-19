@@ -28,6 +28,9 @@ import {
 import * as React from "react";
 import { twMerge } from "tailwind-merge";
 
+const WHEEL_STEP_DELTA = 40;
+const WHEEL_STEP_COOLDOWN_MS = 90;
+
 const TerminalTabs = (props: {
   workspace: WsPB.Workspace;
   onCreate: () => void;
@@ -39,7 +42,13 @@ const TerminalTabs = (props: {
   const dispatch = useAppDispatch();
   const tg = useAppSelector((state) => state.terminalGroup);
   const connection = useAppSelector((state) => state.conn.status);
+  const fullscreen = useAppSelector(
+    (state) => state.settings.terminalFullscreen,
+  );
   const scrollRef = React.useRef<HTMLDivElement>(null);
+  const groupRef = React.useRef(tg);
+  const wheelDelta = React.useRef(0);
+  const lastStepAt = React.useRef(0);
   const dragId = React.useRef<string | null>(null);
   const [dragging, setDragging] = React.useState<string | null>(null);
   const [drop, setDrop] = React.useState<{
@@ -47,6 +56,57 @@ const TerminalTabs = (props: {
     position: "before" | "after";
   } | null>(null);
   const [menuID, setMenuID] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    groupRef.current = tg;
+  }, [tg]);
+
+  React.useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const onWheel = (event: WheelEvent) => {
+      event.preventDefault();
+
+      const raw =
+        Math.abs(event.deltaX) > Math.abs(event.deltaY)
+          ? event.deltaX
+          : event.deltaY;
+      if (!raw) return;
+
+      const delta =
+        event.deltaMode === 1
+          ? raw * 16
+          : event.deltaMode === 2
+            ? raw * container.clientWidth
+            : raw;
+      if (Math.sign(delta) !== Math.sign(wheelDelta.current)) {
+        wheelDelta.current = 0;
+      }
+      wheelDelta.current += delta;
+      if (Math.abs(wheelDelta.current) < WHEEL_STEP_DELTA) return;
+
+      const direction = Math.sign(wheelDelta.current);
+      wheelDelta.current = 0;
+      if (event.timeStamp - lastStepAt.current < WHEEL_STEP_COOLDOWN_MS) return;
+      lastStepAt.current = event.timeStamp;
+
+      const { terminals, activeTerminal } = groupRef.current;
+      const index = terminals.findIndex(
+        (terminal) => terminal.id === activeTerminal,
+      );
+      if (index < 0) return;
+      const next = Math.min(
+        terminals.length - 1,
+        Math.max(0, index + direction),
+      );
+      if (next !== index)
+        dispatch(setActiveTerminal({ id: terminals[next].id }));
+    };
+
+    container.addEventListener("wheel", onWheel, { passive: false });
+    return () => container.removeEventListener("wheel", onWheel);
+  }, [dispatch]);
 
   React.useEffect(() => {
     saveTerminalPreferences(props.workspace.metadata!.uid, tg.terminals);
@@ -240,6 +300,7 @@ const TerminalTabs = (props: {
                 onChange={(opened) => setMenuID(opened ? terminal.id : null)}
                 position="bottom-start"
                 withinPortal
+                zIndex={fullscreen ? 410 : undefined}
               >
                 <Menu.Target>
                   <button

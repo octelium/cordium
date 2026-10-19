@@ -352,6 +352,87 @@ describe("Portal navigation, Services and terminals", () => {
     );
   });
 
+  it("switches terminal tabs with wheel scrolling in normal and full-screen modes", async () => {
+    await terminals();
+    for (const fullscreen of [false, true]) {
+      if (fullscreen) {
+        await page
+          .getByRole("button", { name: "Toggle full screen", exact: true })
+          .click();
+      }
+      const scrollY = await page.evaluate(() => window.scrollY);
+      for (const [deltaX, deltaY, expected] of [
+        [0, 80, "worker"],
+        [0, 80, "logs"],
+        [0, 80, "logs"],
+        [-80, 0, "worker"],
+        [0, -80, "main"],
+        [0, -80, "main"],
+      ]) {
+        await page.getByRole("tablist", { name: "Terminal sessions" }).hover();
+        await page.waitForTimeout(110);
+        await page.mouse.wheel(deltaX, deltaY);
+        await page.waitForFunction(
+          (title) =>
+            document
+              .getElementById(`terminal-tab-terminal-${title}`)
+              ?.getAttribute("aria-selected") === "true",
+          expected,
+        );
+      }
+      assert.equal(await page.evaluate(() => window.scrollY), scrollY);
+    }
+  });
+
+  for (const theme of ["light", "dark"]) {
+    it(`keeps full-screen tab menus clickable in the ${theme} theme`, async () => {
+      await load("/workspaces/demo/terminals", theme);
+      await page.getByRole("tab", { name: "logs", exact: true }).waitFor();
+      const fullscreen = page.getByRole("button", {
+        name: "Toggle full screen",
+        exact: true,
+      });
+      await fullscreen.click();
+      await page
+        .getByRole("button", { name: "Actions for logs", exact: true })
+        .click();
+      await page
+        .getByRole("menuitem", { name: "Pin tab", exact: true })
+        .click();
+      await page
+        .getByRole("tab", { name: "logs (pinned)", exact: true })
+        .waitFor();
+      await page
+        .getByRole("button", { name: "Actions for logs (pinned)", exact: true })
+        .click();
+      await page
+        .getByRole("menuitem", { name: "Unpin tab", exact: true })
+        .click();
+      await page
+        .getByRole("tab", { name: "logs", exact: true })
+        .click({ button: "right" });
+      await page
+        .getByRole("menuitem", { name: "Move right", exact: true })
+        .click();
+      assert.deepEqual(await order(), [
+        "terminal-main",
+        "terminal-logs",
+        "terminal-worker",
+      ]);
+      await page
+        .getByRole("button", { name: "Actions for worker", exact: true })
+        .click();
+      await page
+        .getByRole("menu", { name: "Actions for worker", exact: true })
+        .getByRole("menuitem", { name: "Close terminal", exact: true })
+        .click();
+      await page
+        .getByRole("tab", { name: "worker", exact: true })
+        .waitFor({ state: "detached" });
+      assert.equal(await fullscreen.getAttribute("aria-pressed"), "true");
+    });
+  }
+
   it("keeps pinned tabs and titles when the terminal list refreshes", async () => {
     await terminals();
     await page
