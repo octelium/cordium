@@ -57,7 +57,7 @@ go get github.com/octelium/cordium/cordium-go
 import cordium "github.com/octelium/cordium/cordium-go"
 ```
 
-The SDK requires Go 1.26 or later.
+The SDK requires Go 1.27 or later.
 
 ## Authentication
 

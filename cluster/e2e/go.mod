@@ -1,6 +1,6 @@
 module github.com/octelium/cordium/cluster/e2e
 
-go 1.26.8
+go 1.27.3
 
 require (
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4
