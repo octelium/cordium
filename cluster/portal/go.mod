@@ -3,6 +3,7 @@ module github.com/octelium/cordium/cluster/portal
 go 1.27.3
 
 require (
+	github.com/PuerkitoBio/goquery v1.11.0
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
 	github.com/go-resty/resty/v2 v2.17.2
 	github.com/google/go-github/v33 v33.0.0
@@ -11,6 +12,7 @@ require (
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
 	github.com/octelium/cordium/cluster/supervisor v0.0.0-00010101000000-000000000000
 	github.com/octelium/cordium/cluster/workspace v0.0.0-00010101000000-000000000000
+	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/cluster/apiserver v0.0.0-20261003070331-0fe86d9363da
 	github.com/octelium/octelium/cluster/common v0.0.0-20261003070331-0fe86d9363da
@@ -26,11 +28,6 @@ require (
 	golang.zx2c4.com/wireguard/wgctrl v0.0.0-20241231184526-a9ab2273dd10
 	google.golang.org/grpc v1.84.0
 	gvisor.dev/gvisor v0.0.0-20250503011706-39ed1f5ac29c
-)
-
-require (
-	github.com/PuerkitoBio/goquery v1.11.0
-	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 )
 
 require (

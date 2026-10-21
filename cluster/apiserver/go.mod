@@ -5,23 +5,20 @@ go 1.27.3
 require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
 	github.com/gosimple/slug v1.15.0
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
+	github.com/octelium/cordium/cluster/supervisor v0.0.0-00010101000000-000000000000
+	github.com/octelium/cordium/cluster/workspace v0.0.0-00010101000000-000000000000
+	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/cluster/apiserver v0.0.0-20261003070331-0fe86d9363da
 	github.com/octelium/octelium/cluster/common v0.0.0-20261003070331-0fe86d9363da
 	github.com/octelium/octelium/pkg v0.0.0-20261003070331-0fe86d9363da
+	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
 	go.uber.org/zap v1.28.0
 	golang.org/x/crypto v0.55.0
 	google.golang.org/grpc v1.84.0
-)
-
-require (
-	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4
-	github.com/octelium/cordium/cluster/supervisor v0.0.0-00010101000000-000000000000
-	github.com/octelium/cordium/cluster/workspace v0.0.0-00010101000000-000000000000
-	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
-	github.com/pkg/errors v0.9.1
 	google.golang.org/protobuf v1.36.12
 )
 

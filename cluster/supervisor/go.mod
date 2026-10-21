@@ -3,13 +3,15 @@ module github.com/octelium/cordium/cluster/supervisor
 go 1.27.3
 
 require (
+	github.com/compose-spec/compose-go/v2 v2.10.1
 	github.com/containerd/cgroups/v3 v3.1.3
 	github.com/containerd/continuity v0.4.5
-	github.com/ghodss/yaml v1.0.0 // indirect
-	github.com/go-git/go-git/v5 v5.19.2 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
 	github.com/octelium/cordium/cluster/workspace v0.0.0-00010101000000-000000000000
+	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
+	github.com/octelium/octelium/client/common v0.0.0-20261003070331-0fe86d9363da
 	github.com/octelium/octelium/cluster/common v0.0.0-20261003070331-0fe86d9363da
 	github.com/octelium/octelium/pkg v0.0.0-20261003070331-0fe86d9363da
 	github.com/opencontainers/runtime-spec v1.3.0
@@ -22,13 +24,6 @@ require (
 	golang.zx2c4.com/wireguard/wgctrl v0.0.0-20241231184526-a9ab2273dd10
 	google.golang.org/grpc v1.84.0
 	google.golang.org/protobuf v1.36.12
-)
-
-require (
-	github.com/compose-spec/compose-go/v2 v2.10.1
-	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4
-	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/client/common v0.0.0-20261003070331-0fe86d9363da
 )
 
 require (
@@ -58,8 +53,10 @@ require (
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.1 // indirect
+	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.9.0 // indirect
+	github.com/go-git/go-git/v5 v5.19.2 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect

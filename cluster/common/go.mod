@@ -4,27 +4,24 @@ go 1.27.3
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
+	github.com/codeclysm/extract/v4 v4.0.0
+	github.com/go-git/go-git/v5 v5.19.2
 	github.com/google/go-containerregistry v0.21.2
 	github.com/google/uuid v1.6.0
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4
+	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/cluster/apiserver v0.0.0-20261003070331-0fe86d9363da
 	github.com/octelium/octelium/cluster/common v0.0.0-20261003070331-0fe86d9363da
+	github.com/octelium/octelium/cluster/rscserver v0.0.0-20261003070331-0fe86d9363da
 	github.com/octelium/octelium/pkg v0.0.0-20261003070331-0fe86d9363da
 	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
 	github.com/tidwall/jsonc v0.3.2
 	go.uber.org/zap v1.28.0
-	google.golang.org/grpc v1.84.0
-)
-
-require (
-	github.com/codeclysm/extract/v4 v4.0.0
-	github.com/go-git/go-git/v5 v5.19.2
-	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4
-	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/cluster/rscserver v0.0.0-20261003070331-0fe86d9363da
 	golang.zx2c4.com/wireguard/wgctrl v0.0.0-20241231184526-a9ab2273dd10
+	google.golang.org/grpc v1.84.0
 	google.golang.org/protobuf v1.36.12
 	k8s.io/client-go v0.37.0
 )

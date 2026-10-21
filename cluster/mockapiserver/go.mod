@@ -4,24 +4,19 @@ go 1.27.3
 
 require (
 	github.com/google/uuid v1.6.0
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4
 	github.com/improbable-eng/grpc-web v0.15.0
 	github.com/octelium/cordium/cluster/apiserver v0.0.0-00010101000000-000000000000
+	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
+	github.com/octelium/cordium/cluster/rscserver v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/cluster/apiserver v0.0.0-20261003070331-0fe86d9363da
 	github.com/octelium/octelium/cluster/authserver v0.0.0-20261003070331-0fe86d9363da
 	github.com/octelium/octelium/cluster/common v0.0.0-20261003070331-0fe86d9363da
-	github.com/octelium/octelium/cluster/octovigil v0.0.0-20261003070331-0fe86d9363da // indirect
-	github.com/octelium/octelium/cluster/rscserver v0.0.0-20261003070331-0fe86d9363da // indirect
 	github.com/octelium/octelium/pkg v0.0.0-20261003070331-0fe86d9363da
 	go.uber.org/zap v1.28.0
 	golang.zx2c4.com/wireguard/wgctrl v0.0.0-20241231184526-a9ab2273dd10
 	google.golang.org/grpc v1.84.0
-)
-
-require (
-	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4
-	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
-	github.com/octelium/cordium/cluster/rscserver v0.0.0-00010101000000-000000000000
 	google.golang.org/protobuf v1.36.12
 )
 
@@ -107,6 +102,8 @@ require (
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000 // indirect
+	github.com/octelium/octelium/cluster/octovigil v0.0.0-20261003070331-0fe86d9363da // indirect
+	github.com/octelium/octelium/cluster/rscserver v0.0.0-20261003070331-0fe86d9363da // indirect
 	github.com/open-policy-agent/opa v1.20.1 // indirect
 	github.com/oschwald/geoip2-golang/v2 v2.3.0 // indirect
 	github.com/oschwald/maxminddb-golang/v2 v2.5.0 // indirect

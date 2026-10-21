@@ -3,9 +3,11 @@ module github.com/octelium/cordium/cluster/nocturne
 go 1.27.3
 
 require (
+	github.com/kubernetes-csi/external-snapshotter/client/v8 v8.4.0
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
 	github.com/octelium/cordium/cluster/supervisor v0.0.0-00010101000000-000000000000
 	github.com/octelium/cordium/cluster/workspace v0.0.0-00010101000000-000000000000
+	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/cluster/apiserver v0.0.0-20261003070331-0fe86d9363da
 	github.com/octelium/octelium/cluster/common v0.0.0-20261003070331-0fe86d9363da
@@ -14,17 +16,11 @@ require (
 	github.com/stretchr/testify v1.12.1
 	go.uber.org/zap v1.28.0
 	golang.org/x/crypto v0.55.0
-	golang.org/x/net v0.58.0 // indirect
 	golang.zx2c4.com/wireguard/wgctrl v0.0.0-20241231184526-a9ab2273dd10
 	google.golang.org/grpc v1.84.0
 	k8s.io/api v0.37.0
 	k8s.io/apimachinery v0.37.0
 	k8s.io/client-go v0.37.0
-)
-
-require (
-	github.com/kubernetes-csi/external-snapshotter/client/v8 v8.4.0
-	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -182,6 +178,7 @@ require (
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.3 // indirect
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
+	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect

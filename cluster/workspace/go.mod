@@ -4,9 +4,10 @@ go 1.27.3
 
 require (
 	github.com/creack/pty v1.1.24
-	github.com/go-git/go-git/v5 v5.19.2 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4
 	github.com/moby/term v0.5.2
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
+	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/cluster/common v0.0.0-20261003070331-0fe86d9363da
 	github.com/octelium/octelium/pkg v0.0.0-20261003070331-0fe86d9363da
@@ -18,11 +19,6 @@ require (
 	golang.zx2c4.com/wireguard v0.0.0-20250521234502-f333402bd9cb
 	golang.zx2c4.com/wireguard/wgctrl v0.0.0-20241231184526-a9ab2273dd10
 	google.golang.org/grpc v1.84.0
-)
-
-require (
-	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4
-	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -48,6 +44,7 @@ require (
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.9.0 // indirect
+	github.com/go-git/go-git/v5 v5.19.2 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
