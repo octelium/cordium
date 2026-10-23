@@ -433,6 +433,30 @@ describe("Portal navigation, Services and terminals", () => {
     });
   }
 
+  it("opens the terminal requested by the terminal query parameter", async () => {
+    await load("/workspaces/demo/terminals?terminal=terminal-logs");
+    await page
+      .getByRole("tab", { name: "logs", exact: true, selected: true })
+      .waitFor();
+    await page.waitForFunction(() => !location.search.includes("terminal="));
+    assert.equal(
+      await page
+        .getByRole("tab", { name: "main", exact: true })
+        .getAttribute("aria-selected"),
+      "false",
+    );
+
+    await page.getByRole("tab", { name: "worker", exact: true }).click();
+    await page
+      .getByRole("tab", { name: "worker", exact: true, selected: true })
+      .waitFor();
+
+    await load("/workspaces/demo/terminals?terminal=terminal-missing");
+    await page.getByRole("tab", { name: "main", exact: true }).waitFor();
+    await page.waitForFunction(() => !location.search.includes("terminal="));
+    assert.equal(await page.getByRole("tab", { selected: true }).count(), 1);
+  });
+
   it("keeps pinned tabs and titles when the terminal list refreshes", async () => {
     await terminals();
     await page

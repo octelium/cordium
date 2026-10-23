@@ -16,6 +16,7 @@ import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { IconPlus, IconTerminal2 } from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import * as React from "react";
+import { useSearchParams } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
 import { useContextWorkspace } from "../utils";
 import { canUseTerminals } from "./utils";
@@ -31,6 +32,8 @@ const TerminalGroup = (props: { workspace: WsPB.Workspace }) => {
   const fullscreen = useAppSelector((s) => s.settings.terminalFullscreen);
   const dispatch = useAppDispatch();
   const connection = useAppSelector((state) => state.conn.status);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTerminal = searchParams.get("terminal");
   const ready = canUseTerminals(item);
   const devMode = isDev();
   const isMac = useOs() === "macos";
@@ -71,6 +74,21 @@ const TerminalGroup = (props: { workspace: WsPB.Workspace }) => {
       }),
     );
   }, [dispatch, qryListTerm.data, workspaceID, devMode]);
+
+  const listed = !!qryListTerm.data && tg.workspaceID === workspaceID;
+  React.useEffect(() => {
+    if (!requestedTerminal || !listed) return;
+    if (tg.terminals.some((terminal) => terminal.id === requestedTerminal)) {
+      dispatch(setActiveTerminal({ id: requestedTerminal }));
+    }
+    setSearchParams(
+      (params) => {
+        params.delete("terminal");
+        return params;
+      },
+      { replace: true },
+    );
+  }, [requestedTerminal, listed, tg.terminals, dispatch, setSearchParams]);
 
   const refetchTerminals = qryListTerm.refetch;
   React.useEffect(() => {
