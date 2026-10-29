@@ -595,3 +595,145 @@ func TestExecResultHelpersOnNil(t *testing.T) {
 }
 
 var _ io.Writer = (*ExecSession)(nil)
+
+type execErrorWriter struct {
+	err   error
+	short bool
+}
+
+func (w execErrorWriter) Write(p []byte) (int, error) {
+	if w.short {
+		return len(p) / 2, nil
+	}
+	return 0, w.err
+}
+
+func TestExecWriterFailures(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		option  func(io.Writer) ExecOption
+		message *cordiumv1.ExecResponse
+	}{
+		{name: "stdout", option: WithStdout, message: stdout("output")},
+		{name: "stderr", option: WithStderr, message: stderr("output")},
+		{name: "combined", option: WithCombinedOutput, message: stdout("output")},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			wantErr := errors.New("destination failed")
+			fake := newFakeCluster()
+			fake.execScript = func(req *cordiumv1.ExecRequest_Request, srv grpc.BidiStreamingServer[cordiumv1.ExecRequest, cordiumv1.ExecResponse]) error {
+				if err := srv.Send(tc.message); err != nil {
+					return err
+				}
+				<-srv.Context().Done()
+				return nil
+			}
+			ws := testWorkspace(t, startFakeCluster(t, fake))
+			_, err := ws.Exec(t.Context(), "produce output", tc.option(execErrorWriter{err: wantErr}), WithExecTimeout(2*time.Second))
+			if !errors.Is(err, wantErr) {
+				t.Errorf("Exec error = %v, want %v", err, wantErr)
+			}
+		})
+	}
+}
+
+func TestExecReportsShortWrites(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		option func(io.Writer) ExecOption
+	}{
+		{name: "stdout", option: WithStdout},
+		{name: "combined", option: WithCombinedOutput},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			fake := newFakeCluster()
+			fake.execScript = func(req *cordiumv1.ExecRequest_Request, srv grpc.BidiStreamingServer[cordiumv1.ExecRequest, cordiumv1.ExecResponse]) error {
+				if err := srv.Send(stdout("output")); err != nil {
+					return err
+				}
+				if err := srv.Send(exit(0)); err != nil {
+					return err
+				}
+				<-srv.Context().Done()
+				return nil
+			}
+			ws := testWorkspace(t, startFakeCluster(t, fake))
+			_, err := ws.Exec(t.Context(), "produce output", tc.option(execErrorWriter{short: true}), WithExecTimeout(2*time.Second))
+			if !errors.Is(err, io.ErrShortWrite) {
+				t.Errorf("Exec error = %v, want io.ErrShortWrite", err)
+			}
+		})
+	}
+}
+
+type execErrorReader struct {
+	err  error
+	read chan struct{}
+}
+
+func (r execErrorReader) Read([]byte) (int, error) {
+	close(r.read)
+	return 0, r.err
+}
+
+func TestExecReportsStdinReadFailure(t *testing.T) {
+	wantErr := errors.New("input failed")
+	read := make(chan struct{})
+	fake := newFakeCluster()
+	fake.execScript = func(req *cordiumv1.ExecRequest_Request, srv grpc.BidiStreamingServer[cordiumv1.ExecRequest, cordiumv1.ExecResponse]) error {
+		select {
+		case <-read:
+		case <-srv.Context().Done():
+			return nil
+		}
+		if err := srv.Send(exit(0)); err != nil {
+			return err
+		}
+		<-srv.Context().Done()
+		return nil
+	}
+	ws := testWorkspace(t, startFakeCluster(t, fake))
+	_, err := ws.Exec(t.Context(), "read input", WithStdin(execErrorReader{err: wantErr, read: read}), WithExecTimeout(2*time.Second))
+	if !errors.Is(err, wantErr) {
+		t.Errorf("Exec error = %v, want %v", err, wantErr)
+	}
+}
+
+func TestExecWaitReturnsIndependentResults(t *testing.T) {
+	fake := newFakeCluster()
+	fake.execScript = func(req *cordiumv1.ExecRequest_Request, srv grpc.BidiStreamingServer[cordiumv1.ExecRequest, cordiumv1.ExecResponse]) error {
+		if err := srv.Send(stdout("result")); err != nil {
+			return err
+		}
+		if err := srv.Send(exit(0)); err != nil {
+			return err
+		}
+		<-srv.Context().Done()
+		return nil
+	}
+	ws := testWorkspace(t, startFakeCluster(t, fake))
+	sess, err := ws.ExecStream(t.Context(), "echo result", WithOutputBuffer(0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer sess.Close()
+	first, err := sess.Wait()
+	if err != nil {
+		t.Fatal(err)
+	}
+	first.Stdout[0] = 'X'
+	first.Combined[0] = 'X'
+	second, err := sess.Wait()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if second.StdoutString() != "result" || second.CombinedString() != "result" {
+		t.Errorf("mutating an earlier result changed the next result: %+v", second)
+	}
+	if _, err := sess.WriteString("late"); !errors.Is(err, ErrExecNotRunning) {
+		t.Errorf("Write after exit: %v", err)
+	}
+	if n, err := sess.Write(nil); n != 0 || err != nil {
+		t.Errorf("empty Write = %d, %v", n, err)
+	}
+}

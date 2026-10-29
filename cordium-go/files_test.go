@@ -20,11 +20,13 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"google.golang.org/grpc"
@@ -345,5 +347,102 @@ func TestFileHelpersRejectEmptyPaths(t *testing.T) {
 	}
 	if err := ws.UploadFile(t.Context(), filepath.Join(t.TempDir(), "nope"), "/x"); !os.IsNotExist(err) {
 		t.Errorf("uploading a missing file: %v", err)
+	}
+}
+
+func TestReadFileCaptureBoundaries(t *testing.T) {
+	for _, size := range []int{0, 1, 3, 1024} {
+		t.Run(strconv.Itoa(size), func(t *testing.T) {
+			ws, fs := fileWorkspace(t)
+			content := bytes.Repeat([]byte("x"), size)
+			fs.files["/file"] = content
+			got, err := ws.ReadFile(t.Context(), "/file", WithMaxCaptureBytes(size))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !bytes.Equal(got, content) {
+				t.Errorf("read %d bytes, want %d", len(got), size)
+			}
+			if size > 0 {
+				if _, err := ws.ReadFile(t.Context(), "/file", WithMaxCaptureBytes(size-1)); err == nil {
+					t.Error("reading over the limit succeeded")
+				}
+			}
+		})
+	}
+}
+
+func TestDownloadFileErrors(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		output string
+		code   int32
+		stderr string
+		want   string
+	}{
+		{name: "malformed base64", output: "not base64!", want: "base64"},
+		{name: "incomplete base64", output: "YQ", want: "unexpected EOF"},
+		{name: "remote failure", code: 23, want: "exited with code 23"},
+		{name: "remote diagnostic", code: 1, stderr: "permission denied\n", want: "permission denied"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			fake := newFakeCluster()
+			fake.execScript = func(req *cordiumv1.ExecRequest_Request, srv grpc.BidiStreamingServer[cordiumv1.ExecRequest, cordiumv1.ExecResponse]) error {
+				for _, message := range []*cordiumv1.ExecResponse{stdout(tc.output), stderr(tc.stderr), exit(tc.code)} {
+					if err := srv.Send(message); err != nil {
+						return err
+					}
+				}
+				<-srv.Context().Done()
+				return nil
+			}
+			ws := testWorkspace(t, startFakeCluster(t, fake))
+			out := filepath.Join(t.TempDir(), "nested", "file")
+			err := ws.DownloadFile(t.Context(), "/remote", out, WithExecTimeout(2*time.Second))
+			if err == nil || !strings.Contains(err.Error(), tc.want) {
+				t.Errorf("DownloadFile error = %v, want %q", err, tc.want)
+			}
+			if _, err := os.Stat(out); !os.IsNotExist(err) {
+				t.Errorf("failed download left a partial file: %v", err)
+			}
+		})
+	}
+}
+
+func TestDownloadFilePropagatesWriterFailure(t *testing.T) {
+	ws, fs := fileWorkspace(t)
+	fs.files["/file"] = bytes.Repeat([]byte("x"), 4096)
+	wantErr := errors.New("disk full")
+	err := ws.DownloadFileTo(t.Context(), "/file", execErrorWriter{err: wantErr}, WithExecTimeout(2*time.Second))
+	if !errors.Is(err, wantErr) {
+		t.Errorf("DownloadFileTo error = %v, want %v", err, wantErr)
+	}
+}
+
+func TestDownloadFailurePreservesExistingFile(t *testing.T) {
+	for _, remote := range []string{"", "/missing"} {
+		t.Run("remote="+remote, func(t *testing.T) {
+			ws, _ := fileWorkspace(t)
+			out := filepath.Join(t.TempDir(), "existing.txt")
+			if err := os.WriteFile(out, []byte("original"), 0600); err != nil {
+				t.Fatal(err)
+			}
+			if err := ws.DownloadFile(t.Context(), remote, out); err == nil {
+				t.Fatal("download succeeded unexpectedly")
+			}
+			got, err := os.ReadFile(out)
+			if err != nil || string(got) != "original" {
+				t.Errorf("failed download destroyed the existing destination: content=%q, error=%v", got, err)
+			}
+		})
+	}
+}
+
+func TestUploadRejectsInvalidSizes(t *testing.T) {
+	ws, _ := fileWorkspace(t)
+	for _, size := range []int64{-1, maxInt/2 + 1} {
+		if err := ws.upload(t.Context(), "/file", size, strings.NewReader("")); !IsInvalidArgument(err) {
+			t.Errorf("upload size %d: %v", size, err)
+		}
 	}
 }
