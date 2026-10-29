@@ -17,7 +17,9 @@
 package gitutils
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -28,6 +30,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	git "github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
@@ -289,4 +292,162 @@ func TestGitEmbedded(t *testing.T) {
 		assert.Nil(t, err)
 
 	}
+}
+
+func localGitRepository(t *testing.T) (string, []plumbing.Hash) {
+	t.Helper()
+	dir := t.TempDir()
+	repo, err := git.PlainInit(dir, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tree, err := repo.Worktree()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var commits []plumbing.Hash
+	for i := 0; i < 3; i++ {
+		if err := os.WriteFile(filepath.Join(dir, "file.txt"), []byte(fmt.Sprintf("version%d", i)), 0600); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := tree.Add("file.txt"); err != nil {
+			t.Fatal(err)
+		}
+		hash, err := tree.Commit(fmt.Sprintf("commit%d", i), &git.CommitOptions{Author: &object.Signature{Name: "Test", Email: "test@example.com", When: time.Unix(int64(i+1), 0)}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		commits = append(commits, hash)
+	}
+	if err := repo.Storer.SetReference(plumbing.NewHashReference(plumbing.NewBranchReferenceName("feature"), commits[1])); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := repo.CreateTag("v1.0.0", commits[0], nil); err != nil {
+		t.Fatal(err)
+	}
+	return "file://" + dir, commits
+}
+
+func TestLocalGitCloneOptions(t *testing.T) {
+	url, commits := localGitRepository(t)
+	for _, tc := range []struct {
+		name    string
+		clone   func(context.Context, *CloneOpts) error
+		options *cordiumv1.Workspace_Spec_Repository_CloneOptions
+		count   int
+		head    plumbing.Hash
+	}{
+		{name: "command lazy", clone: cloneCmd, count: 1, head: commits[2]},
+		{name: "command explicit depth", clone: cloneCmd, options: &cordiumv1.Workspace_Spec_Repository_CloneOptions{DisableLazyUnshallow: true, Depth: 2}, count: 2, head: commits[2]},
+		{name: "command full", clone: cloneCmd, options: &cordiumv1.Workspace_Spec_Repository_CloneOptions{DisableLazyUnshallow: true}, count: 3, head: commits[2]},
+		{name: "command branch", clone: cloneCmd, options: &cordiumv1.Workspace_Spec_Repository_CloneOptions{Branch: "feature", DisableLazyUnshallow: true}, count: 3, head: commits[1]},
+		{name: "embedded full", clone: cloneEmbedded, options: &cordiumv1.Workspace_Spec_Repository_CloneOptions{DisableLazyUnshallow: true}, count: 3, head: commits[2]},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			opts := &CloneOpts{Dir: filepath.Join(t.TempDir(), "clone"), Repo: &cordiumv1.Workspace_Spec_Repository{Url: url, CloneOptions: tc.options}}
+			if err := tc.clone(t.Context(), opts); err != nil {
+				t.Fatal(err)
+			}
+			repo, err := git.PlainOpen(opts.Dir)
+			if err != nil {
+				t.Fatal(err)
+			}
+			head, err := repo.Head()
+			if err != nil {
+				t.Fatal(err)
+			}
+			assert.Equal(t, tc.head, head.Hash())
+			iter, err := repo.CommitObjects()
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer iter.Close()
+			count := 0
+			assert.Nil(t, iter.ForEach(func(*object.Commit) error { count++; return nil }))
+			assert.Equal(t, tc.count, count)
+		})
+	}
+}
+
+func TestLocalGitCheckoutReferences(t *testing.T) {
+	url, commits := localGitRepository(t)
+	for _, tc := range []struct {
+		name     string
+		checkout func(context.Context, *CloneOpts) error
+	}{
+		{name: "command", checkout: checkoutCmd},
+		{name: "embedded", checkout: checkoutEmbedded},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			for _, ref := range []string{commits[0].String(), "v1.0.0"} {
+				t.Run(ref, func(t *testing.T) {
+					opts := &CloneOpts{Dir: filepath.Join(t.TempDir(), "clone"), Repo: &cordiumv1.Workspace_Spec_Repository{Url: url, CloneOptions: &cordiumv1.Workspace_Spec_Repository_CloneOptions{DisableLazyUnshallow: true, Checkout: ref}}}
+					if err := cloneCmd(t.Context(), opts); err != nil {
+						t.Fatal(err)
+					}
+					if err := tc.checkout(t.Context(), opts); !assert.Nil(t, err) {
+						return
+					}
+					repo, err := git.PlainOpen(opts.Dir)
+					if err != nil {
+						t.Fatal(err)
+					}
+					head, err := repo.Head()
+					if err != nil {
+						t.Fatal(err)
+					}
+					assert.Equal(t, commits[0], head.Hash())
+				})
+			}
+		})
+	}
+}
+
+func TestLocalGitUnshallow(t *testing.T) {
+	url, _ := localGitRepository(t)
+	for _, tc := range []struct {
+		name      string
+		unshallow func(context.Context, *CloneOpts) error
+	}{
+		{name: "command", unshallow: unshallowCmd},
+		{name: "embedded", unshallow: unshallowEmbedded},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			opts := &CloneOpts{Dir: filepath.Join(t.TempDir(), "clone"), Repo: &cordiumv1.Workspace_Spec_Repository{Url: url}}
+			if err := cloneCmd(t.Context(), opts); err != nil {
+				t.Fatal(err)
+			}
+			if err := tc.unshallow(t.Context(), opts); !assert.Nil(t, err) {
+				return
+			}
+			repo, err := git.PlainOpen(opts.Dir)
+			if err != nil {
+				t.Fatal(err)
+			}
+			iter, err := repo.CommitObjects()
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer iter.Close()
+			count := 0
+			assert.Nil(t, iter.ForEach(func(*object.Commit) error { count++; return nil }))
+			assert.Equal(t, 3, count)
+			assert.Nil(t, tc.unshallow(t.Context(), opts))
+		})
+	}
+}
+
+func TestGitEmptyRequestsAndCancellation(t *testing.T) {
+	assert.NotNil(t, Clone(t.Context(), nil))
+	assert.NotNil(t, Unshallow(t.Context(), nil))
+	assert.Nil(t, Checkout(t.Context(), nil))
+	for _, opts := range []*CloneOpts{{}, {Repo: &cordiumv1.Workspace_Spec_Repository{}}} {
+		assert.Nil(t, Clone(t.Context(), opts))
+		assert.Nil(t, Unshallow(t.Context(), opts))
+		assert.Nil(t, Checkout(t.Context(), opts))
+	}
+	url, _ := localGitRepository(t)
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+	assert.NotNil(t, Clone(ctx, &CloneOpts{Dir: filepath.Join(t.TempDir(), "clone"), Repo: &cordiumv1.Workspace_Spec_Repository{Url: url}}))
 }

@@ -17,7 +17,10 @@
 package sshagent
 
 import (
+	"io"
+	"net"
 	"testing"
+	"time"
 
 	"github.com/octelium/cordium/cluster/common/tests"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
@@ -142,4 +145,108 @@ func TestSSHAgent(t *testing.T) {
 		})
 		assert.Nil(t, err)
 	}
+}
+
+func TestKeyringSigningAndLockedState(t *testing.T) {
+	key, err := utils_cert.GenerateECDSA()
+	if err != nil {
+		t.Fatal(err)
+	}
+	signer, err := ssh.NewSignerFromKey(key.PrivateKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ring := &keyring{keys: []privKey{{signer: signer, comment: "test-key"}}}
+	data := []byte("message to sign")
+	signature, err := ring.Sign(signer.PublicKey(), data)
+	if assert.Nil(t, err) {
+		assert.Nil(t, signer.PublicKey().Verify(data, signature))
+	}
+	_, err = ring.SignWithFlags(signer.PublicKey(), data, agent.SignatureFlags(128))
+	assert.NotNil(t, err)
+	signers, err := ring.Signers()
+	assert.Nil(t, err)
+	assert.Len(t, signers, 1)
+	keys, err := ring.List()
+	assert.Nil(t, err)
+	assert.Equal(t, "test-key", keys[0].Comment)
+	keys[0].Blob[0] ^= 0xff
+	keys, err = ring.List()
+	assert.Nil(t, err)
+	assert.Equal(t, signer.PublicKey().Marshal(), keys[0].Blob)
+	ring.locked = true
+	keys, err = ring.List()
+	assert.Nil(t, err)
+	assert.Empty(t, keys)
+	_, err = ring.Sign(signer.PublicKey(), data)
+	assert.ErrorIs(t, err, errLocked)
+	_, err = ring.Signers()
+	assert.ErrorIs(t, err, errLocked)
+	_, err = ring.Extension("unknown", nil)
+	assert.ErrorIs(t, err, agent.ErrExtensionUnsupported)
+}
+
+func TestKeyringRejectsUnknownKey(t *testing.T) {
+	key, err := utils_cert.GenerateECDSA()
+	if err != nil {
+		t.Fatal(err)
+	}
+	signer, err := ssh.NewSignerFromKey(key.PrivateKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = (&keyring{}).Sign(signer.PublicKey(), []byte("message"))
+	assert.NotNil(t, err)
+	keys, err := NewKeyring().List()
+	assert.Nil(t, err)
+	assert.Empty(t, keys)
+}
+
+func TestSSHAgentFiltersInvalidSecrets(t *testing.T) {
+	a, err := NewAgent(&Opts{UserSecretList: &cordiumv1.UserSecretList{Items: []*cordiumv1.UserSecret{
+		{Metadata: &metav1.Metadata{Name: "other"}, Spec: &cordiumv1.UserSecret_Spec{}, Data: &cordiumv1.UserSecret_Data{}},
+		{Metadata: &metav1.Metadata{Name: "malformed"}, Spec: &cordiumv1.UserSecret_Spec{Type: cordiumv1.UserSecret_Spec_SSH_KEY}, Data: &cordiumv1.UserSecret_Data{Type: &cordiumv1.UserSecret_Data_ValueBytes{ValueBytes: []byte("invalid private key")}}},
+	}}})
+	if assert.Nil(t, err) {
+		keys, err := a.keyring.List()
+		assert.Nil(t, err)
+		assert.Empty(t, keys)
+	}
+}
+
+func TestServeConnClosesClientConnection(t *testing.T) {
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer listener.Close()
+	client, err := net.Dial("tcp", listener.Addr().String())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close()
+	server, err := listener.Accept()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer server.Close()
+	a, err := NewAgent(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	done := make(chan struct{})
+	go func() { defer close(done); a.serveConn(server) }()
+	if err := client.(*net.TCPConn).CloseWrite(); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		t.Fatal("agent connection did not finish")
+	}
+	if err := client.SetReadDeadline(time.Now().Add(200 * time.Millisecond)); err != nil {
+		t.Fatal(err)
+	}
+	_, err = client.Read(make([]byte, 1))
+	assert.ErrorIs(t, err, io.EOF)
 }

@@ -22,12 +22,15 @@ import (
 	"testing"
 
 	otests "github.com/octelium/cordium/cluster/common/tests"
+	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/corev1"
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/cluster/apiserver/apiserver/admin"
 	"github.com/octelium/octelium/cluster/common/tests/tstuser"
+	"github.com/octelium/octelium/cluster/common/userctx"
 	"github.com/octelium/octelium/pkg/utils/utilrand"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestShortName(t *testing.T) {
@@ -102,4 +105,53 @@ func TestShortName(t *testing.T) {
 		assert.Equal(t, fmt.Sprintf("%s.%s", spc, usr.Usr.Metadata.Name), res.Name)
 	}
 
+}
+
+func TestFullNameParentDepth(t *testing.T) {
+	user := &userctx.UserCtx{User: &corev1.User{Metadata: &metav1.Metadata{Name: "alice"}}}
+	for _, tc := range []struct {
+		name    string
+		parents int
+		want    string
+	}{
+		{name: "workspace.default", parents: 2, want: "workspace.default.alice"},
+		{name: "workspace.team", parents: 2, want: "workspace.team.alice"},
+		{name: "workspace.team.bob", parents: 2, want: "workspace.team.bob"},
+		{name: "secret", parents: 1, want: "secret.alice"},
+		{name: "secret.bob", parents: 1, want: "secret.bob"},
+	} {
+		t.Run(tc.name, func(t *testing.T) { assert.Equal(t, tc.want, getFullGetOptionsUserCtx(user, tc.name, tc.parents)) })
+	}
+	assert.Nil(t, getFullGetOptionsSpaceChild(t.Context(), nil))
+	assert.Nil(t, getFullDeleteOptionsSpaceChild(t.Context(), nil))
+	assert.Nil(t, getFullNamResourceRefSpaceChild(t.Context(), nil))
+	assert.Nil(t, getFullGetOptionsSpace(t.Context(), nil))
+	assert.Nil(t, getFullResourceRefSpace(t.Context(), nil))
+	for _, ref := range []*metav1.ObjectReference{{Uid: "uid-only"}, {Name: "item.team.bob", Uid: "uid"}} {
+		before := proto.Clone(ref)
+		assert.Same(t, ref, getFullNamResourceRefSpaceChild(t.Context(), ref))
+		assert.True(t, proto.Equal(before, ref))
+	}
+}
+
+func TestParseSpaceResourceNames(t *testing.T) {
+	got, err := parseSpaceResource("item.team.alice")
+	if assert.Nil(t, err) {
+		assert.Equal(t, "item", got.name)
+		assert.Equal(t, "team.alice", got.space)
+	}
+	for _, name := range []string{"", "item", "item.team", "item.team.alice.extra", ".team.alice", "item..alice", "item.team."} {
+		t.Run(name, func(t *testing.T) {
+			_, err := parseSpaceResource(name)
+			assert.NotNil(t, err)
+		})
+	}
+}
+
+func TestDefaultResourceRequiresDefaultName(t *testing.T) {
+	srv := &Server{}
+	for _, resource := range []*cordiumv1.Space{nil, {}, {Metadata: &metav1.Metadata{}}, {Metadata: &metav1.Metadata{Name: "team.alice"}}} {
+		assert.NotNil(t, srv.checkResourceDefault(resource))
+	}
+	assert.Nil(t, srv.checkResourceDefault(&cordiumv1.Space{Metadata: &metav1.Metadata{Name: "default.alice"}}))
 }

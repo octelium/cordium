@@ -762,6 +762,112 @@ describe("Portal navigation, Services and terminals", () => {
     await page.getByRole("tab", { name: "main", exact: true }).waitFor();
   });
 
+  it("disposes terminal renderers and subscriptions when navigating away and recreates them on return", async () => {
+    await terminals();
+    await page.waitForFunction(
+      () => window.portalFixture.sockets.at(-1)?.subscriptions.size === 3,
+    );
+    await page.getByRole("link", { name: "Services", exact: true }).click();
+    await page.getByRole("heading", { name: "Services", exact: true }).waitFor();
+    await page.waitForFunction(
+      () =>
+        window.portalFixture.terminals.every((record) => record.disposed) &&
+        window.portalFixture.sockets.every(
+          (socket) => socket.subscriptions.size === 0,
+        ),
+    );
+    await page.goBack();
+    await page.getByRole("tab", { name: "main", exact: true }).waitFor();
+    await page.waitForFunction(
+      () => window.portalFixture.sockets.at(-1)?.subscriptions.size === 3,
+    );
+    assert.equal(
+      await page.evaluate(
+        () =>
+          window.portalFixture.terminals.filter((record) => !record.disposed)
+            .length,
+      ),
+      3,
+    );
+    assert.equal(await page.getByRole("tab", { selected: true }).count(), 1);
+  });
+
+  it("closes every terminal and creates a fresh session from the empty state", async () => {
+    await terminals();
+    for (const name of ["main", "worker", "logs"]) {
+      await page
+        .getByRole("button", { name: `Close ${name}`, exact: true })
+        .click();
+      await page
+        .getByRole("tab", { name, exact: true })
+        .waitFor({ state: "detached" });
+    }
+    await page.getByText("No terminal sessions", { exact: true }).waitFor();
+    await page.waitForFunction(() =>
+      window.portalFixture.terminals.every((record) => record.disposed),
+    );
+    await page.getByRole("button", { name: "New terminal", exact: true }).click();
+    await page
+      .getByRole("tab", { name: "shell-1", exact: true, selected: true })
+      .waitFor();
+    assert.deepEqual(await order(), ["terminal-shell-1"]);
+    assert.equal(
+      await page.evaluate(
+        () =>
+          window.portalFixture.calls.filter(
+            (call) => call.method === "CreateTerminal",
+          ).length,
+      ),
+      1,
+    );
+  });
+
+  it("ignores duplicate, missing and malformed saved terminal entries", async () => {
+    await context.addInitScript(() =>
+      localStorage.setItem(
+        "cordium-terminal-tabs:workspace-demo",
+        JSON.stringify([
+          null,
+          { id: "terminal-missing", pinned: true },
+          { id: "terminal-worker", pinned: true },
+          { id: "terminal-worker", pinned: false },
+          { id: "terminal-main", pinned: "true" },
+        ]),
+      ),
+    );
+    await load("/workspaces/demo/terminals");
+    await page
+      .getByRole("tab", { name: "worker (pinned)", exact: true })
+      .waitFor();
+    assert.deepEqual(await order(), [
+      "terminal-worker",
+      "terminal-main",
+      "terminal-logs",
+    ]);
+    assert.equal(await page.getByRole("tab", { selected: true }).count(), 1);
+    assert.equal(await page.getByRole("tab").count(), 3);
+  });
+
+  it("keeps terminal actions usable when saving preferences exceeds the storage quota", async () => {
+    await context.addInitScript(() => {
+      Storage.prototype.setItem = () => {
+        throw new DOMException("Storage full", "QuotaExceededError");
+      };
+    });
+    await terminals();
+    await page
+      .getByRole("button", { name: "Actions for worker", exact: true })
+      .click();
+    await page.getByRole("menuitem", { name: "Pin tab", exact: true }).click();
+    await page
+      .getByRole("tab", { name: "worker (pinned)", exact: true })
+      .waitFor();
+    await page.getByRole("tab", { name: "main", exact: true }).click();
+    await page
+      .getByRole("tab", { name: "main", exact: true, selected: true })
+      .waitFor();
+  });
+
   for (const theme of ["light", "dark"]) {
     for (const width of [1440, 390]) {
       it(`fits Services and terminal controls in the ${theme} theme at ${width}px`, async () => {

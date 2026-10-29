@@ -310,3 +310,55 @@ describe("built-in tools", () => {
     }
   });
 });
+
+describe("data parsing boundaries", () => {
+  it("parses embedded newlines, escaped quotes, empty cells and missing trailing cells", () => {
+    assert.deepEqual(
+      parseCSV(
+        ' name ,note,extra\r\nalpha,"line one\nline two",\r\nbeta,"say ""hello"""\r\n',
+      ),
+      [
+        { name: "alpha", note: "line one\nline two", extra: "" },
+        { name: "beta", note: 'say "hello"', extra: "" },
+      ],
+    );
+    assert.deepEqual(parseCSV("name,value\na,1"), [{ name: "a", value: "1" }]);
+    assert.deepEqual(parseCSV("name,value\n"), []);
+  });
+
+  it("rejects unterminated quoted CSV fields", () => {
+    assert.throws(
+      () => parseCSV('name,note\nalpha,"unterminated'),
+      /quote|CSV|unterminated/i,
+    );
+  });
+
+  it("rejects duplicate CSV column names instead of silently losing a column", () => {
+    assert.throws(
+      () => parseCSV("name,name\nfirst,second\n"),
+      /duplicate|column|header/i,
+    );
+  });
+
+  it("reads every supported JSON array wrapper and rejects invalid JSON", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "cordium-agent-json-"));
+    try {
+      const file = path.join(dir, "data.JSON");
+      for (const key of ["rows", "items", "data", "results"]) {
+        fs.writeFileSync(file, JSON.stringify({ [key]: [{ value: 1 }] }));
+        assert.deepEqual(readRowsFile(file), [{ value: 1 }]);
+      }
+      fs.writeFileSync(file, "{");
+      assert.throws(() => readRowsFile(file), SyntaxError);
+      fs.writeFileSync(file, "null");
+      assert.throws(() => readRowsFile(file), /JSON array/);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("keeps text at the exact truncation boundary unchanged", () => {
+    assert.deepEqual(truncateText("abc", 3), { text: "abc", truncated: false });
+    assert.deepEqual(truncateText("", 0), { text: "", truncated: false });
+  });
+});

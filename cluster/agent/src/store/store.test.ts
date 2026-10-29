@@ -5,6 +5,7 @@ import * as path from "node:path";
 import { Readable } from "node:stream";
 import { afterEach, beforeEach, describe, it } from "node:test";
 import type { Message } from "../protocol/index.ts";
+import { SettingsStore } from "./settings.ts";
 import { ConversationStore, isValidID } from "./conversations.ts";
 import {
   FileStore,
@@ -161,5 +162,251 @@ describe("file store", () => {
     assert.equal(sanitizeFileName(""), "file");
     assert.equal(guessMimeType("x.PNG"), "image/png");
     assert.equal(guessMimeType("x.unknown"), "application/octet-stream");
+  });
+});
+
+describe("store recovery and file boundaries", () => {
+  let dir: string;
+
+  beforeEach(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), "cordium-agent-boundaries-"));
+  });
+
+  afterEach(() => {
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  it("keeps valid messages when a journal contains a truncated record", () => {
+    const store = new ConversationStore(dir);
+    store.init();
+    const conv = store.create();
+    store.appendMessage(conv.id, message(conv.id, "first"));
+    fs.appendFileSync(
+      path.join(dir, conv.id, "messages.jsonl"),
+      '{"partial":\n',
+    );
+    store.appendMessage(conv.id, message(conv.id, "last"));
+    assert.deepEqual(
+      store.getMessages(conv.id).map((m) => m.id),
+      ["m-first", "m-last"],
+    );
+  });
+
+  it("recovers a pending message only once across repeated restarts", () => {
+    const store = new ConversationStore(dir);
+    store.init();
+    const conv = store.create();
+    store.savePending(conv.id, message(conv.id, "pending"));
+    const first = new ConversationStore(dir);
+    assert.equal(first.init().length, 1);
+    const second = new ConversationStore(dir);
+    assert.deepEqual(second.init(), []);
+    assert.equal(second.getMessages(conv.id).length, 1);
+    assert.equal(second.get(conv.id)?.messageCount, 1);
+  });
+
+  it("does not duplicate a pending message already appended before a crash", () => {
+    const store = new ConversationStore(dir);
+    store.init();
+    const conv = store.create();
+    const pending = message(conv.id, "pending");
+    store.savePending(conv.id, pending);
+    store.appendMessage(conv.id, { ...pending, status: "completed" });
+    const reloaded = new ConversationStore(dir);
+    reloaded.init();
+    assert.equal(reloaded.getMessages(conv.id).length, 1);
+    assert.equal(reloaded.get(conv.id)?.messageCount, 1);
+    assert.equal(reloaded.getMessages(conv.id)[0].status, "completed");
+  });
+
+  it("ignores malformed metadata without preventing valid conversations from loading", () => {
+    const store = new ConversationStore(dir);
+    store.init();
+    const conv = store.create("Valid");
+    for (const [id, metadata] of [
+      ["bad-json", "{"],
+      ["bad-null", "null"],
+      ["bad-array", "[]"],
+    ]) {
+      fs.mkdirSync(path.join(dir, id));
+      fs.writeFileSync(path.join(dir, id, "conversation.json"), metadata);
+    }
+    const reloaded = new ConversationStore(dir);
+    assert.doesNotThrow(() => reloaded.init());
+    assert.deepEqual(
+      reloaded.list().map((c) => c.id),
+      [conv.id],
+    );
+  });
+
+  it("does not expose mutable conversation metadata to callers", () => {
+    const store = new ConversationStore(dir);
+    store.init();
+    const conv = store.create("Original");
+    conv.title = "Changed";
+    store.list()[0].title = "Changed again";
+    assert.equal(store.get(conv.id)?.title, "Original");
+    assert.equal(store.update("missing", { title: "Ignored" }), undefined);
+    assert.deepEqual(store.getMessages("missing"), []);
+  });
+
+  it("accepts exactly the upload limit and cleans up a multi-chunk overflow", async () => {
+    const store = new FileStore(dir);
+    store.init();
+    const info = await store.saveUpload(
+      "exact.bin",
+      undefined,
+      Readable.from([Buffer.alloc(3), Buffer.alloc(5)]),
+      8,
+    );
+    assert.equal(info.size, 8);
+    await assert.rejects(
+      store.saveUpload(
+        "overflow.bin",
+        undefined,
+        Readable.from([Buffer.alloc(4), Buffer.alloc(5)]),
+        8,
+      ),
+      FileTooLargeError,
+    );
+    assert.deepEqual(fs.readdirSync(store.uploadsDir), [info.id]);
+    const empty = await store.saveUpload(
+      "empty.txt",
+      undefined,
+      Readable.from([]),
+      0,
+    );
+    assert.equal(empty.size, 0);
+  });
+
+  it("removes partial upload data when the source stream fails", async () => {
+    const store = new FileStore(dir);
+    store.init();
+    const failure = new Error("source failed");
+    const source = Readable.from(
+      (async function* () {
+        yield Buffer.from("partial");
+        throw failure;
+      })(),
+    );
+    await assert.rejects(
+      store.saveUpload("partial.txt", undefined, source, 100),
+      failure,
+    );
+    assert.deepEqual(fs.readdirSync(store.uploadsDir), []);
+  });
+
+  it("reloads upload metadata and keeps uploaded files private", async () => {
+    const store = new FileStore(dir);
+    store.init();
+    const info = await store.saveUpload(
+      "data.json",
+      "application/octet-stream",
+      Readable.from(["{}"]),
+      2,
+    );
+    const reloaded = new FileStore(dir);
+    reloaded.init();
+    assert.deepEqual(reloaded.getUpload(info.id), info);
+    assert.equal(info.mimeType, "application/json");
+    assert.equal(fs.statSync(info.path).mode & 0o777, 0o600);
+    assert.equal(fs.statSync(path.dirname(info.path)).mode & 0o777, 0o700);
+    fs.writeFileSync(path.join(store.uploadsDir, info.id, ".meta.json"), "{");
+    assert.equal(store.getUpload(info.id), undefined);
+  });
+
+  it("does not return metadata for an upload whose content was removed", async () => {
+    const store = new FileStore(dir);
+    store.init();
+    const info = await store.saveUpload(
+      "removed.txt",
+      undefined,
+      Readable.from(["x"]),
+      1,
+    );
+    fs.unlinkSync(info.path);
+    assert.equal(store.getUpload(info.id), undefined);
+  });
+
+  it("accepts long UTF-8 filenames within filesystem byte limits", async () => {
+    const store = new FileStore(dir);
+    store.init();
+    const info = await store.saveUpload(
+      `${"é".repeat(140)}.txt`,
+      undefined,
+      Readable.from(["x"]),
+      1,
+    );
+    assert.ok(Buffer.byteLength(info.name) <= 255);
+    assert.equal(fs.readFileSync(info.path, "utf8"), "x");
+  });
+
+  it("reloads artifact metadata and ignores missing artifact content", () => {
+    const store = new FileStore(dir);
+    store.init();
+    const source = path.join(dir, "source.txt");
+    fs.writeFileSync(source, "content");
+    const info = store.publishArtifact(source, {
+      name: "../report.txt",
+      conversationId: "conversation",
+      title: "Report",
+    });
+    const reloaded = new FileStore(dir);
+    reloaded.init();
+    const artifact = reloaded.getArtifact(info.id)!;
+    assert.equal(artifact.info.name, "report.txt");
+    assert.equal(artifact.conversationId, "conversation");
+    fs.unlinkSync(artifact.filePath);
+    assert.equal(reloaded.getArtifact(info.id), undefined);
+    assert.equal(reloaded.getArtifact("../../outside"), undefined);
+  });
+});
+
+describe("settings store", () => {
+  let dir: string;
+
+  beforeEach(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), "cordium-agent-settings-"));
+  });
+
+  afterEach(() => {
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  it("persists settings and removes fields explicitly cleared by an update", () => {
+    const store = new SettingsStore(dir);
+    assert.deepEqual(store.read(), {});
+    store.write({
+      model: { provider: "test", id: "model" },
+      thinkingLevel: "high",
+      approvals: { api: "write", commands: true },
+    });
+    const updated = store.update({ thinkingLevel: undefined });
+    assert.equal(updated.thinkingLevel, undefined);
+    assert.deepEqual(new SettingsStore(dir).read(), {
+      model: { provider: "test", id: "model" },
+      approvals: { api: "write", commands: true },
+    });
+    assert.equal(
+      fs.statSync(path.join(dir, "settings.json")).mode & 0o777,
+      0o600,
+    );
+  });
+
+  it("ignores corrupt or structurally invalid settings", () => {
+    const store = new SettingsStore(dir);
+    for (const input of ["{", "null", "[]", '"text"']) {
+      fs.writeFileSync(path.join(dir, "settings.json"), input);
+      assert.deepEqual(store.read(), {});
+    }
+    fs.writeFileSync(
+      path.join(dir, "settings.json"),
+      JSON.stringify({
+        model: { provider: 1, id: "x" },
+        thinkingLevel: false,
+        approvals: { api: "unknown", commands: "true" },
+      }),
+    );
+    assert.deepEqual(store.read(), { approvals: {} });
   });
 });

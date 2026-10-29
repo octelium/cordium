@@ -20,6 +20,8 @@ import (
 	"testing"
 
 	"github.com/octelium/cordium/cluster/common/tests"
+	"github.com/octelium/octelium/apis/main/cordiumv1"
+	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -55,4 +57,41 @@ func TestDevContainers(t *testing.T) {
 		assert.Equal(t, out, res)
 	}
 
+}
+
+func TestSubstituteVarsCases(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		input string
+		env   []string
+		want  string
+	}{
+		{name: "plain input", input: `{"image":"alpine"}`, want: `{"image":"alpine"}`},
+		{name: "repeated variable", input: "${PATH}:${PATH}", env: []string{"PATH=/bin"}, want: "/bin:/bin"},
+		{name: "container environment", input: "${containerEnv:EDITOR}", env: []string{"EDITOR=vim"}, want: "vim"},
+		{name: "local environment", input: "before${localEnv:PRIVATE}after", want: "beforeafter"},
+		{name: "unknown variable", input: "${unknown}", want: "${unknown}"},
+		{name: "workspace folder", input: "${localWorkspaceFolder}", want: "${localWorkspaceFolder}"},
+		{name: "unterminated variable", input: "${containerEnv:EDITOR", want: "${containerEnv:EDITOR"},
+		{name: "distinct variables", input: "${containerEnv:FIRST}/${containerEnv:SECOND}", env: []string{"FIRST=one", "SECOND=two"}, want: "one/two"},
+		{name: "environment contains equals", input: "${containerEnv:TOKEN}", env: []string{"TOKEN=a=b=c"}, want: "a=b=c"},
+		{name: "missing environment", input: "before${containerEnv:MISSING}after", want: "beforeafter"},
+		{name: "empty environment", input: "before${containerEnv:EMPTY}after", env: []string{"EMPTY="}, want: "beforeafter"},
+		{name: "last environment value wins", input: "${containerEnv:EDITOR}", env: []string{"EDITOR=vi", "EDITOR=nano"}, want: "nano"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := SubstituteVars(&SubstituteVarsOpts{Input: tc.input, ContainerEnv: tc.env})
+			assert.Nil(t, err)
+			assert.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func TestSubstituteVarsWorkspaceID(t *testing.T) {
+	got, err := SubstituteVars(&SubstituteVarsOpts{
+		Input:     "${devcontainerId}",
+		Workspace: &cordiumv1.Workspace{Metadata: &metav1.Metadata{Uid: "workspace-uid"}},
+	})
+	assert.Nil(t, err)
+	assert.Equal(t, "workspace-uid", got)
 }

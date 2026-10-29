@@ -20,6 +20,8 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/google/go-containerregistry/pkg/name"
@@ -124,4 +126,72 @@ func TestLimitedReader(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Equal(t, 32, len(out))
 	}
+}
+
+func TestLimitedReaderExactLimit(t *testing.T) {
+	for _, size := range []int{0, 8} {
+		r := &limitedReader{r: bytes.NewReader(make([]byte, size)), n: int64(size)}
+		out, err := io.ReadAll(r)
+		assert.Nil(t, err)
+		assert.Len(t, out, size)
+	}
+}
+
+func TestFeatureDependencyOrdering(t *testing.T) {
+	features := []*Feature{
+		{Name: "app", Spec: &Spec{InstallsAfter: []string{"left:1", "right:1", "missing:1"}}},
+		{Name: "left", Spec: &Spec{InstallsAfter: []string{"base:1"}}},
+		{Name: "right", Spec: &Spec{InstallsAfter: []string{"base:1"}}},
+		{Name: "base", Spec: &Spec{}},
+	}
+	var sorted []*Feature
+	for _, feature := range features {
+		doAddFeature(features, &sorted, feature, make(map[string]struct{}))
+	}
+	var names []string
+	for _, feature := range sorted {
+		names = append(names, feature.Name)
+	}
+	assert.Equal(t, []string{"base", "left", "right", "app"}, names)
+}
+
+func TestFeatureDependencyRegistryPort(t *testing.T) {
+	features := []*Feature{
+		{Name: "app", Spec: &Spec{InstallsAfter: []string{"registry.example.com:5000/team/base:1"}}},
+		{Name: "registry.example.com:5000/team/base", Spec: &Spec{}},
+	}
+	var sorted []*Feature
+	for _, feature := range features {
+		doAddFeature(features, &sorted, feature, make(map[string]struct{}))
+	}
+	assert.Equal(t, features[1].Name, sorted[0].Name)
+	assert.Equal(t, "app", sorted[1].Name)
+}
+
+func TestGetSortedFeaturesLocalFiles(t *testing.T) {
+	base := t.TempDir()
+	for name, spec := range map[string]string{
+		"app":  `{"id":"app","installsAfter":["base:1"]}`,
+		"base": `{"id":"base","name":"Base feature"}`,
+	} {
+		dir := filepath.Join(base, name)
+		if err := os.MkdirAll(dir, 0700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(dir, "devcontainer-feature.json"), []byte(spec), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	features, err := GetSortedFeatures(&GetSortedFeaturesOpts{BasePath: base})
+	if !assert.Nil(t, err) {
+		return
+	}
+	assert.Len(t, features, 2)
+	assert.Equal(t, "base", features[0].Name)
+	assert.Equal(t, filepath.Join(base, "base"), features[0].Path)
+	assert.Equal(t, "app", features[1].Name)
+	_, err = GetSortedFeatures(&GetSortedFeaturesOpts{BasePath: filepath.Join(base, "missing")})
+	assert.NotNil(t, err)
+	assert.Nil(t, DownloadFeatures(t.Context(), &GetFeaturesOpts{DirBase: base}))
+	assert.NotNil(t, DownloadFeatures(t.Context(), nil))
 }

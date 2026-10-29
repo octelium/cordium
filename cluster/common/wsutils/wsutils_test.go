@@ -17,6 +17,8 @@
 package wsutils
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	otests "github.com/octelium/cordium/cluster/common/tests"
@@ -24,6 +26,7 @@ import (
 	"github.com/octelium/octelium/apis/main/metav1"
 	"github.com/octelium/octelium/pkg/common/pbutils"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestMergeSpec(t *testing.T) {
@@ -269,4 +272,79 @@ func TestMergeSpec(t *testing.T) {
 		})
 	*/
 
+}
+
+func TestLoadWorkspaceFileCandidatesAndParent(t *testing.T) {
+	for _, candidate := range []string{".cordium/workspace.yaml", ".cordium/workspace.yml", ".cordium.yaml", ".cordium.yml"} {
+		t.Run(candidate, func(t *testing.T) {
+			base := t.TempDir()
+			file := filepath.Join(base, candidate)
+			if err := os.MkdirAll(filepath.Dir(file), 0700); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(file, []byte("metadata:\n  name: ignored\nspec:\n  runtime:\n    cmd: echo loaded\n"), 0600); err != nil {
+				t.Fatal(err)
+			}
+			req := workspaceValidationReq()
+			got, err := LoadWorkspaceFile(t.Context(), &LoadWorkspaceFileRequest{Parent: req.Workspace, Space: req.Space, BaseDir: base})
+			if !assert.Nil(t, err) {
+				return
+			}
+			assert.Equal(t, req.Workspace.Metadata, got.Metadata)
+			assert.Equal(t, req.Workspace.Status, got.Status)
+			assert.Equal(t, "echo loaded", got.Spec.Runtime.Cmd)
+			assert.Nil(t, req.Workspace.Spec.Runtime)
+		})
+	}
+}
+
+func TestLoadWorkspaceFilePrecedenceAndErrors(t *testing.T) {
+	base := t.TempDir()
+	req := workspaceValidationReq()
+	opts := &LoadWorkspaceFileRequest{Parent: req.Workspace, Space: req.Space, BaseDir: base}
+	_, err := LoadWorkspaceFile(t.Context(), opts)
+	assert.NotNil(t, err)
+	assert.Nil(t, os.WriteFile(filepath.Join(base, ".cordium.yaml"), []byte("spec:\n  runtime:\n    cmd: fallback\n"), 0600))
+	assert.Nil(t, os.MkdirAll(filepath.Join(base, ".cordium"), 0700))
+	primary := filepath.Join(base, ".cordium", "workspace.yaml")
+	assert.Nil(t, os.WriteFile(primary, []byte("spec:\n  runtime:\n    cmd: primary\n"), 0600))
+	got, err := LoadWorkspaceFile(t.Context(), opts)
+	if assert.Nil(t, err) {
+		assert.Equal(t, "primary", got.Spec.Runtime.Cmd)
+	}
+	assert.Nil(t, os.WriteFile(primary, []byte("spec: [unterminated"), 0600))
+	_, err = LoadWorkspaceFile(t.Context(), opts)
+	assert.NotNil(t, err)
+	assert.Nil(t, os.WriteFile(primary, []byte("{}"), 0600))
+	got, err = LoadWorkspaceFile(t.Context(), opts)
+	if assert.Nil(t, err) {
+		assert.NotNil(t, got.Spec)
+	}
+	_, err = LoadWorkspaceFile(t.Context(), nil)
+	assert.NotNil(t, err)
+}
+
+func TestMergeSpecDoesNotMutateInputs(t *testing.T) {
+	ws := workspaceValidationReq().Workspace
+	ws.Spec.Runtime = &cordiumv1.Workspace_Spec_Runtime{EnvVars: []*cordiumv1.Workspace_Spec_Runtime_EnvVar{{Key: "KEY", Type: &cordiumv1.Workspace_Spec_Runtime_EnvVar_Value{Value: "workspace"}}}}
+	tmpl := &cordiumv1.Template{Spec: &cordiumv1.Template_Spec{Repository: &cordiumv1.Workspace_Spec_Repository{Url: "https://example.com/repo"}}}
+	beforeWS, beforeTemplate := proto.Clone(ws), proto.Clone(tmpl)
+	merged, err := Merge(&MergeSpecReq{Workspace: ws, Template: tmpl})
+	if !assert.Nil(t, err) {
+		return
+	}
+	merged.Spec.Repository.Url = "https://example.com/changed"
+	merged.Spec.Runtime.EnvVars[0].Key = "OTHER"
+	merged.Metadata.Name = "changed"
+	assert.True(t, proto.Equal(beforeWS, ws))
+	assert.True(t, proto.Equal(beforeTemplate, tmpl))
+}
+
+func TestCheckTerminalIDBoundaries(t *testing.T) {
+	for _, id := range []string{"abc-1234", "abcdefg-1abc", "a12-0000"} {
+		assert.Nil(t, CheckTerminalID(id), "%s", id)
+	}
+	for _, id := range []string{"", "ab-1234", "abcdefgh-1234", "1ab-1234", "Abc-1234", "abc-123", "abc-12345", "abc-12_4", "abc-1234\n", "../abc-1234"} {
+		assert.NotNil(t, CheckTerminalID(id), "%s", id)
+	}
 }

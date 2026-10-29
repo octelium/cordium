@@ -250,3 +250,93 @@ func countPrefix(prefixes []netip.Prefix, arg string) int {
 	}
 	return ret
 }
+
+func TestValidateEgressLimits(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		set   func(*cordiumv1.Workspace_Spec_Runtime_Network_Rule, int)
+		limit int
+	}{
+		{name: "CIDRs", limit: MaxCIDRsPerRule, set: func(rule *cordiumv1.Workspace_Spec_Runtime_Network_Rule, n int) {
+			rule.Cidrs = nil
+			for i := 0; i < n; i++ {
+				rule.Cidrs = append(rule.Cidrs, "203.0.113.0/24")
+			}
+		}},
+		{name: "ports", limit: MaxPortsPerRule, set: func(rule *cordiumv1.Workspace_Spec_Runtime_Network_Rule, n int) {
+			for i := 0; i < n; i++ {
+				rule.Ports = append(rule.Ports, uint32(i+1))
+			}
+		}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			for _, n := range []int{tc.limit, tc.limit + 1} {
+				rule := &cordiumv1.Workspace_Spec_Runtime_Network_Rule{Action: cordiumv1.Workspace_Spec_Runtime_Network_Rule_ALLOW, Cidrs: []string{"203.0.113.0/24"}}
+				tc.set(rule, n)
+				err := ValidateEgress(&cordiumv1.Workspace_Spec_Runtime_Network_Egress{Rules: []*cordiumv1.Workspace_Spec_Runtime_Network_Rule{rule}})
+				if n == tc.limit {
+					assert.Nil(t, err)
+				} else {
+					assert.NotNil(t, err)
+				}
+			}
+		})
+	}
+}
+
+func TestValidateEgressUnknownEnumsAndMappedIPv6(t *testing.T) {
+	assert.NotNil(t, ValidateEgress(&cordiumv1.Workspace_Spec_Runtime_Network_Egress{DefaultAction: cordiumv1.Workspace_Spec_Runtime_Network_Egress_DefaultAction(99)}))
+	assert.NotNil(t, ValidateEgress(&cordiumv1.Workspace_Spec_Runtime_Network_Egress{Rules: []*cordiumv1.Workspace_Spec_Runtime_Network_Rule{{Action: cordiumv1.Workspace_Spec_Runtime_Network_Rule_Action(99), Cidrs: []string{"203.0.113.0/24"}}}}))
+	for _, cidr := range []string{"::ffff:192.0.2.1/128", "::ffff:192.0.2.0/120", "192.0.2.1/33", "2001:db8::/129"} {
+		_, err := parsePrefixes([]string{cidr})
+		assert.NotNil(t, err, "%s", cidr)
+	}
+}
+
+func TestCompileStableDenyOrderAndNormalization(t *testing.T) {
+	p, err := Compile(&CompileReq{
+		UID: 543210,
+		Network: &cordiumv1.Workspace_Spec_Runtime_Network{Egress: &cordiumv1.Workspace_Spec_Runtime_Network_Egress{Rules: []*cordiumv1.Workspace_Spec_Runtime_Network_Rule{
+			{Action: cordiumv1.Workspace_Spec_Runtime_Network_Rule_ALLOW, Cidrs: []string{"203.0.113.129/24", "203.0.113.0/24"}, Ports: []uint32{65535, 1, 1}},
+			{Action: cordiumv1.Workspace_Spec_Runtime_Network_Rule_DENY, Cidrs: []string{"2001:db8:1::1/64"}},
+			{Action: cordiumv1.Workspace_Spec_Runtime_Network_Rule_DENY, Cidrs: []string{"192.0.2.1/24"}},
+		}}},
+	})
+	if !assert.Nil(t, err) {
+		return
+	}
+	assert.Nil(t, p.Check())
+	assert.Equal(t, "2001:db8:1::/64", p.Rules[0].Prefixes[0].String())
+	assert.Equal(t, "192.0.2.0/24", p.Rules[1].Prefixes[0].String())
+	assert.Equal(t, []netip.Prefix{netip.MustParsePrefix("203.0.113.0/24")}, p.Rules[2].Prefixes)
+	assert.Equal(t, []uint32{1, 65535}, p.Rules[2].Ports)
+	_, err = Compile(nil)
+	assert.NotNil(t, err)
+}
+
+func TestPolicyCheckInvalidValues(t *testing.T) {
+	var nilPolicy *Policy
+	assert.NotNil(t, nilPolicy.Check())
+	for _, tc := range []struct {
+		name   string
+		policy *Policy
+	}{
+		{name: "unknown rule action", policy: &Policy{UID: 1, DefaultAction: DefaultActionDeny, Rules: []*Rule{{Action: "INVALID", Prefixes: []netip.Prefix{netip.MustParsePrefix("192.0.2.0/24")}}}}},
+		{name: "invalid prefix", policy: &Policy{UID: 1, DefaultAction: DefaultActionDeny, Rules: []*Rule{{Action: ActionDeny, Prefixes: []netip.Prefix{{}}}}}},
+		{name: "noncanonical prefix", policy: &Policy{UID: 1, DefaultAction: DefaultActionDeny, Rules: []*Rule{{Action: ActionAllow, Prefixes: []netip.Prefix{netip.MustParsePrefix("192.0.2.1/24")}}}}},
+		{name: "invalid protected prefix", policy: &Policy{UID: 1, DefaultAction: DefaultActionDeny, Protected: []netip.Prefix{{}}}},
+		{name: "invalid nonpublic prefix", policy: &Policy{UID: 1, DefaultAction: DefaultActionDeny, NonPublic: []netip.Prefix{{}}}},
+		{name: "zero system port", policy: &Policy{UID: 1, DefaultAction: DefaultActionDeny, SystemSourcePorts: []*SystemPort{{Protocol: "tcp"}}}},
+		{name: "large system port", policy: &Policy{UID: 1, DefaultAction: DefaultActionDeny, SystemSourcePorts: []*SystemPort{{Protocol: "udp", Port: 65536}}}},
+	} {
+		t.Run(tc.name, func(t *testing.T) { assert.NotNil(t, tc.policy.Check()) })
+	}
+}
+
+func TestNormalizeAndFilterPrefixes(t *testing.T) {
+	input := []netip.Prefix{{}, netip.MustParsePrefix("2001:db8::1/64"), netip.MustParsePrefix("192.0.2.1/24"), netip.MustParsePrefix("192.0.2.0/24")}
+	assert.Equal(t, []netip.Prefix{netip.MustParsePrefix("192.0.2.0/24"), netip.MustParsePrefix("2001:db8::/64")}, normalizePrefixes(input))
+	assert.Equal(t, []uint32{1, 443, 65535}, normalizePorts([]uint32{65536, 443, 0, 1, 443, 65535}))
+	assert.Empty(t, FilterV4(nil))
+	assert.Empty(t, FilterV6([]netip.Prefix{{}, netip.MustParsePrefix("::ffff:192.0.2.0/120")}))
+}

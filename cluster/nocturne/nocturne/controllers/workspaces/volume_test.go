@@ -22,19 +22,26 @@ import (
 	"testing"
 
 	workspacecommon "github.com/octelium/cordium/cluster/common"
+	"github.com/octelium/cordium/cluster/common/octeliumc"
 	otests "github.com/octelium/cordium/cluster/common/tests"
 	"github.com/octelium/cordium/cluster/common/wsutils"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
+	"github.com/octelium/octelium/apis/rsc/rcordiumv1"
 	"github.com/octelium/octelium/apis/rsc/rmetav1"
 	"github.com/octelium/octelium/cluster/common/vutils"
 	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"github.com/octelium/octelium/pkg/utils/utilrand"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 	k8scorev1 "k8s.io/api/core/v1"
 	k8serr "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	k8smetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sfake "k8s.io/client-go/kubernetes/fake"
 )
 
 func (c *snapshotTest) createVolume(ctx context.Context, t *testing.T,
@@ -669,4 +676,75 @@ func TestResolveVolumeMounts(t *testing.T) {
 
 		assert.NotNil(t, getVolume("octelium"))
 	})
+}
+
+func TestDeleteVolumeRegionAndIdempotency(t *testing.T) {
+	ctx := t.Context()
+	client := k8sfake.NewSimpleClientset(&k8scorev1.PersistentVolumeClaim{ObjectMeta: k8smetav1.ObjectMeta{Name: "vol-uid", Namespace: ns}})
+	ctl := &Controller{k8sC: client, regionRef: &metav1.ObjectReference{Uid: "region"}}
+	vol := &cordiumv1.Volume{Metadata: &metav1.Metadata{Name: "data", Uid: "uid"}, Status: &cordiumv1.Volume_Status{RegionRef: &metav1.ObjectReference{Uid: "other"}}}
+	assert.Nil(t, ctl.OnDeleteVolume(ctx, vol))
+	_, err := client.CoreV1().PersistentVolumeClaims(ns).Get(ctx, "vol-uid", k8smetav1.GetOptions{})
+	assert.Nil(t, err)
+	vol.Status.RegionRef.Uid = "region"
+	assert.Nil(t, ctl.OnDeleteVolume(ctx, vol))
+	_, err = client.CoreV1().PersistentVolumeClaims(ns).Get(ctx, "vol-uid", k8smetav1.GetOptions{})
+	assert.True(t, k8serr.IsNotFound(err))
+	assert.Nil(t, ctl.OnDeleteVolume(ctx, vol))
+}
+
+type volumeStatusClient struct {
+	octeliumc.ClientInterface
+	resources *volumeStatusResources
+}
+
+func (c *volumeStatusClient) CordiumC() rcordiumv1.ResourceServiceClient { return c.resources }
+
+type volumeStatusResources struct {
+	rcordiumv1.ResourceServiceClient
+	updates int
+	err     error
+}
+
+func (c *volumeStatusResources) UpdateVolume(ctx context.Context, vol *cordiumv1.Volume, opts ...grpc.CallOption) (*cordiumv1.Volume, error) {
+	c.updates++
+	return vol, c.err
+}
+
+func TestVolumeStatusRecoversFromLostStorage(t *testing.T) {
+	resources := &volumeStatusResources{}
+	ctl := &Controller{octeliumC: &volumeStatusClient{resources: resources}}
+	vol := &cordiumv1.Volume{Metadata: &metav1.Metadata{Name: "data", Uid: "uid"}, Status: &cordiumv1.Volume_Status{State: cordiumv1.Volume_Status_STATE_PENDING}}
+	lost := &k8scorev1.PersistentVolumeClaim{Status: k8scorev1.PersistentVolumeClaimStatus{Phase: k8scorev1.ClaimLost}}
+	assert.Nil(t, ctl.setVolumeStatus(t.Context(), vol, lost))
+	assert.Equal(t, cordiumv1.Volume_Status_STATE_FAILED, vol.Status.State)
+	assert.NotNil(t, vol.Status.Failure.GetStorage())
+	bound := &k8scorev1.PersistentVolumeClaim{Status: k8scorev1.PersistentVolumeClaimStatus{Phase: k8scorev1.ClaimBound, Capacity: k8scorev1.ResourceList{k8scorev1.ResourceStorage: resource.MustParse("2Gi")}}}
+	assert.Nil(t, ctl.setVolumeStatus(t.Context(), vol, bound))
+	assert.Equal(t, cordiumv1.Volume_Status_STATE_READY, vol.Status.State)
+	assert.Nil(t, vol.Status.Failure)
+	assert.Equal(t, uint32(2147), vol.Status.Capacity.Megabytes)
+	assert.True(t, volumeWasProvisioned(vol))
+	readyAt := proto.Clone(vol.Status.ReadyAt)
+	assert.Nil(t, ctl.setVolumeStatus(t.Context(), vol, bound))
+	assert.Equal(t, 2, resources.updates)
+	assert.True(t, proto.Equal(readyAt, vol.Status.ReadyAt))
+	assert.Nil(t, ctl.setVolumeStatus(t.Context(), vol, lost))
+	assert.True(t, volumeWasProvisioned(vol))
+}
+
+func TestVolumeStatusResourceErrors(t *testing.T) {
+	for _, code := range []codes.Code{codes.NotFound, codes.Unavailable} {
+		t.Run(code.String(), func(t *testing.T) {
+			resources := &volumeStatusResources{err: status.Error(code, "update failed")}
+			ctl := &Controller{octeliumC: &volumeStatusClient{resources: resources}}
+			vol := &cordiumv1.Volume{Metadata: &metav1.Metadata{Name: "data"}, Status: &cordiumv1.Volume_Status{}}
+			err := ctl.setVolumeStatus(t.Context(), vol, &k8scorev1.PersistentVolumeClaim{Status: k8scorev1.PersistentVolumeClaimStatus{Phase: k8scorev1.ClaimBound}})
+			if code == codes.NotFound {
+				assert.Nil(t, err)
+			} else {
+				assert.ErrorIs(t, err, resources.err)
+			}
+		})
+	}
 }

@@ -18,11 +18,13 @@ package devcontainers
 
 import (
 	"encoding/json"
+	"os/exec"
 	"slices"
 	"testing"
 
 	"github.com/octelium/cordium/cluster/common/tests"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )
 
@@ -163,4 +165,65 @@ func TestCommand(t *testing.T) {
 		assert.True(t, slices.Contains(wrp.Cmd.Commands, "ls -la"))
 	}
 
+}
+
+func TestSpecCommandVariants(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		input   string
+		want    []string
+		invalid bool
+	}{
+		{name: "shell command", input: `"echo ready"`, want: []string{"echo ready"}},
+		{name: "simple argv", input: `["echo","ready"]`, want: []string{"echo ready"}},
+		{name: "parallel commands", input: `{"first":"echo one","second":["echo","two"]}`, want: []string{"echo one", "echo two"}},
+		{name: "number", input: `42`, invalid: true},
+		{name: "boolean", input: `true`, invalid: true},
+		{name: "mixed argv", input: `["echo",42]`, invalid: true},
+		{name: "invalid parallel command", input: `{"first":false}`, invalid: true},
+		{name: "invalid nested argv", input: `{"first":["echo",null]}`, invalid: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			command := &SpecCommand{}
+			err := json.Unmarshal([]byte(tc.input), command)
+			if tc.invalid {
+				assert.NotNil(t, err)
+			} else {
+				assert.Nil(t, err)
+				assert.ElementsMatch(t, tc.want, command.Commands)
+			}
+		})
+	}
+}
+
+func TestSpecCommandPreservesArgv(t *testing.T) {
+	for _, arg := range []string{"a b", "$CORDIUM_UNDEFINED_VARIABLE", "semi;printf injected", "quote'and\"double"} {
+		t.Run(arg, func(t *testing.T) {
+			data, err := json.Marshal([]string{"printf", "%s", arg})
+			if err != nil {
+				t.Fatal(err)
+			}
+			command := &SpecCommand{}
+			if err := json.Unmarshal(data, command); err != nil {
+				t.Fatal(err)
+			}
+			require.Len(t, command.Commands, 1)
+			out, err := exec.CommandContext(t.Context(), "sh", "-c", command.Commands[0]).CombinedOutput()
+			assert.Nil(t, err)
+			assert.Equal(t, arg, string(out))
+		})
+	}
+}
+
+func TestLoadSpecJSONAndSubstitution(t *testing.T) {
+	for _, value := range []string{"plain", "with space", `quote"value`, `path\value`, "line\nbreak"} {
+		t.Run(value, func(t *testing.T) {
+			spec, err := LoadSpec(&LoadSpecOpts{Data: []byte(`{"name":"${containerEnv:NAME}","image":"alpine"}`), ContainerEnv: []string{"NAME=" + value}})
+			if assert.Nil(t, err) {
+				assert.Equal(t, value, spec.Name)
+			}
+		})
+	}
+	_, err := LoadSpec(&LoadSpecOpts{Data: []byte(`{"name":42}`)})
+	assert.NotNil(t, err)
 }

@@ -1098,3 +1098,154 @@ describe("server: workspace tools", () => {
     assert.equal(last.text, "The tests ran in both Workspaces.");
   });
 });
+
+describe("server: request boundaries and recovery", () => {
+  let t: TestApp;
+
+  before(async () => {
+    t = await createTestApp({ config: { server: { maxUploadBytes: 64 } } });
+  });
+
+  after(async () => {
+    await t.close();
+  });
+
+  it("rejects malformed and non-object JSON without creating conversations", async () => {
+    const before = t.app.store.list().length;
+    for (const body of ["{", "null", "[]", '"text"', "42"]) {
+      const response = await fetch(`${t.baseUrl}/v1/conversations`, {
+        method: "POST",
+        headers: { "content-type": "application/json; charset=utf-8" },
+        body,
+      });
+      assert.equal(response.status, 400, body);
+      const error = (await response.json()) as { error: { message: string } };
+      assert.equal(typeof error.error.message, "string");
+    }
+    assert.equal(t.app.store.list().length, before);
+  });
+
+  it("rejects JSON lookalike media types", async () => {
+    const response = await fetch(`${t.baseUrl}/v1/conversations`, {
+      method: "POST",
+      headers: { "content-type": "application/jsonp" },
+      body: JSON.stringify({ title: "Should be rejected" }),
+    });
+    assert.equal(response.status, 400);
+  });
+
+  it("rolls back conversation creation after invalid input and attachments", async () => {
+    const before = t.app.store.list().length;
+    for (const input of [
+      { text: " " },
+      { text: "Analyze", attachments: ["missing-file"] },
+      { text: "Analyze", attachments: [123] },
+    ]) {
+      const response = await postJSON(`${t.baseUrl}/v1/conversations`, {
+        title: "Invalid",
+        input,
+      });
+      assert.equal(response.status, 400);
+      assert.equal(t.app.store.list().length, before);
+    }
+  });
+
+  it("accepts binary uploads at the limit and returns persistent metadata", async () => {
+    const data = Buffer.from(Array.from({ length: 64 }, (_, i) => i));
+    const response = await fetch(
+      `${t.baseUrl}/v1/files?name=..%2F..%2Fbytes.bin`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/octet-stream" },
+        body: data,
+      },
+    );
+    assert.equal(response.status, 201);
+    const info = (await response.json()) as FileInfo;
+    assert.equal(info.name, "bytes.bin");
+    assert.equal(info.size, data.length);
+    assert.deepEqual(fs.readFileSync(info.path), data);
+    const metadata = await fetch(`${t.baseUrl}/v1/files/${info.id}`);
+    assert.equal(metadata.status, 200);
+    assert.deepEqual(await metadata.json(), info);
+  });
+
+  it("does not leave upload files after rejection and still accepts the next request", async () => {
+    const uploads = t.app.files.uploadsDir;
+    const before = fs.readdirSync(uploads).sort();
+    const tooLarge = await fetch(`${t.baseUrl}/v1/files?name=large.bin`, {
+      method: "POST",
+      body: Buffer.alloc(65),
+    });
+    assert.equal(tooLarge.status, 413);
+    assert.deepEqual(fs.readdirSync(uploads).sort(), before);
+    const missingName = await fetch(`${t.baseUrl}/v1/files`, {
+      method: "POST",
+      body: "x",
+    });
+    assert.equal(missingName.status, 400);
+    const accepted = await fetch(`${t.baseUrl}/v1/files?name=empty.txt`, {
+      method: "POST",
+      body: "",
+    });
+    assert.equal(accepted.status, 201);
+    assert.equal(((await accepted.json()) as FileInfo).size, 0);
+  });
+
+  it("streams artifact bytes and keeps active content sandboxed", async () => {
+    const source = path.join(t.app.config.workDir, "report.svg");
+    const content =
+      '<svg xmlns="http://www.w3.org/2000/svg"><script>1</script></svg>';
+    fs.writeFileSync(source, content);
+    const info = t.app.files.publishArtifact(source, { name: "réport.svg" });
+    const response = await fetch(`${t.baseUrl}${info.url}?inline=1`);
+    assert.equal(response.status, 200);
+    assert.equal(await response.text(), content);
+    assert.equal(
+      response.headers.get("content-length"),
+      String(Buffer.byteLength(content)),
+    );
+    assert.match(
+      response.headers.get("content-disposition") ?? "",
+      /^attachment/,
+    );
+    assert.match(
+      response.headers.get("content-disposition") ?? "",
+      /filename\*=UTF-8''r%C3%A9port.svg/,
+    );
+    assert.match(
+      response.headers.get("content-security-policy") ?? "",
+      /sandbox/,
+    );
+    assert.equal(response.headers.get("cache-control"), "private, no-store");
+    fs.unlinkSync(t.app.files.getArtifact(info.id)!.filePath);
+    assert.equal((await fetch(`${t.baseUrl}${info.url}`)).status, 404);
+  });
+
+  it("replays only events after the requested sequence for a finished run", async () => {
+    t.faux.setResponses([fauxAssistantMessage([fauxText("Finished")])]);
+    const created = await startConversation(t, "Finish this run");
+    const events = await collectEvents(t.baseUrl, created.run!.id);
+    assert.ok(events.length > 2);
+    const after = events[1].seq;
+    const replayed = await collectEvents(
+      t.baseUrl,
+      created.run!.id,
+      undefined,
+      after,
+    );
+    assert.deepEqual(
+      replayed,
+      events.filter((event) => event.seq > after),
+    );
+    assert.deepEqual(
+      await collectEvents(
+        t.baseUrl,
+        created.run!.id,
+        undefined,
+        events.at(-1)!.seq,
+      ),
+      [],
+    );
+  });
+});
