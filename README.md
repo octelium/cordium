@@ -4,9 +4,15 @@
 [![Discord](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://octelium.com/external/discord)
 [![Slack](https://img.shields.io/badge/Slack-purple?logo=slack&logoColor=white)](https://octelium.com/external/slack)
 
-Cordium is a free and open source, self-hosted platform that combines isolated, reproducible sandboxes with identity-based, secretless access to infrastructure. Built on Kubernetes and [Octelium](https://github.com/octelium/octelium), it supports developers, AI agents and automated workloads, from persistent remote development environments to ephemeral CI/CD jobs.
+Cordium is a free and open source, self-hosted, identity-based, horizontally scalable sandbox platform built on Kubernetes and [Octelium](https://github.com/octelium/octelium) for humans and AI agents.
 
-Every sandbox (i.e. _Workspace_) has its own Octelium _Session_ identity. Through Octelium's identity-aware proxies, it can access authorized databases, SSH servers, internal APIs, LLM providers and Kubernetes clusters without receiving their upstream credentials (e.g. API keys, database passwords and SSH private keys). Access is policy-driven and evaluated per request using identity and context.
+Cordium is designed around two tightly integrated purposes that most platforms treat as separate concerns:
+
+- **General-purpose sandboxed execution**: a platform for running both long-lived workloads (remote development environments, persistent coding sessions, running servers) and short-lived tasks (AI agent runs, CI/CD jobs, automated scripts) inside isolated, reproducible sandboxes accessible via a web browser, SSH, the `cordium` CLI, or gRPC-based SDKs.
+
+- **Identity-based zero-trust secretless remote access**: a platform that leverages Octelium ZTNA capabilities to provide secretless, policy-driven access to infrastructure resources (SSH servers, databases, internal HTTP APIs, LLM providers, Kubernetes clusters, mTLS services) from within _Workspaces_, without exposing, distributing, or managing upstream application-layer credentials (e.g. API keys and access tokens, SSH private keys, database passwords, etc.). This works for both human _Users_ opening a browser-based terminal and AI agents executing programmatically inside a _Workspace_.
+
+Cordium is 100% free and open source. It is designed for single-tenant self-hosting and built on standard Kubernetes infrastructure with no proprietary cloud control plane and no vendor lock-in.
 
 [Documentation](https://octelium.com/docs/cordium/latest/overview/intro) · [Quick Installation Guide](https://octelium.com/docs/cordium/latest/overview/quick-install) · [Examples](https://octelium.com/docs/cordium/latest/examples)
 
@@ -103,7 +109,7 @@ Cordium combines sandboxed execution with Octelium's identity-based access to in
 
 ### How are Workspaces sandboxed?
 
-Each _Workspace_ runs in its own Kubernetes pod, where a supervisor uses Podman to launch the sandbox as a nested, rootless container. The sandbox has its own filesystem, processes and network, and its root user maps to an unprivileged user outside it. This lets you install system packages and run containers inside the _Workspace_ without granting it root access to the Kubernetes node.
+Each _Workspace_ runs inside a Kubernetes pod, which bootstraps a hardened supervisor, that in turns launches the actuall sandbox as a rootless container. The sandbox has its own filesystem, processes and network, and its root user maps to an unprivileged user outside it. This lets you install system packages and run containers inside the _Workspace_ without granting it root access to the Kubernetes node.
 
 The supervisor enforces resource limits and network egress policies outside the sandbox. Cordium runs on standard Kubernetes nodes without requiring a separate VM per _Workspace_ or specialized hardware. Read more about the isolation model [here](https://octelium.com/docs/cordium/latest/overview/how#workspace-isolation-model).
 
