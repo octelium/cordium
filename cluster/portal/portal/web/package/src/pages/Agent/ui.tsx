@@ -1,4 +1,5 @@
 import { ActionIcon, Button, Modal, Tooltip } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import {
   IconCheck,
   IconCopy,
@@ -12,7 +13,6 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import * as React from "react";
-import { toast } from "react-hot-toast";
 import { twMerge } from "tailwind-merge";
 import { copyText, fileKind } from "./utils";
 
@@ -196,7 +196,7 @@ export const ConfirmModal = (props: {
       await props.onConfirm();
       props.onClose();
     } catch (err) {
-      toast.error((err as Error).message);
+      notifications.show({ color: "red", message: (err as Error).message });
     } finally {
       setPending(false);
     }

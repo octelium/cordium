@@ -21,11 +21,11 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { IconGitBranch, IconSettings2 } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import * as React from "react";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 type ProviderKind = "github" | "gitlab" | "oauth2";
@@ -124,7 +124,10 @@ export const GitProviderForm = (props: { item?: WsPB.GitProvider }) => {
     onSuccess: (response) => {
       invalidateGitProviders();
       invalidateResource(response);
-      toast.success(isEdit ? "Git provider updated" : "Git provider created");
+      notifications.show({
+        color: "green",
+        message: isEdit ? "Git provider updated" : "Git provider created",
+      });
       navigate(`${getPathSpace(space!)}/gitproviders`);
     },
     onError,

@@ -22,6 +22,7 @@ import {
   Text,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import * as MetaPB from "@octelium/apis/main/metav1";
 import {
@@ -36,7 +37,6 @@ import {
 } from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import * as React from "react";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const VolumeState = WsPB.Volume_Status_State;
@@ -84,7 +84,7 @@ const ResizeVolume = (props: { item: WsPB.Volume }) => {
     onSuccess: () => {
       close();
       invalidateVolumes();
-      toast.success("Volume resized");
+      notifications.show({ color: "green", message: "Volume resized" });
     },
     onError,
   });
@@ -153,7 +153,7 @@ const VolumeRow = (props: { item: WsPB.Volume; canManage: boolean }) => {
     },
     onSuccess: () => {
       invalidateVolumes();
-      toast.success("Volume deleted");
+      notifications.show({ color: "green", message: "Volume deleted" });
     },
     onError,
   });

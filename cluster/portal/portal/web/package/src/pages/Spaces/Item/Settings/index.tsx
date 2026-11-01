@@ -21,6 +21,7 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { DeleteOptions } from "@octelium/apis/main/metav1";
 import {
@@ -31,7 +32,6 @@ import {
 } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import * as React from "react";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useContextSpace } from "../../utils";
 
@@ -127,7 +127,7 @@ const SettingsForm = (props: { data: WsPB.Space }) => {
     },
     onSuccess: (response) => {
       invalidateSpace(response);
-      toast.success("Space updated");
+      notifications.show({ color: "green", message: "Space updated" });
     },
     onError,
   });
@@ -140,7 +140,7 @@ const SettingsForm = (props: { data: WsPB.Space }) => {
     },
     onSuccess: () => {
       invalidateSpaces();
-      toast.success("Space deleted");
+      notifications.show({ color: "green", message: "Space deleted" });
       navigate("/spaces");
     },
     onError,
@@ -154,7 +154,7 @@ const SettingsForm = (props: { data: WsPB.Space }) => {
     },
     onSuccess: () => {
       invalidateSpaces();
-      toast.success("You left the Space");
+      notifications.show({ color: "green", message: "You left the Space" });
       navigate("/spaces");
     },
     onError,

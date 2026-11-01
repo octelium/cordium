@@ -21,6 +21,7 @@ import {
   isWorkspaceStopped,
 } from "@/utils/pb";
 import { Alert, Anchor, Button, Select, Stack } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { GetOptions } from "@octelium/apis/main/metav1";
 import {
@@ -32,7 +33,6 @@ import {
 } from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { useContextWorkspace } from "../utils";
 import { StartStopButtons } from "./index";
@@ -179,9 +179,11 @@ const ApplicationShare = (props: {
     },
     onSuccess: (_, val) => {
       invalidateResource(item);
-      toast.success(
-        val === "private" ? "Application unshared" : "Application shared",
-      );
+      notifications.show({
+        color: "green",
+        message:
+          val === "private" ? "Application unshared" : "Application shared",
+      });
     },
     onError,
   });

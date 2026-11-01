@@ -109,6 +109,115 @@ describe("Portal navigation, Services and terminals", () => {
         fullPage: true,
       });
   };
+  const checkNotification = async (theme, color) => {
+    const notification = page.locator(".mantine-Notification-root");
+    await notification.waitFor();
+    await notification.hover();
+    assert.equal(await notification.count(), 1);
+    const box = await notification.boundingBox();
+    const viewport = page.viewportSize();
+    assert.ok(Math.abs(box.x + box.width / 2 - viewport.width / 2) <= 1);
+    assert.ok(box.x >= 0 && box.x + box.width <= viewport.width);
+    assert.ok(viewport.height - box.y - box.height >= 0);
+    assert.ok(viewport.height - box.y - box.height <= 32);
+
+    const appearance = await notification.evaluate((element) => {
+      const canvas = document.createElement("canvas").getContext("2d");
+      const rgb = (color) => {
+        canvas.fillStyle = color;
+        canvas.fillRect(0, 0, 1, 1);
+        return [...canvas.getImageData(0, 0, 1, 1).data].slice(0, 3);
+      };
+      const luminance = (color) => {
+        const [r, g, b] = rgb(color).map((channel) => {
+          const value = channel / 255;
+          return value <= 0.04045
+            ? value / 12.92
+            : ((value + 0.055) / 1.055) ** 2.4;
+        });
+        return r * 0.2126 + g * 0.7152 + b * 0.0722;
+      };
+      const background = luminance(getComputedStyle(element).backgroundColor);
+      const foreground = luminance(
+        getComputedStyle(
+          element.querySelector(".mantine-Notification-description"),
+        ).color,
+      );
+      return {
+        background,
+        contrast:
+          (Math.max(background, foreground) + 0.05) /
+          (Math.min(background, foreground) + 0.05),
+        accent: rgb(getComputedStyle(element, "::before").backgroundColor),
+      };
+    });
+    assert.ok(appearance.contrast >= 4.5);
+    assert.ok(
+      theme === "dark"
+        ? appearance.background < 0.1
+        : appearance.background > 0.9,
+    );
+    assert.ok(
+      color === "green"
+        ? appearance.accent[1] > appearance.accent[0]
+        : appearance.accent[0] > appearance.accent[1],
+    );
+    return notification;
+  };
+
+  for (const theme of ["light", "dark"]) {
+    it(`shows and dismisses bottom-center success notifications on mobile in the ${theme} theme`, async () => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await load("/workspaces/demo/snapshots", theme);
+      await page
+        .getByRole("button", { name: "Take snapshot", exact: true })
+        .first()
+        .click();
+      const dialog = page.getByRole("dialog", {
+        name: "Take snapshot",
+        exact: true,
+      });
+      await dialog
+        .getByRole("textbox", { name: "Name", exact: true })
+        .fill("checkpoint");
+      await dialog
+        .getByRole("button", { name: "Take snapshot", exact: true })
+        .click();
+      await dialog.waitFor({ state: "detached" });
+      await page.getByText("Snapshot started", { exact: true }).waitFor();
+      const notification = await checkNotification(theme, "green");
+      await screenshot(`notification-success-${theme}-mobile`);
+      await notification
+        .getByRole("button", { name: "Dismiss notification", exact: true })
+        .click();
+      await notification.waitFor({ state: "detached" });
+    });
+
+    it(`shows bottom-center error notifications above full-screen terminals in the ${theme} theme`, async () => {
+      await load("/workspaces/demo/terminals", theme);
+      await page.getByRole("tab", { name: "main", exact: true }).waitFor();
+      await page
+        .getByRole("button", { name: "Toggle full screen", exact: true })
+        .click();
+      await page.evaluate(() => {
+        window.portalFixture.failRemove = true;
+      });
+      await page
+        .getByRole("button", { name: "Close main", exact: true })
+        .click();
+      const notification = await checkNotification(theme, "red");
+      assert.equal(await notification.textContent(), "Service Unavailable");
+      await screenshot(`notification-error-${theme}-desktop`);
+      await notification
+        .getByRole("button", { name: "Dismiss notification", exact: true })
+        .click();
+      await notification.waitFor({ state: "detached" });
+      assert.equal(
+        await page.getByRole("tab", { name: "main", exact: true }).isVisible(),
+        true,
+      );
+    });
+  }
 
   it("persists the collapsed desktop sidebar and keeps the selected route accessible", async () => {
     await load();

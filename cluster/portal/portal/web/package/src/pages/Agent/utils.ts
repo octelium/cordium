@@ -12,10 +12,10 @@ import {
 } from "@/apis/agent/protocol";
 import { getPathSpaceRef } from "@/utils/octelium";
 import { getShortNameFromStr } from "@/utils/pb";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { ObjectReference } from "@octelium/apis/main/metav1";
 import * as React from "react";
-import { toast } from "react-hot-toast";
 import { defaultUrlTransform } from "react-markdown";
 
 export const isMac =
@@ -233,7 +233,10 @@ export const copyText = async (value: string): Promise<boolean> => {
     await navigator.clipboard.writeText(value);
     return true;
   } catch {
-    toast.error("Could not copy to the clipboard");
+    notifications.show({
+      color: "red",
+      message: "Could not copy to the clipboard",
+    });
     return false;
   }
 };

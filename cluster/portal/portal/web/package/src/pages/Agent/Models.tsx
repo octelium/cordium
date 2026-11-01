@@ -18,6 +18,7 @@ import {
   TextInput,
   useCombobox,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import {
   IconAlertCircle,
   IconBrain,
@@ -33,7 +34,6 @@ import {
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as React from "react";
-import { toast } from "react-hot-toast";
 import { twMerge } from "tailwind-merge";
 import { AgentClient } from "./client";
 import {
@@ -300,7 +300,11 @@ const useModels = (client: AgentClient, enabled: boolean) => {
         queryKey: ["agent", client.baseUrl, "info"],
       });
     },
-    onError: (err: Error) => toast.error(err.message),
+    onError: (err: Error) =>
+      notifications.show({
+        color: "red",
+        message: err.message,
+      }),
   });
 
   return { query, mutation };
@@ -602,7 +606,11 @@ const SettingsDrawer = (props: {
       queryClient.setQueryData(settingsKey, data);
       void queryClient.invalidateQueries({ queryKey: infoKey });
     },
-    onError: (err: Error) => toast.error(err.message),
+    onError: (err: Error) =>
+      notifications.show({
+        color: "red",
+        message: err.message,
+      }),
   });
 
   const logout = useMutation({
@@ -612,7 +620,11 @@ const SettingsDrawer = (props: {
       void queryClient.invalidateQueries({ queryKey: modelsKey });
       void queryClient.invalidateQueries({ queryKey: infoKey });
     },
-    onError: (err: Error) => toast.error(err.message),
+    onError: (err: Error) =>
+      notifications.show({
+        color: "red",
+        message: err.message,
+      }),
   });
 
   const approvals = settingsQuery.data?.approvals;
@@ -774,11 +786,12 @@ const SettingsDrawer = (props: {
                   void queryClient.invalidateQueries({ queryKey: modelsKey });
                   void queryClient.invalidateQueries({ queryKey: infoKey });
                   if (session.status === "completed") {
-                    toast.success(
-                      session.model
+                    notifications.show({
+                      color: "green",
+                      message: session.model
                         ? `Signed in. Now using ${modelLabel(session.model)}`
                         : "Signed in",
-                    );
+                    });
                     setSigningIn(undefined);
                   }
                 }}

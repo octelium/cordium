@@ -1,6 +1,6 @@
 const isDevVal = import.meta.env.MODE === "development";
 import type { RpcError } from "@protobuf-ts/runtime-rpc";
-import toast from "react-hot-toast";
+import { notifications } from "@mantine/notifications";
 
 import { QueryClient } from "@tanstack/react-query";
 
@@ -26,7 +26,7 @@ const isWebgl2SupportedFn = (() => {
 export const isWebgl2Supported = isWebgl2SupportedFn();
 
 export const onError = (err: RpcError) => {
-  toast.error(err.message);
+  notifications.show({ color: "red", message: err.message });
 };
 
 export const queryClient = new QueryClient({

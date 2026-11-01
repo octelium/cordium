@@ -27,6 +27,7 @@ import {
   TextInput,
   useMantineColorScheme,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import {
   IconAdjustments,
@@ -39,7 +40,6 @@ import {
 } from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import * as React from "react";
-import { toast } from "react-hot-toast";
 
 const T = WsPB.Workspace_Spec_Runtime_Task_Type;
 
@@ -163,7 +163,7 @@ const UserConfigForm = (props: { userConfig: WsPB.UserConfig }) => {
       return response;
     },
     onSuccess: () => {
-      toast.success("Settings saved");
+      notifications.show({ color: "green", message: "Settings saved" });
     },
     onError,
   });

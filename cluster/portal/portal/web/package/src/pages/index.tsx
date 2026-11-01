@@ -9,8 +9,8 @@ import { getClientUser, getClientWorkspace } from "@/utils/client";
 import { useAppDispatch, useAppSelector } from "@/utils/hooks";
 import { useThemeColorMeta } from "@/utils/theme/colorScheme";
 
+import { Notifications } from "@mantine/notifications";
 import { useQuery } from "@tanstack/react-query";
-import { Toaster } from "react-hot-toast";
 
 import { invalidateSpaces } from "@/utils/octelium";
 import {
@@ -89,16 +89,7 @@ const Page = () => {
   return (
     <>
       <Root />
-      <Toaster
-        position="bottom-center"
-        toastOptions={{
-          style: {
-            borderRadius: "10px",
-            fontSize: "0.85rem",
-            fontWeight: 500,
-          },
-        }}
-      />
+      <Notifications position="bottom-center" />
     </>
   );
 };

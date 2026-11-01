@@ -11,6 +11,7 @@ import {
   Menu,
   Modal,
   MultiSelect,
+  Notification,
   NumberInput,
   Pagination,
   PasswordInput,
@@ -232,6 +233,26 @@ const theme = createTheme({
     Alert: Alert.extend({
       defaultProps: { radius: "md", variant: "light" },
       classNames: { title: "font-bold" },
+    }),
+    Notification: Notification.extend({
+      defaultProps: {
+        withBorder: true,
+        closeButtonProps: { "aria-label": "Dismiss notification" },
+      },
+      styles: {
+        root: {
+          backgroundColor: "var(--app-surface)",
+          borderColor: "var(--app-line)",
+          boxShadow: "var(--app-shadow-overlay)",
+        },
+        description: {
+          color: "var(--app-ink)",
+          fontSize: "0.85rem",
+          fontWeight: 500,
+          overflowWrap: "anywhere",
+        },
+        closeButton: { color: "var(--app-ink-muted)" },
+      },
     }),
   },
 });

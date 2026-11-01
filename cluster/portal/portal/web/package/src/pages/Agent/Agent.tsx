@@ -2,6 +2,7 @@ import type { AgentInfo } from "@/apis/agent/protocol";
 import Meta from "@/components/Meta";
 import { getClientWorkspace } from "@/utils/client";
 import { Button, Loader, Menu } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { GetOptions, ObjectReference } from "@octelium/apis/main/metav1";
 import type { RpcError } from "@protobuf-ts/runtime-rpc";
@@ -22,7 +23,6 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, MotionConfig } from "framer-motion";
 import * as React from "react";
-import { toast } from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
 import Chat from "./Chat";
@@ -413,7 +413,11 @@ const WorkspaceRunner = (props: {
   const start = useMutation({
     mutationFn: startAgent,
     onSettled: () => refresh(),
-    onError: (err) => toast.error(getErrorMessage(err)),
+    onError: (err) =>
+      notifications.show({
+        color: "red",
+        message: getErrorMessage(err),
+      }),
   });
 
   const stop = useMutation({
@@ -422,7 +426,11 @@ const WorkspaceRunner = (props: {
         WsPB.StopWorkspaceRequest.create({ workspaceRef: getRef() }),
       ),
     onSettled: () => refresh(),
-    onError: (err) => toast.error(getErrorMessage(err)),
+    onError: (err) =>
+      notifications.show({
+        color: "red",
+        message: getErrorMessage(err),
+      }),
   });
 
   const restart = useMutation({
@@ -445,7 +453,11 @@ const WorkspaceRunner = (props: {
       await startAgent();
     },
     onSettled: () => refresh(),
-    onError: (err) => toast.error(getErrorMessage(err)),
+    onError: (err) =>
+      notifications.show({
+        color: "red",
+        message: getErrorMessage(err),
+      }),
   });
   const restarting = restart.isPending;
 
@@ -687,7 +699,11 @@ const AgentEnvironment = () => {
         )
       ).response,
     onSuccess: (data) => queryClient.setQueryData(userConfigKey, data),
-    onError: (err) => toast.error(getErrorMessage(err)),
+    onError: (err) =>
+      notifications.show({
+        color: "red",
+        message: getErrorMessage(err),
+      }),
   });
 
   if (userConfigQuery.isPending) {

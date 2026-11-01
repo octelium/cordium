@@ -11,12 +11,12 @@ import { useAppSelector } from "@/utils/hooks";
 import { getPathSpace, invalidateMemberships } from "@/utils/octelium";
 import { getResourceRef, getRoleLabel, getShortName } from "@/utils/pb";
 import { Alert, Avatar, Button, Select, Stack, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import * as MetaPB from "@octelium/apis/main/metav1";
 import { IconTrash, IconUserPlus, IconUsers } from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import * as React from "react";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const Role = WsPB.Membership_Spec_Role;
@@ -43,7 +43,7 @@ const MemberRow = (props: {
     },
     onSuccess: () => {
       invalidateMemberships();
-      toast.success("Member removed");
+      notifications.show({ color: "green", message: "Member removed" });
     },
     onError,
   });
@@ -57,7 +57,7 @@ const MemberRow = (props: {
     },
     onSuccess: () => {
       invalidateMemberships();
-      toast.success("Role updated");
+      notifications.show({ color: "green", message: "Role updated" });
     },
     onError,
   });

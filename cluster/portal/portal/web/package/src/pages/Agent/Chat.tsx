@@ -12,6 +12,7 @@ import {
 import Meta from "@/components/Meta";
 import { ActionIcon, Button, Menu, Popover, Tooltip } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
 import {
   IconAlertTriangle,
   IconArrowDown,
@@ -33,7 +34,6 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import * as React from "react";
-import { toast } from "react-hot-toast";
 import { useSearchParams } from "react-router-dom";
 import { twMerge } from "tailwind-merge";
 import { type BlockContext } from "./Blocks";
@@ -239,7 +239,10 @@ const Chat = (props: {
         setOptimistic(undefined);
       } catch (err) {
         if (loadedRef.current === id) {
-          toast.error((err as Error).message);
+          notifications.show({
+            color: "red",
+            message: (err as Error).message,
+          });
           setChat(emptyChatState);
         }
       } finally {
@@ -466,9 +469,10 @@ const Chat = (props: {
   const addFiles = async (files: File[]) => {
     for (const file of files) {
       if (file.size > info.capabilities.uploads.maxBytes) {
-        toast.error(
-          `${file.name} exceeds the maximum size of ${formatBytes(info.capabilities.uploads.maxBytes)}`,
-        );
+        notifications.show({
+          color: "red",
+          message: `${file.name} exceeds the maximum size of ${formatBytes(info.capabilities.uploads.maxBytes)}`,
+        });
         continue;
       }
       const key = `${file.name}-${file.size}-${Math.random()}`;
@@ -481,7 +485,10 @@ const Chat = (props: {
           setPreviews((current) => ({ ...current, [uploaded.id]: url }));
         }
       } catch (err) {
-        toast.error(`Could not upload ${file.name}: ${(err as Error).message}`);
+        notifications.show({
+          color: "red",
+          message: `Could not upload ${file.name}: ${(err as Error).message}`,
+        });
       } finally {
         setUploads((current) => current.filter((itm) => itm.key !== key));
       }
@@ -546,7 +553,7 @@ const Chat = (props: {
         });
       }
     } catch (err) {
-      toast.error((err as Error).message);
+      notifications.show({ color: "red", message: (err as Error).message });
       setOptimistic(undefined);
       if (!override) {
         setInput((current) => current || text);
@@ -562,7 +569,7 @@ const Chat = (props: {
     try {
       await client.cancelRun(run.id);
     } catch (err) {
-      toast.error((err as Error).message);
+      notifications.show({ color: "red", message: (err as Error).message });
     }
   };
 
@@ -581,7 +588,7 @@ const Chat = (props: {
           reason,
         );
       } catch (err) {
-        toast.error((err as Error).message);
+        notifications.show({ color: "red", message: (err as Error).message });
       }
     },
     [client],
@@ -594,7 +601,7 @@ const Chat = (props: {
           await client.renameConversation(target.id, title),
         );
       } catch (err) {
-        toast.error((err as Error).message);
+        notifications.show({ color: "red", message: (err as Error).message });
       }
     },
     [client, onConversationUpdated],
@@ -611,7 +618,10 @@ const Chat = (props: {
     if (current === target.id) {
       setSelected(undefined);
     }
-    toast.success("The conversation is deleted");
+    notifications.show({
+      color: "green",
+      message: "The conversation is deleted",
+    });
   };
 
   const exportConversation = () => {

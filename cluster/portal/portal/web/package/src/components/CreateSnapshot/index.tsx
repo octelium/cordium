@@ -12,11 +12,11 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { IconCameraPlus } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import * as React from "react";
-import { toast } from "react-hot-toast";
 
 const CreateSnapshot = (props: {
   item: WsPB.Workspace;
@@ -54,7 +54,7 @@ const CreateSnapshot = (props: {
       setName("");
       setDisplayName("");
       invalidateWorkspaceSnapshots();
-      toast.success("Snapshot started");
+      notifications.show({ color: "green", message: "Snapshot started" });
     },
     onError,
   });

@@ -8,11 +8,11 @@ import { getClientWorkspace } from "@/utils/client";
 import { useAppSelector } from "@/utils/hooks";
 import { invalidateUserSecrets } from "@/utils/octelium";
 import { Alert, Button, SegmentedControl, Stack, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { IconInfoCircle, IconKey, IconLock } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import * as React from "react";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const Type = WsPB.UserSecret_Spec_Type;
@@ -43,7 +43,7 @@ const CreateUserSecret = () => {
     },
     onSuccess: () => {
       invalidateUserSecrets();
-      toast.success("Secret created");
+      notifications.show({ color: "green", message: "Secret created" });
       navigate("/usersecrets");
     },
     onError,

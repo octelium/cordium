@@ -11,11 +11,11 @@ import {
   Text,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { IconHammer } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import * as React from "react";
-import { toast } from "react-hot-toast";
 
 const BuildTemplate = (props: {
   item: WsPB.Template;
@@ -41,7 +41,7 @@ const BuildTemplate = (props: {
       close();
       setTags([]);
       invalidateTemplate(item);
-      toast.success("Build started");
+      notifications.show({ color: "green", message: "Build started" });
     },
     onError,
   });

@@ -8,12 +8,12 @@ import { getClientWorkspace } from "@/utils/client";
 import { getPathSpace, invalidateTemplate, invalidateTemplates } from "@/utils/octelium";
 import { getResourceRef, getShortName } from "@/utils/pb";
 import { Button, Stack } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { DeleteOptions } from "@octelium/apis/main/metav1";
 import { IconAlertTriangle, IconTrash } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import * as React from "react";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const SettingsForm = (props: { data: WsPB.Template; space: WsPB.Space }) => {
@@ -30,7 +30,7 @@ const SettingsForm = (props: { data: WsPB.Template; space: WsPB.Space }) => {
     },
     onSuccess: (response) => {
       invalidateTemplate(response);
-      toast.success("Template updated");
+      notifications.show({ color: "green", message: "Template updated" });
     },
     onError,
   });
@@ -43,7 +43,7 @@ const SettingsForm = (props: { data: WsPB.Template; space: WsPB.Space }) => {
     },
     onSuccess: () => {
       invalidateTemplates();
-      toast.success("Template deleted");
+      notifications.show({ color: "green", message: "Template deleted" });
       navigate(`${getPathSpace(space!)}/templates`);
     },
     onError,

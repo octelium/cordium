@@ -9,11 +9,11 @@ import { getClientWorkspace } from "@/utils/client";
 import { getPathSpace, invalidateSecrets } from "@/utils/octelium";
 import { getResourceRef, getShortName } from "@/utils/pb";
 import { Button, Stack } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { IconKey, IconLock } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import * as React from "react";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const CreateSecret = () => {
@@ -44,7 +44,7 @@ const CreateSecret = () => {
     },
     onSuccess: () => {
       invalidateSecrets();
-      toast.success("Secret created");
+      notifications.show({ color: "green", message: "Secret created" });
       navigate(`${getPathSpace(space!)}/secrets`);
     },
     onError,

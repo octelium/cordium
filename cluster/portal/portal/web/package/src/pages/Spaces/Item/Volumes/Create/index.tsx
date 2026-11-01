@@ -15,12 +15,12 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import * as MetaPB from "@octelium/apis/main/metav1";
 import { IconDatabase, IconServer } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import * as React from "react";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const CreateVolume = () => {
@@ -56,7 +56,7 @@ const CreateVolume = () => {
     },
     onSuccess: () => {
       invalidateVolumes();
-      toast.success("Volume created");
+      notifications.show({ color: "green", message: "Volume created" });
       navigate(`${getPathSpace(space!)}/volumes`);
     },
     onError,

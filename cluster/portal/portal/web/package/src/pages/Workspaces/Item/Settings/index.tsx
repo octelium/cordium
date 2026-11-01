@@ -11,6 +11,7 @@ import {
 } from "@/utils/octelium";
 import { isWorkspaceStopped } from "@/utils/pb";
 import { Alert, Button, Stack } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { DeleteOptions } from "@octelium/apis/main/metav1";
 import {
@@ -20,7 +21,6 @@ import {
 } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import * as React from "react";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useContextWorkspace } from "../../utils";
 
@@ -39,7 +39,7 @@ const SettingsForm = (props: { data: WsPB.Workspace }) => {
     onSuccess: (response) => {
       invalidateResource(response);
       invalidateWorkspaces();
-      toast.success("Workspace updated");
+      notifications.show({ color: "green", message: "Workspace updated" });
     },
     onError,
   });
@@ -52,7 +52,7 @@ const SettingsForm = (props: { data: WsPB.Workspace }) => {
     },
     onSuccess: () => {
       invalidateWorkspaces();
-      toast.success("Workspace deleted");
+      notifications.show({ color: "green", message: "Workspace deleted" });
       navigate("/workspaces");
     },
     onError,

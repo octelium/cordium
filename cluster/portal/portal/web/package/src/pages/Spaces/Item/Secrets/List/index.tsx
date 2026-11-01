@@ -11,12 +11,12 @@ import { useAppSelector } from "@/utils/hooks";
 import { getPathSpace, invalidateSecrets } from "@/utils/octelium";
 import { getResourceRef, getShortName } from "@/utils/pb";
 import { Alert, Button, Stack, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import * as MetaPB from "@octelium/apis/main/metav1";
 import { IconKey, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import * as React from "react";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const SecretRow = (props: { item: WsPB.Secret; canManage: boolean }) => {
@@ -31,7 +31,7 @@ const SecretRow = (props: { item: WsPB.Secret; canManage: boolean }) => {
     },
     onSuccess: () => {
       invalidateSecrets();
-      toast.success("Secret deleted");
+      notifications.show({ color: "green", message: "Secret deleted" });
     },
     onError,
   });

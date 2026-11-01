@@ -1,4 +1,5 @@
 import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
 import "@xterm/xterm/css/xterm.css";
 import React from "react";
 import ReactDOM from "react-dom/client";

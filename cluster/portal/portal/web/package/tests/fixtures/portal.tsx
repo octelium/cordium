@@ -1,4 +1,5 @@
 import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
 import "@xterm/xterm/css/xterm.css";
 import "@/index.css";
 import React from "react";
@@ -317,6 +318,12 @@ window.fetch = async (url, init) => {
         items: ["default", "data"].map((name) => ({ metadata: { name } })),
       };
       break;
+    case "ListWorkspaceSnapshot":
+      result = {
+        items: [],
+        listResponseMeta: { totalCount: 0, itemsPerPage: 10 },
+      };
+      break;
     case "ListTerminal": {
       if (fixture.failTerminals) return new Response(null, { status: 503 });
       const workspaceID = (input as WsPB.ListTerminalRequest).workspaceRef?.uid;
@@ -338,7 +345,11 @@ window.fetch = async (url, init) => {
       break;
     }
     case "RemoveTerminal":
-      if (fixture.failRemove) return new Response(null, { status: 503 });
+      if (fixture.failRemove)
+        return new Response(null, {
+          status: 503,
+          statusText: "Service Unavailable",
+        });
       terminalIDs.delete((input as WsPB.RemoveTerminalRequest).id);
       break;
     case "ListenLog":
@@ -382,6 +393,8 @@ const { default: Workspace } = await import("@/pages/Workspaces/Item");
 const { default: Terminals } =
   await import("@/pages/Workspaces/Item/Terminals");
 const { default: Logs } = await import("@/pages/Workspaces/Item/Logs");
+const { default: Snapshots } =
+  await import("@/pages/Workspaces/Item/Snapshots");
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -400,6 +413,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                   <Route index element={<p>Workspace details</p>} />
                   <Route path="terminals" element={<Terminals />} />
                   <Route path="logs" element={<Logs />} />
+                  <Route path="snapshots" element={<Snapshots />} />
                 </Route>
                 <Route path="*" element={<p>Portal resources</p>} />
               </Route>

@@ -14,12 +14,12 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { ObjectReference } from "@octelium/apis/main/metav1";
 import { IconUserPlus } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import * as React from "react";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const Role = WsPB.CreateMembershipRequest_Role;
@@ -55,7 +55,7 @@ const AddMember = () => {
     },
     onSuccess: () => {
       invalidateMemberships();
-      toast.success("Member added");
+      notifications.show({ color: "green", message: "Member added" });
       navigate(`${getPathSpace(space!)}/memberships`);
     },
     onError,

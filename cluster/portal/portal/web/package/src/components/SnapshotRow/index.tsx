@@ -27,6 +27,7 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import * as MetaPB from "@octelium/apis/main/metav1";
 import {
@@ -41,7 +42,6 @@ import {
 } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import * as React from "react";
-import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 
 const SnapshotState = WsPB.WorkspaceSnapshot_Status_State;
@@ -106,7 +106,10 @@ const RestoreSnapshot = (props: { item: WsPB.WorkspaceSnapshot }) => {
     onSuccess: (response) => {
       close();
       invalidateWorkspace(response);
-      toast.success("Workspace created from snapshot");
+      notifications.show({
+        color: "green",
+        message: "Workspace created from snapshot",
+      });
       navigate(getPathWorkspace(response));
     },
     onError,
@@ -196,7 +199,7 @@ const SnapshotRow = (props: {
     },
     onSuccess: () => {
       invalidateWorkspaceSnapshots();
-      toast.success("Snapshot deleted");
+      notifications.show({ color: "green", message: "Snapshot deleted" });
     },
     onError,
   });

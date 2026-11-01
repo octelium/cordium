@@ -7,6 +7,7 @@ import {
   resourceToYAML,
 } from "@/utils/pb";
 import { Alert, SegmentedControl, Select, Stack, Tabs } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import * as MetaPB from "@octelium/apis/main/metav1";
 import {
@@ -22,7 +23,6 @@ import {
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import * as React from "react";
-import toast from "react-hot-toast";
 import ApplicationsSection from "./Applications";
 import ErrorBoundary from "./ErrorBoundary";
 import ImageSection from "./Image";
@@ -105,7 +105,10 @@ const SpecEditor = (props: {
       }
       setYamlError(null);
       props.onChange(parsed as Editable);
-      toast.success("YAML applied to the form");
+      notifications.show({
+        color: "green",
+        message: "YAML applied to the form",
+      });
       setYamlDraft(null);
       setMode("form");
     } catch (err) {

@@ -12,6 +12,7 @@ import { useAppSelector } from "@/utils/hooks";
 import { invalidateTemplate } from "@/utils/octelium";
 import { getResourceRef } from "@/utils/pb";
 import { Loader, Stack, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import * as MetaPB from "@octelium/apis/main/metav1";
 import {
@@ -22,7 +23,6 @@ import {
 } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import * as React from "react";
-import toast from "react-hot-toast";
 
 const BuildState = WsPB.Template_Status_BuildInfo_Build_State;
 
@@ -45,7 +45,7 @@ const BuildRow = (props: {
     },
     onSuccess: () => {
       invalidateTemplate(template);
-      toast.success("Build canceled");
+      notifications.show({ color: "green", message: "Build canceled" });
     },
     onError,
   });
