@@ -20,7 +20,7 @@ Cordium is 100% free and open source. It is designed for single-tenant self-host
 
 | [Web Portal Tour](https://octelium.com/assets/cordium-portal-tour-dark-B9SmYIOW.webm) | [CLI Tour](https://octelium.com/assets/cordium-cli-tour-k46x0Bs8.webm) |
 |---|---|
-| Create and manage _Workspaces_, open terminals and chat with the Cordium Agent. | Run _Workspaces_, execute commands, copy files and access infrastructure without credentials. |
+| Create and manage _Workspaces_, open terminals and chat with the Cordium AI assistant. | Run _Workspaces_, execute commands, copy files and access infrastructure without credentials. |
 
 ## Main Features
 
