@@ -93,6 +93,7 @@ const (
 	ResourceService_GetMembership_FullMethodName           = "/octelium.api.rsc.cordium.v1.ResourceService/GetMembership"
 	ResourceService_ListMembership_FullMethodName          = "/octelium.api.rsc.cordium.v1.ResourceService/ListMembership"
 	ResourceService_DeleteMembership_FullMethodName        = "/octelium.api.rsc.cordium.v1.ResourceService/DeleteMembership"
+	ResourceService_WatchMembership_FullMethodName         = "/octelium.api.rsc.cordium.v1.ResourceService/WatchMembership"
 	ResourceService_CreateGitProvider_FullMethodName       = "/octelium.api.rsc.cordium.v1.ResourceService/CreateGitProvider"
 	ResourceService_UpdateGitProvider_FullMethodName       = "/octelium.api.rsc.cordium.v1.ResourceService/UpdateGitProvider"
 	ResourceService_GetGitProvider_FullMethodName          = "/octelium.api.rsc.cordium.v1.ResourceService/GetGitProvider"
@@ -160,6 +161,7 @@ type ResourceServiceClient interface {
 	GetMembership(ctx context.Context, in *rmetav1.GetOptions, opts ...grpc.CallOption) (*cordiumv1.Membership, error)
 	ListMembership(ctx context.Context, in *rmetav1.ListOptions, opts ...grpc.CallOption) (*cordiumv1.MembershipList, error)
 	DeleteMembership(ctx context.Context, in *rmetav1.DeleteOptions, opts ...grpc.CallOption) (*rmetav1.OperationResult, error)
+	WatchMembership(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error)
 	CreateGitProvider(ctx context.Context, in *cordiumv1.GitProvider, opts ...grpc.CallOption) (*cordiumv1.GitProvider, error)
 	UpdateGitProvider(ctx context.Context, in *cordiumv1.GitProvider, opts ...grpc.CallOption) (*cordiumv1.GitProvider, error)
 	GetGitProvider(ctx context.Context, in *rmetav1.GetOptions, opts ...grpc.CallOption) (*cordiumv1.GitProvider, error)
@@ -654,6 +656,25 @@ func (c *resourceServiceClient) DeleteMembership(ctx context.Context, in *rmetav
 	return out, nil
 }
 
+func (c *resourceServiceClient) WatchMembership(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[6], ResourceService_WatchMembership_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[rmetav1.WatchOptions, rmetav1.WatchEvent]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ResourceService_WatchMembershipClient = grpc.ServerStreamingClient[rmetav1.WatchEvent]
+
 func (c *resourceServiceClient) CreateGitProvider(ctx context.Context, in *cordiumv1.GitProvider, opts ...grpc.CallOption) (*cordiumv1.GitProvider, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(cordiumv1.GitProvider)
@@ -706,7 +727,7 @@ func (c *resourceServiceClient) DeleteGitProvider(ctx context.Context, in *rmeta
 
 func (c *resourceServiceClient) WatchGitProvider(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[6], ResourceService_WatchGitProvider_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[7], ResourceService_WatchGitProvider_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -775,7 +796,7 @@ func (c *resourceServiceClient) DeleteUserSecret(ctx context.Context, in *rmetav
 
 func (c *resourceServiceClient) WatchUserSecret(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[7], ResourceService_WatchUserSecret_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[8], ResourceService_WatchUserSecret_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -834,7 +855,7 @@ func (c *resourceServiceClient) DeleteUserConfig(ctx context.Context, in *rmetav
 
 func (c *resourceServiceClient) WatchUserConfig(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[8], ResourceService_WatchUserConfig_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[9], ResourceService_WatchUserConfig_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -873,7 +894,7 @@ func (c *resourceServiceClient) UpdateClusterConfig(ctx context.Context, in *cor
 
 func (c *resourceServiceClient) WatchClusterConfig(ctx context.Context, in *rmetav1.WatchOptions, opts ...grpc.CallOption) (grpc.ServerStreamingClient[rmetav1.WatchEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[9], ResourceService_WatchClusterConfig_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &ResourceService_ServiceDesc.Streams[10], ResourceService_WatchClusterConfig_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -935,6 +956,7 @@ type ResourceServiceServer interface {
 	GetMembership(context.Context, *rmetav1.GetOptions) (*cordiumv1.Membership, error)
 	ListMembership(context.Context, *rmetav1.ListOptions) (*cordiumv1.MembershipList, error)
 	DeleteMembership(context.Context, *rmetav1.DeleteOptions) (*rmetav1.OperationResult, error)
+	WatchMembership(*rmetav1.WatchOptions, grpc.ServerStreamingServer[rmetav1.WatchEvent]) error
 	CreateGitProvider(context.Context, *cordiumv1.GitProvider) (*cordiumv1.GitProvider, error)
 	UpdateGitProvider(context.Context, *cordiumv1.GitProvider) (*cordiumv1.GitProvider, error)
 	GetGitProvider(context.Context, *rmetav1.GetOptions) (*cordiumv1.GitProvider, error)
@@ -1087,6 +1109,9 @@ func (UnimplementedResourceServiceServer) ListMembership(context.Context, *rmeta
 }
 func (UnimplementedResourceServiceServer) DeleteMembership(context.Context, *rmetav1.DeleteOptions) (*rmetav1.OperationResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteMembership not implemented")
+}
+func (UnimplementedResourceServiceServer) WatchMembership(*rmetav1.WatchOptions, grpc.ServerStreamingServer[rmetav1.WatchEvent]) error {
+	return status.Errorf(codes.Unimplemented, "method WatchMembership not implemented")
 }
 func (UnimplementedResourceServiceServer) CreateGitProvider(context.Context, *cordiumv1.GitProvider) (*cordiumv1.GitProvider, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateGitProvider not implemented")
@@ -1865,6 +1890,17 @@ func _ResourceService_DeleteMembership_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ResourceService_WatchMembership_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(rmetav1.WatchOptions)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ResourceServiceServer).WatchMembership(m, &grpc.GenericServerStream[rmetav1.WatchOptions, rmetav1.WatchEvent]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type ResourceService_WatchMembershipServer = grpc.ServerStreamingServer[rmetav1.WatchEvent]
+
 func _ResourceService_CreateGitProvider_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(cordiumv1.GitProvider)
 	if err := dec(in); err != nil {
@@ -2438,6 +2474,11 @@ var ResourceService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "WatchSpace",
 			Handler:       _ResourceService_WatchSpace_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "WatchMembership",
+			Handler:       _ResourceService_WatchMembership_Handler,
 			ServerStreams: true,
 		},
 		{
