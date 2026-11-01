@@ -12,14 +12,14 @@ require (
 	github.com/juju/errors v1.0.0
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/client/common v0.0.0-20261003070331-0fe86d9363da
-	github.com/octelium/octelium/client/octelium v0.0.0-20261003070331-0fe86d9363da
-	github.com/octelium/octelium/pkg v0.0.0-20261003070331-0fe86d9363da
+	github.com/octelium/octelium/client/common v0.0.0-20261101155145-962ca3e7459f
+	github.com/octelium/octelium/client/octelium v0.0.0-20261101155145-962ca3e7459f
+	github.com/octelium/octelium/pkg v0.0.0-20261101155145-962ca3e7459f
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
 	go.uber.org/zap v1.28.0
-	golang.org/x/crypto v0.55.0
+	golang.org/x/crypto v0.56.0
 	golang.org/x/term v0.45.0
 	google.golang.org/grpc v1.84.0
 )
@@ -51,6 +51,7 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	github.com/zcalusic/sysinfo v1.1.3 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
+	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
@@ -59,6 +60,7 @@ require (
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
 replace github.com/octelium/octelium/apis => ../../apis
