@@ -65,8 +65,11 @@ export const readJSON = async <T>(
   if (body.length === 0) {
     return {} as T;
   }
-  const contentType = (req.headers["content-type"] ?? "").toLowerCase();
-  if (!contentType.startsWith("application/json")) {
+  const contentType = (req.headers["content-type"] ?? "")
+    .split(";")[0]
+    .trim()
+    .toLowerCase();
+  if (contentType !== "application/json") {
     throw badRequest("The request body must be application/json");
   }
   try {

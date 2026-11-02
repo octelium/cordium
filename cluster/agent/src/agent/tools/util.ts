@@ -90,6 +90,9 @@ export const parseCSV = (text: string): Record<string, string>[] => {
       field += c;
     }
   }
+  if (inQuotes) {
+    throw new Error("Unterminated quoted CSV field");
+  }
   row.push(field);
   if (row.some((v) => v !== "")) {
     rows.push(row);
@@ -99,8 +102,12 @@ export const parseCSV = (text: string): Record<string, string>[] => {
   if (!header) {
     return [];
   }
+  const keys = header.map((key) => key.trim());
+  if (new Set(keys).size !== keys.length) {
+    throw new Error("CSV column names must be unique");
+  }
   return data.map((values) =>
-    Object.fromEntries(header.map((key, i) => [key.trim(), values[i] ?? ""])),
+    Object.fromEntries(keys.map((key, i) => [key, values[i] ?? ""])),
   );
 };
 

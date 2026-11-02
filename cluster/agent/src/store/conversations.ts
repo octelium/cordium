@@ -47,18 +47,43 @@ export class ConversationStore {
         continue;
       }
 
+      if (
+        !stored ||
+        typeof stored !== "object" ||
+        Array.isArray(stored) ||
+        stored.id !== entry.name ||
+        typeof stored.title !== "string" ||
+        typeof stored.createdAt !== "string" ||
+        typeof stored.updatedAt !== "string" ||
+        !Number.isSafeInteger(stored.messageCount) ||
+        stored.messageCount < 0 ||
+        (stored.activeRunId !== undefined &&
+          typeof stored.activeRunId !== "string") ||
+        (stored.sessionFile !== undefined &&
+          typeof stored.sessionFile !== "string")
+      ) {
+        continue;
+      }
+
       this.conversations.set(stored.id, stored);
 
       const pending = this.readPending(stored.id);
       if (pending) {
-        const message: Message = {
-          ...pending,
-          status: "interrupted",
-          completedAt: pending.completedAt ?? new Date().toISOString(),
-        };
-        this.appendMessage(stored.id, message);
+        const messages = this.getMessages(stored.id);
+        if (stored.messageCount !== messages.length) {
+          stored.messageCount = messages.length;
+          this.save(stored);
+        }
+        if (!messages.some((message) => message.id === pending.id)) {
+          const message: Message = {
+            ...pending,
+            status: "interrupted",
+            completedAt: pending.completedAt ?? new Date().toISOString(),
+          };
+          this.appendMessage(stored.id, message);
+          recovered.push(message);
+        }
         this.clearPending(stored.id);
-        recovered.push(message);
       }
 
       if (stored.activeRunId) {

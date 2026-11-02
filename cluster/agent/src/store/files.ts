@@ -56,10 +56,18 @@ export const sanitizeFileName = (name: string): string => {
   const base = path.basename(name.replace(/\\/g, "/")).normalize("NFC");
   const cleaned = base
     .replace(/[\u0000-\u001f\u007f<>:"/\\|?*]/g, "_")
-    .replace(/^\.+/, "_")
-    .slice(0, 200)
-    .trim();
-  return cleaned === "" ? "file" : cleaned;
+    .replace(/^\.+/, "_");
+  let truncated = "";
+  let size = 0;
+  for (const character of cleaned) {
+    const bytes = Buffer.byteLength(character);
+    if (size + bytes > 200) {
+      break;
+    }
+    truncated += character;
+    size += bytes;
+  }
+  return truncated.trim() || "file";
 };
 
 export class FileTooLargeError extends Error {}
@@ -143,9 +151,13 @@ export class FileStore {
       return undefined;
     }
     try {
-      return JSON.parse(
+      const info: FileInfo = JSON.parse(
         fs.readFileSync(path.join(this.uploadsDir, id, ".meta.json"), "utf8"),
       );
+      if (!fs.statSync(info.path).isFile()) {
+        return undefined;
+      }
+      return info;
     } catch {
       return undefined;
     }

@@ -1126,12 +1126,37 @@ describe("server: request boundaries and recovery", () => {
   });
 
   it("rejects JSON lookalike media types", async () => {
-    const response = await fetch(`${t.baseUrl}/v1/conversations`, {
-      method: "POST",
-      headers: { "content-type": "application/jsonp" },
-      body: JSON.stringify({ title: "Should be rejected" }),
-    });
-    assert.equal(response.status, 400);
+    const before = t.app.store.list().length;
+    for (const contentType of [
+      "application/jsonp",
+      "application/json+xml",
+      "application/json-invalid; charset=utf-8",
+    ]) {
+      const response = await fetch(`${t.baseUrl}/v1/conversations`, {
+        method: "POST",
+        headers: { "content-type": contentType },
+        body: JSON.stringify({ title: "Should be rejected" }),
+      });
+      assert.equal(response.status, 400, contentType);
+    }
+    assert.equal(t.app.store.list().length, before);
+  });
+
+  it("accepts JSON media types with parameters and case-insensitive names", async () => {
+    for (const contentType of [
+      "application/json; charset=utf-8",
+      "Application/JSON; charset=UTF-8",
+      "application/json ; charset=utf-8",
+    ]) {
+      const response = await fetch(`${t.baseUrl}/v1/conversations`, {
+        method: "POST",
+        headers: { "content-type": contentType },
+        body: JSON.stringify({ title: "Valid JSON" }),
+      });
+      assert.equal(response.status, 201, contentType);
+      const body = (await response.json()) as CreateConversationResponse;
+      assert.equal(body.conversation.title, "Valid JSON");
+    }
   });
 
   it("rolls back conversation creation after invalid input and attachments", async () => {

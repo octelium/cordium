@@ -213,10 +213,30 @@ describe("store recovery and file boundaries", () => {
     store.savePending(conv.id, pending);
     store.appendMessage(conv.id, { ...pending, status: "completed" });
     const reloaded = new ConversationStore(dir);
-    reloaded.init();
+    assert.deepEqual(reloaded.init(), []);
     assert.equal(reloaded.getMessages(conv.id).length, 1);
     assert.equal(reloaded.get(conv.id)?.messageCount, 1);
     assert.equal(reloaded.getMessages(conv.id)[0].status, "completed");
+    assert.equal(reloaded.readPending(conv.id), undefined);
+  });
+
+  it("recovers message counts when a crash leaves the journal ahead of metadata", () => {
+    const store = new ConversationStore(dir);
+    store.init();
+    const conv = store.create();
+    const pending = message(conv.id, "pending");
+    store.savePending(conv.id, pending);
+    store.update(conv.id, { activeRunId: "run-pending" });
+    fs.appendFileSync(
+      path.join(dir, conv.id, "messages.jsonl"),
+      `${JSON.stringify({ ...pending, status: "completed" })}\n`,
+    );
+    const reloaded = new ConversationStore(dir);
+    assert.deepEqual(reloaded.init(), []);
+    assert.equal(reloaded.getMessages(conv.id).length, 1);
+    assert.equal(reloaded.get(conv.id)?.messageCount, 1);
+    assert.equal(reloaded.get(conv.id)?.activeRunId, undefined);
+    assert.equal(reloaded.readPending(conv.id), undefined);
   });
 
   it("ignores malformed metadata without preventing valid conversations from loading", () => {
@@ -227,6 +247,25 @@ describe("store recovery and file boundaries", () => {
       ["bad-json", "{"],
       ["bad-null", "null"],
       ["bad-array", "[]"],
+      ["bad-object", "{}"],
+      ["bad-id", JSON.stringify({ ...conv, id: "other-directory" })],
+      ["bad-title", JSON.stringify({ ...conv, id: "bad-title", title: null })],
+      [
+        "bad-date",
+        JSON.stringify({ ...conv, id: "bad-date", updatedAt: null }),
+      ],
+      [
+        "bad-count",
+        JSON.stringify({ ...conv, id: "bad-count", messageCount: -1 }),
+      ],
+      [
+        "bad-run",
+        JSON.stringify({ ...conv, id: "bad-run", activeRunId: false }),
+      ],
+      [
+        "bad-session",
+        JSON.stringify({ ...conv, id: "bad-session", sessionFile: 42 }),
+      ],
     ]) {
       fs.mkdirSync(path.join(dir, id));
       fs.writeFileSync(path.join(dir, id, "conversation.json"), metadata);
@@ -311,8 +350,13 @@ describe("store recovery and file boundaries", () => {
     assert.equal(info.mimeType, "application/json");
     assert.equal(fs.statSync(info.path).mode & 0o777, 0o600);
     assert.equal(fs.statSync(path.dirname(info.path)).mode & 0o777, 0o700);
-    fs.writeFileSync(path.join(store.uploadsDir, info.id, ".meta.json"), "{");
-    assert.equal(store.getUpload(info.id), undefined);
+    for (const metadata of ["{", "null", "[]", "{}"]) {
+      fs.writeFileSync(
+        path.join(store.uploadsDir, info.id, ".meta.json"),
+        metadata,
+      );
+      assert.equal(store.getUpload(info.id), undefined);
+    }
   });
 
   it("does not return metadata for an upload whose content was removed", async () => {
@@ -331,14 +375,35 @@ describe("store recovery and file boundaries", () => {
   it("accepts long UTF-8 filenames within filesystem byte limits", async () => {
     const store = new FileStore(dir);
     store.init();
-    const info = await store.saveUpload(
+    for (const name of [
       `${"é".repeat(140)}.txt`,
+      `${"🦊".repeat(80)}.txt`,
+      `${"a".repeat(199)}🦊.txt`,
+    ]) {
+      const info = await store.saveUpload(
+        name,
+        undefined,
+        Readable.from(["x"]),
+        1,
+      );
+      assert.ok(Buffer.byteLength(info.name) <= 255);
+      assert.equal(Buffer.from(info.name).toString("utf8"), info.name);
+      assert.equal(fs.readFileSync(info.path, "utf8"), "x");
+    }
+  });
+
+  it("does not return metadata for upload content replaced with a directory", async () => {
+    const store = new FileStore(dir);
+    store.init();
+    const info = await store.saveUpload(
+      "replaced.txt",
       undefined,
       Readable.from(["x"]),
       1,
     );
-    assert.ok(Buffer.byteLength(info.name) <= 255);
-    assert.equal(fs.readFileSync(info.path, "utf8"), "x");
+    fs.unlinkSync(info.path);
+    fs.mkdirSync(info.path);
+    assert.equal(store.getUpload(info.id), undefined);
   });
 
   it("reloads artifact metadata and ignores missing artifact content", () => {

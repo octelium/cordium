@@ -327,17 +327,23 @@ describe("data parsing boundaries", () => {
   });
 
   it("rejects unterminated quoted CSV fields", () => {
-    assert.throws(
-      () => parseCSV('name,note\nalpha,"unterminated'),
-      /quote|CSV|unterminated/i,
-    );
+    for (const text of [
+      'name,note\nalpha,"unterminated',
+      'name,note\nalpha,"unterminated\n',
+      'name,note\nalpha,"unterminated""',
+    ]) {
+      assert.throws(() => parseCSV(text), /quote|CSV|unterminated/i);
+    }
   });
 
   it("rejects duplicate CSV column names instead of silently losing a column", () => {
-    assert.throws(
-      () => parseCSV("name,name\nfirst,second\n"),
-      /duplicate|column|header/i,
-    );
+    for (const text of [
+      "name,name\nfirst,second\n",
+      "name, name \nfirst,second\n",
+      "name,name\n",
+    ]) {
+      assert.throws(() => parseCSV(text), /duplicate|column|header/i);
+    }
   });
 
   it("reads every supported JSON array wrapper and rejects invalid JSON", () => {

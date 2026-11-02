@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { defineTool } from "@earendil-works/pi-coding-agent";
-import { Type } from "@earendil-works/pi-ai";
+import { Type } from "typebox";
 import type { WebSearchConfig } from "../../config.ts";
 import { sanitizeFileName } from "../../store/files.ts";
 import {

@@ -15,7 +15,7 @@ import {
   type WorkspaceOptions,
 } from "@octelium/cordium";
 import { defineTool } from "@earendil-works/pi-coding-agent";
-import { Type } from "@earendil-works/pi-ai";
+import { Type } from "typebox";
 import type { AgentToolResult } from "@earendil-works/pi-agent-core";
 import type { JsonValue } from "@protobuf-ts/runtime";
 import type {

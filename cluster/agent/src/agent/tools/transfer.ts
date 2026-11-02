@@ -5,7 +5,7 @@ import * as path from "node:path";
 import { promisify } from "node:util";
 import { shellQuote, type Workspace } from "@octelium/cordium";
 import { defineTool } from "@earendil-works/pi-coding-agent";
-import { Type } from "@earendil-works/pi-ai";
+import { Type } from "typebox";
 import type { AgentToolResult } from "@earendil-works/pi-agent-core";
 import type { ToolDetails, TransferDetails } from "../../protocol/index.ts";
 import { toAPIError, type APIClient } from "../../api/client.ts";
