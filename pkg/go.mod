@@ -4,7 +4,7 @@ go 1.27.3
 
 require (
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/pkg v0.0.0-20261104190343-05fe79e5e71f
+	github.com/octelium/octelium/pkg v0.0.0-20261104234339-b2536e22e1f1
 	github.com/pkg/errors v0.9.1
 	google.golang.org/protobuf v1.36.12
 )
