@@ -70,7 +70,7 @@ func (g *Genesis) RunUpgrade(ctx context.Context, o *UpgradeOpts) error {
 	}
 
 	if err := g.setRegionVersionMap(ctx, regionV); err != nil {
-		zap.L().Warn("Could not setRegionVersionMap", zap.Error(err))
+		return err
 	}
 
 	zap.L().Debug("Upgrade successful")
