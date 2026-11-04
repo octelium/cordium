@@ -2,8 +2,8 @@ github.com/golang/protobuf v1.5.4 h1:i7eJL8qZTpSEXOPTxNKhASYpMn+8e5Q6AdndVa1dWek
 github.com/golang/protobuf v1.5.4/go.mod h1:lnTiLA8Wa4RWRcIUkrtSVa5nRhsEGBg48fD6rSs7xps=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
 github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX3N/iU=
-github.com/octelium/octelium/pkg v0.0.0-20261104121127-6287c825566d h1:PP8T4d6MDalc9PPGXZbaE6cyS2ccy0wzIgnyv391PCU=
-github.com/octelium/octelium/pkg v0.0.0-20261104121127-6287c825566d/go.mod h1:sEolTdyH45ArC1+45hkgbEUhNqKPCqch4wF+hcOq144=
+github.com/octelium/octelium/pkg v0.0.0-20261104190343-05fe79e5e71f h1:EoEqMLCmdZ5FkFj8wO0rpx11kpdW4tZmxr1KyM7juUA=
+github.com/octelium/octelium/pkg v0.0.0-20261104190343-05fe79e5e71f/go.mod h1:sEolTdyH45ArC1+45hkgbEUhNqKPCqch4wF+hcOq144=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 golang.org/x/net v0.62.0 h1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=
