@@ -19,7 +19,6 @@ package genesis
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/octelium/cordium/cluster/common/components"
@@ -46,6 +45,9 @@ import (
 type InitOpts struct{}
 
 func (g *Genesis) RunInit(ctx context.Context, o *InitOpts) error {
+	if err := g.waitForConcurrentGenesis(ctx); err != nil {
+		return err
+	}
 	zap.L().Info("Starting initializing the Cluster")
 
 	octeliumCInit, err := octeliumcinit.NewClient(ctx)
@@ -60,17 +62,11 @@ func (g *Genesis) RunInit(ctx context.Context, o *InitOpts) error {
 		return err
 	}
 
-	regionName := func() string {
-		if os.Getenv("OCTELIUM_REGION_NAME") != "" {
-			return os.Getenv("OCTELIUM_REGION_NAME")
-		}
-		return "default"
-	}()
-
-	region, err := g.octeliumCInit.CoreC().GetRegion(ctx, &rmetav1.GetOptions{Name: regionName})
+	region, err := g.prepareRegion(ctx, clusterCfg)
 	if err != nil {
 		return err
 	}
+	regionName := region.Metadata.Name
 
 	if err := g.installComponents(ctx, &oc.CommonOpts{
 		CommonOpts: gc.CommonOpts{

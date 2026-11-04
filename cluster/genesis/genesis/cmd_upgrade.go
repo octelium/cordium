@@ -18,11 +18,9 @@ package genesis
 
 import (
 	"context"
-	"os"
 
 	"github.com/octelium/cordium/cluster/common/octeliumc"
 	oc "github.com/octelium/cordium/cluster/genesis/genesis/components"
-	"github.com/octelium/octelium/apis/rsc/rmetav1"
 	gc "github.com/octelium/octelium/cluster/genesis/genesis/components"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -31,6 +29,9 @@ import (
 type UpgradeOpts struct{}
 
 func (g *Genesis) RunUpgrade(ctx context.Context, o *UpgradeOpts) error {
+	if err := g.waitForConcurrentGenesis(ctx); err != nil {
+		return err
+	}
 
 	octeliumC, err := octeliumc.NewClient(ctx, nil)
 	if err != nil {
@@ -40,22 +41,15 @@ func (g *Genesis) RunUpgrade(ctx context.Context, o *UpgradeOpts) error {
 	g.octeliumC = octeliumC
 	g.octeliumCInit = octeliumC
 
-	regionName := os.Getenv("OCTELIUM_REGION_NAME")
-	if regionName == "" {
-		return errors.Errorf("Could not start upgrade. Empty region name.")
-	}
-
-	zap.L().Debug("Starting Cordium upgrade", zap.String("region", regionName))
-
-	regionV, err := g.octeliumC.CoreC().GetRegion(ctx, &rmetav1.GetOptions{Name: regionName})
-	if err != nil {
-		return err
-	}
-
 	clusterCfg, err := g.octeliumC.CoreV1Utils().GetClusterConfig(ctx)
 	if err != nil {
 		return err
 	}
+	regionV, err := g.prepareRegion(ctx, clusterCfg)
+	if err != nil {
+		return err
+	}
+	zap.L().Debug("Starting Cordium upgrade", zap.String("region", regionV.Metadata.Name))
 
 	if err := g.installComponents(ctx, &oc.CommonOpts{
 		CommonOpts: gc.CommonOpts{

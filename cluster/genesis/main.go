@@ -40,7 +40,7 @@ var initCmd = &cobra.Command{
 			return err
 		}
 
-		if err := g.RunInit(context.Background(), &genesis.InitOpts{}); err != nil {
+		if err := g.RunInit(cmd.Context(), &genesis.InitOpts{}); err != nil {
 			return err
 		}
 
@@ -56,7 +56,7 @@ var upgradeCmd = &cobra.Command{
 			return err
 		}
 
-		if err := g.RunUpgrade(context.Background(), &genesis.UpgradeOpts{}); err != nil {
+		if err := g.RunUpgrade(cmd.Context(), &genesis.UpgradeOpts{}); err != nil {
 			return err
 		}
 
@@ -106,7 +106,7 @@ func main() {
 			return err
 		}
 
-		if err := rootCmd.Execute(); err != nil {
+		if err := rootCmd.ExecuteContext(ctx); err != nil {
 			return err
 		}
 
