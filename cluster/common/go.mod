@@ -11,24 +11,24 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/cluster/apiserver v0.0.0-20261104234339-b2536e22e1f1
-	github.com/octelium/octelium/cluster/common v0.0.0-20261104234339-b2536e22e1f1
-	github.com/octelium/octelium/cluster/rscserver v0.0.0-20261104234339-b2536e22e1f1
-	github.com/octelium/octelium/pkg v0.0.0-20261104234339-b2536e22e1f1
+	github.com/octelium/octelium/cluster/apiserver v0.0.0-20261105165540-be7392ed620e
+	github.com/octelium/octelium/cluster/common v0.0.0-20261105165540-be7392ed620e
+	github.com/octelium/octelium/cluster/rscserver v0.0.0-20261105165540-be7392ed620e
+	github.com/octelium/octelium/pkg v0.0.0-20261105165540-be7392ed620e
 	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
 	github.com/tidwall/jsonc v0.3.2
 	go.uber.org/zap v1.28.0
 	golang.zx2c4.com/wireguard/wgctrl v0.0.0-20241231184526-a9ab2273dd10
-	google.golang.org/grpc v1.84.0
+	google.golang.org/grpc v1.85.0
 	google.golang.org/protobuf v1.36.12
 	k8s.io/client-go v0.37.0
 )
 
 require (
 	cel.dev/cel-go v0.32.0 // indirect
-	cel.dev/expr v0.25.2 // indirect
+	cel.dev/expr v0.25.3 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
