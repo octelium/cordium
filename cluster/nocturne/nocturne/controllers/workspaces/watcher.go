@@ -448,6 +448,15 @@ func (c *statusWatcher) doUpdateStatusOnce(ctx context.Context, st cordiumv1.Wor
 	}
 
 	if ws.Status.State == state {
+		if state == cordiumv1.Workspace_Status_RUNNING && ws.Status.Failure != nil {
+			ws.Status.Failure = nil
+			_, err = c.octeliumC.CordiumC().UpdateWorkspace(ctx, ws)
+			if grpcerr.IsNotFound(err) {
+				return nil
+			}
+			return err
+		}
+
 		zap.L().Debug("Workspace is already at the state. Nothing to be done",
 			zap.String("name", c.name), zap.String("state", state.String()))
 		return nil
@@ -464,6 +473,7 @@ func (c *statusWatcher) doUpdateStatusOnce(ctx context.Context, st cordiumv1.Wor
 
 	switch state {
 	case cordiumv1.Workspace_Status_RUNNING:
+		ws.Status.Failure = nil
 		c.runningStartedAt = now
 		ws.Status.LastRunningAt = ws.Status.CurrentStateSetAt
 		ws.Status.LastActivityAt = ws.Status.CurrentStateSetAt
@@ -960,11 +970,10 @@ func (c *statusWatcher) onStopped(ctx context.Context) error {
 		return err
 	}
 
-	doUpdateWS := false
+	doUpdateWS := ws.Status.Failure != nil || failure != nil
+	ws.Status.Failure = failure
 
 	if failure != nil {
-		ws.Status.Failure = failure
-
 		if run := ucordiumv1.ToWorkspace(ws).GetCurrentRun(); run != nil {
 			run.Failure = failure
 		}
@@ -972,8 +981,6 @@ func (c *statusWatcher) onStopped(ctx context.Context) error {
 		if failure.GetHealthCheck() != nil {
 			ws.Status.StoppingReason = cordiumv1.Workspace_Status_STOPPING_REASON_ERROR
 		}
-
-		doUpdateWS = true
 	}
 
 	if doUpdateWS {
