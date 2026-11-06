@@ -100,6 +100,18 @@ export const canStopWorkspace = (arg: WsPB.Workspace): boolean => {
   }
 };
 
+export const hasConnect = (arg: UserPB.Service): boolean => {
+  switch (arg.spec?.type) {
+    case undefined:
+    case UserPB.Service_Spec_Type.UNSET:
+    case UserPB.Service_Spec_Type.RDP:
+    case UserPB.Service_Spec_Type.RDP_WEB:
+      return false;
+    default:
+      return true;
+  }
+};
+
 export const isWorkspaceStopped = (arg: WsPB.Workspace): boolean => {
   return arg.status?.state === WsPB.Workspace_Status_State.STOPPED;
 };

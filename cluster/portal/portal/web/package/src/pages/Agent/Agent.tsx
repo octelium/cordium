@@ -5,7 +5,6 @@ import { Button, Loader, Menu } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { GetOptions, ObjectReference } from "@octelium/apis/main/metav1";
-import type { RpcError } from "@protobuf-ts/runtime-rpc";
 import {
   IconAlertCircle,
   IconCheck,
@@ -29,11 +28,16 @@ import Chat from "./Chat";
 import { AgentClient } from "./client";
 import { AgentMark, Shimmer, StatusDot, type DotTone } from "./ui";
 import {
+  agentUserConfigKey,
+  agentWorkspaceKey,
+  getErrorMessage,
   getWorkspaceDisplayName,
   getWorkspaceFailure,
   getWorkspacePath,
+  isNotFound,
   isWorkspaceStarting,
   isWorkspaceStopping,
+  startAgentWorkspace,
   workspaceStateLabel,
 } from "./utils";
 
@@ -42,15 +46,8 @@ const devAgentURL = import.meta.env.VITE_CORDIUM_AGENT_URL as
 
 const S = WsPB.Workspace_Status_State;
 
-const userConfigKey = ["agent", "userConfig"];
 const agentStartupHintMs = 90000;
 const ease = [0.22, 1, 0.36, 1] as const;
-
-const getErrorMessage = (err: unknown): string =>
-  (err as RpcError | Error | undefined)?.message ?? String(err);
-
-const isNotFound = (err: unknown) =>
-  (err as RpcError | undefined)?.code === "NOT_FOUND";
 
 const workspaceTone = (ws?: WsPB.Workspace): DotTone => {
   if (getWorkspaceFailure(ws)) return "red";
@@ -361,7 +358,7 @@ const WorkspaceRunner = (props: {
   const [userStopped, setUserStopped] = React.useState(false);
   const [slowURL, setSlowURL] = React.useState<string>();
   const startedRef = React.useRef(false);
-  const wsKey = ["agent", "workspace", uid];
+  const wsKey = agentWorkspaceKey(uid);
 
   const wsQuery = useQuery({
     queryKey: wsKey,
@@ -389,26 +386,10 @@ const WorkspaceRunner = (props: {
   const getRef = () =>
     ObjectReference.create({ uid, name: ws?.metadata?.name });
 
-  const startAgent = async () => {
-    try {
-      const { response } = await getClientWorkspace().initializeAgent(
-        WsPB.InitializeAgentRequest.create({}),
-      );
-      if (response.status?.agentWorkspaceRef?.uid !== uid) {
-        queryClient.setQueryData(userConfigKey, response);
-        return;
-      }
-    } catch (err) {
-      if ((err as RpcError).code === "FAILED_PRECONDITION") throw err;
-    }
-    try {
-      await getClientWorkspace().startWorkspace(
-        WsPB.StartWorkspaceRequest.create({ workspaceRef: getRef() }),
-      );
-    } catch (err) {
-      if ((err as RpcError).code !== "ALREADY_EXISTS") throw err;
-    }
-  };
+  const startAgent = () =>
+    startAgentWorkspace(getRef(), (config) =>
+      queryClient.setQueryData(agentUserConfigKey, config),
+    );
 
   const start = useMutation({
     mutationFn: startAgent,
@@ -680,7 +661,7 @@ const AgentEnvironment = () => {
   const queryClient = useQueryClient();
 
   const userConfigQuery = useQuery({
-    queryKey: userConfigKey,
+    queryKey: agentUserConfigKey,
     queryFn: async () =>
       (
         await getClientWorkspace().getUserConfig(
@@ -698,7 +679,7 @@ const AgentEnvironment = () => {
           WsPB.InitializeAgentRequest.create({}),
         )
       ).response,
-    onSuccess: (data) => queryClient.setQueryData(userConfigKey, data),
+    onSuccess: (data) => queryClient.setQueryData(agentUserConfigKey, data),
     onError: (err) =>
       notifications.show({
         color: "red",

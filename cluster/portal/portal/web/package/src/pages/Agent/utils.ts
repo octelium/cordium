@@ -10,13 +10,49 @@ import {
   type TableBlock,
   type ToolBlock,
 } from "@/apis/agent/protocol";
+import { getClientWorkspace } from "@/utils/client";
 import { getPathSpaceRef } from "@/utils/octelium";
 import { getShortNameFromStr } from "@/utils/pb";
 import { notifications } from "@mantine/notifications";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { ObjectReference } from "@octelium/apis/main/metav1";
+import type { RpcError } from "@protobuf-ts/runtime-rpc";
 import * as React from "react";
 import { defaultUrlTransform } from "react-markdown";
+
+export const agentUserConfigKey = ["agent", "userConfig"];
+
+export const agentWorkspaceKey = (uid: string) => ["agent", "workspace", uid];
+
+export const getErrorMessage = (err: unknown): string =>
+  (err as RpcError | Error | undefined)?.message ?? String(err);
+
+export const isNotFound = (err: unknown) =>
+  (err as RpcError | undefined)?.code === "NOT_FOUND";
+
+export const startAgentWorkspace = async (
+  workspaceRef: ObjectReference,
+  onReplaced: (config: WsPB.UserConfig) => void,
+) => {
+  try {
+    const { response } = await getClientWorkspace().initializeAgent(
+      WsPB.InitializeAgentRequest.create({}),
+    );
+    if (response.status?.agentWorkspaceRef?.uid !== workspaceRef.uid) {
+      onReplaced(response);
+      return;
+    }
+  } catch (err) {
+    if ((err as RpcError).code === "FAILED_PRECONDITION") throw err;
+  }
+  try {
+    await getClientWorkspace().startWorkspace(
+      WsPB.StartWorkspaceRequest.create({ workspaceRef }),
+    );
+  } catch (err) {
+    if ((err as RpcError).code !== "ALREADY_EXISTS") throw err;
+  }
+};
 
 export const isMac =
   typeof navigator !== "undefined" &&

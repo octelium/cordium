@@ -11,6 +11,8 @@ The Agent suite checks conversations, search, composing, streaming, approvals, W
 
 The portal suite builds a production fixture with protobuf RPC responses and a simulated WebSocket. It checks desktop and mobile navigation, Services search and server filters, pagination resets, error recovery, workspace actions, terminal pinning and drag ordering, deep links to a terminal, keyboard navigation, saved preferences, reconnect replay, full-screen continuity, WebGL context-loss recovery and log-stream cleanup. It also checks layouts in light and dark themes at desktop and mobile widths.
 
+The portal suite also covers the Service connect drawer: the client command of every Service type, the validity of the generated setup scripts, connecting from the Services list and from deep links, the agent Workspace states, session recovery, terminal cleanup on close, and the drawer width and text contrast in light and dark themes from phone to wide desktop widths.
+
 To capture screenshots while running the portal suite:
 
 ```sh

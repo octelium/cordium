@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -1007,5 +1008,692 @@ describe("Portal navigation, Services and terminals", () => {
         await screenshot(`terminals-${theme}-${width}`);
       });
     }
+  }
+
+  const connectDrawer = (name) =>
+    page.getByRole("dialog", { name: `Connect to ${name}`, exact: true });
+  const connectStatus = (drawer, label) =>
+    drawer.getByRole("status").filter({ hasText: label }).waitFor();
+  const connectText = () =>
+    page.evaluate(() => {
+      const record = window.portalFixture.terminals.find(
+        (record) =>
+          !record.disposed &&
+          record.terminal.element?.closest('[data-testid="connect-terminal"]'),
+      );
+      if (!record) return "";
+      const buffer = record.terminal.buffer.active;
+      return Array.from({ length: buffer.length }, (_, index) =>
+        buffer.getLine(index).translateToString(true),
+      ).join("\n");
+    });
+  const rpcCalls = (method) =>
+    page.evaluate(
+      (method) =>
+        window.portalFixture.calls.filter((call) => call.method === method)
+          .length,
+      method,
+    );
+  const connectInputs = () =>
+    page.evaluate(() => window.portalFixture.connect.inputs);
+  const settle = (ms = 200) =>
+    page.evaluate(
+      (ms) => new Promise((resolve) => window.setTimeout(resolve, ms)),
+      ms,
+    );
+  const connectTo = (name) =>
+    page.getByRole("link", { name: `Connect to ${name}`, exact: true }).click();
+  const connected = async (route = "/services/postgres.data/connect") => {
+    await load(route);
+    const drawer = connectDrawer("postgres.data");
+    await connectStatus(drawer, "Connected");
+    return drawer;
+  };
+  const closeDrawer = async (drawer) => {
+    await drawer.getByRole("button", { name: "Close", exact: true }).click();
+    await drawer.waitFor({ state: "detached" });
+  };
+  const textContrast = (locator) =>
+    locator.evaluate((element) => {
+      const canvas = document.createElement("canvas").getContext("2d", {
+        willReadFrequently: true,
+      });
+      const parse = (color) => {
+        canvas.clearRect(0, 0, 1, 1);
+        canvas.fillStyle = color;
+        canvas.fillRect(0, 0, 1, 1);
+        const [r, g, b, a] = canvas.getImageData(0, 0, 1, 1).data;
+        return { rgb: [r, g, b], alpha: a / 255 };
+      };
+      const layers = [];
+      for (let node = element; node; node = node.parentElement) {
+        const layer = parse(getComputedStyle(node).backgroundColor);
+        if (layer.alpha > 0) layers.push(layer);
+        if (layer.alpha === 1) break;
+      }
+      const background = layers.reduceRight(
+        (below, layer) =>
+          below.map(
+            (channel, index) =>
+              layer.rgb[index] * layer.alpha + channel * (1 - layer.alpha),
+          ),
+        [255, 255, 255],
+      );
+      const foreground = parse(getComputedStyle(element).color);
+      const blended = foreground.rgb.map(
+        (channel, index) =>
+          channel * foreground.alpha +
+          background[index] * (1 - foreground.alpha),
+      );
+      const luminance = (channels) => {
+        const [r, g, b] = channels.map((channel) => {
+          const value = channel / 255;
+          return value <= 0.04045
+            ? value / 12.92
+            : ((value + 0.055) / 1.055) ** 2.4;
+        });
+        return r * 0.2126 + g * 0.7152 + b * 0.0722;
+      };
+      const light = Math.max(luminance(background), luminance(blended));
+      const dark = Math.min(luminance(background), luminance(blended));
+      return (light + 0.05) / (dark + 0.05);
+    });
+  const assertReadable = async (locator, label) => {
+    const contrast = await textContrast(locator);
+    assert.ok(contrast >= 4.5, `${label} has a contrast of ${contrast}`);
+  };
+
+  it("connects from the Services list and removes the terminals on close", async () => {
+    await load("/services?q=postgres");
+    await connectTo("postgres.data");
+    await page.waitForURL(
+      (url) =>
+        url.pathname === "/services/postgres.data/connect" &&
+        url.search === "?q=postgres",
+    );
+    const drawer = connectDrawer("postgres.data");
+    await connectStatus(drawer, "Connected");
+    assert.equal(await page.title(), "Connect to postgres.data · Cordium");
+    assert.deepEqual(await connectInputs(), ["psql -h postgres.data\r"]);
+    assert.ok((await connectText()).includes("psql -h postgres.data"));
+    assert.equal(
+      await drawer.getByTestId("connect-command").textContent(),
+      "psql -h postgres.data",
+    );
+    assert.equal(await rpcCalls("CreateTerminal"), 2);
+    assert.equal(await rpcCalls("RemoveTerminal"), 1);
+
+    await closeDrawer(drawer);
+    await page.waitForURL(
+      (url) => url.pathname === "/services" && url.search === "?q=postgres",
+    );
+    await page.waitForFunction(
+      () =>
+        window.portalFixture.calls.filter(
+          (call) => call.method === "RemoveTerminal",
+        ).length === 2,
+    );
+    assert.equal(await page.title(), "Services · Cordium");
+    assert.equal(
+      await page.evaluate(
+        () =>
+          window.portalFixture.terminals.filter((record) => !record.disposed)
+            .length,
+      ),
+      0,
+    );
+  });
+
+  it("opens a deep link above the Services list and accepts short names", async () => {
+    await load("/services/web/connect");
+    const drawer = connectDrawer("web");
+    await connectStatus(drawer, "Connected");
+    await page.getByText("service-00", { exact: true }).waitFor();
+    assert.deepEqual(await connectInputs(), [
+      "curl -sI https://web.local.example.test/",
+    ]);
+  });
+
+  it("closes the drawer without an animation when motion is reduced", async () => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    const drawer = await connected();
+    await closeDrawer(drawer);
+    await page.waitForURL((url) => url.pathname === "/services");
+  });
+
+  it("explains the Services that cannot be connected to", async () => {
+    await load("/services?q=windows");
+    await page.getByText("windows", { exact: true }).last().waitFor();
+    assert.equal(
+      await page.getByRole("link", { name: /^Connect to / }).count(),
+      0,
+    );
+
+    await load("/services/windows/connect");
+    let drawer = connectDrawer("windows");
+    await drawer.getByText("This Service has no terminal client").waitFor();
+    await drawer.getByText("RDP Services cannot be reached").waitFor();
+    assert.equal(await rpcCalls("GetUserConfig"), 0);
+
+    await load("/services/missing.default/connect");
+    drawer = connectDrawer("missing.default");
+    await drawer.getByText("This Service is not available").waitFor();
+    await drawer
+      .getByRole("button", { name: "Back to Services", exact: true })
+      .click();
+    await page.waitForURL((url) => url.pathname === "/services");
+  });
+
+  it("keeps the terminal output when the drawer is resized", async () => {
+    await connected();
+    await page.evaluate(() =>
+      window.portalFixture.connect.output("keep this line\r\n"),
+    );
+    const before = await page.evaluate(
+      () => window.portalFixture.connect.sizes.length,
+    );
+    await page.setViewportSize({ width: 700, height: 600 });
+    await page.waitForFunction(
+      (before) => window.portalFixture.connect.sizes.length > before,
+      before,
+    );
+    await settle();
+    const text = await connectText();
+    assert.ok(text.includes("keep this line"));
+    assert.ok(text.includes("psql -h postgres.data"));
+  });
+
+  it("sends Escape and Tab to the terminal instead of the drawer", async () => {
+    const drawer = await connected();
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("Tab");
+    await page.waitForFunction(() =>
+      window.portalFixture.connect.inputs.includes("\t"),
+    );
+    assert.ok((await connectInputs()).includes("\x1b"));
+    assert.ok(await drawer.isVisible());
+
+    await drawer
+      .getByRole("button", { name: "Start a new session", exact: true })
+      .focus();
+    await page.keyboard.press("Escape");
+    await drawer.waitFor({ state: "detached" });
+  });
+
+  it("types the quick commands without running them", async () => {
+    const drawer = await connected();
+    await drawer
+      .getByRole("button", { name: "\\conninfo", exact: true })
+      .click();
+    await page.waitForFunction(() =>
+      window.portalFixture.connect.inputs.includes("\\conninfo"),
+    );
+  });
+
+  it("continues a kept terminal in the Workspace", async () => {
+    const drawer = await connected();
+    const id = await page.evaluate(() => window.portalFixture.connect.main());
+    await drawer
+      .getByRole("button", { name: "Open in Workspace", exact: true })
+      .click();
+    await page.waitForURL(
+      (url) => url.pathname === "/workspaces/agent/terminals",
+    );
+    await page.locator(`[data-terminal-tab="${id}"]`).waitFor();
+    await page
+      .locator(`[data-terminal-tab="${id}"] [aria-selected="true"]`)
+      .waitFor();
+    assert.equal(await rpcCalls("RemoveTerminal"), 1);
+    assert.equal(new URL(page.url()).searchParams.get("terminal"), null);
+  });
+
+  it("restarts the session after the shell exits", async () => {
+    const drawer = await connected();
+    await page.evaluate(() => window.portalFixture.connect.closeMain());
+    await connectStatus(drawer, "The session has ended");
+    await drawer
+      .getByRole("button", { name: "New session", exact: true })
+      .click();
+    await page.waitForFunction(
+      () => window.portalFixture.connect.inputs.length === 2,
+    );
+    await connectStatus(drawer, "Connected");
+    assert.deepEqual(await connectInputs(), [
+      "psql -h postgres.data\r",
+      "psql -h postgres.data\r",
+    ]);
+  });
+
+  it("reports connection failures and missing clients", async () => {
+    const drawer = await connected();
+    await page.evaluate(() =>
+      window.portalFixture.connect.output(
+        "psql: error: connection refused\r\n",
+      ),
+    );
+    const alert = drawer.getByRole("alert");
+    await alert.getByText("psql: error: connection refused").waitFor();
+    await connectStatus(drawer, "Needs attention");
+    await alert.getByRole("button", { name: "Dismiss", exact: true }).click();
+    await connectStatus(drawer, "Connected");
+
+    await load("/services");
+    await page.evaluate(() => {
+      window.portalFixture.connect.failTool = true;
+    });
+    await connectTo("llm");
+    const llm = connectDrawer("llm");
+    await llm.getByText("curl could not be installed").first().waitFor();
+    await connectStatus(llm, "Needs attention");
+    assert.deepEqual(await connectInputs(), [
+      "curl -s http://llm:8080/v1/models",
+    ]);
+  });
+
+  it("skips the setup and opens the shell", async () => {
+    await load("/services");
+    await page.evaluate(() => {
+      window.portalFixture.connect.holdSetup = true;
+    });
+    await connectTo("postgres.data");
+    const drawer = connectDrawer("postgres.data");
+    await drawer.getByText("Connecting to postgres.data").waitFor();
+    await drawer.locator('[data-step="dns"][data-status="running"]').waitFor();
+    await drawer
+      .getByRole("button", { name: "Skip and open the shell", exact: true })
+      .click();
+    await connectStatus(drawer, "Connected");
+    assert.deepEqual(await connectInputs(), []);
+  });
+
+  it("recovers when the terminals cannot be created", async () => {
+    await load("/services");
+    await page.evaluate(() => {
+      window.portalFixture.connect.failCreate = true;
+    });
+    await connectTo("postgres.data");
+    const drawer = connectDrawer("postgres.data");
+    await drawer.getByText("The terminal is not available").waitFor();
+    await drawer.getByText("The Workspace is not reachable").waitFor();
+    await page.evaluate(() => {
+      window.portalFixture.connect.failCreate = false;
+    });
+    await drawer
+      .getByRole("button", { name: "Try again", exact: true })
+      .click();
+    await connectStatus(drawer, "Connected");
+  });
+
+  it("sets up the agent Workspace on request", async () => {
+    await load("/services");
+    await page.evaluate(() => {
+      window.portalFixture.agent.configured = false;
+    });
+    await connectTo("postgres.data");
+    const drawer = connectDrawer("postgres.data");
+    await drawer.getByText("Set up your agent").waitFor();
+    assert.equal(await rpcCalls("InitializeAgent"), 0);
+    await drawer.getByRole("button", { name: "Set up", exact: true }).click();
+    await connectStatus(drawer, "Connected");
+    assert.equal(await rpcCalls("InitializeAgent"), 1);
+  });
+
+  it("starts a stopped agent Workspace automatically", async () => {
+    await load("/services");
+    await page.evaluate(() => {
+      const fixture = window.portalFixture;
+      fixture.agent.state = fixture.states.STOPPED;
+    });
+    await connectTo("postgres.data");
+    await connectStatus(connectDrawer("postgres.data"), "Connected");
+    assert.equal(await rpcCalls("StartWorkspace"), 1);
+  });
+
+  it("does not restart a failed agent Workspace", async () => {
+    await load("/services");
+    await page.evaluate(() => {
+      const fixture = window.portalFixture;
+      fixture.agent.state = fixture.states.STOPPED;
+      fixture.agent.failure = "The image could not be pulled";
+    });
+    await connectTo("postgres.data");
+    const drawer = connectDrawer("postgres.data");
+    await drawer.getByText("Your agent Workspace failed").waitFor();
+    await drawer.getByText("The image could not be pulled").waitFor();
+    assert.equal(await rpcCalls("StartWorkspace"), 0);
+    await drawer.getByRole("link", { name: "View logs", exact: true }).click();
+    await page.waitForURL((url) => url.pathname === "/workspaces/agent/logs");
+  });
+
+  it("reports an agent Workspace that cannot be started", async () => {
+    await load("/services");
+    await page.evaluate(() => {
+      const fixture = window.portalFixture;
+      fixture.agent.state = fixture.states.STOPPED;
+      fixture.agent.startError = "The quota is exceeded";
+    });
+    await connectTo("postgres.data");
+    const drawer = connectDrawer("postgres.data");
+    await drawer.getByText("could not be started").waitFor();
+    await drawer.getByText("The quota is exceeded").waitFor();
+    await page.evaluate(() => {
+      window.portalFixture.agent.startError = "";
+    });
+    await drawer.getByRole("button", { name: "Start", exact: true }).click();
+    await connectStatus(drawer, "Connected");
+  });
+
+  it("replaces a deleted agent Workspace", async () => {
+    await load("/services");
+    await page.evaluate(() => {
+      window.portalFixture.agent.missing = true;
+    });
+    await connectTo("postgres.data");
+    const drawer = connectDrawer("postgres.data");
+    await drawer.getByText("does not exist anymore").waitFor();
+    await drawer
+      .getByRole("button", { name: "Set up again", exact: true })
+      .click();
+    await connectStatus(drawer, "Connected");
+  });
+
+  it("builds a client command for every Service type", async () => {
+    await load();
+    const plans = await page.evaluate(() => {
+      const { plan } = window.portalFixture;
+      const types = {
+        TCP: 1,
+        UDP: 2,
+        HTTP: 3,
+        SSH: 4,
+        KUBERNETES: 5,
+        POSTGRES: 6,
+        MYSQL: 7,
+        GRPC: 8,
+        WEB: 9,
+        DNS: 10,
+        SOCKS5: 11,
+        MCP: 13,
+        LLM: 14,
+      };
+      return {
+        http: plan({ type: types.HTTP, port: 8080 }, "api.default"),
+        https: plan(
+          { type: types.HTTP, port: 443, isTLS: true },
+          "api.default",
+        ),
+        web: plan({ type: types.WEB, port: 8080 }, "app.default"),
+        mcp: plan({ type: types.MCP, port: 8080 }, "mcp.tools"),
+        llm: plan({ type: types.LLM, port: 8080 }, "llm.default"),
+        ssh: plan({ type: types.SSH, port: 22 }, "box.default"),
+        sshPort: plan({ type: types.SSH, port: 2222 }, "box.ops"),
+        postgres: plan({ type: types.POSTGRES, port: 5432 }, "db.default"),
+        postgresPort: plan({ type: types.POSTGRES, port: 6000 }, "db.default"),
+        mysql: plan({ type: types.MYSQL, port: 3307 }, "db.default"),
+        kubernetes: plan({ type: types.KUBERNETES, port: 443 }, "k8s.default"),
+        grpc: plan({ type: types.GRPC, port: 8080 }, "rpc.default"),
+        grpcTLS: plan(
+          { type: types.GRPC, port: 443, isTLS: true },
+          "rpc.default",
+        ),
+        dns: plan({ type: types.DNS, port: 53 }, "dns.default"),
+        socks: plan({ type: types.SOCKS5, port: 1080 }, "egress.default"),
+        udpDNS: plan({ type: types.UDP, port: 53 }, "resolver.default"),
+        udp: plan({ type: types.UDP, port: 9000 }, "stats.default"),
+        tcpName: plan({ type: types.TCP, port: 7000 }, "redis-1.default"),
+        tcpDisplay: plan(
+          { type: types.TCP, port: 7000 },
+          "cache.default",
+          "MariaDB primary",
+        ),
+        tcpPort: plan({ type: types.TCP, port: 5432 }, "store.default"),
+        tcpHTTP: plan({ type: types.TCP, port: 8080 }, "svc.default"),
+        tcp: plan({ type: types.TCP, port: 7000 }, "thing.default"),
+      };
+    });
+
+    const expected = {
+      http: ["curl", "curl -i http://api:8080/", false],
+      https: ["curl", "curl -i https://api.local.example.test/", false],
+      web: ["curl", "curl -sI http://app:8080/", false],
+      llm: ["curl", "curl -s http://llm:8080/v1/models", false],
+      ssh: ["ssh", "ssh box", true],
+      sshPort: ["ssh", "ssh box.ops -p 2222", true],
+      postgres: ["psql", "psql -h db", true],
+      postgresPort: ["psql", "psql -h db -p 6000", true],
+      mysql: ["mysql", "mysql -h db -P 3307", true],
+      kubernetes: ["kubectl", "kubectl get pods -A", false],
+      grpc: ["grpcurl", "grpcurl -plaintext rpc:8080 list", false],
+      grpcTLS: ["grpcurl", "grpcurl rpc.local.example.test:443 list", false],
+      dns: ["dig", "dig @dns example.com", false],
+      socks: [
+        "curl",
+        "curl --socks5-hostname egress:1080 https://example.com -I",
+        false,
+      ],
+      udpDNS: ["dig", "dig @resolver example.com", false],
+      tcpName: ["redis-cli", "redis-cli -h redis-1 -p 7000", true],
+      tcpDisplay: ["mysql", "mysql -h cache -P 7000 -p -u ", false],
+      tcpPort: ["psql", "psql -h store -U ", false],
+      tcpHTTP: ["curl", "curl -i http://svc:8080/", false],
+    };
+
+    for (const [name, [tool, command, run]] of Object.entries(expected)) {
+      const plan = plans[name];
+      assert.equal(plan.tool, tool, name);
+      assert.equal(plan.inputs.at(-1).text, command, name);
+      assert.equal(!!plan.inputs.at(-1).run, run, name);
+    }
+
+    assert.ok(
+      plans.mcp.inputs[0].text.startsWith("curl -s http://mcp.tools:8080/ "),
+    );
+    assert.ok(plans.mcp.inputs[0].text.includes('"method":"initialize"'));
+    assert.equal(plans.kubernetes.kubeconfig, "k8s");
+    assert.equal(
+      plans.kubernetes.inputs[0].text,
+      "export KUBECONFIG=/home/alex/.kube/config",
+    );
+    assert.equal(plans.udp.tool, undefined);
+    assert.ok(plans.udp.hint.includes("stats:9000"));
+    assert.equal(plans.tcp.tool, undefined);
+    assert.ok(plans.tcp.hint.includes("thing:7000"));
+    assert.equal(
+      plans.tcpName.inferred,
+      "redis-cli is inferred from the Service name.",
+    );
+    assert.equal(
+      plans.tcpDisplay.inferred,
+      "mysql is inferred from the Service display name.",
+    );
+    assert.equal(
+      plans.tcpPort.inferred,
+      "psql is inferred from the Service port.",
+    );
+
+    for (const [name, plan] of Object.entries(plans)) {
+      assert.doesNotThrow(
+        () => execFileSync("sh", ["-n", "-c", plan.script]),
+        `${name} has an invalid setup script`,
+      );
+    }
+  });
+
+  for (const theme of ["light", "dark"]) {
+    it(`fits the drawer on every device width in the ${theme} theme`, async () => {
+      const sizes = [
+        { name: "phone-small", width: 320, height: 568, drawer: 320 },
+        { name: "phone", width: 390, height: 844, drawer: 390 },
+        { name: "phone-landscape", width: 844, height: 390, drawer: 844 },
+        { name: "phablet", width: 640, height: 900, drawer: 640 },
+        { name: "tablet", width: 768, height: 1024, drawer: 768 },
+        { name: "tablet-landscape", width: 1024, height: 768, drawer: 960 },
+        { name: "laptop", width: 1440, height: 900, drawer: 960 },
+        { name: "desktop", width: 1920, height: 1080, drawer: 1152 },
+        { name: "wide", width: 2560, height: 1440, drawer: 1536 },
+      ];
+      await load("/services/postgres.data/connect", theme);
+      const drawer = connectDrawer("postgres.data");
+      await connectStatus(drawer, "Connected");
+
+      for (const size of sizes) {
+        await page.setViewportSize({ width: size.width, height: size.height });
+        await settle();
+        const box = await drawer.boundingBox();
+        assert.equal(box.width, size.drawer, `${size.name} width`);
+        assert.equal(box.height, size.height, `${size.name} height`);
+        assert.equal(box.x + box.width, size.width, `${size.name} edge`);
+        assert.equal(box.y, 0, `${size.name} top`);
+
+        const layout = await drawer.evaluate((element) => {
+          const content = element.getBoundingClientRect();
+          const rect = (selector) =>
+            element.querySelector(selector).getBoundingClientRect();
+          const controls = [
+            ...element.querySelectorAll("header button, header h2"),
+          ].filter((node) => node.getClientRects().length > 0);
+          const toolbar = element.querySelector('[role="toolbar"]');
+          return {
+            overflow: controls.some((node) => {
+              const box = node.getBoundingClientRect();
+              return box.left < content.left || box.right > content.right;
+            }),
+            clipped: element.scrollWidth > element.clientWidth,
+            page: document.documentElement.scrollWidth,
+            terminal: rect('[data-testid="connect-terminal"]'),
+            xterm: rect(".xterm-screen"),
+            toolbarInside: toolbar.clientWidth <= content.width,
+            bottom: rect('[data-testid="connect-size"]').bottom,
+            contentBottom: content.bottom,
+          };
+        });
+        assert.equal(layout.overflow, false, `${size.name} header controls`);
+        assert.equal(layout.clipped, false, `${size.name} clipping`);
+        assert.ok(layout.page <= size.width, `${size.name} page scroll`);
+        assert.ok(layout.toolbarInside, `${size.name} toolbar`);
+        assert.ok(layout.terminal.height >= 150, `${size.name} terminal`);
+        assert.ok(
+          layout.terminal.width >= size.drawer - 2,
+          `${size.name} terminal width`,
+        );
+        assert.ok(
+          layout.xterm.right <= layout.terminal.right,
+          `${size.name} xterm width`,
+        );
+        assert.ok(layout.bottom <= layout.contentBottom, `${size.name} footer`);
+        await screenshot(`connect-${theme}-${size.name}`);
+      }
+    });
+
+    it(`keeps every connect state readable in the ${theme} theme`, async () => {
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await load("/services", theme);
+      await page.evaluate(() => {
+        window.portalFixture.connect.holdSetup = true;
+      });
+      await connectTo("service-00");
+      const drawer = connectDrawer("service-00");
+      const card = drawer.locator('.console-surface [role="status"]');
+      await drawer.getByText("Connecting to service-00").waitFor();
+      await assertReadable(drawer.getByRole("heading"), "title");
+      await assertReadable(drawer.getByTestId("connect-command"), "command");
+      await assertReadable(drawer.getByRole("note"), "info strip");
+      await assertReadable(card.getByText("Connecting to service-00"), "card");
+      await assertReadable(
+        card.getByText("in your agent Workspace"),
+        "subtitle",
+      );
+      await assertReadable(
+        drawer.locator('[data-step="dns"] span').last(),
+        "step",
+      );
+      await settle(400);
+      await screenshot(`connect-${theme}-progress`);
+      await drawer
+        .getByRole("button", { name: "Skip and open the shell", exact: true })
+        .click();
+      await connectStatus(drawer, "Connected");
+      await assertReadable(
+        drawer.getByRole("status").filter({ hasText: "Connected" }),
+        "status",
+      );
+      await assertReadable(
+        drawer.getByRole("button", { name: "raw TCP", exact: true }),
+        "quick command",
+      );
+      await assertReadable(drawer.getByTitle("agent"), "footer");
+      await closeDrawer(drawer);
+
+      await page.evaluate(() => {
+        const { connect } = window.portalFixture;
+        connect.holdSetup = false;
+        connect.failTool = true;
+      });
+      await connectTo("postgres.data");
+      const postgres = connectDrawer("postgres.data");
+      const warning = postgres.getByRole("alert");
+      await warning.getByText("psql could not be installed").first().waitFor();
+      await assertReadable(warning.locator("div").first(), "warning strip");
+      await connectStatus(postgres, "Needs attention");
+      await page.evaluate(() =>
+        window.portalFixture.connect.output(
+          "psql: error: connection refused\r\n",
+        ),
+      );
+      await settle(400);
+      await screenshot(`connect-${theme}-warning`);
+      await closeDrawer(postgres);
+
+      await page.evaluate(() => {
+        const fixture = window.portalFixture;
+        fixture.connect.failTool = false;
+        fixture.agent.configured = false;
+        return fixture.refreshAgent();
+      });
+      await connectTo("llm");
+      const llm = connectDrawer("llm");
+      await llm.getByText("Set up your agent").waitFor();
+      const setup = llm.locator('.console-surface [role="status"]');
+      await assertReadable(setup.getByText("Set up your agent"), "setup title");
+      await assertReadable(
+        setup.getByText("Terminals run in the Workspace"),
+        "setup text",
+      );
+      await assertReadable(
+        setup.getByRole("button", { name: "Set up", exact: true }),
+        "setup button",
+      );
+      await settle(400);
+      await screenshot(`connect-${theme}-setup`);
+    });
+
+    it(`shows the Connect action on every width in the ${theme} theme`, async () => {
+      await load("/services?q=web", theme);
+      for (const width of [320, 360, 390, 768, 1440]) {
+        await page.setViewportSize({ width, height: 800 });
+        const link = page.getByRole("link", {
+          name: "Connect to web",
+          exact: true,
+        });
+        await link.waitFor();
+        const box = await link.boundingBox();
+        assert.ok(box.x >= 0 && box.x + box.width <= width);
+        assert.ok(
+          (await page.evaluate(() => document.documentElement.scrollWidth)) <=
+            width,
+        );
+        assert.equal(
+          await page.evaluate(
+            () =>
+              [...document.querySelectorAll(".mantine-Button-label")].filter(
+                (label) => label.scrollWidth > label.clientWidth,
+              ).length,
+          ),
+          0,
+          `clipped button labels at ${width}px`,
+        );
+        await screenshot(`services-connect-${theme}-${width}`);
+      }
+    });
   }
 });

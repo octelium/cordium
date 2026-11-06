@@ -12,10 +12,12 @@ import { getDomain } from "@/utils";
 import { getClientUser } from "@/utils/client";
 import { useAppSelector } from "@/utils/hooks";
 import {
+  getPathServiceConnect,
   getServiceHostname,
   getServicePrivateFQDN,
   getServicePublicFQDN,
 } from "@/utils/octelium";
+import { hasConnect } from "@/utils/pb";
 import {
   ActionIcon,
   Alert,
@@ -38,11 +40,18 @@ import {
   IconServer2,
   IconRefresh,
   IconSearchOff,
+  IconTerminal2,
   IconX,
 } from "@tabler/icons-react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import * as React from "react";
-import { useSearchParams } from "react-router-dom";
+import {
+  Link,
+  Outlet,
+  useLocation,
+  useMatch,
+  useSearchParams,
+} from "react-router-dom";
 import {
   CommonListOptions_OrderBy_Mode,
   CommonListOptions_OrderBy_Type,
@@ -57,6 +66,7 @@ const ORDER_BY_NAME = {
 
 const ServiceRow = (props: { item: Service; domain: string }) => {
   const { item, domain } = props;
+  const location = useLocation();
   const [expanded, setExpanded] = React.useState(false);
   const detailsId = React.useId();
   const isWeb = item.spec?.isPublic && item.spec.type === Service_Spec_Type.WEB;
@@ -115,7 +125,22 @@ const ServiceRow = (props: { item: Service; domain: string }) => {
           </Collapse>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {hasConnect(item) && (
+            <Button
+              size="xs"
+              variant="default"
+              component={Link}
+              to={{
+                pathname: getPathServiceConnect(item),
+                search: location.search,
+              }}
+              leftSection={<IconTerminal2 size={13} />}
+              aria-label={`Connect to ${getServiceHostname(item)}`}
+            >
+              Connect
+            </Button>
+          )}
           {isWeb && (
             <Button
               size="xs"
@@ -175,6 +200,7 @@ const FilterChip = (props: {
 const Page = () => {
   const itemsPerPage = useAppSelector((s) => s.settings.itemsPerPage);
   const [searchParams, setSearchParams] = useSearchParams();
+  const connect = useMatch("/services/:name/connect");
   const domain = getDomain();
   const search = (searchParams.get("q") ?? "").trim();
   const namespace = searchParams.get("namespace") ?? "";
@@ -255,7 +281,9 @@ const Page = () => {
 
   return (
     <>
-      <Meta title="Services" />
+      <Meta
+        title={connect ? `Connect to ${connect.params.name}` : "Services"}
+      />
       <PageHeader
         title="Services"
         description="Discover Services available to you and connect from your workspaces."
@@ -432,6 +460,7 @@ const Page = () => {
           </Stack>
         )}
       </QueryBoundary>
+      <Outlet />
     </>
   );
 };

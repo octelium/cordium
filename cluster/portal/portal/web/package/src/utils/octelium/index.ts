@@ -55,6 +55,10 @@ export const getServicePublicURL = (
   return `https://${getServicePublicFQDN(arg, domain)}`;
 };
 
+export const getPathServiceConnect = (arg: UserPB.Service): string => {
+  return `/services/${encodeURIComponent(arg.metadata!.name)}/connect`;
+};
+
 export const getPathSpaceRef = (arg: MetaPB.ObjectReference): string => {
   return `/spaces/${getSpacePathName(
     arg.name,

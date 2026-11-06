@@ -14,6 +14,8 @@ import { Terminal as XTerm } from "@xterm/xterm";
 import { WebglAddon } from "@xterm/addon-webgl";
 import theme, { cssVariablesResolver } from "@/utils/theme/mantine";
 import { queryClient } from "@/utils";
+import { buildConnectPlan } from "@/components/ServiceConnect/plan";
+import { buildSetupScript } from "@/components/ServiceConnect/setup";
 
 interface TerminalRecord {
   terminal: XTerm;
@@ -35,6 +37,39 @@ declare global {
       missingTerminalIDs: string[];
       logAborts: number;
       refreshTerminals: () => Promise<void>;
+      refreshAgent: () => Promise<unknown>;
+      states: typeof WsPB.Workspace_Status_State;
+      agent: {
+        uid: string;
+        configured: boolean;
+        missing: boolean;
+        state: WsPB.Workspace_Status_State;
+        failure: string;
+        startError: string;
+      };
+      connect: {
+        scripts: string[];
+        inputs: string[];
+        sizes: { id: string; cols: number; rows: number }[];
+        holdSetup: boolean;
+        failTool: boolean;
+        failCreate: boolean;
+        main: () => string;
+        output: (text: string) => void;
+        closeMain: () => void;
+      };
+      plan: (
+        spec: Partial<UserPB.Service_Spec>,
+        name: string,
+        displayName?: string,
+      ) => {
+        tool?: string;
+        kubeconfig?: string;
+        hint?: string;
+        inferred?: string;
+        inputs: { text: string; run?: boolean }[];
+        script: string;
+      };
     };
   }
 }
@@ -52,9 +87,53 @@ window.portalFixture = {
   logAborts: 0,
   refreshTerminals: () =>
     queryClient.invalidateQueries({ queryKey: ["workspace/ws/listTerminal"] }),
+  refreshAgent: () => queryClient.invalidateQueries({ queryKey: ["agent"] }),
+  states: WsPB.Workspace_Status_State,
+  agent: {
+    uid: "workspace-agent",
+    configured: true,
+    missing: false,
+    state: WsPB.Workspace_Status_State.RUNNING,
+    failure: "",
+    startError: "",
+  },
+  connect: {
+    scripts: [],
+    inputs: [],
+    sizes: [],
+    holdSetup: false,
+    failTool: false,
+    failCreate: false,
+    main: () => mainTerminal(),
+    output: (text) => emitOutput(mainTerminal(), text),
+    closeMain: () => {
+      const id = mainTerminal();
+      emitTerminal(id, { oneofKind: "close", close: {} });
+      closeStream(id);
+    },
+  },
+  plan: (spec, name, displayName) => {
+    const plan = buildConnectPlan(
+      UserPB.Service.create({
+        metadata: { name, displayName },
+        spec,
+        status: { namespace: name.split(".")[1] },
+      }),
+      "example.test",
+    );
+    return {
+      tool: plan.tool,
+      kubeconfig: plan.kubeconfig,
+      hint: plan.hint?.text,
+      inferred: plan.inferred,
+      inputs: plan.commands({ kubeconfig: "/home/alex/.kube/config" }),
+      script: buildSetupScript(plan, "example.test", "0123456789ab"),
+    };
+  },
 };
 const fixture = window.portalFixture;
 const encoder = new TextEncoder();
+const decoder = new TextDecoder();
 const route = new URLSearchParams(location.search).get("route") ?? "/services";
 const colorScheme =
   new URLSearchParams(location.search).get("theme") === "dark"
@@ -211,6 +290,11 @@ const services = [
     spec: { type: UserPB.Service_Spec_Type.LLM, port: 8080 },
     status: { namespace: "default" },
   }),
+  UserPB.Service.create({
+    metadata: { uid: "windows", name: "windows.default" },
+    spec: { type: UserPB.Service_Spec_Type.RDP, port: 3389 },
+    status: { namespace: "default" },
+  }),
 ].sort((a, b) => a.metadata!.name.localeCompare(b.metadata!.name));
 const workspace = WsPB.Workspace.create({
   apiVersion: "cordium/v1",
@@ -231,6 +315,25 @@ const workspace = WsPB.Workspace.create({
   },
 });
 
+const agentWorkspace = () =>
+  WsPB.Workspace.create({
+    apiVersion: "cordium/v1",
+    kind: "Workspace",
+    metadata: {
+      uid: fixture.agent.uid,
+      name: "agent",
+      displayName: "Cordium Agent",
+    },
+    spec: { runtime: {} },
+    status: {
+      state: fixture.agent.state,
+      regionRef: { name: "default" },
+      failure: fixture.agent.failure
+        ? { message: fixture.agent.failure }
+        : undefined,
+    },
+  });
+
 const frame = (type: number, payload: Uint8Array) => {
   const bytes = new Uint8Array(5 + payload.length);
   bytes[0] = type;
@@ -239,6 +342,71 @@ const frame = (type: number, payload: Uint8Array) => {
   return bytes;
 };
 const trailer = frame(128, encoder.encode("grpc-status: 0\r\n"));
+const rpcError = (code: number, message: string) =>
+  new Response(
+    frame(
+      128,
+      encoder.encode(`grpc-status: ${code}\r\ngrpc-message: ${message}\r\n`),
+    ),
+    { headers: { "content-type": "application/grpc-web+proto" } },
+  );
+
+const terminalStreams = new Map<
+  string,
+  ReadableStreamDefaultController<Uint8Array>
+>();
+const pendingInput = new Map<string, string>();
+const connectTerminals: string[] = [];
+const mainTerminal = () => connectTerminals.at(-1) ?? "";
+const emitTerminal = (
+  id: string,
+  type: WsPB.ListenTerminalResponse["type"],
+) => {
+  terminalStreams
+    .get(id)
+    ?.enqueue(
+      frame(
+        0,
+        WsPB.ListenTerminalResponse.toBinary(
+          WsPB.ListenTerminalResponse.create({ type }),
+        ),
+      ),
+    );
+};
+const emitOutput = (id: string, text: string) =>
+  emitTerminal(id, {
+    oneofKind: "stdout",
+    stdout: { data: encoder.encode(text) },
+  });
+const closeStream = (id: string) => {
+  const controller = terminalStreams.get(id);
+  if (!controller) return;
+  terminalStreams.delete(id);
+  controller.enqueue(trailer);
+  controller.close();
+};
+const runSetup = (id: string, script: string) => {
+  fixture.connect.scripts.push(script);
+  const nonce = /^N=(\w+)/.exec(script)![1];
+  const mark = (body: string) =>
+    emitOutput(id, `\r\n@@ocx:${nonce}:${body}\r\n`);
+  mark("start");
+  mark("step:dns:run");
+  if (fixture.connect.holdSetup) return;
+  mark("step:dns:ok");
+  const tool = /^(?:want|fetch) (\S+) /m.exec(script)?.[1];
+  if (tool) {
+    mark(
+      fixture.connect.failTool
+        ? `step:${tool}:fail:root access is not available`
+        : `step:${tool}:ok:${tool}`,
+    );
+  }
+  mark("done");
+  emitTerminal(id, { oneofKind: "close", close: {} });
+  closeStream(id);
+};
+
 const originalFetch = window.fetch;
 window.fetch = async (url, init) => {
   const path = new URL(String(url), location.origin).pathname;
@@ -281,8 +449,47 @@ window.fetch = async (url, init) => {
         ],
       };
       break;
-    case "GetWorkspace": {
+    case "GetUserConfig":
+    case "InitializeAgent":
+      if (method.name === "InitializeAgent") {
+        if (fixture.agent.missing) fixture.agent.uid = "workspace-agent-new";
+        fixture.agent.configured = true;
+        fixture.agent.missing = false;
+      }
+      result = {
+        status: {
+          agentWorkspaceRef: fixture.agent.configured
+            ? { uid: fixture.agent.uid, name: "agent" }
+            : undefined,
+        },
+      };
+      break;
+    case "StartWorkspace":
+      if (fixture.agent.startError) {
+        return rpcError(9, fixture.agent.startError);
+      }
+      fixture.agent.state = WsPB.Workspace_Status_State.RUNNING;
+      break;
+    case "GetService": {
       const name = (input as { name: string }).name;
+      const item = services.find(
+        (service) =>
+          service.metadata!.name === name ||
+          service.metadata!.name === `${name}.default`,
+      );
+      if (!item) return rpcError(5, "The Service does not exist");
+      result = item;
+      break;
+    }
+    case "GetWorkspace": {
+      const { name, uid } = input as { name: string; uid: string };
+      if (uid.startsWith("workspace-agent")) {
+        if (fixture.agent.missing) {
+          return rpcError(5, "The Workspace does not exist");
+        }
+        result = agentWorkspace();
+        break;
+      }
       const item = WsPB.Workspace.clone(workspace);
       if (name === "other") {
         item.metadata!.uid = "workspace-other";
@@ -339,9 +546,69 @@ window.fetch = async (url, init) => {
       break;
     }
     case "CreateTerminal": {
+      if (fixture.connect.failCreate) {
+        return rpcError(14, "The Workspace is not reachable");
+      }
       const id = `terminal-shell-${terminalIDs.size + 1}`;
       terminalIDs.add(id);
+      if ((input as WsPB.CreateTerminalRequest).cols === 200) {
+        connectTerminals.unshift(id);
+      } else {
+        connectTerminals.push(id);
+      }
       result = { id };
+      break;
+    }
+    case "ListenTerminal": {
+      const id = (input as WsPB.ListenTerminalRequest).id;
+      if (!terminalIDs.has(id)) return rpcError(5, "Terminal not found");
+      return new Response(
+        new ReadableStream({
+          start(controller) {
+            terminalStreams.set(id, controller);
+            emitTerminal(id, {
+              oneofKind: "windowSize",
+              windowSize: { rows: 24, cols: 80 },
+            });
+            emitOutput(id, "$ ");
+            init?.signal?.addEventListener(
+              "abort",
+              () => {
+                if (terminalStreams.get(id) === controller) closeStream(id);
+              },
+              { once: true },
+            );
+          },
+        }),
+        { headers: { "content-type": "application/grpc-web+proto" } },
+      );
+    }
+    case "WriteTerminalData": {
+      const { id, data } = input as WsPB.WriteTerminalDataRequest;
+      const text = (pendingInput.get(id) ?? "") + decoder.decode(data);
+      if (text.startsWith(" echo ")) {
+        const setup = /^ echo (\S+) \| base64 -d > \S+ && sh \S+; exit\r$/.exec(
+          text,
+        );
+        if (setup) {
+          pendingInput.delete(id);
+          runSetup(id, atob(setup[1]));
+        } else {
+          pendingInput.set(id, text);
+        }
+        break;
+      }
+      fixture.connect.inputs.push(text);
+      emitOutput(id, text.replace(/\r/g, "\r\n"));
+      break;
+    }
+    case "SetTerminalWindowSize": {
+      const { id, cols, rows } = input as WsPB.SetTerminalWindowSizeRequest;
+      fixture.connect.sizes.push({ id, cols, rows });
+      emitTerminal(id, {
+        oneofKind: "windowSize",
+        windowSize: { cols, rows },
+      });
       break;
     }
     case "RemoveTerminal":
@@ -351,6 +618,7 @@ window.fetch = async (url, init) => {
           statusText: "Service Unavailable",
         });
       terminalIDs.delete((input as WsPB.RemoveTerminalRequest).id);
+      closeStream((input as WsPB.RemoveTerminalRequest).id);
       break;
     case "ListenLog":
       return new Response(
@@ -389,6 +657,7 @@ window.fetch = async (url, init) => {
 const { default: store } = await import("@/store");
 const { default: Root } = await import("@/pages");
 const { default: Services } = await import("@/pages/Services/List");
+const { default: Connect } = await import("@/pages/Services/Connect");
 const { default: Workspace } = await import("@/pages/Workspaces/Item");
 const { default: Terminals } =
   await import("@/pages/Workspaces/Item/Terminals");
@@ -408,7 +677,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <BrowserRouter>
             <Routes>
               <Route element={<Root />}>
-                <Route path="services" element={<Services />} />
+                <Route path="services" element={<Services />}>
+                  <Route path=":name/connect" element={<Connect />} />
+                </Route>
                 <Route path="workspaces/:name" element={<Workspace />}>
                   <Route index element={<p>Workspace details</p>} />
                   <Route path="terminals" element={<Terminals />} />
