@@ -834,6 +834,64 @@ describe("Portal navigation, Services and terminals", () => {
     );
   });
 
+  const loadRouter = async (route, theme = "light") => {
+    const origin = server.resolvedUrls.local[0];
+    await page.goto(
+      `${origin}tests/fixtures/portal.html?${new URLSearchParams({ route, theme, router: "full" })}`,
+    );
+  };
+
+  for (const theme of ["light", "dark"]) {
+    it(`shows a not found page for unknown addresses in the ${theme} theme`, async () => {
+      for (const route of [
+        "/nope",
+        "/workspaces/demo/nope",
+        "/spaces/default/nope/deep",
+        "/services/web",
+      ]) {
+        await loadRouter(route, theme);
+        await page
+          .getByRole("heading", { name: "Page not found", exact: true })
+          .waitFor();
+        await page
+          .getByRole("link", { name: "Workspaces", exact: true })
+          .first()
+          .waitFor();
+        assert.equal(await page.title(), "Page not found · Cordium");
+        await screenshot(`not-found-${theme}`);
+      }
+      await page
+        .getByRole("link", { name: "Go to Overview", exact: true })
+        .click();
+      await page
+        .getByRole("heading", { name: "Welcome back, Alex", exact: true })
+        .waitFor();
+    });
+
+    it(`keeps the portal around a page that fails to render in the ${theme} theme`, async () => {
+      await loadRouter("/crash", theme);
+      const alert = page.getByRole("alert");
+      await alert
+        .getByRole("heading", {
+          name: "This page hit an unexpected error",
+          exact: true,
+        })
+        .waitFor();
+      await alert.getByText("Render failed", { exact: true }).waitFor();
+      await alert.getByRole("button", { name: "Reload", exact: true }).waitFor();
+      await page
+        .getByRole("link", { name: "Workspaces", exact: true })
+        .first()
+        .waitFor();
+      assert.equal(await page.title(), "Something went wrong · Cordium");
+      await screenshot(`route-error-${theme}`);
+      await alert.getByRole("link", { name: "Overview", exact: true }).click();
+      await page
+        .getByRole("heading", { name: "Welcome back, Alex", exact: true })
+        .waitFor();
+    });
+  }
+
   it("uses Plus Jakarta Sans and JetBrains Mono with no trace of Ubuntu", async () => {
     await terminals();
     const fonts = await page.evaluate(async () => {

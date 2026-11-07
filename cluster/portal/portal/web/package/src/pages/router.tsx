@@ -1,3 +1,4 @@
+import { NotFoundPage, RouteError } from "@/components/RouteError";
 import { RouteObject } from "react-router-dom";
 import routerAgent from "./Agent/router";
 import Home from "./Home";
@@ -14,14 +15,20 @@ const routerRoot = (): RouteObject => {
     path: "/",
     element: <Root />,
     children: [
-      { path: "", element: <Home /> },
-      routerAgent(),
-      routerWorkspaces(),
-      routerSnapshots(),
-      routerSpaces(),
-      routerServices(),
-      routerUserSecret(),
-      routerSettings(),
+      {
+        errorElement: <RouteError />,
+        children: [
+          { path: "", element: <Home /> },
+          routerAgent(),
+          routerWorkspaces(),
+          routerSnapshots(),
+          routerSpaces(),
+          routerServices(),
+          routerUserSecret(),
+          routerSettings(),
+          { path: "*", element: <NotFoundPage /> },
+        ],
+      },
     ],
   };
 };

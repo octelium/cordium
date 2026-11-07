@@ -7,7 +7,13 @@ import ReactDOM from "react-dom/client";
 import { MantineProvider } from "@mantine/core";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Provider } from "react-redux";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter,
+  createBrowserRouter,
+  Route,
+  RouterProvider,
+  Routes,
+} from "react-router-dom";
 import * as UserPB from "@octelium/apis/main/userv1";
 import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { Terminal as XTerm } from "@xterm/xterm";
@@ -139,6 +145,7 @@ const colorScheme =
   new URLSearchParams(location.search).get("theme") === "dark"
     ? "dark"
     : "light";
+const fullRouter = new URLSearchParams(location.search).has("router");
 history.replaceState(null, "", route);
 
 const terminalIDs = new Set([
@@ -656,6 +663,7 @@ window.fetch = async (url, init) => {
 
 const { default: store } = await import("@/store");
 const { default: Root } = await import("@/pages");
+const { default: routerRoot } = await import("@/pages/router");
 const { default: Services } = await import("@/pages/Services/List");
 const { default: Connect } = await import("@/pages/Services/Connect");
 const { default: Workspace } = await import("@/pages/Workspaces/Item");
@@ -664,6 +672,17 @@ const { default: Terminals } =
 const { default: Logs } = await import("@/pages/Workspaces/Item/Logs");
 const { default: Snapshots } =
   await import("@/pages/Workspaces/Item/Snapshots");
+
+const portalRouter = () => {
+  const root = routerRoot();
+  root.children![0].children!.push({
+    path: "crash",
+    Component: () => {
+      throw new Error("Render failed");
+    },
+  });
+  return createBrowserRouter([root]);
+};
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -674,22 +693,26 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         forceColorScheme={colorScheme}
       >
         <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            <Routes>
-              <Route element={<Root />}>
-                <Route path="services" element={<Services />}>
-                  <Route path=":name/connect" element={<Connect />} />
+          {fullRouter ? (
+            <RouterProvider router={portalRouter()} />
+          ) : (
+            <BrowserRouter>
+              <Routes>
+                <Route element={<Root />}>
+                  <Route path="services" element={<Services />}>
+                    <Route path=":name/connect" element={<Connect />} />
+                  </Route>
+                  <Route path="workspaces/:name" element={<Workspace />}>
+                    <Route index element={<p>Workspace details</p>} />
+                    <Route path="terminals" element={<Terminals />} />
+                    <Route path="logs" element={<Logs />} />
+                    <Route path="snapshots" element={<Snapshots />} />
+                  </Route>
+                  <Route path="*" element={<p>Portal resources</p>} />
                 </Route>
-                <Route path="workspaces/:name" element={<Workspace />}>
-                  <Route index element={<p>Workspace details</p>} />
-                  <Route path="terminals" element={<Terminals />} />
-                  <Route path="logs" element={<Logs />} />
-                  <Route path="snapshots" element={<Snapshots />} />
-                </Route>
-                <Route path="*" element={<p>Portal resources</p>} />
-              </Route>
-            </Routes>
-          </BrowserRouter>
+              </Routes>
+            </BrowserRouter>
+          )}
         </QueryClientProvider>
       </MantineProvider>
     </Provider>

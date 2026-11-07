@@ -3,7 +3,7 @@ import { IconInbox } from "@tabler/icons-react";
 import * as React from "react";
 
 const Empty = (props: {
-  title: string;
+  title: React.ReactNode;
   description?: React.ReactNode;
   icon?: React.ReactNode;
   action?: React.ReactNode;
