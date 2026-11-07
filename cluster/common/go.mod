@@ -11,10 +11,10 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/cluster/apiserver v0.0.0-20261105165540-be7392ed620e
-	github.com/octelium/octelium/cluster/common v0.0.0-20261105165540-be7392ed620e
-	github.com/octelium/octelium/cluster/rscserver v0.0.0-20261105165540-be7392ed620e
-	github.com/octelium/octelium/pkg v0.0.0-20261105165540-be7392ed620e
+	github.com/octelium/octelium/cluster/apiserver v0.0.0-20261107180524-2930116218df
+	github.com/octelium/octelium/cluster/common v0.0.0-20261107180524-2930116218df
+	github.com/octelium/octelium/cluster/rscserver v0.0.0-20261107180524-2930116218df
+	github.com/octelium/octelium/pkg v0.0.0-20261107180524-2930116218df
 	github.com/pelletier/go-toml/v2 v2.2.4
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
