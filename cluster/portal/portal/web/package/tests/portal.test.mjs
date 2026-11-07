@@ -834,6 +834,82 @@ describe("Portal navigation, Services and terminals", () => {
     );
   });
 
+  it("uses Plus Jakarta Sans and JetBrains Mono with no trace of Ubuntu", async () => {
+    await terminals();
+    const fonts = await page.evaluate(async () => {
+      await document.fonts.load('700 1em "Plus Jakarta Sans"');
+      const probe = document.createElement("span");
+      probe.className = "font-mono font-bold";
+      document.body.append(probe);
+      const body = getComputedStyle(document.body);
+      const mono = getComputedStyle(probe);
+      const result = {
+        body: body.fontFamily,
+        bodyWeight: body.fontWeight,
+        bodySpacing: parseFloat(body.wordSpacing),
+        faces: [...document.fonts].map((face) => face.family),
+        mono: mono.fontFamily,
+        monoWeight: mono.fontWeight,
+        monoLigatures: mono.fontVariantLigatures,
+        monoSpacing: mono.wordSpacing,
+        terminal: window.portalFixture.terminals[0].terminal.options.fontFamily,
+      };
+      probe.remove();
+      return result;
+    });
+    assert.match(fonts.body, /^"?Plus Jakarta Sans"?,/);
+    assert.equal(fonts.bodyWeight, "500");
+    assert.ok(fonts.bodySpacing > 0);
+    assert.ok(fonts.faces.length > 0);
+    assert.ok(fonts.faces.every((family) => !/ubuntu/i.test(family)));
+    assert.match(fonts.mono, /^"?JetBrains Mono"?,/);
+    assert.equal(fonts.monoWeight, "400");
+    assert.equal(fonts.monoLigatures, "none");
+    assert.equal(fonts.monoSpacing, "0px");
+    assert.match(fonts.terminal, /^"JetBrains Mono",/);
+  });
+
+  it("uses the neutral dark palette of the Octelium portal", async () => {
+    await load("/services", "dark");
+    const token = (name) =>
+      page.evaluate(
+        (name) =>
+          getComputedStyle(document.documentElement).getPropertyValue(name),
+        name,
+      );
+    assert.match(await token("--app-canvas"), /^oklch\(13\.5% 0?\.002 270\)$/);
+    assert.match(await token("--app-surface"), /^oklch\(17% 0?\.002 270\)$/);
+    assert.match(await token("--app-line"), /^oklch\(26% 0?\.002 270\)$/);
+    assert.match(await token("--app-ink"), /^oklch\(96% 0?\.002 270\)$/);
+  });
+
+  it("measures terminals again when JetBrains Mono loads late", async () => {
+    const height = () =>
+      window.portalFixture.terminals.find((record) => !record.disposed).terminal
+        ._core._renderService.dimensions.css.cell.height;
+    const loaded = () =>
+      page.waitForFunction(
+        () =>
+          document.fonts.check('400 1em "JetBrains Mono"') &&
+          document.fonts.check('700 1em "JetBrains Mono"'),
+      );
+    await terminals();
+    await loaded();
+    await page.waitForFunction(() => document.fonts.status === "loaded");
+    await page.waitForTimeout(200);
+    const expected = await page.evaluate(height);
+    await page.route(/jetbrains-mono-.*\.woff2/, async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      await route.continue();
+    });
+    await terminals();
+    await loaded();
+    await page.waitForFunction(
+      ({ height, expected }) => (0, eval)(height)() === expected,
+      { height: height.toString(), expected },
+    );
+  });
+
   it("falls back to a working renderer after WebGL context loss without resizing the page", async (test) => {
     await terminals();
     const supported = await page.evaluate(() => {

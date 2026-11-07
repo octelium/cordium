@@ -1,5 +1,10 @@
 import { loadWebglRenderer } from "@/components/Terminal/renderer";
-import { terminalTheme } from "@/components/Terminal/theme";
+import {
+  loadTerminalFont,
+  refreshTerminalFont,
+  terminalFontFamily,
+  terminalTheme,
+} from "@/components/Terminal/theme";
 import { getErrorMessage } from "@/pages/Agent/utils";
 import { isWebgl2Supported } from "@/utils";
 import { getClientWorkspaceSvc } from "@/utils/client";
@@ -268,7 +273,7 @@ export class ConnectSession {
     if (!this.term) {
       this.term = new Terminal({
         convertEol: false,
-        fontFamily: '"Ubuntu Mono", ui-monospace, Menlo, Consolas, monospace',
+        fontFamily: terminalFontFamily,
         fontWeight: 400,
         fontWeightBold: 700,
         cursorBlink: true,
@@ -286,7 +291,11 @@ export class ConnectSession {
         this.webgl = loadWebglRenderer(this.term, () => this.fitNow());
       }
       this.term.onData((data) => this.send(data));
-      void document.fonts.ready.then(() => this.fitNow());
+      void loadTerminalFont().then(() => {
+        if (this.disposed || !this.term) return;
+        refreshTerminalFont(this.term);
+        this.fitNow();
+      });
     }
     this.observer?.disconnect();
     this.observer = new ResizeObserver(() => this.scheduleFit());

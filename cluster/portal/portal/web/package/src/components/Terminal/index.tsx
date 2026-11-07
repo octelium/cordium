@@ -20,7 +20,12 @@ import { AppDispatch, RootState } from "../../store";
 import { isDev, isWebgl2Supported } from "../../utils";
 import emitter from "../../utils/event";
 import { loadWebglRenderer } from "./renderer";
-import { terminalTheme } from "./theme";
+import {
+  loadTerminalFont,
+  refreshTerminalFont,
+  terminalFontFamily,
+  terminalTheme,
+} from "./theme";
 
 interface Props extends PropsFromRedux {
   id: string;
@@ -99,8 +104,10 @@ class Terminal extends React.Component<Props> {
     window.addEventListener("focus", this.resume);
     window.addEventListener("pageshow", this.resume);
     document.addEventListener("visibilitychange", this.resume);
-    document.fonts.ready.then(() => {
-      if (this.mounted) this.doResize();
+    loadTerminalFont().then(() => {
+      if (!this.mounted) return;
+      refreshTerminalFont(this.t);
+      this.doResize();
     });
     this.props.sendListenTerminal({ id: this.props.id });
   }
@@ -137,7 +144,7 @@ class Terminal extends React.Component<Props> {
   init() {
     this.t = new XTerm({
       convertEol: true,
-      fontFamily: '"Ubuntu Mono", ui-monospace, Menlo, Consolas, monospace',
+      fontFamily: terminalFontFamily,
       fontWeight: 400,
       fontWeightBold: 700,
       cursorBlink: true,

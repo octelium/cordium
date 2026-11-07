@@ -1,8 +1,24 @@
+import type { Terminal } from "@xterm/xterm";
+
+export const terminalFontFamily =
+  '"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace';
+
+export const loadTerminalFont = () =>
+  Promise.allSettled([
+    document.fonts.load('400 1em "JetBrains Mono"'),
+    document.fonts.load('700 1em "JetBrains Mono"'),
+  ]);
+
+export const refreshTerminalFont = (terminal: Terminal) => {
+  terminal.options.fontFamily = "monospace";
+  terminal.options.fontFamily = terminalFontFamily;
+};
+
 export const terminalTheme = {
-  background: "#0b0b0e",
+  background: "#0b0b0c",
   foreground: "#e4e4e7",
   cursor: "#a1a1aa",
-  cursorAccent: "#0b0b0e",
+  cursorAccent: "#0b0b0c",
   selectionBackground: "#3f3f46",
   black: "#27272a",
   brightBlack: "#52525b",

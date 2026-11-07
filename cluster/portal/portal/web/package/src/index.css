@@ -26,8 +26,8 @@
   --app-ink-subtle: oklch(70.4% 0.04 256.788);
   --app-ink-faint: oklch(86.9% 0.022 252.894);
 
-  --app-inverted: oklch(20.8% 0.042 265.755);
-  --app-inverted-hover: oklch(27.9% 0.041 260.031);
+  --app-inverted: #2e2e2e;
+  --app-inverted-hover: #242424;
   --app-on-inverted: #ffffff;
   --app-logo: #000000;
 
@@ -36,7 +36,7 @@
   --app-scrollbar: oklch(86.9% 0.022 252.894);
   --app-scrollbar-hover: oklch(70.4% 0.04 256.788);
 
-  --app-shadow-panel: 0 1px 3px rgb(15 23 42 / 0.05);
+  --app-shadow-panel: 0 1px 2px rgb(15 23 42 / 0.05);
   --app-shadow-raised: 0 4px 12px rgb(15 23 42 / 0.08);
   --app-shadow-overlay: 0 16px 40px rgb(15 23 42 / 0.14);
   --app-shadow-console: 0 8px 24px rgb(15 23 42 / 0.16);
@@ -76,8 +76,8 @@
   --app-hue-teal-soft: oklch(98.4% 0.014 180.72);
   --app-hue-teal-line: oklch(91% 0.096 180.426);
 
-  --console-bg: #0b0b0e;
-  --console-chrome: #141418;
+  --console-bg: #0b0b0c;
+  --console-chrome: #151516;
   --console-scrollbar: #3f3f46;
   --console-scrollbar-hover: #52525b;
 }
@@ -85,76 +85,88 @@
 :root[data-mantine-color-scheme="dark"] {
   color-scheme: dark;
 
-  --app-canvas: oklch(15.5% 0.004 286);
-  --app-surface: oklch(20.5% 0.005 286);
-  --app-surface-subtle: oklch(18.5% 0.004 286);
-  --app-surface-hover: oklch(24% 0.005 286);
-  --app-surface-muted: oklch(26% 0.005 286);
-  --app-surface-strong: oklch(30% 0.005 286);
+  --app-canvas: oklch(13.5% 0.002 270);
+  --app-surface: oklch(17% 0.002 270);
+  --app-surface-subtle: oklch(20% 0.002 270);
+  --app-surface-hover: oklch(20% 0.002 270);
+  --app-surface-muted: oklch(22.5% 0.002 270);
+  --app-surface-strong: oklch(26% 0.002 270);
 
-  --app-line: oklch(29.5% 0.005 286);
-  --app-line-subtle: oklch(24.5% 0.004 286);
-  --app-line-strong: oklch(38% 0.006 286);
+  --app-line: oklch(26% 0.002 270);
+  --app-line-subtle: oklch(22.5% 0.002 270);
+  --app-line-strong: oklch(33% 0.002 270);
 
-  --app-ink: oklch(94.5% 0.004 286);
-  --app-ink-strong: oklch(91.5% 0.005 286);
-  --app-ink-body: oklch(85% 0.005 286);
-  --app-ink-soft: oklch(77.5% 0.006 286);
-  --app-ink-muted: oklch(68.5% 0.007 286);
-  --app-ink-subtle: oklch(58% 0.008 286);
-  --app-ink-faint: oklch(45% 0.007 286);
+  --app-ink: oklch(96% 0.002 270);
+  --app-ink-strong: oklch(92.5% 0.002 270);
+  --app-ink-body: oklch(87% 0.002 270);
+  --app-ink-soft: oklch(79% 0.002 270);
+  --app-ink-muted: oklch(71% 0.002 270);
+  --app-ink-subtle: oklch(62% 0.002 270);
+  --app-ink-faint: oklch(45% 0.002 270);
 
-  --app-inverted: oklch(94.5% 0.004 286);
-  --app-inverted-hover: oklch(98% 0.002 286);
-  --app-on-inverted: oklch(20% 0.005 286);
-  --app-logo: oklch(94.5% 0.004 286);
+  --app-inverted: #e4e4e6;
+  --app-inverted-hover: #e9e9eb;
+  --app-on-inverted: oklch(17% 0.002 270);
+  --app-logo: oklch(96% 0.002 270);
 
-  --app-focus: oklch(58% 0.008 286);
-  --app-switch-on: oklch(58% 0.008 286);
-  --app-scrollbar: oklch(36% 0.006 286);
-  --app-scrollbar-hover: oklch(45% 0.007 286);
+  --app-focus: oklch(62% 0.002 270);
+  --app-switch-on: oklch(62% 0.002 270);
+  --app-scrollbar: oklch(33% 0.002 270);
+  --app-scrollbar-hover: oklch(45% 0.002 270);
 
-  --app-shadow-panel: 0 1px 3px rgb(0 0 0 / 0.5);
-  --app-shadow-raised: 0 4px 12px rgb(0 0 0 / 0.55);
+  --app-shadow-panel: inset 0 1px 0 rgb(255 255 255 / 0.045);
+  --app-shadow-raised:
+    inset 0 1px 0 rgb(255 255 255 / 0.045), 0 8px 24px rgb(0 0 0 / 0.5);
   --app-shadow-overlay: 0 16px 40px rgb(0 0 0 / 0.7);
   --app-shadow-console: 0 8px 24px rgb(0 0 0 / 0.6);
 
-  --app-hue-emerald: oklch(84.5% 0.143 164.978);
-  --app-hue-emerald-soft: oklch(69.6% 0.17 162.48 / 0.14);
-  --app-hue-emerald-line: oklch(69.6% 0.17 162.48 / 0.32);
+  --app-hue-emerald: oklch(81% 0.12 162.48);
+  --app-hue-emerald-solid: oklch(66% 0.17 162.48);
+  --app-hue-emerald-soft: oklch(24% 0.03 162.48);
+  --app-hue-emerald-line: oklch(33% 0.062 162.48);
 
-  --app-hue-amber: oklch(87.9% 0.169 91.605);
-  --app-hue-amber-soft: oklch(76.9% 0.188 70.08 / 0.14);
-  --app-hue-amber-line: oklch(76.9% 0.188 70.08 / 0.32);
+  --app-hue-amber: oklch(81% 0.12 70.08);
+  --app-hue-amber-solid: oklch(66% 0.17 70.08);
+  --app-hue-amber-soft: oklch(24% 0.03 70.08);
+  --app-hue-amber-line: oklch(33% 0.062 70.08);
 
-  --app-hue-rose: oklch(81% 0.117 11.638);
-  --app-hue-rose-soft: oklch(64.5% 0.246 16.439 / 0.14);
-  --app-hue-rose-line: oklch(64.5% 0.246 16.439 / 0.32);
+  --app-hue-rose: oklch(81% 0.12 16.439);
+  --app-hue-rose-solid: oklch(66% 0.17 16.439);
+  --app-hue-rose-soft: oklch(24% 0.03 16.439);
+  --app-hue-rose-line: oklch(33% 0.062 16.439);
 
-  --app-hue-sky: oklch(82.8% 0.111 230.318);
-  --app-hue-sky-soft: oklch(68.5% 0.169 237.323 / 0.14);
-  --app-hue-sky-line: oklch(68.5% 0.169 237.323 / 0.32);
+  --app-hue-sky: oklch(81% 0.12 237.323);
+  --app-hue-sky-solid: oklch(66% 0.17 237.323);
+  --app-hue-sky-soft: oklch(24% 0.03 237.323);
+  --app-hue-sky-line: oklch(33% 0.062 237.323);
 
-  --app-hue-blue: oklch(80.9% 0.105 251.813);
-  --app-hue-blue-soft: oklch(62.3% 0.214 259.815 / 0.14);
-  --app-hue-blue-line: oklch(62.3% 0.214 259.815 / 0.32);
+  --app-hue-blue: oklch(81% 0.12 259.815);
+  --app-hue-blue-solid: oklch(66% 0.17 259.815);
+  --app-hue-blue-soft: oklch(24% 0.03 259.815);
+  --app-hue-blue-line: oklch(33% 0.062 259.815);
 
-  --app-hue-violet: oklch(81.1% 0.111 293.571);
-  --app-hue-violet-soft: oklch(60.6% 0.25 292.717 / 0.14);
-  --app-hue-violet-line: oklch(60.6% 0.25 292.717 / 0.32);
+  --app-hue-violet: oklch(81% 0.12 292.717);
+  --app-hue-violet-solid: oklch(66% 0.17 292.717);
+  --app-hue-violet-soft: oklch(24% 0.03 292.717);
+  --app-hue-violet-line: oklch(33% 0.062 292.717);
 
-  --app-hue-teal: oklch(85.5% 0.138 181.071);
-  --app-hue-teal-soft: oklch(70.4% 0.14 182.503 / 0.14);
-  --app-hue-teal-line: oklch(70.4% 0.14 182.503 / 0.32);
+  --app-hue-teal: oklch(81% 0.12 182.503);
+  --app-hue-teal-solid: oklch(66% 0.17 182.503);
+  --app-hue-teal-soft: oklch(24% 0.03 182.503);
+  --app-hue-teal-line: oklch(33% 0.062 182.503);
 }
 
 @theme inline {
   --font-sans:
-    "Ubuntu", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono:
-    "Ubuntu Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
     "Liberation Mono", monospace;
+
+  --font-weight-normal: 500;
+  --font-weight-medium: 600;
+  --font-weight-semibold: 700;
 
   --color-canvas: var(--app-canvas);
   --color-surface: var(--app-surface);
@@ -247,8 +259,69 @@ body {
   margin: 0;
   background-color: var(--app-canvas);
   font-family: var(--font-sans);
+  font-weight: 500;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  word-spacing: 0.06em;
+}
+
+code,
+kbd,
+pre,
+.font-mono {
+  font-variant-ligatures: none;
+  font-weight: 400;
+  word-spacing: normal;
+}
+
+.mantine-Input-input::placeholder {
+  font-weight: 500;
+}
+
+.mantine-Input-input:focus,
+.mantine-Input-input[data-focus] {
+  border-color: var(--app-ink);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--app-ink) 12%, transparent);
+  outline: none;
+}
+
+.mantine-SegmentedControl-label[data-active] {
+  color: var(--app-ink);
+}
+
+.mantine-Pagination-control:hover:not([data-active]) {
+  background-color: var(--app-surface-hover);
+  border-color: var(--app-line-strong);
+}
+
+.mantine-Pagination-control[data-active] {
+  background-color: var(--app-inverted) !important;
+  border-color: var(--app-inverted) !important;
+  color: var(--app-on-inverted) !important;
+}
+
+.mantine-Button-root:focus-visible,
+.mantine-ActionIcon-root:focus-visible {
+  outline: 2px solid var(--app-ink-muted);
+  outline-offset: 2px;
+}
+
+.mantine-Select-option[data-combobox-selected],
+.mantine-Combobox-option[data-combobox-selected] {
+  background-color: var(--app-inverted);
+  color: var(--app-on-inverted);
+}
+
+.mantine-Select-option[data-combobox-active],
+.mantine-Combobox-option[data-combobox-active] {
+  background-color: var(--app-surface-muted);
 }
 
 ::-webkit-scrollbar {

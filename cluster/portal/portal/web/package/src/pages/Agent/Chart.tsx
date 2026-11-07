@@ -84,7 +84,7 @@ const buildChartOption = (spec: ChartSpec, theme: ChartTheme) => {
     color: theme.muted,
     fontSize: 11,
     fontWeight: 600,
-    fontFamily: "Ubuntu, ui-sans-serif, system-ui, sans-serif",
+    fontFamily: '"Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif',
   };
   const tooltip = {
     confine: true,

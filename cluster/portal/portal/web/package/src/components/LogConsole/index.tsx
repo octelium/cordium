@@ -11,7 +11,12 @@ import * as WsPB from "@octelium/apis/main/cordiumv1";
 import { RootState } from "../../store";
 import { isWebgl2Supported } from "../../utils";
 import { loadWebglRenderer } from "../Terminal/renderer";
-import { terminalTheme } from "../Terminal/theme";
+import {
+  loadTerminalFont,
+  refreshTerminalFont,
+  terminalFontFamily,
+  terminalTheme,
+} from "../Terminal/theme";
 
 interface Props extends PropsFromRedux {
   item: WsPB.Workspace;
@@ -41,7 +46,7 @@ class LogConsole extends React.Component<Props> {
   componentDidMount() {
     this.t = new XTerm({
       convertEol: true,
-      fontFamily: '"Ubuntu Mono", ui-monospace, Menlo, Consolas, monospace',
+      fontFamily: terminalFontFamily,
       fontWeight: 400,
       fontWeightBold: 700,
       cursorBlink: false,
@@ -59,6 +64,14 @@ class LogConsole extends React.Component<Props> {
     }
 
     this.doResize();
+
+    let active = true;
+    this.disposables.push({ dispose: () => (active = false) });
+    loadTerminalFont().then(() => {
+      if (!active) return;
+      refreshTerminalFont(this.t);
+      this.doResize();
+    });
 
     this.resizeObserver = new ResizeObserver(() => this.doResize());
     if (this.containerRef.current) {

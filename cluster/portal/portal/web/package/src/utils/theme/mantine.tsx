@@ -27,7 +27,7 @@ import {
 } from "@mantine/core";
 
 const fontFamily = [
-  "Ubuntu",
+  '"Plus Jakarta Sans"',
   "ui-sans-serif",
   "system-ui",
   "-apple-system",
@@ -40,7 +40,7 @@ const fontFamily = [
 ].join(",");
 
 const fontFamilyMonospace = [
-  '"Ubuntu Mono"',
+  '"JetBrains Mono"',
   "ui-monospace",
   "SFMono-Regular",
   "Menlo",
@@ -140,7 +140,7 @@ const theme = createTheme({
   components: {
     Button: Button.extend({
       defaultProps: { radius: "md" },
-      classNames: { root: "font-semibold" },
+      styles: { root: { fontWeight: 700 }, label: { fontWeight: 700 } },
     }),
     ActionIcon: ActionIcon.extend({
       defaultProps: { radius: "md", variant: "subtle" },
@@ -185,8 +185,24 @@ const theme = createTheme({
       },
     }),
     SegmentedControl: SegmentedControl.extend({
-      defaultProps: { radius: "md" },
-      classNames: { label: "font-semibold" },
+      styles: {
+        root: {
+          backgroundColor: "var(--app-surface-muted)",
+          border: "1px solid var(--app-line)",
+          borderRadius: "10px",
+          padding: "3px",
+        },
+        label: {
+          fontSize: "0.8125rem",
+          fontWeight: 700,
+          color: "var(--app-ink-muted)",
+        },
+        indicator: {
+          backgroundColor: "var(--app-surface)",
+          borderRadius: "7px",
+          boxShadow: "var(--app-shadow-panel)",
+        },
+      },
     }),
     Tabs: Tabs.extend({
       defaultProps: { autoContrast: false },
@@ -227,8 +243,28 @@ const theme = createTheme({
       classNames: { title: "font-bold text-ink-strong" },
     }),
     Menu: Menu.extend({
-      defaultProps: { shadow: "lg", radius: "md", width: 220 },
-      classNames: { item: "font-medium" },
+      defaultProps: { shadow: "md", radius: "lg", width: 220 },
+      styles: {
+        dropdown: {
+          border: "1px solid var(--app-line)",
+          boxShadow: "var(--app-shadow-overlay)",
+          padding: "6px",
+        },
+        item: {
+          borderRadius: "7px",
+          fontSize: "0.8125rem",
+          fontWeight: 600,
+          minHeight: "34px",
+        },
+        label: {
+          color: "var(--app-ink-muted)",
+          fontSize: "0.6875rem",
+          fontWeight: 700,
+          letterSpacing: "0.05em",
+          textTransform: "uppercase",
+        },
+        divider: { borderColor: "var(--app-line)" },
+      },
     }),
     Alert: Alert.extend({
       defaultProps: { radius: "md", variant: "light" },
