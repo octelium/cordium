@@ -23,6 +23,7 @@ import (
 	"path"
 	"testing"
 
+	"github.com/octelium/octelium/pkg/utils/ldflags"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -93,4 +94,28 @@ func TestRunProxy(t *testing.T) {
 		_, err = os.Stat(p.socketPath)
 		assert.True(t, os.IsNotExist(err))
 	})
+}
+
+func TestGetUserAgent(t *testing.T) {
+	oldSemVer, oldGitCommit := ldflags.SemVer, ldflags.GitCommit
+	t.Cleanup(func() {
+		ldflags.SemVer, ldflags.GitCommit = oldSemVer, oldGitCommit
+	})
+
+	for _, tc := range []struct {
+		semVer    string
+		gitCommit string
+		userAgent string
+	}{
+		{semVer: "v0.12.0", gitCommit: "0a1b2c3d4e5f60718293a4b5c6d7e8f901234567", userAgent: "cordium/v0.12.0"},
+		{semVer: "v1.2.3-rc.1", userAgent: "cordium/v1.2.3-rc.1"},
+		{gitCommit: "0a1b2c3d4e5f60718293a4b5c6d7e8f901234567", userAgent: "cordium/v0.0.0-dev+0a1b2c3d4e5f"},
+		{gitCommit: "0a1b2c3", userAgent: "cordium/v0.0.0-dev+0a1b2c3"},
+		{gitCommit: "0a1b2c", userAgent: "cordium/v0.0.0-dev"},
+		{gitCommit: "not a commit", userAgent: "cordium/v0.0.0-dev"},
+		{userAgent: "cordium/v0.0.0-dev"},
+	} {
+		ldflags.SemVer, ldflags.GitCommit = tc.semVer, tc.gitCommit
+		assert.Equal(t, tc.userAgent, getUserAgent(), "%+v", tc)
+	}
 }

@@ -18,9 +18,11 @@ package oproxy
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/http"
 	"os"
+	"regexp"
 	"sync"
 	"time"
 
@@ -28,6 +30,7 @@ import (
 	"github.com/octelium/octelium/apis/main/authv1"
 	"github.com/octelium/octelium/client/common/authc"
 	"github.com/octelium/octelium/pkg/grpcerr"
+	"github.com/octelium/octelium/pkg/utils/ldflags"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
@@ -92,6 +95,7 @@ func (p *OcteliumProxy) Run(ctx context.Context) error {
 			}
 			return "", errors.Errorf("Could not find refresh token")
 		},
+		UserAgent: getUserAgent(),
 	})
 	if err != nil {
 		return err
@@ -251,4 +255,18 @@ func (p *OcteliumProxy) doRefresh(ctx context.Context) error {
 		zap.Time("now", time.Now()))
 
 	return nil
+}
+
+var rgxGitCommit = regexp.MustCompile(`^[0-9a-f]{7,64}$`)
+
+func getUserAgent() string {
+	if ldflags.SemVer != "" {
+		return fmt.Sprintf("cordium/%s", ldflags.SemVer)
+	}
+
+	if rgxGitCommit.MatchString(ldflags.GitCommit) {
+		return fmt.Sprintf("cordium/v0.0.0-dev+%s", ldflags.GitCommit[:min(len(ldflags.GitCommit), 12)])
+	}
+
+	return "cordium/v0.0.0-dev"
 }
