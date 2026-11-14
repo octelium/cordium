@@ -3,8 +3,8 @@ module github.com/octelium/cordium/cordium-go
 go 1.27.4
 
 require (
-	github.com/octelium/octelium/apis v0.50.0
-	github.com/octelium/octelium/octelium-go v0.50.1-0.20261113052800-65352b1a75f0
+	github.com/octelium/octelium/apis v0.51.0
+	github.com/octelium/octelium/octelium-go v0.51.0
 	google.golang.org/grpc v1.85.0
 	google.golang.org/protobuf v1.36.12
 )
