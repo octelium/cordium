@@ -1,6 +1,6 @@
 module github.com/octelium/cordium/cluster/genesis
 
-go 1.27.3
+go 1.27.4
 
 // require google.golang.org/protobuf v1.36.11
 

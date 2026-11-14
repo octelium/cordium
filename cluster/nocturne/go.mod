@@ -1,6 +1,6 @@
 module github.com/octelium/cordium/cluster/nocturne
 
-go 1.27.3
+go 1.27.4
 
 require (
 	github.com/kubernetes-csi/external-snapshotter/client/v8 v8.4.0
