@@ -19,6 +19,7 @@ package mains
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/octelium/cordium/cluster/apiserver/apiserver/commonw"
@@ -201,7 +202,7 @@ type reqSpaceResource struct {
 
 func parseSpaceResource(arg string) (*reqSpaceResource, error) {
 	args := strings.Split(arg, ".")
-	if len(args) != 3 {
+	if len(args) != 3 || slices.Contains(args, "") {
 		return nil, serr.InvalidArg("Invalid requested name: %s", arg)
 	}
 	return &reqSpaceResource{
