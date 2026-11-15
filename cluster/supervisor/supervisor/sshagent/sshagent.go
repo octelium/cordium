@@ -205,6 +205,7 @@ func NewAgent(opts *Opts) (*Agent, error) {
 }
 
 func (a *Agent) serveConn(c net.Conn) {
+	defer c.Close()
 	if err := agent.ServeAgent(a.keyring, c); err != io.EOF {
 		zap.L().Error("Agent client connection ended with error:", zap.Error(err))
 	}

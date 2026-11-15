@@ -1402,6 +1402,7 @@ github.com/docker/docker v20.10.17+incompatible/go.mod h1:eEKB0N0r5NX/I1kEveEz05
 github.com/docker/docker v23.0.3+incompatible/go.mod h1:eEKB0N0r5NX/I1kEveEz05bcu8tLC/8azJZsviup8Sk=
 github.com/docker/docker v28.3.3+incompatible h1:Dypm25kh4rmk49v1eiVbsAtpAsYURjYkaKubwuBdxEI=
 github.com/docker/docker v28.3.3+incompatible/go.mod h1:eEKB0N0r5NX/I1kEveEz05bcu8tLC/8azJZsviup8Sk=
+github.com/docker/docker v28.4.0+incompatible/go.mod h1:eEKB0N0r5NX/I1kEveEz05bcu8tLC/8azJZsviup8Sk=
 github.com/docker/docker v28.5.2+incompatible h1:DBX0Y0zAjZbSrm1uzOkdr1onVghKaftjlSWt4AFexzM=
 github.com/docker/docker v28.5.2+incompatible/go.mod h1:eEKB0N0r5NX/I1kEveEz05bcu8tLC/8azJZsviup8Sk=
 github.com/docker/docker-credential-helpers v0.6.3/go.mod h1:WRaJzqw3CTB9bk10avuGsjVBZsD05qeibJ1/TYlvc0Y=
@@ -4893,6 +4894,7 @@ k8s.io/code-generator v0.33.3/go.mod h1:6Y02+HQJYgNphv9z3wJB5w+sjYDIEBQW7sh62Pku
 k8s.io/code-generator v0.33.9/go.mod h1:ZAOTKBCjrG1f9ZHl1ANODDOMBCOy5BlY0ofUgJcmhgY=
 k8s.io/code-generator v0.33.10/go.mod h1:FZxuAGEFQTevqv/sfS5bCGvEgEA4NOCUPzlWteBuS74=
 k8s.io/code-generator v0.36.3/go.mod h1:Unn13Mp8X+H803jgZi4f4ExxK11aj0llXcSsl++UTkE=
+k8s.io/code-generator v0.37.0/go.mod h1:qg7E/uDlyvevVRL1V8+h2z9UWmi/8gxaRka/lVXUBdk=
 k8s.io/component-base v0.20.1/go.mod h1:guxkoJnNoh8LNrbtiQOlyp2Y2XFCZQmrcg2n/DeYNLk=
 k8s.io/component-base v0.20.4/go.mod h1:t4p9EdiagbVCJKrQ1RsA5/V4rFQNDfRlevJajlGwgjI=
 k8s.io/component-base v0.20.6/go.mod h1:6f1MPBAeI+mvuts3sIdtpjljHWBQ2cIy38oBIWMYnrM=

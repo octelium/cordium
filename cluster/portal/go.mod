@@ -29,6 +29,7 @@ require (
 )
 
 require (
+	al.essio.dev/pkg/shellescape v1.6.1 // indirect
 	cel.dev/cel-go v0.32.0 // indirect
 	cel.dev/expr v0.25.3 // indirect
 	dario.cat/mergo v1.0.0 // indirect
