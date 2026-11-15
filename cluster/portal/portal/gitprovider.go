@@ -235,7 +235,7 @@ func (s *Server) handleAuthGitProviderCallback(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	state := r.FormValue("state")
+	state := q.Get("state")
 	if state == "" {
 		http.Redirect(w, r, u.String(), http.StatusSeeOther)
 		return

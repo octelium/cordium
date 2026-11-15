@@ -253,9 +253,10 @@ func (g *Genesis) installSystemResources(ctx context.Context, region *corev1.Reg
 			},
 			Status: &corev1.Service_Status{
 				ManagedService: &corev1.Service_Status_ManagedService{
-					Image:        ldflags.GetImage(components.CordiumComponent(components.Portal), ""),
-					HasSubdomain: true,
-					ForwardHost:  true,
+					Image:              ldflags.GetImage(components.CordiumComponent(components.Portal), ""),
+					HasSubdomain:       true,
+					ForwardHost:        true,
+					ReadOnlyFileSystem: true,
 					// ImagePullSecret: "octelium-regcred",
 					HealthCheck: &corev1.Service_Status_ManagedService_HealthCheck{
 						Type: &corev1.Service_Status_ManagedService_HealthCheck_Grpc{

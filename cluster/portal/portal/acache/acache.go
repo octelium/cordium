@@ -17,53 +17,28 @@
 package acache
 
 import (
-	"os"
-
 	workspacecommon "github.com/octelium/cordium/cluster/common"
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/metav1"
+	"github.com/octelium/octelium/cluster/common/cache"
 	"github.com/octelium/octelium/pkg/apiutils/umetav1"
 	"github.com/octelium/octelium/pkg/common/pbutils"
 	"github.com/pkg/errors"
-	"go.etcd.io/bbolt"
 )
 
 type Cache struct {
-	db *bbolt.DB
+	resources *cache.Cache[resourceKey, []byte]
 }
 
-const dbPath = "/tmp/octelium-acache.db"
+type resourceKey struct {
+	kind string
+	key  string
+}
 
 func NewCache() (*Cache, error) {
-
-	if err := os.Remove(dbPath); err != nil && !os.IsNotExist(err) {
-		return nil, err
-	}
-
-	db, err := bbolt.Open(dbPath, 0600, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := db.Update(func(tx *bbolt.Tx) error {
-
-		bucketNames := []string{ucordiumv1.KindWorkspace, ucordiumv1.KindSpace, ucordiumv1.KindMembership}
-
-		for _, bucketName := range bucketNames {
-			_, err = tx.CreateBucketIfNotExists([]byte(bucketName))
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
 	return &Cache{
-		db: db,
+		resources: cache.New[resourceKey, []byte](nil),
 	}, nil
 }
 
@@ -76,20 +51,11 @@ func (c *Cache) setResource(key string, obj umetav1.ResourceObjectI, kind string
 		return err
 	}
 
-	if err := c.db.Update(func(tx *bbolt.Tx) error {
-
-		b := tx.Bucket([]byte(kind))
-
-		if key == "" {
-			key = obj.GetMetadata().Uid
-		}
-		err := b.Put([]byte(key), objBytes)
-
-		return err
-
-	}); err != nil {
-		return err
+	if key == "" {
+		key = obj.GetMetadata().Uid
 	}
+
+	c.resources.Set(resourceKey{kind: kind, key: key}, objBytes)
 
 	return nil
 }
@@ -100,36 +66,20 @@ func (c *Cache) getResource(kind string, key string) (umetav1.ResourceObjectI, e
 		return nil, err
 	}
 
-	if err := c.db.View(func(tx *bbolt.Tx) error {
-		b := tx.Bucket([]byte(kind))
-		v := b.Get([]byte(key))
-		if v == nil {
-			return ErrNotFound
-		}
+	v, ok := c.resources.Get(resourceKey{kind: kind, key: key})
+	if !ok {
+		return nil, ErrNotFound
+	}
 
-		if err := pbutils.Unmarshal(v, rsc); err != nil {
-			return err
-		}
-
-		return nil
-	}); err != nil {
+	if err := pbutils.Unmarshal(v, rsc); err != nil {
 		return nil, err
 	}
+
 	return rsc, nil
 }
 
 func (c *Cache) deleteResource(kind string, key string) error {
-	if err := c.db.Update(func(tx *bbolt.Tx) error {
-
-		b := tx.Bucket([]byte(kind))
-
-		err := b.Delete([]byte(key))
-
-		return err
-
-	}); err != nil {
-		return err
-	}
+	c.resources.Delete(resourceKey{kind: kind, key: key})
 	return nil
 }
 

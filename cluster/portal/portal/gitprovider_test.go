@@ -17,9 +17,11 @@
 package portal
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -296,6 +298,48 @@ func (s *tstSrvHTTP) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *tstSrvHTTP) close() {
 	s.srv.Close()
 	time.Sleep(1 * time.Second)
+}
+
+func TestHandleAuthGitProviderCallbackQuery(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		query   string
+		authErr bool
+	}{
+		{name: "query state", query: "?state=query-state&code=code", authErr: true},
+		{name: "body state"},
+		{name: "provider error", query: "?error=access_denied&state=query-state"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var body bytes.Buffer
+			writer := multipart.NewWriter(&body)
+			assert.Nil(t, writer.WriteField("state", "body-state"))
+			file, err := writer.CreateFormFile("upload", "file")
+			assert.Nil(t, err)
+			_, err = io.WriteString(file, "payload")
+			assert.Nil(t, err)
+			assert.Nil(t, writer.Close())
+			bodyLen := body.Len()
+
+			s := &Server{rootURL: "https://cordium.example.com"}
+			req := httptest.NewRequest("GET", s.rootURL+"/auth/v1/callback"+tc.query, &body)
+			req.Header.Set("Content-Type", writer.FormDataContentType())
+			w := httptest.NewRecorder()
+
+			s.ServeHTTP(w, req)
+
+			resp := w.Result()
+			defer resp.Body.Close()
+			assert.Equal(t, http.StatusSeeOther, resp.StatusCode)
+			redirect, err := resp.Location()
+			assert.Nil(t, err)
+			assert.Equal(t, "https", redirect.Scheme)
+			assert.Equal(t, "cordium.example.com", redirect.Host)
+			assert.Equal(t, tc.authErr, redirect.Query().Has("error"))
+			assert.Equal(t, bodyLen, body.Len())
+			assert.Nil(t, req.MultipartForm)
+		})
+	}
 }
 
 func TestHandleAuthGitProviderCallback(t *testing.T) {

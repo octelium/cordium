@@ -88,8 +88,17 @@ func TestPackageCommandsWithLegacyAndBoundClusters(t *testing.T) {
 			require.NoError(t, g.RunInit(t.Context(), nil))
 			certificate, err := tst.C.OcteliumC.CoreC().GetSecret(t.Context(), &rmetav1.GetOptions{Name: "crt-svc-default-cordium"})
 			require.NoError(t, err)
+			portal, err := tst.C.OcteliumC.CoreC().GetService(t.Context(), &rmetav1.GetOptions{Name: fmt.Sprintf("%s.cordium", region.Metadata.Name)})
+			require.NoError(t, err)
+			require.True(t, portal.GetStatus().GetManagedService().GetReadOnlyFileSystem())
+			portal.Status.ManagedService.ReadOnlyFileSystem = false
+			_, err = tst.C.OcteliumC.CoreC().UpdateService(t.Context(), portal)
+			require.NoError(t, err)
 			for range 2 {
 				require.NoError(t, g.RunUpgrade(t.Context(), nil))
+				portal, err = tst.C.OcteliumC.CoreC().GetService(t.Context(), &rmetav1.GetOptions{Name: portal.Metadata.Name})
+				require.NoError(t, err)
+				assert.True(t, portal.GetStatus().GetManagedService().GetReadOnlyFileSystem())
 			}
 			require.NoError(t, g.RunInit(t.Context(), nil))
 			currentKey, err := tst.C.OcteliumC.CordiumC().GetSecret(t.Context(), &rmetav1.GetOptions{Name: key.Metadata.Name})
