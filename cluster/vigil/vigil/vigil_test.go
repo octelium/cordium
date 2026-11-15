@@ -16,6 +16,53 @@
 
 package vigil
 
+import (
+	"context"
+	"os"
+	"testing"
+
+	otests "github.com/octelium/cordium/cluster/common/tests"
+	"github.com/octelium/octelium/apis/main/corev1"
+	"github.com/octelium/octelium/cluster/apiserver/apiserver/admin"
+	"github.com/octelium/octelium/cluster/common/tests"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestNewServerSSH(t *testing.T) {
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	tst, err := otests.Initialize(nil)
+	assert.Nil(t, err, "%+v", err)
+	t.Cleanup(func() {
+		tst.Destroy()
+	})
+	fakeC := tst.C
+
+	adminSrv := admin.NewServer(&admin.Opts{
+		OcteliumC:  fakeC.OcteliumC,
+		IsEmbedded: true,
+	})
+
+	req := tests.GenService("")
+	req.Spec.Mode = corev1.Service_Spec_SSH
+	req.Spec.Config.Upstream = &corev1.Service_Spec_Config_Upstream{
+		Type: &corev1.Service_Spec_Config_Upstream_Url{
+			Url: "ssh://localhost:22",
+		},
+	}
+
+	svc, err := adminSrv.CreateService(ctx, req)
+	assert.Nil(t, err)
+
+	os.Setenv("OCTELIUM_SVC_UID", svc.Metadata.Uid)
+
+	srv, err := newServer(ctx, fakeC.OcteliumC)
+	assert.Nil(t, err, "%+v", err)
+	assert.NotNil(t, srv)
+}
+
 /*
 import (
 	"context"
