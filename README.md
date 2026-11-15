@@ -14,7 +14,7 @@ Cordium is designed around two tightly integrated purposes that most platforms t
 
 Cordium is 100% free and open source. It is designed for single-tenant self-hosting and built on standard Kubernetes infrastructure with no proprietary cloud control plane and no vendor lock-in.
 
-[Documentation](https://octelium.com/docs/cordium/latest/overview/intro) · [Quick Installation Guide](https://octelium.com/docs/cordium/latest/overview/quick-install) · [Examples](https://octelium.com/docs/cordium/latest/examples)
+[Documentation](https://octelium.com/docs/cordium) · [Quick Installation Guide](https://octelium.com/docs/cordium/latest/overview/quick-install) · [Examples](https://octelium.com/docs/cordium/latest/overview/intro#use-cases)
 
 ## Tours
 
@@ -24,23 +24,23 @@ Cordium is 100% free and open source. It is designed for single-tenant self-host
 
 ## Main Features
 
-- **Unified platform for humans and AI agents.** _Workspaces_ are isolated, rootless container sandboxes running on standard Kubernetes. The same _Workspace_ can be used for long-lived coding sessions and short-lived automated workloads, through a [web browser](https://octelium.com/docs/cordium/latest/use/web-portal), [SSH and editors](https://octelium.com/docs/cordium/latest/use/ssh) (e.g. VS Code, Zed and JetBrains), the CLI or the SDKs.
+- **Unified platform for humans and AI agents.** _Workspaces_ are isolated, rootless container sandboxes running on standard Kubernetes. The same _Workspace_ can be used for [long-lived coding sessions](https://octelium.com/docs/cordium/latest/examples/dev/fullstack) and [short-lived automated workloads](https://octelium.com/docs/cordium/latest/examples/automation/cicd), through a [web browser](https://octelium.com/docs/cordium/latest/use/web-portal), [SSH and editors](https://octelium.com/docs/cordium/latest/use/ssh) (e.g. VS Code, Zed and JetBrains), the CLI or the SDKs.
 
-- **Declarative, reproducible environments.** Define images, Dockerfiles, devcontainers, repositories, lifecycle tasks, environment variables and resource limits in YAML. _Workspaces_ support root access inside the sandbox for installing system packages and running nested containers. Reusable [Templates](https://octelium.com/docs/cordium/latest/workspaces/templates) support pre-builds that capture a fully initialized filesystem for fast startup.
+- **Declarative, reproducible environments.** Define images, Dockerfiles, [devcontainers](https://octelium.com/docs/cordium/latest/examples/dev/devcontainer), repositories, lifecycle tasks, environment variables and resource limits in YAML. _Workspaces_ support root access inside the sandbox for installing system packages and running nested containers. Reusable [Templates](https://octelium.com/docs/cordium/latest/workspaces/templates) support pre-builds that capture a fully initialized filesystem for fast startup.
 
-- **Persistent, ephemeral and forkable storage.** Persistent _Workspaces_ preserve their filesystem across stops and restarts, while ephemeral ones start fresh on every run. [WorkspaceSnapshots](https://octelium.com/docs/cordium/latest/workspaces/snapshots) checkpoint storage and restore it into new _Workspaces_ for rollback or parallel runs. [Volumes](https://octelium.com/docs/cordium/latest/workspaces/volumes) outlive individual _Workspaces_ and provide persistent or shared storage for datasets, caches and artifacts.
+- **Persistent, ephemeral and forkable storage.** Persistent _Workspaces_ preserve their filesystem across stops and restarts, while ephemeral ones start fresh on every run. [WorkspaceSnapshots](https://octelium.com/docs/cordium/latest/workspaces/snapshots) checkpoint storage and restore it into new _Workspaces_ for rollback or [parallel runs](https://octelium.com/docs/cordium/latest/examples/ai/parallel-agents). [Volumes](https://octelium.com/docs/cordium/latest/workspaces/volumes) outlive individual _Workspaces_ and provide persistent or shared storage for datasets, caches and artifacts.
 
-- **Network isolation and egress control.** Restrict outbound traffic by CIDR and port, including a default-deny posture, with [network policies](https://octelium.com/docs/cordium/latest/workspaces/network) enforced outside the sandbox. Read-only root filesystems and configurable Linux capabilities provide further controls for untrusted and AI-generated code.
+- **Network isolation and egress control.** Restrict outbound traffic by CIDR and port, including a default-deny posture, with [network policies](https://octelium.com/docs/cordium/latest/workspaces/network) enforced outside the sandbox. Read-only root filesystems and configurable Linux capabilities provide further controls for [untrusted and AI-generated code](https://octelium.com/docs/cordium/latest/examples/security/untrusted-code).
 
-- **A built-in AI agent.** Chat with the [Cordium Agent](https://octelium.com/docs/cordium/latest/use/agent) from the web portal to create and manage _Workspaces_, run commands and test suites, copy files and use authorized Octelium _Services_. The agent runs inside your own _Workspace_ with your own identity, with configurable approvals for sensitive operations.
+- **A built-in AI assistant.** Chat with the [Cordium Agent](https://octelium.com/docs/cordium/latest/use/agent) which runs in a dedicated sandbox from the web portal to create and manage _Workspaces_, run commands and test suites, copy files and access authorized Octelium _Services_. The agent runs inside your own _Workspace_ with your own identity, with configurable approvals for sensitive operations.
 
-- **Secretless access to infrastructure.** Standard tools (e.g. `psql`, `ssh`, `curl` and `kubectl`) access authorized [Octelium Services](https://octelium.com/docs/cordium/latest/workspaces/secretless) without holding upstream API keys, database passwords, SSH private keys or kubeconfigs. Credentials remain at Octelium's identity-aware proxy and are applied at the protocol layer.
+- **Secretless access to infrastructure.** Standard tools (e.g. `psql`, `ssh`, `curl` and `kubectl`) access authorized [Octelium Services](https://octelium.com/docs/cordium/latest/workspaces/secretless) without holding upstream API keys, database passwords, SSH private keys or kubeconfigs. Credentials remain at Octelium's identity-aware proxy and are applied at the protocol layer. See examples for [secretless LLM access](https://octelium.com/docs/cordium/latest/examples/ai/secretless-llm) and [databases, SSH and Kubernetes](https://octelium.com/docs/cordium/latest/examples/security/octelium).
 
 - **Identity-based access control.** Octelium provides per-request, L7-aware attribute-based access control (ABAC), with policy-as-code using CEL and OPA and zero standing privileges by default. [Authentication](https://octelium.com/docs/octelium/latest/management/core/identity-providers) supports OIDC and SAML 2.0 identity providers, GitHub OAuth2, passkeys and workload identity federation.
 
 - **OpenTelemetry-native auditing and visibility.** Infrastructure requests through Octelium are authorized and logged with the _Workspace_'s identity. Export L7-aware [access logs](https://octelium.com/docs/octelium/latest/management/core/visibility) to your OpenTelemetry OTLP receivers for integration with log management and SIEM providers.
 
-- **APIs and SDKs.** The complete gRPC API used by the CLI and web portal is available through official [SDKs for Go, Python, Rust and TypeScript/JavaScript](https://octelium.com/docs/cordium/latest/use/api). Create and manage sandboxes, execute commands, transfer files and manage snapshots and _Volumes_ from your applications, AI agents and CI pipelines.
+- **APIs and SDKs.** The complete gRPC API used by the CLI and web portal is available through official [SDKs for Go, Python, Rust and TypeScript/JavaScript](https://octelium.com/docs/cordium/latest/use/api). Create and manage sandboxes, execute commands, transfer files and manage snapshots and _Volumes_ from your applications, AI agents and CI pipelines. See the [GitHub Actions example](https://octelium.com/docs/cordium/latest/examples/automation/github-actions) for workload authentication and automation.
 
 - **Open source and designed for self-hosting.** Run Cordium on a single-node VM or a production multi-node Kubernetes cluster, cloud-based or on-premises. There is no proprietary control plane, no tiered feature set and no vendor lock-in. [Spaces](https://octelium.com/docs/cordium/latest/workspaces/spaces) organize _Workspaces_, _Templates_, _Secrets_ and _Volumes_ for individuals and teams.
 
@@ -77,6 +77,8 @@ cordium logs abc
 
 Read the [CLI guide](https://octelium.com/docs/cordium/latest/use/cli) for _Templates_, _Volumes_, snapshots, file transfers and automation, and the [SSH and IDE guide](https://octelium.com/docs/cordium/latest/use/ssh) for editor integration and port forwarding.
 
+See the [Claude Code](https://octelium.com/docs/cordium/latest/examples/ai/claude-code) and [Codex](https://octelium.com/docs/cordium/latest/examples/ai/codex) examples for running coding agents inside _Workspaces_.
+
 ## Workspace Configuration
 
 _Workspaces_ and _Templates_ share the same declarative spec structure. For example, the following `workspace.yaml` clones a Python project and installs its dependencies on the first run. Replace the repository URL with your own project:
@@ -105,13 +107,13 @@ Read the [configuration guide](https://octelium.com/docs/cordium/latest/workspac
 
 ### How does Cordium differ from sandbox platforms such as Daytona and E2B?
 
-Cordium combines sandboxed execution with Octelium's identity-based access to infrastructure. Every _Workspace_ has its own _Session_ identity, and the upstream credentials used to access an Octelium _Service_ remain outside the sandbox. Access can be scoped to the _Workspace_, its _Template_ or its _Space_ and is evaluated per request using identity and context. This applies to developers and AI agents alike, including access to private resources behind NAT and public APIs such as LLM providers. Read more about the architecture [here](https://octelium.com/docs/cordium/latest/overview/how).
+Cordium combines sandboxed execution with Octelium's identity-based access to infrastructure. Every _Workspace_ has its own _Session_ identity, and the upstream credentials used to access an Octelium _Service_ remain outside the sandbox. Access can be scoped to the _Workspace_, its _Template_ or its _Space_ and is evaluated per request using identity and context. This applies to developers and AI agents alike, including access to private resources behind NAT and public APIs such as LLM providers. Read more about the [architecture](https://octelium.com/docs/cordium/latest/overview/how).
 
 ### How are Workspaces sandboxed?
 
 Each _Workspace_ runs inside a Kubernetes pod, which bootstraps a hardened supervisor, that in turns launches the actuall sandbox as a rootless container. The sandbox has its own filesystem, processes and network, and its root user maps to an unprivileged user outside it. This lets you install system packages and run containers inside the _Workspace_ without granting it root access to the Kubernetes node.
 
-The supervisor enforces resource limits and network egress policies outside the sandbox. Cordium runs on standard Kubernetes nodes without requiring a separate VM per _Workspace_ or specialized hardware. Read more about the isolation model [here](https://octelium.com/docs/cordium/latest/overview/how#workspace-isolation-model).
+The supervisor enforces resource limits and network egress policies outside the sandbox. Cordium runs on standard Kubernetes nodes without requiring a separate VM per _Workspace_ or specialized hardware. Read the [architecture and isolation model](https://octelium.com/docs/cordium/latest/overview/how#workspace-isolation-model) and [core concepts](https://octelium.com/docs/cordium/latest/overview/concepts) for details.
 
 ### What storage is needed for snapshots and shared Volumes?
 
