@@ -287,7 +287,7 @@ func (w *Workspace) IsStoppingOrStopped() bool {
 }
 
 func (s *SecretList) GetByName(name string) (*cordiumv1.Secret, error) {
-	for _, idp := range s.Items {
+	for _, idp := range s.GetItems() {
 		if idp.Metadata.Name == name {
 			return idp, nil
 		}
@@ -296,7 +296,7 @@ func (s *SecretList) GetByName(name string) (*cordiumv1.Secret, error) {
 }
 
 func (s *UserSecretList) GetByName(name string) (*cordiumv1.UserSecret, error) {
-	for _, idp := range s.Items {
+	for _, idp := range s.GetItems() {
 		if idp.Metadata.Name == name {
 			return idp, nil
 		}
