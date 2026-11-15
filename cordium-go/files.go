@@ -177,6 +177,9 @@ func (w *Workspace) DownloadFile(ctx context.Context, remotePath, localPath stri
 	if localPath == "" {
 		return invalidArgumentf("empty local file path")
 	}
+	if remotePath == "" {
+		return invalidArgumentf("empty file path")
+	}
 
 	if dir := localDir(localPath); dir != "" {
 		if err := os.MkdirAll(dir, 0o755); err != nil {

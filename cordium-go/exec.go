@@ -734,13 +734,13 @@ func (s *ExecSession) deliver(stream Stream, data []byte) bool {
 	}
 
 	if writer != nil {
-		if _, err := writer.Write(data); err != nil {
+		if err := writeAll(writer, data); err != nil {
 			s.setErr(err)
 			return false
 		}
 	}
 	if s.cfg.combined != nil {
-		if _, err := s.cfg.combined.Write(data); err != nil {
+		if err := writeAll(s.cfg.combined, data); err != nil {
 			s.setErr(err)
 			return false
 		}
@@ -763,6 +763,17 @@ func (s *ExecSession) deliver(stream Stream, data []byte) bool {
 	}
 }
 
+func writeAll(w io.Writer, data []byte) error {
+	n, err := w.Write(data)
+	if err != nil {
+		return err
+	}
+	if n < len(data) {
+		return io.ErrShortWrite
+	}
+	return nil
+}
+
 func (s *ExecSession) stdinLoop() {
 	buf := make([]byte, 32*1024)
 	for {
@@ -773,7 +784,10 @@ func (s *ExecSession) stdinLoop() {
 			}
 		}
 		if err != nil {
-			if errors.Is(err, io.EOF) && s.cfg.terminateOnStdinEOF {
+			if !errors.Is(err, io.EOF) {
+				s.setErr(err)
+				s.cancel()
+			} else if s.cfg.terminateOnStdinEOF {
 				_ = s.Kill()
 			}
 			return
