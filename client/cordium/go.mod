@@ -3,12 +3,12 @@ module github.com/octelium/cordium/client/cordium
 go 1.27.4
 
 require (
-	al.essio.dev/pkg/shellescape v1.6.0
-	github.com/fatih/color v1.18.0
+	al.essio.dev/pkg/shellescape v1.6.1
+	github.com/fatih/color v1.19.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-resty/resty/v2 v2.17.2
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4
-	github.com/hashicorp/go-version v1.8.0
+	github.com/hashicorp/go-version v1.9.0
 	github.com/juju/errors v1.0.0
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
