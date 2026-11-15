@@ -40,7 +40,6 @@ import (
 	"github.com/octelium/octelium/cluster/common/httputils"
 	"github.com/octelium/octelium/cluster/common/vutils"
 	"github.com/octelium/octelium/pkg/apiutils/umetav1"
-	"github.com/patrickmn/go-cache"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
@@ -52,7 +51,6 @@ type Server struct {
 
 	// jwkCtl        *jwkctl.Controller
 	clusterDomain string
-	genCache      *cache.Cache
 	tunnelSrv     *tunnelSrv
 	aCache        *acache.Cache
 
@@ -79,7 +77,6 @@ func newServer(ctx context.Context, octeliumC octeliumc.ClientInterface) (*Serve
 	ret := &Server{
 		octeliumC: octeliumC,
 		svcUID:    os.Getenv("OCTELIUM_SVC_UID"),
-		genCache:  cache.New(cache.NoExpiration, 1*time.Minute),
 		/*
 			workspaceMap: &workspaceMap{
 				wsMap: make(map[string]*workspaceCtx),

@@ -17,145 +17,54 @@
 package acache
 
 import (
-	"fmt"
-	"time"
-
 	workspacecommon "github.com/octelium/cordium/cluster/common"
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/octelium/octelium/apis/main/corev1"
 	"github.com/octelium/octelium/apis/main/metav1"
+	"github.com/octelium/octelium/cluster/common/cache"
 	"github.com/octelium/octelium/pkg/apiutils/ucorev1"
 	"github.com/octelium/octelium/pkg/apiutils/umetav1"
-	"github.com/patrickmn/go-cache"
 	"github.com/pkg/errors"
 )
 
 type Cache struct {
-	// db *bbolt.DB
-	c *cache.Cache
+	c *cache.Cache[resourceKey, umetav1.ResourceObjectI]
+}
+
+type resourceKey struct {
+	kind string
+	key  string
 }
 
 func NewCache() (*Cache, error) {
-
-	/*
-		filename := fmt.Sprintf("/tmp/acache-%s.db", utilrand.GetRandomStringLowercase(6))
-		db, err := bbolt.Open(filename, 0600, nil)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := db.Update(func(tx *bbolt.Tx) error {
-
-			bucketNames := []string{
-				ucordiumv1.KindWorkspace,
-				ucordiumv1.KindSpace,
-				ucordiumv1.KindMembership,
-				ucorev1.KindSession,
-			}
-
-			for _, bucketName := range bucketNames {
-				_, err = tx.CreateBucketIfNotExists([]byte(bucketName))
-				if err != nil {
-					return err
-				}
-			}
-
-			return nil
-		}); err != nil {
-			return nil, err
-		}
-	*/
-
 	return &Cache{
-		// db: db,
-		c: cache.New(5*cache.NoExpiration, 10*time.Minute),
+		c: cache.New[resourceKey, umetav1.ResourceObjectI](nil),
 	}, nil
 }
 
 var ErrNotFound = errors.New("Resource not found")
 
 func (c *Cache) setResource(key string, obj umetav1.ResourceObjectI, kind string) error {
-
-	c.c.Set(fmt.Sprintf("%s:%s", kind, key), obj, cache.NoExpiration)
-	/*
-		objBytes, err := pbutils.Marshal(obj)
-		if err != nil {
-			return err
-		}
-
-		if err := c.db.Update(func(tx *bbolt.Tx) error {
-
-			b := tx.Bucket([]byte(kind))
-
-			if key == "" {
-				key = obj.GetMetadata().Uid
-			}
-			err := b.Put([]byte(key), objBytes)
-
-			return err
-
-		}); err != nil {
-			return err
-		}
-	*/
-
+	c.c.Set(resourceKey{kind: kind, key: key}, obj)
 	return nil
 }
 
-func (c *Cache) getResource(kind string, key string, newObjFn func(kind string) (umetav1.ResourceObjectI, error)) (umetav1.ResourceObjectI, error) {
-
-	ret, ok := c.c.Get(fmt.Sprintf("%s:%s", kind, key))
+func (c *Cache) getResource(kind string, key string) (umetav1.ResourceObjectI, error) {
+	ret, ok := c.c.Get(resourceKey{kind: kind, key: key})
 	if !ok {
 		return nil, ErrNotFound
 	}
-	/*
-		rsc, err := newObjFn(kind)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := c.db.View(func(tx *bbolt.Tx) error {
-			b := tx.Bucket([]byte(kind))
-			v := b.Get([]byte(key))
-			if v == nil {
-				return ErrNotFound
-			}
-
-			if err := pbutils.Unmarshal(v, rsc); err != nil {
-				return err
-			}
-
-			return nil
-		}); err != nil {
-			return nil, err
-		}
-	*/
-	return ret.(umetav1.ResourceObjectI), nil
+	return ret, nil
 }
 
 func (c *Cache) deleteResource(kind string, key string) error {
-
-	c.c.Delete(fmt.Sprintf("%s:%s", kind, key))
-
-	/*
-		if err := c.db.Update(func(tx *bbolt.Tx) error {
-
-			b := tx.Bucket([]byte(kind))
-
-			err := b.Delete([]byte(key))
-
-			return err
-
-		}); err != nil {
-			return err
-		}
-	*/
+	c.c.Delete(resourceKey{kind: kind, key: key})
 	return nil
 }
 
 func (c *Cache) GetWorkspace(workspaceName string) (*cordiumv1.Workspace, error) {
-	ret, err := c.getResource(ucordiumv1.KindWorkspace, workspaceName, ucordiumv1.NewObject)
+	ret, err := c.getResource(ucordiumv1.KindWorkspace, workspaceName)
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +84,7 @@ func getKey(ws *cordiumv1.Workspace) string {
 }
 
 func (c *Cache) GetSpace(uid string) (*cordiumv1.Space, error) {
-	ret, err := c.getResource(ucordiumv1.KindSpace, uid, ucordiumv1.NewObject)
+	ret, err := c.getResource(ucordiumv1.KindSpace, uid)
 	if err != nil {
 		return nil, err
 	}
@@ -191,7 +100,7 @@ func (c *Cache) DeleteSpace(spc *cordiumv1.Space) error {
 }
 
 func (c *Cache) GetSession(uid string) (*corev1.Session, error) {
-	ret, err := c.getResource(ucorev1.KindSession, uid, ucorev1.NewObject)
+	ret, err := c.getResource(ucorev1.KindSession, uid)
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +116,7 @@ func (c *Cache) DeleteSession(sess *corev1.Session) error {
 }
 
 func (c *Cache) GetMembership(spcRef, usrRef *metav1.ObjectReference) (*cordiumv1.Membership, error) {
-	ret, err := c.getResource(ucordiumv1.KindMembership, workspacecommon.GetMembershipName(spcRef, usrRef), ucordiumv1.NewObject)
+	ret, err := c.getResource(ucordiumv1.KindMembership, workspacecommon.GetMembershipName(spcRef, usrRef))
 	if err != nil {
 		return nil, err
 	}

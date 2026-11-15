@@ -11,7 +11,6 @@ require (
 	github.com/octelium/octelium/cluster/common v0.0.0-20261114160625-c2433476ab35
 	github.com/octelium/octelium/cluster/vigil v0.0.0-20261114160625-c2433476ab35
 	github.com/octelium/octelium/pkg v0.0.0-20261114160625-c2433476ab35
-	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
 	go.uber.org/zap v1.28.0
