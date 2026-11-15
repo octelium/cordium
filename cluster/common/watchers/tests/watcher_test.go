@@ -31,14 +31,14 @@ import (
 )
 
 func TestWatcherCordium(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-
 	tst, err := tests.Initialize(nil)
 	assert.Nil(t, err)
 	t.Cleanup(func() {
 		tst.Destroy()
 	})
 	fakeC := tst.C
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
 	watcher := watchers.NewCordiumV1(fakeC.OcteliumC)
 

@@ -195,3 +195,21 @@ func TestGetSortedFeaturesLocalFiles(t *testing.T) {
 	assert.Nil(t, DownloadFeatures(t.Context(), &GetFeaturesOpts{DirBase: base}))
 	assert.NotNil(t, DownloadFeatures(t.Context(), nil))
 }
+
+func TestGetFeatureName(t *testing.T) {
+	for _, tc := range []struct {
+		ref  string
+		want string
+	}{
+		{ref: "base", want: "base"},
+		{ref: "base:1", want: "base"},
+		{ref: "ghcr.io/devcontainers/features/node:1", want: "ghcr.io/devcontainers/features/node"},
+		{ref: "registry.example.com:5000/team/base", want: "registry.example.com:5000/team/base"},
+		{ref: "registry.example.com:5000/team/base:1", want: "registry.example.com:5000/team/base"},
+		{ref: "ghcr.io/devcontainers/features/node@sha256:0123456789abcdef", want: "ghcr.io/devcontainers/features/node"},
+	} {
+		t.Run(tc.ref, func(t *testing.T) {
+			assert.Equal(t, tc.want, getFeatureName(tc.ref))
+		})
+	}
+}

@@ -199,7 +199,12 @@ type limitedReader struct {
 
 func (l *limitedReader) Read(p []byte) (int, error) {
 	if l.n <= 0 {
-		return 0, errors.Errorf("Devcontainer feature archive is too large")
+		var b [1]byte
+		n, err := l.r.Read(b[:])
+		if n > 0 {
+			return 0, errors.Errorf("Devcontainer feature archive is too large")
+		}
+		return 0, err
 	}
 	if int64(len(p)) > l.n {
 		p = p[0:l.n]
@@ -281,6 +286,14 @@ func GetSortedFeatures(o *GetSortedFeaturesOpts) ([]*Feature, error) {
 	return sortedFeatures, nil
 }
 
+func getFeatureName(ref string) string {
+	ref, _, _ = strings.Cut(ref, "@")
+	if idx := strings.LastIndex(ref, ":"); idx > strings.LastIndex(ref, "/") {
+		return ref[:idx]
+	}
+	return ref
+}
+
 func isInList(lst []*Feature, name string) bool {
 	for _, ftr := range lst {
 		if ftr.Name == name {
@@ -312,11 +325,7 @@ func doAddFeature(features []*Feature, sortedFeatures *[]*Feature, ftr *Feature,
 	defer delete(visiting, ftr.Name)
 
 	for _, dep := range ftr.Spec.InstallsAfter {
-		args := strings.Split(dep, ":")
-		if len(args) < 1 {
-			continue
-		}
-		name := args[0]
+		name := getFeatureName(dep)
 		if !isInList(*sortedFeatures, name) {
 			if ftr := getByName(features, name); ftr != nil {
 				doAddFeature(features, sortedFeatures, ftr, visiting)

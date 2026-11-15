@@ -19,6 +19,7 @@ package wsutils
 import (
 	"context"
 	"fmt"
+	"slices"
 	"sort"
 
 	"github.com/octelium/cordium/cluster/common/octeliumc"
@@ -132,6 +133,12 @@ func ResolveVolumeMounts(ctx context.Context, octeliumC octeliumc.ClientInterfac
 				return nil, newVolumeMountErr(name, "It does not exist")
 			}
 			return nil, err
+		}
+
+		if slices.ContainsFunc(ret.Volumes, func(itm *cordiumv1.Volume) bool {
+			return itm.Metadata.Uid == vol.Metadata.Uid
+		}) {
+			return nil, newVolumeMountErr(vol.Metadata.Name, "It is mounted more than once")
 		}
 
 		if vol.Status.SpaceRef == nil || vol.Status.SpaceRef.Uid != ws.Status.SpaceRef.Uid {

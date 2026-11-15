@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"strings"
 
+	"al.essio.dev/pkg/shellescape"
 	"github.com/octelium/cordium/cluster/common/devcontainers/dcvars"
 	"github.com/octelium/octelium/apis/main/cordiumv1"
 	"github.com/tidwall/jsonc"
@@ -84,6 +85,7 @@ func LoadSpec(o *LoadSpecOpts) (*Spec, error) {
 		Input:        string(jsonc.ToJSON(o.Data)),
 		Workspace:    o.Workspace,
 		ContainerEnv: o.ContainerEnv,
+		EscapeJSON:   true,
 	})
 	if err != nil {
 		return nil, err
@@ -117,7 +119,7 @@ func (c *SpecCommand) UnmarshalJSON(data []byte) error {
 			if !ok {
 				return &json.SyntaxError{}
 			}
-			cmdArgs = append(cmdArgs, value)
+			cmdArgs = append(cmdArgs, shellescape.Quote(value))
 		}
 		c.Commands = append(c.Commands, strings.Join(cmdArgs, " "))
 		return nil
@@ -132,7 +134,7 @@ func (c *SpecCommand) UnmarshalJSON(data []byte) error {
 					if !ok {
 						return &json.SyntaxError{}
 					}
-					cmdArgs = append(cmdArgs, value)
+					cmdArgs = append(cmdArgs, shellescape.Quote(value))
 				}
 				c.Commands = append(c.Commands, strings.Join(cmdArgs, " "))
 			} else {

@@ -19,15 +19,18 @@ package gitutils
 import (
 	"context"
 	"fmt"
+	"math"
 	"os"
 	"os/exec"
 	"os/user"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
 	"syscall"
 
 	git "github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
@@ -144,7 +147,21 @@ func unshallowEmbedded(ctx context.Context, o *CloneOpts) error {
 		return err
 	}
 
-	gopts := &git.FetchOptions{}
+	shallows, err := repo.Storer.Shallow()
+	if err != nil {
+		return err
+	}
+	if len(shallows) == 0 {
+		zap.L().Debug("The repo does not need an unshallow fetch. Nothing to be done")
+		return nil
+	}
+
+	gopts := &git.FetchOptions{
+		Depth: math.MaxInt32,
+		RefSpecs: []config.RefSpec{
+			"+refs/heads/*:refs/remotes/origin/*",
+		},
+	}
 	if o.Repo.Authentication != nil {
 		usernamePassword, err := getUsernamePassword(o)
 		if err != nil {
@@ -156,7 +173,11 @@ func unshallowEmbedded(ctx context.Context, o *CloneOpts) error {
 		}
 	}
 
-	if err := repo.FetchContext(ctx, gopts); err != nil {
+	if err := repo.FetchContext(ctx, gopts); err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
+		return err
+	}
+
+	if err := os.Remove(filepath.Join(o.Dir, git.GitDirName, "shallow")); err != nil && !os.IsNotExist(err) {
 		return err
 	}
 
@@ -422,8 +443,28 @@ func checkoutEmbedded(ctx context.Context, o *CloneOpts) error {
 		return err
 	}
 
+	branch := plumbing.NewBranchReferenceName(o.Repo.CloneOptions.Checkout)
+	if _, err := repo.Reference(branch, false); err == nil {
+		return tree.Checkout(&git.CheckoutOptions{
+			Branch: branch,
+		})
+	}
+
+	if hash, err := repo.ResolveRevision(plumbing.Revision(o.Repo.CloneOptions.Checkout)); err == nil {
+		return tree.Checkout(&git.CheckoutOptions{
+			Hash: *hash,
+		})
+	}
+
+	remoteBranch, err := repo.Reference(plumbing.NewRemoteReferenceName("origin", o.Repo.CloneOptions.Checkout), true)
+	if err != nil {
+		return err
+	}
+
 	if err := tree.Checkout(&git.CheckoutOptions{
-		Branch: plumbing.NewBranchReferenceName(o.Repo.CloneOptions.Checkout),
+		Branch: branch,
+		Hash:   remoteBranch.Hash(),
+		Create: true,
 	}); err != nil {
 		return err
 	}

@@ -403,6 +403,37 @@ func TestLocalGitCheckoutReferences(t *testing.T) {
 	}
 }
 
+func TestLocalGitCheckoutRemoteBranch(t *testing.T) {
+	url, commits := localGitRepository(t)
+	for _, tc := range []struct {
+		name     string
+		checkout func(context.Context, *CloneOpts) error
+	}{
+		{name: "command", checkout: checkoutCmd},
+		{name: "embedded", checkout: checkoutEmbedded},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			opts := &CloneOpts{Dir: filepath.Join(t.TempDir(), "clone"), Repo: &cordiumv1.Workspace_Spec_Repository{Url: url, CloneOptions: &cordiumv1.Workspace_Spec_Repository_CloneOptions{DisableLazyUnshallow: true, Checkout: "feature"}}}
+			if err := cloneCmd(t.Context(), opts); err != nil {
+				t.Fatal(err)
+			}
+			if err := tc.checkout(t.Context(), opts); !assert.Nil(t, err) {
+				return
+			}
+			repo, err := git.PlainOpen(opts.Dir)
+			if err != nil {
+				t.Fatal(err)
+			}
+			head, err := repo.Head()
+			if err != nil {
+				t.Fatal(err)
+			}
+			assert.Equal(t, plumbing.NewBranchReferenceName("feature"), head.Name())
+			assert.Equal(t, commits[1], head.Hash())
+		})
+	}
+}
+
 func TestLocalGitUnshallow(t *testing.T) {
 	url, _ := localGitRepository(t)
 	for _, tc := range []struct {
@@ -432,6 +463,8 @@ func TestLocalGitUnshallow(t *testing.T) {
 			count := 0
 			assert.Nil(t, iter.ForEach(func(*object.Commit) error { count++; return nil }))
 			assert.Equal(t, 3, count)
+			_, err = os.Stat(filepath.Join(opts.Dir, ".git", "shallow"))
+			assert.True(t, os.IsNotExist(err))
 			assert.Nil(t, tc.unshallow(t.Context(), opts))
 		})
 	}

@@ -60,6 +60,7 @@ func LoadSpec(o *LoadSpecOpts) (*Spec, error) {
 		Input:        string(jsonc.ToJSON(o.Data)),
 		Workspace:    o.Workspace,
 		ContainerEnv: o.ContainerEnv,
+		EscapeJSON:   true,
 	})
 	if err != nil {
 		return nil, err

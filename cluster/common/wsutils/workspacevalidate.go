@@ -145,7 +145,7 @@ func ValidateWorkspace(ctx context.Context, req *ValidateWorkspaceReq) error {
 					}
 
 				default:
-
+					return serr.InvalidArg("Registry authentication password source must be set")
 				}
 			}
 		case *cordiumv1.Workspace_Spec_Image_Repository_:
@@ -254,6 +254,14 @@ func ValidateWorkspace(ctx context.Context, req *ValidateWorkspaceReq) error {
 
 			if cmd.Type == cordiumv1.Workspace_Spec_Runtime_Task_UNKNOWN {
 				return serr.InvalidArg("The type of the container command: %s must be set", cmd.Run)
+			}
+
+			if _, ok := cordiumv1.Workspace_Spec_Runtime_Task_Type_name[int32(cmd.Type)]; !ok {
+				return serr.InvalidArg("Invalid type of the container command: %s", cmd.Run)
+			}
+
+			if _, ok := cordiumv1.Workspace_Spec_Runtime_Task_OnFailure_name[int32(cmd.OnFailure)]; !ok {
+				return serr.InvalidArg("Invalid onFailure of the container command: %s", cmd.Run)
 			}
 
 			if cmd.WorkingDir != "" {
@@ -461,9 +469,11 @@ func ValidateWorkspace(ctx context.Context, req *ValidateWorkspaceReq) error {
 					}
 
 				default:
-
+					return serr.InvalidArg("Basic authentication password source must be set")
 				}
 
+			default:
+				return serr.InvalidArg("Repository authentication method must be set")
 			}
 		}
 

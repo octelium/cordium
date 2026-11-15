@@ -111,6 +111,11 @@ func (c *ActivityCtl) doCheck(ctx context.Context) error {
 			continue
 		}
 
+		if !lastActivity.After(ws.Status.GetLastActivityAt().AsTime()) {
+			delete(c.activityMap, wsUID)
+			continue
+		}
+
 		ws.Status.LastActivityAt = pbutils.Timestamp(lastActivity)
 		_, err = c.octeliumC.CordiumC().UpdateWorkspace(ctx, ws)
 		if err != nil && !grpcerr.IsNotFound(err) {

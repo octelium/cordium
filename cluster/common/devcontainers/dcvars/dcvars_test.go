@@ -95,3 +95,13 @@ func TestSubstituteVarsWorkspaceID(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "workspace-uid", got)
 }
+
+func TestSubstituteVarsEscapeJSON(t *testing.T) {
+	got, err := SubstituteVars(&SubstituteVarsOpts{
+		Input:        `{"name":"${containerEnv:NAME}","path":"${PATH}"}`,
+		ContainerEnv: []string{`NAME=a"b\c`, "PATH=/bin:/usr/bin"},
+		EscapeJSON:   true,
+	})
+	assert.Nil(t, err)
+	assert.Equal(t, `{"name":"a\"b\\c","path":"/bin:/usr/bin"}`, got)
+}

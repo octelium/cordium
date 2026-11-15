@@ -3,6 +3,7 @@ module github.com/octelium/cordium/cluster/common
 go 1.27.4
 
 require (
+	al.essio.dev/pkg/shellescape v1.6.1
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
 	github.com/codeclysm/extract/v4 v4.0.2
 	github.com/go-git/go-git/v5 v5.19.3

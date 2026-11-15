@@ -17,6 +17,7 @@
 package dcvars
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
@@ -28,6 +29,7 @@ type SubstituteVarsOpts struct {
 	Input        string
 	Workspace    *cordiumv1.Workspace
 	ContainerEnv []string
+	EscapeJSON   bool
 }
 
 var re = regexp.MustCompile(`\$\{(.*?)\}`)
@@ -35,9 +37,8 @@ var re = regexp.MustCompile(`\$\{(.*?)\}`)
 func toMap(arg []string) map[string]string {
 	ret := make(map[string]string)
 	for _, itm := range arg {
-		args := strings.Split(itm, "=")
-		if len(args) == 2 {
-			ret[args[0]] = args[1]
+		if k, v, ok := strings.Cut(itm, "="); ok {
+			ret[k] = v
 		}
 	}
 
@@ -45,12 +46,20 @@ func toMap(arg []string) map[string]string {
 }
 
 func SubstituteVars(o *SubstituteVarsOpts) (string, error) {
-	matches := re.FindStringSubmatch(o.Input)
+	matches := re.FindAllStringSubmatch(o.Input, -1)
 
 	containerEnv := toMap(o.ContainerEnv)
 
+	doSubstitute := func(in, old, new string) string {
+		if o.EscapeJSON {
+			new = escapeJSON(new)
+		}
+		return strings.ReplaceAll(in, fmt.Sprintf(`${%s}`, old), new)
+	}
+
 	ret := o.Input
-	for _, match := range matches {
+	for _, submatch := range matches {
+		match := submatch[1]
 		switch {
 		case match == "PATH":
 			ret = doSubstitute(ret, match, containerEnv["PATH"])
@@ -67,6 +76,7 @@ func SubstituteVars(o *SubstituteVarsOpts) (string, error) {
 					ret = doSubstitute(ret, match, v)
 				} else {
 					ret = strings.ReplaceAll(ret, fmt.Sprintf("${%s}:", match), "")
+					ret = doSubstitute(ret, match, "")
 				}
 
 			case varArgs[0] == "localEnv":
@@ -79,6 +89,7 @@ func SubstituteVars(o *SubstituteVarsOpts) (string, error) {
 	return ret, nil
 }
 
-func doSubstitute(in, old, new string) string {
-	return strings.ReplaceAll(in, fmt.Sprintf(`${%s}`, old), new)
+func escapeJSON(arg string) string {
+	ret, _ := json.Marshal(arg)
+	return string(ret[1 : len(ret)-1])
 }
