@@ -20,8 +20,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
+	"math/rand/v2"
 	"os"
 	"path"
 	"path/filepath"
@@ -181,12 +183,48 @@ func (w *Workspace) DownloadFile(ctx context.Context, remotePath, localPath stri
 		return invalidArgumentf("empty file path")
 	}
 
-	if dir := localDir(localPath); dir != "" {
-		if err := os.MkdirAll(dir, 0o755); err != nil {
+	info, err := os.Stat(localPath)
+	switch {
+	case err == nil && !info.Mode().IsRegular():
+		return w.downloadInPlace(ctx, remotePath, localPath, opts...)
+	case err == nil:
+		if localPath, err = filepath.EvalSymlinks(localPath); err != nil {
 			return err
 		}
+		file, err := os.OpenFile(localPath, os.O_WRONLY, 0)
+		if err != nil {
+			return err
+		}
+		_ = file.Close()
+	case errors.Is(err, os.ErrNotExist):
+		if dir := localDir(localPath); dir != "" {
+			if err := os.MkdirAll(dir, 0o755); err != nil {
+				return err
+			}
+		}
+	default:
+		return err
 	}
 
+	file, err := createTempFile(filepath.Dir(localPath))
+	if err != nil {
+		return err
+	}
+
+	if err := w.downloadToTempFile(ctx, remotePath, file, info, opts...); err != nil {
+		_ = os.Remove(file.Name())
+		return err
+	}
+
+	if err := os.Rename(file.Name(), localPath); err != nil {
+		_ = os.Remove(file.Name())
+		return err
+	}
+
+	return nil
+}
+
+func (w *Workspace) downloadInPlace(ctx context.Context, remotePath, localPath string, opts ...ExecOption) error {
 	file, err := os.Create(localPath)
 	if err != nil {
 		return err
@@ -194,10 +232,44 @@ func (w *Workspace) DownloadFile(ctx context.Context, remotePath, localPath stri
 
 	if err := w.download(ctx, remotePath, file, opts...); err != nil {
 		_ = file.Close()
-		_ = os.Remove(localPath)
 		return err
 	}
 	return file.Close()
+}
+
+func (w *Workspace) downloadToTempFile(ctx context.Context, remotePath string, file *os.File,
+	info os.FileInfo, opts ...ExecOption) error {
+
+	if info != nil {
+		if err := file.Chmod(info.Mode().Perm()); err != nil {
+			_ = file.Close()
+			return err
+		}
+	}
+
+	if err := w.download(ctx, remotePath, file, opts...); err != nil {
+		_ = file.Close()
+		return err
+	}
+
+	if err := file.Sync(); err != nil {
+		_ = file.Close()
+		return err
+	}
+	return file.Close()
+}
+
+func createTempFile(dir string) (*os.File, error) {
+	var err error
+	for range 10 {
+		var file *os.File
+		file, err = os.OpenFile(filepath.Join(dir, fmt.Sprintf(".cordium-download-%016x.tmp", rand.Uint64())),
+			os.O_RDWR|os.O_CREATE|os.O_EXCL, 0o666)
+		if !errors.Is(err, os.ErrExist) {
+			return file, err
+		}
+	}
+	return nil, err
 }
 
 // DownloadFileTo copies a file out of the Workspace into a writer.

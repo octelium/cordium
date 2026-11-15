@@ -23,6 +23,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -435,6 +436,188 @@ func TestDownloadFailurePreservesExistingFile(t *testing.T) {
 				t.Errorf("failed download destroyed the existing destination: content=%q, error=%v", got, err)
 			}
 		})
+	}
+}
+
+func dirEntries(t *testing.T, dir string) []string {
+	t.Helper()
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var names []string
+	for _, entry := range entries {
+		names = append(names, entry.Name())
+	}
+	return names
+}
+
+func TestDownloadFileReplacesExistingFile(t *testing.T) {
+	ws, fs := fileWorkspace(t)
+	fs.files["/remote"] = []byte("updated")
+	dir := t.TempDir()
+	out := filepath.Join(dir, "existing.txt")
+	if err := os.WriteFile(out, []byte("original"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chmod(out, 0o640); err != nil {
+		t.Fatal(err)
+	}
+	if err := ws.DownloadFile(t.Context(), "/remote", out); err != nil {
+		t.Fatalf("DownloadFile: %v", err)
+	}
+	if got, err := os.ReadFile(out); err != nil || string(got) != "updated" {
+		t.Errorf("content = %q, %v, want %q", got, err, "updated")
+	}
+	info, err := os.Stat(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Mode().Perm() != 0o640 {
+		t.Errorf("mode = %v, want %v", info.Mode().Perm(), os.FileMode(0o640))
+	}
+	if names := dirEntries(t, dir); !slices.Equal(names, []string{"existing.txt"}) {
+		t.Errorf("directory holds %v, want only the destination", names)
+	}
+}
+
+func TestDownloadFileCreatesFileWithDefaultMode(t *testing.T) {
+	ws, fs := fileWorkspace(t)
+	fs.files["/remote"] = []byte("content")
+	dir := t.TempDir()
+	reference, err := os.Create(filepath.Join(dir, "reference"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := reference.Close(); err != nil {
+		t.Fatal(err)
+	}
+	out := filepath.Join(dir, "new.txt")
+	if err := ws.DownloadFile(t.Context(), "/remote", out); err != nil {
+		t.Fatalf("DownloadFile: %v", err)
+	}
+	want, err := os.Stat(reference.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := os.Stat(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Mode() != want.Mode() {
+		t.Errorf("mode = %v, want %v", got.Mode(), want.Mode())
+	}
+}
+
+func TestDownloadFileMidStreamFailurePreservesExistingFile(t *testing.T) {
+	fake := newFakeCluster()
+	fake.execScript = func(req *cordiumv1.ExecRequest_Request, srv grpc.BidiStreamingServer[cordiumv1.ExecRequest, cordiumv1.ExecResponse]) error {
+		for _, message := range []*cordiumv1.ExecResponse{stdout(base64.StdEncoding.EncodeToString([]byte("partial"))), stderr("read error\n"), exit(1)} {
+			if err := srv.Send(message); err != nil {
+				return err
+			}
+		}
+		<-srv.Context().Done()
+		return nil
+	}
+	ws := testWorkspace(t, startFakeCluster(t, fake))
+	dir := t.TempDir()
+	out := filepath.Join(dir, "existing.txt")
+	if err := os.WriteFile(out, []byte("original"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	err := ws.DownloadFile(t.Context(), "/remote", out, WithExecTimeout(2*time.Second))
+	if err == nil || !strings.Contains(err.Error(), "read error") {
+		t.Errorf("DownloadFile error = %v, want the remote diagnostic", err)
+	}
+	if got, err := os.ReadFile(out); err != nil || string(got) != "original" {
+		t.Errorf("failed download changed the existing destination: content=%q, error=%v", got, err)
+	}
+	if names := dirEntries(t, dir); !slices.Equal(names, []string{"existing.txt"}) {
+		t.Errorf("directory holds %v, want only the destination", names)
+	}
+}
+
+func TestDownloadFileThroughSymlink(t *testing.T) {
+	ws, fs := fileWorkspace(t)
+	fs.files["/remote"] = []byte("updated")
+	dir := t.TempDir()
+	target := filepath.Join(dir, "target.txt")
+	if err := os.WriteFile(target, []byte("original"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	link := filepath.Join(dir, "link.txt")
+	if err := os.Symlink("target.txt", link); err != nil {
+		t.Skipf("symlinks are not supported: %v", err)
+	}
+	if err := ws.DownloadFile(t.Context(), "/remote", link); err != nil {
+		t.Fatalf("DownloadFile: %v", err)
+	}
+	if got, err := os.ReadFile(target); err != nil || string(got) != "updated" {
+		t.Errorf("target content = %q, %v, want %q", got, err, "updated")
+	}
+	info, err := os.Lstat(link)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Mode()&os.ModeSymlink == 0 {
+		t.Error("the symlink was replaced by a regular file")
+	}
+	if names := dirEntries(t, dir); !slices.Equal(names, []string{"link.txt", "target.txt"}) {
+		t.Errorf("directory holds %v, want only the link and its target", names)
+	}
+}
+
+func TestDownloadFileRespectsReadOnlyFile(t *testing.T) {
+	if os.Geteuid() == 0 {
+		t.Skip("root can write to read-only files")
+	}
+	ws, fs := fileWorkspace(t)
+	fs.files["/remote"] = []byte("updated")
+	out := filepath.Join(t.TempDir(), "readonly.txt")
+	if err := os.WriteFile(out, []byte("original"), 0o400); err != nil {
+		t.Fatal(err)
+	}
+	if err := ws.DownloadFile(t.Context(), "/remote", out); !errors.Is(err, os.ErrPermission) {
+		t.Errorf("DownloadFile error = %v, want a permission error", err)
+	}
+	if got, err := os.ReadFile(out); err != nil || string(got) != "original" {
+		t.Errorf("read-only destination changed: content=%q, error=%v", got, err)
+	}
+}
+
+func TestDownloadFileRejectsDirectory(t *testing.T) {
+	ws, fs := fileWorkspace(t)
+	fs.files["/remote"] = []byte("content")
+	dir := t.TempDir()
+	if err := ws.DownloadFile(t.Context(), "/remote", dir); err == nil {
+		t.Fatal("DownloadFile replaced a directory")
+	}
+	info, err := os.Stat(dir)
+	if err != nil || !info.IsDir() {
+		t.Errorf("destination directory changed: %v, %v", info, err)
+	}
+	if names := dirEntries(t, dir); len(names) != 0 {
+		t.Errorf("directory holds %v, want nothing", names)
+	}
+}
+
+func TestDownloadFileToDevice(t *testing.T) {
+	if os.Geteuid() == 0 {
+		t.Skip("a regression must not be able to replace the device as root")
+	}
+	before, err := os.Stat(os.DevNull)
+	if err != nil || before.Mode().IsRegular() {
+		t.Skipf("%s is not a device: %v", os.DevNull, err)
+	}
+	ws, fs := fileWorkspace(t)
+	fs.files["/remote"] = []byte("content")
+	if err := ws.DownloadFile(t.Context(), "/remote", os.DevNull); err != nil {
+		t.Fatalf("DownloadFile: %v", err)
+	}
+	after, err := os.Stat(os.DevNull)
+	if err != nil || after.Mode() != before.Mode() {
+		t.Errorf("%s mode = %v, %v, want %v", os.DevNull, after, err, before.Mode())
 	}
 }
 
