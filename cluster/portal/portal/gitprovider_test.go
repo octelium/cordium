@@ -48,8 +48,136 @@ import (
 	"github.com/octelium/octelium/pkg/common/pbutils"
 	"github.com/octelium/octelium/pkg/utils/utilrand"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+	"golang.org/x/oauth2"
 )
+
+type gitProviderTestTransport func(*http.Request) (*http.Response, error)
+
+func (f gitProviderTestTransport) RoundTrip(r *http.Request) (*http.Response, error) {
+	return f(r)
+}
+
+func gitProviderTestResponse(r *http.Request, status int, body string) *http.Response {
+	w := httptest.NewRecorder()
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	w.Write([]byte(body))
+	ret := w.Result()
+	ret.Request = r
+	return ret
+}
+
+func TestGetGitProviderInfoGitHub(t *testing.T) {
+	for _, tc := range []struct {
+		name       string
+		body       string
+		status     int
+		username   string
+		email      string
+		emptyToken bool
+		err        string
+	}{
+		{name: "profile", body: `{"login":"octocat","email":"octocat@example.com"}`, username: "octocat", email: "octocat@example.com"},
+		{name: "missing optional fields", body: `{}`},
+		{name: "unauthorized", status: http.StatusUnauthorized, body: `{"message":"Bad credentials"}`, err: "Could not get user"},
+		{name: "invalid response", body: `invalid`, err: "Could not get user"},
+		{name: "empty token", emptyToken: true, err: "Could not create GitHub client"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			requested := false
+			transport := gitProviderTestTransport(func(r *http.Request) (*http.Response, error) {
+				requested = true
+				assert.Equal(t, "GET", r.Method)
+				assert.Equal(t, "https://api.github.com/user", r.URL.String())
+				assert.Equal(t, "Bearer github-token", r.Header.Get("Authorization"))
+				status := tc.status
+				if status == 0 {
+					status = http.StatusOK
+				}
+				return gitProviderTestResponse(r, status, tc.body), nil
+			})
+			ctx := context.WithValue(t.Context(), oauth2.HTTPClient, &http.Client{Transport: transport})
+			token := &oauth2.Token{AccessToken: "github-token", RefreshToken: "refresh-token", Expiry: time.Now().Add(time.Hour)}
+			if tc.emptyToken {
+				token.AccessToken = ""
+			}
+			provider := &cordiumv1.GitProvider{
+				Metadata: &metav1.Metadata{Name: "github", Uid: "provider-uid"},
+				Spec:     &cordiumv1.GitProvider_Spec{Type: &cordiumv1.GitProvider_Spec_Github_{}},
+			}
+			s := &Server{}
+
+			ret, err := s.getGitProviderInfo(ctx, &oauth2.Config{}, token, provider)
+			assert.Equal(t, !tc.emptyToken, requested)
+			if tc.err != "" {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tc.err)
+				assert.Nil(t, ret)
+				return
+			}
+			require.Nil(t, err)
+			require.NotNil(t, ret)
+			assert.Equal(t, tc.username, ret.Username)
+			assert.Equal(t, tc.email, ret.Email)
+			assert.Equal(t, token.AccessToken, ret.AccessToken)
+			assert.Equal(t, token.RefreshToken, ret.RefreshToken)
+			assert.True(t, token.Expiry.Equal(ret.ExpiresAt.AsTime()))
+			assert.True(t, pbutils.IsEqual(umetav1.GetObjectReference(provider), ret.GitProviderRef))
+			assert.NotNil(t, ret.CreatedAt)
+		})
+	}
+}
+
+func TestGetGitProviderInfoGitHubRedirectCredentials(t *testing.T) {
+	for _, tc := range []struct {
+		name       string
+		url        string
+		authorized bool
+	}{
+		{name: "API origin", url: "https://api.github.com/redirected-user", authorized: true},
+		{name: "upload origin", url: "https://uploads.github.com/redirected-user", authorized: true},
+		{name: "other host", url: "https://example.net/redirected-user"},
+		{name: "subdomain", url: "https://sub.api.github.com/redirected-user"},
+		{name: "other port", url: "https://api.github.com:8443/redirected-user"},
+		{name: "downgrade", url: "http://api.github.com/redirected-user"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			redirected := false
+			transport := gitProviderTestTransport(func(r *http.Request) (*http.Response, error) {
+				if r.URL.String() == tc.url {
+					redirected = true
+					if tc.authorized {
+						assert.Equal(t, "Bearer github-token", r.Header.Get("Authorization"))
+					} else {
+						assert.Empty(t, r.Header.Get("Authorization"))
+					}
+					return gitProviderTestResponse(r, http.StatusOK, `{"login":"octocat"}`), nil
+				}
+				if r.URL.String() != "https://api.github.com/user" {
+					return nil, fmt.Errorf("Unexpected GitHub request: %s", r.URL)
+				}
+				assert.Equal(t, "Bearer github-token", r.Header.Get("Authorization"))
+				response := gitProviderTestResponse(r, http.StatusFound, "")
+				response.Header.Set("Location", tc.url)
+				return response, nil
+			})
+			ctx := context.WithValue(t.Context(), oauth2.HTTPClient, &http.Client{Transport: transport})
+			provider := &cordiumv1.GitProvider{
+				Metadata: &metav1.Metadata{Name: "github", Uid: "provider-uid"},
+				Spec:     &cordiumv1.GitProvider_Spec{Type: &cordiumv1.GitProvider_Spec_Github_{}},
+			}
+			s := &Server{}
+
+			ret, err := s.getGitProviderInfo(ctx, &oauth2.Config{}, &oauth2.Token{AccessToken: "github-token"}, provider)
+			require.Nil(t, err)
+			require.NotNil(t, ret)
+			assert.True(t, redirected)
+			assert.Equal(t, "octocat", ret.Username)
+		})
+	}
+}
 
 func TestHandleAuthGitProviderBegin(t *testing.T) {
 

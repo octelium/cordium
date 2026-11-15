@@ -27,7 +27,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/go-resty/resty/v2"
-	"github.com/google/go-github/v33/github"
+	"github.com/google/go-github/v93/github"
 	workspacecommon "github.com/octelium/cordium/cluster/common"
 	"github.com/octelium/cordium/cluster/portal/portal/middlewares"
 	"github.com/octelium/cordium/pkg/apiutils/ucordiumv1"
@@ -538,13 +538,17 @@ func (s *Server) getGitProviderInfo(ctx context.Context, oauth2Config *oauth2.Co
 
 	switch gitProvider.Spec.Type.(type) {
 	case *cordiumv1.GitProvider_Spec_Github_:
-		client := oauth2Config.Client(ctx, tkn)
-
-		githubClient := github.NewClient(client)
+		githubClient, err := github.NewClient(
+			github.WithHTTPClient(oauth2.NewClient(ctx, nil)),
+			github.WithAuthToken(tkn.AccessToken),
+		)
+		if err != nil {
+			return nil, errors.Errorf("Could not create GitHub client: %v", err)
+		}
 
 		user, _, err := githubClient.Users.Get(ctx, "")
 		if err != nil {
-			return nil, errors.Errorf("Could not get user")
+			return nil, errors.Errorf("Could not get user: %v", err)
 		}
 
 		if user.Email != nil {
