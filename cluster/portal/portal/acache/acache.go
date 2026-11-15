@@ -28,7 +28,7 @@ import (
 )
 
 type Cache struct {
-	resources *cache.Cache[resourceKey, []byte]
+	resources *cache.Cache[resourceKey, umetav1.ResourceObjectI]
 }
 
 type resourceKey struct {
@@ -38,7 +38,7 @@ type resourceKey struct {
 
 func NewCache() (*Cache, error) {
 	return &Cache{
-		resources: cache.New[resourceKey, []byte](nil),
+		resources: cache.New[resourceKey, umetav1.ResourceObjectI](nil),
 	}, nil
 }
 
@@ -46,36 +46,22 @@ var ErrNotFound = errors.New("Resource not found")
 var SessionNotFound = errors.New("Session not found")
 
 func (c *Cache) setResource(key string, obj umetav1.ResourceObjectI, kind string) error {
-	objBytes, err := pbutils.Marshal(obj)
-	if err != nil {
-		return err
-	}
-
 	if key == "" {
 		key = obj.GetMetadata().Uid
 	}
 
-	c.resources.Set(resourceKey{kind: kind, key: key}, objBytes)
+	c.resources.Set(resourceKey{kind: kind, key: key}, pbutils.Clone(obj).(umetav1.ResourceObjectI))
 
 	return nil
 }
 
 func (c *Cache) getResource(kind string, key string) (umetav1.ResourceObjectI, error) {
-	rsc, err := ucordiumv1.NewObject(kind)
-	if err != nil {
-		return nil, err
-	}
-
-	v, ok := c.resources.Get(resourceKey{kind: kind, key: key})
+	obj, ok := c.resources.Get(resourceKey{kind: kind, key: key})
 	if !ok {
 		return nil, ErrNotFound
 	}
 
-	if err := pbutils.Unmarshal(v, rsc); err != nil {
-		return nil, err
-	}
-
-	return rsc, nil
+	return pbutils.Clone(obj).(umetav1.ResourceObjectI), nil
 }
 
 func (c *Cache) deleteResource(kind string, key string) error {
