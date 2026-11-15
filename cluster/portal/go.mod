@@ -22,10 +22,10 @@ require (
 	go.uber.org/zap v1.28.0
 	golang.org/x/net v0.62.0
 	golang.org/x/oauth2 v0.36.0
-	golang.zx2c4.com/wireguard v0.0.0-20250521234502-f333402bd9cb
+	golang.zx2c4.com/wireguard v0.0.0-20261024220952-b3bc704ef0ee
 	golang.zx2c4.com/wireguard/wgctrl v0.0.0-20241231184526-a9ab2273dd10
 	google.golang.org/grpc v1.85.0
-	gvisor.dev/gvisor v0.0.0-20250503011706-39ed1f5ac29c
+	gvisor.dev/gvisor v0.0.0-20261103030936-1899f71d79be
 )
 
 require (
@@ -49,7 +49,7 @@ require (
 	github.com/containerd/continuity v0.4.5 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/containerd/stargz-snapshotter/estargz v0.18.2 // indirect
-	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
+	github.com/coreos/go-systemd/v22 v22.6.0 // indirect
 	github.com/creack/pty v1.1.24 // indirect
 	github.com/cyphar/filepath-securejoin v0.6.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
