@@ -91,10 +91,18 @@ func testWorkspaceFilesystem(t *testing.T, ch *harness.H) {
 		})
 		assert.NotEqual(t, int32(0), res.Code,
 			"/etc of a readOnly Workspace accepted a write")
+
+		res = h.Exec(t, readOnly, charness.ExecOpts{
+			Command:   fmt.Sprintf("touch ${HOME}/e2e-%s", name),
+			RunAsRoot: true,
+		})
+		assert.NotEqual(t, int32(0), res.Code,
+			"the home directory of a readOnly Workspace accepted a write")
+		assert.Contains(t, strings.ToLower(res.Stderr), "read-only file system")
 	})
 
 	t.Run("TheReadOnlyWorkspaceKeepsItsWritableVolumes", func(t *testing.T) {
-		for _, dir := range []string{"/tmp", "/var/tmp", workspaceDir, "${HOME}"} {
+		for _, dir := range []string{"/tmp", "/var/tmp"} {
 			file := fmt.Sprintf("%s/e2e-ro-%s", dir, name)
 
 			res := h.Exec(t, readOnly, charness.ExecOpts{

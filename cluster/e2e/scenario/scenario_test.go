@@ -57,9 +57,11 @@ func TestScenarioSPIFFE(t *testing.T) {
 						assert.Empty(t, s.Install.SPIFFETrustDomain)
 						assert.Empty(t, s.Hooks.PostPrepare)
 					}
-					require.Len(t, s.Hooks.PostInstall, 2)
-					assert.Equal(t, "cordium/install-package", s.Hooks.PostInstall[0].Name)
-					assert.Equal(t, "cordium/readiness", s.Hooks.PostInstall[1].Name)
+					require.Len(t, s.Hooks.PostInstall, 3)
+					assert.Equal(t, "cordium/cluster-dns", s.Hooks.PostInstall[0].Name)
+					require.NotNil(t, s.Hooks.PostInstall[0].Run)
+					assert.Equal(t, "cordium/install-package", s.Hooks.PostInstall[1].Name)
+					assert.Equal(t, "cordium/readiness", s.Hooks.PostInstall[2].Name)
 				})
 			}
 		})

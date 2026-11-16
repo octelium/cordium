@@ -79,6 +79,7 @@ func register(id string, o opts) {
 		ret.Topology.Labels = append(ret.Topology.Labels, NodeLabel)
 
 		ret.Hooks.PostInstall = []scenario.Step{
+			{Name: "cordium/cluster-dns", Run: stepClusterDNS},
 			{Name: "cordium/install-package", Run: stepInstallPackage},
 			{Name: "cordium/readiness", Run: stepWaitDeployments},
 		}
