@@ -4,6 +4,8 @@
 [![Discord](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://octelium.com/external/discord)
 [![Slack](https://img.shields.io/badge/Slack-purple?logo=slack&logoColor=white)](https://octelium.com/external/slack)
 
+![Cordium introduction](https://octelium.com/assets/cordium-intro-dark-Dv-NkPnV.webp)
+
 Cordium is a free and open source, self-hosted, identity-based, horizontally scalable sandbox platform built on Kubernetes and [Octelium](https://github.com/octelium/octelium) for humans and AI agents.
 
 Cordium is designed around two tightly integrated purposes that most platforms treat as separate concerns:
