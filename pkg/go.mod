@@ -4,15 +4,15 @@ go 1.27.4
 
 require (
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/pkg v0.0.0-20261114160625-c2433476ab35
+	github.com/octelium/octelium/pkg v0.0.0-20261125030142-32124dd30ea5
 	github.com/pkg/errors v0.9.1
 	google.golang.org/protobuf v1.36.12
 )
 
 require (
 	golang.org/x/net v0.62.0 // indirect
-	golang.org/x/sys v0.49.0 // indirect
-	golang.org/x/text v0.43.0 // indirect
+	golang.org/x/sys v0.50.0 // indirect
+	golang.org/x/text v0.44.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260817212433-ac3dfec99bb1 // indirect
 	google.golang.org/grpc v1.85.0 // indirect
 )
