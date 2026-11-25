@@ -27,7 +27,6 @@ import (
 	"github.com/octelium/octelium/cluster/common/vutils"
 	"github.com/octelium/octelium/pkg/grpcerr"
 	"github.com/octelium/octelium/pkg/utils/ldflags"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 	k8serr "k8s.io/apimachinery/pkg/api/errors"
@@ -53,10 +52,6 @@ func (s *Genesis) doInit(ctx context.Context) error {
 			return err
 		}
 	*/
-
-	if err := s.setWSNamespace(ctx); err != nil {
-		return errors.Errorf("Could not set Workspace k8s namespace: %+v", err)
-	}
 
 	/*
 		if err := s.setPersistentVolume(ctx); err != nil {

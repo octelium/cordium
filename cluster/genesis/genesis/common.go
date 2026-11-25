@@ -80,6 +80,10 @@ func (g *Genesis) installComponents(ctx context.Context, o *components.CommonOpt
 		return err
 	}
 
+	if err := g.setWSNamespace(ctx); err != nil {
+		return errors.Errorf("Could not set Workspace k8s namespace: %+v", err)
+	}
+
 	if err := components.CreateNocturne(ctx, o); err != nil {
 		return err
 	}

@@ -19,15 +19,18 @@ package components
 import (
 	"context"
 
+	workspacecommon "github.com/octelium/cordium/cluster/common"
+	"github.com/octelium/cordium/cluster/common/components"
 	"github.com/octelium/octelium/apis/main/corev1"
+	"github.com/octelium/octelium/cluster/common/k8sretry"
 	"github.com/octelium/octelium/cluster/common/k8sutils"
 	gc "github.com/octelium/octelium/cluster/genesis/genesis/components"
 	utils_types "github.com/octelium/octelium/pkg/utils/types"
-	"github.com/octelium/cordium/cluster/common/components"
 	appsv1 "k8s.io/api/apps/v1"
 	k8scorev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	k8serr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -104,17 +107,47 @@ func getNocturneDeployment(o *CommonOpts) *appsv1.Deployment {
 	return deployment
 }
 
-func getNocturneRole() *rbacv1.ClusterRole {
-	return &rbacv1.ClusterRole{
+func getNocturneRole() *rbacv1.Role {
+	return &rbacv1.Role{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: getComponentName(componentNocturne),
+			Name:      getComponentName(componentNocturne),
+			Namespace: workspacecommon.K8sNS,
 		},
-
 		Rules: []rbacv1.PolicyRule{
 			{
-				APIGroups: []string{"*", "*.*"},
-				Resources: []string{"*"},
-				Verbs:     []string{"*"},
+				APIGroups: []string{""},
+				Resources: []string{"configmaps"},
+				Verbs:     []string{"create", "delete"},
+			},
+			{
+				APIGroups: []string{""},
+				Resources: []string{"configmaps/finalizers"},
+				Verbs:     []string{"update"},
+			},
+			{
+				APIGroups: []string{"apps"},
+				Resources: []string{"deployments"},
+				Verbs:     []string{"create"},
+			},
+			{
+				APIGroups: []string{""},
+				Resources: []string{"services"},
+				Verbs:     []string{"get", "create"},
+			},
+			{
+				APIGroups: []string{""},
+				Resources: []string{"pods"},
+				Verbs:     []string{"list"},
+			},
+			{
+				APIGroups: []string{""},
+				Resources: []string{"persistentvolumeclaims"},
+				Verbs:     []string{"get", "create", "update", "delete"},
+			},
+			{
+				APIGroups: []string{"snapshot.storage.k8s.io"},
+				Resources: []string{"volumesnapshots"},
+				Verbs:     []string{"get", "list", "create", "delete"},
 			},
 		},
 	}
@@ -129,14 +162,15 @@ func getNocturneServiceAccount() *k8scorev1.ServiceAccount {
 	}
 }
 
-func getNocturneRoleBinding() *rbacv1.ClusterRoleBinding {
-	return &rbacv1.ClusterRoleBinding{
+func getNocturneRoleBinding() *rbacv1.RoleBinding {
+	return &rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: getComponentName(componentNocturne),
+			Name:      getComponentName(componentNocturne),
+			Namespace: workspacecommon.K8sNS,
 		},
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: "rbac.authorization.k8s.io",
-			Kind:     "ClusterRole",
+			Kind:     "Role",
 			Name:     getComponentName(componentNocturne),
 		},
 		Subjects: []rbacv1.Subject{
@@ -172,11 +206,15 @@ func CreateNocturne(ctx context.Context, o *CommonOpts) error {
 		return err
 	}
 
-	if _, err := k8sutils.CreateOrUpdateClusterRole(ctx, o.K8sC, getNocturneRole()); err != nil {
+	if _, err := k8sutils.CreateOrUpdateRole(ctx, o.K8sC, getNocturneRole()); err != nil {
 		return err
 	}
 
-	if _, err := k8sutils.CreateOrUpdateClusterRoleBinding(ctx, o.K8sC, getNocturneRoleBinding()); err != nil {
+	if _, err := k8sutils.CreateOrUpdateRoleBinding(ctx, o.K8sC, getNocturneRoleBinding()); err != nil {
+		return err
+	}
+
+	if err := deleteNocturneLegacyClusterRole(ctx, o); err != nil {
 		return err
 	}
 
@@ -189,4 +227,26 @@ func CreateNocturne(ctx context.Context, o *CommonOpts) error {
 	}
 
 	return nil
+}
+
+func deleteNocturneLegacyClusterRole(ctx context.Context, o *CommonOpts) error {
+	name := getComponentName(componentNocturne)
+
+	if err := k8sretry.Do(ctx, func(ctx context.Context) error {
+		err := o.K8sC.RbacV1().ClusterRoleBindings().Delete(ctx, name, metav1.DeleteOptions{})
+		if k8serr.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}); err != nil {
+		return err
+	}
+
+	return k8sretry.Do(ctx, func(ctx context.Context) error {
+		err := o.K8sC.RbacV1().ClusterRoles().Delete(ctx, name, metav1.DeleteOptions{})
+		if k8serr.IsNotFound(err) {
+			return nil
+		}
+		return err
+	})
 }

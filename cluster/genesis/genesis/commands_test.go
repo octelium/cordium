@@ -47,6 +47,8 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 	corev1k8s "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
+	k8serr "k8s.io/apimachinery/pkg/api/errors"
 	k8smetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 )
@@ -81,7 +83,13 @@ func TestPackageCommandsWithLegacyAndBoundClusters(t *testing.T) {
 				t.Setenv("OCTELIUM_GENESIS_REGION_UID", region.Metadata.Uid)
 				t.Setenv("OCTELIUM_GENESIS_NAMESPACE_UID", "namespace-uid")
 			}
-			k8sC := fake.NewSimpleClientset(&corev1k8s.Namespace{ObjectMeta: k8smetav1.ObjectMeta{Name: vutils.K8sNS, UID: "namespace-uid"}}, bootstrap, cm)
+			k8sC := fake.NewSimpleClientset(&corev1k8s.Namespace{ObjectMeta: k8smetav1.ObjectMeta{Name: vutils.K8sNS, UID: "namespace-uid"}}, bootstrap, cm,
+				&rbacv1.ClusterRole{ObjectMeta: k8smetav1.ObjectMeta{Name: "cordium-nocturne"}, Rules: []rbacv1.PolicyRule{{APIGroups: []string{"*"}, Resources: []string{"*"}, Verbs: []string{"*"}}}},
+				&rbacv1.ClusterRoleBinding{
+					ObjectMeta: k8smetav1.ObjectMeta{Name: "cordium-nocturne"},
+					RoleRef:    rbacv1.RoleRef{APIGroup: "rbac.authorization.k8s.io", Kind: "ClusterRole", Name: "cordium-nocturne"},
+					Subjects:   []rbacv1.Subject{{Kind: "ServiceAccount", Name: "cordium-nocturne", Namespace: vutils.K8sNS}},
+				})
 			g := &Genesis{k8sC: k8sC}
 			key, err := tst.C.OcteliumC.CordiumC().GetSecret(t.Context(), &rmetav1.GetOptions{Name: "sys:ws-tunnel-wgkey"})
 			require.NoError(t, err)
@@ -119,6 +127,20 @@ func TestPackageCommandsWithLegacyAndBoundClusters(t *testing.T) {
 				require.NoError(t, err)
 				assert.Equal(t, components.GetImage(name, ""), deployment.Spec.Template.Spec.Containers[0].Image)
 			}
+			_, err = k8sC.CoreV1().Namespaces().Get(t.Context(), "cordium", k8smetav1.GetOptions{})
+			require.NoError(t, err)
+			role, err := k8sC.RbacV1().Roles("cordium").Get(t.Context(), "cordium-nocturne", k8smetav1.GetOptions{})
+			require.NoError(t, err)
+			for _, rule := range role.Rules {
+				assert.NotContains(t, rule.Verbs, "*")
+			}
+			roleBinding, err := k8sC.RbacV1().RoleBindings("cordium").Get(t.Context(), "cordium-nocturne", k8smetav1.GetOptions{})
+			require.NoError(t, err)
+			assert.Equal(t, []rbacv1.Subject{{Kind: "ServiceAccount", Name: "cordium-nocturne", Namespace: vutils.K8sNS}}, roleBinding.Subjects)
+			_, err = k8sC.RbacV1().ClusterRoles().Get(t.Context(), "cordium-nocturne", k8smetav1.GetOptions{})
+			assert.True(t, k8serr.IsNotFound(err))
+			_, err = k8sC.RbacV1().ClusterRoleBindings().Get(t.Context(), "cordium-nocturne", k8smetav1.GetOptions{})
+			assert.True(t, k8serr.IsNotFound(err))
 			stored, err := k8sC.CoreV1().Secrets(vutils.K8sNS).Get(t.Context(), bootstrap.Name, k8smetav1.GetOptions{})
 			require.NoError(t, err)
 			assert.Equal(t, bootstrap.Data, stored.Data)
