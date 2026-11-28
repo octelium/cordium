@@ -7,17 +7,17 @@ require (
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/cluster/apiserver v0.0.0-20261125030142-32124dd30ea5
-	github.com/octelium/octelium/cluster/common v0.0.0-20261125030142-32124dd30ea5
-	github.com/octelium/octelium/cluster/vigil v0.0.0-20261125030142-32124dd30ea5
-	github.com/octelium/octelium/pkg v0.0.0-20261125030142-32124dd30ea5
+	github.com/octelium/octelium/cluster/apiserver v0.0.0-20261128033034-17b314a84135
+	github.com/octelium/octelium/cluster/common v0.0.0-20261128033034-17b314a84135
+	github.com/octelium/octelium/cluster/vigil v0.0.0-20261128033034-17b314a84135
+	github.com/octelium/octelium/pkg v0.0.0-20261128033034-17b314a84135
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
 	go.uber.org/zap v1.28.0
 )
 
 require (
-	cel.dev/cel-go v0.32.0 // indirect
+	cel.dev/cel-go v0.33.4 // indirect
 	cel.dev/expr v0.25.3 // indirect
 	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
@@ -93,8 +93,8 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/octelium/octelium/cluster/octovigil v0.0.0-20261125030142-32124dd30ea5 // indirect
-	github.com/octelium/octelium/cluster/rscserver v0.0.0-20261125030142-32124dd30ea5 // indirect
+	github.com/octelium/octelium/cluster/octovigil v0.0.0-20261128033034-17b314a84135 // indirect
+	github.com/octelium/octelium/cluster/rscserver v0.0.0-20261128033034-17b314a84135 // indirect
 	github.com/open-policy-agent/opa v1.22.2 // indirect
 	github.com/oschwald/geoip2-golang/v2 v2.5.0 // indirect
 	github.com/oschwald/maxminddb-golang/v2 v2.8.0 // indirect

@@ -7,9 +7,9 @@ go 1.27.4
 require (
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/cluster/common v0.0.0-20261125030142-32124dd30ea5
-	github.com/octelium/octelium/cluster/genesis v0.0.0-20261125030142-32124dd30ea5
-	github.com/octelium/octelium/pkg v0.0.0-20261125030142-32124dd30ea5
+	github.com/octelium/octelium/cluster/common v0.0.0-20261128033034-17b314a84135
+	github.com/octelium/octelium/cluster/genesis v0.0.0-20261128033034-17b314a84135
+	github.com/octelium/octelium/pkg v0.0.0-20261128033034-17b314a84135
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
@@ -25,7 +25,7 @@ require (
 // replace github.com/cilium/ebpf => github.com/cilium/ebpf v0.19.0
 
 require (
-	cel.dev/cel-go v0.32.0 // indirect
+	cel.dev/cel-go v0.33.4 // indirect
 	cel.dev/expr v0.25.3 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/agnivade/levenshtein v1.2.1 // indirect
@@ -111,8 +111,8 @@ require (
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000 // indirect
-	github.com/octelium/octelium/cluster/apiserver v0.0.0-20261125030142-32124dd30ea5 // indirect
-	github.com/octelium/octelium/cluster/rscserver v0.0.0-20261125030142-32124dd30ea5 // indirect
+	github.com/octelium/octelium/cluster/apiserver v0.0.0-20261128033034-17b314a84135 // indirect
+	github.com/octelium/octelium/cluster/rscserver v0.0.0-20261128033034-17b314a84135 // indirect
 	github.com/oklog/ulid/v2 v2.1.1 // indirect
 	github.com/open-policy-agent/opa v1.22.2 // indirect
 	github.com/oschwald/geoip2-golang/v2 v2.5.0 // indirect

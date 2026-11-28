@@ -7,10 +7,10 @@ require (
 	github.com/octelium/cordium/cluster/common v0.0.0-00010101000000-000000000000
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.52.0
-	github.com/octelium/octelium/cluster/common v0.0.0-20261125030142-32124dd30ea5
-	github.com/octelium/octelium/cluster/e2e v0.0.0-20261125030142-32124dd30ea5
-	github.com/octelium/octelium/octelium-go v0.52.1-0.20261125030142-32124dd30ea5
-	github.com/octelium/octelium/pkg v0.0.0-20261125030142-32124dd30ea5
+	github.com/octelium/octelium/cluster/common v0.0.0-20261128033034-17b314a84135
+	github.com/octelium/octelium/cluster/e2e v0.0.0-20261128033034-17b314a84135
+	github.com/octelium/octelium/octelium-go v0.52.1-0.20261128033034-17b314a84135
+	github.com/octelium/octelium/pkg v0.0.0-20261128033034-17b314a84135
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
 	go.uber.org/zap v1.28.0
@@ -88,7 +88,7 @@ require (
 	github.com/nats-io/nats.go v1.46.1 // indirect
 	github.com/nats-io/nkeys v0.4.11 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/octelium/octelium/client/common v0.0.0-20261125030142-32124dd30ea5 // indirect
+	github.com/octelium/octelium/client/common v0.0.0-20261128033034-17b314a84135 // indirect
 	github.com/openai/openai-go/v3 v3.2.0 // indirect
 	github.com/paulmach/orb v0.11.1 // indirect
 	github.com/philhofer/fwd v1.2.0 // indirect

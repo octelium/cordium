@@ -12,10 +12,10 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.4
 	github.com/octelium/cordium/pkg v0.0.0-00010101000000-000000000000
 	github.com/octelium/octelium/apis v0.0.0-00010101000000-000000000000
-	github.com/octelium/octelium/cluster/apiserver v0.0.0-20261125030142-32124dd30ea5
-	github.com/octelium/octelium/cluster/common v0.0.0-20261125030142-32124dd30ea5
-	github.com/octelium/octelium/cluster/rscserver v0.0.0-20261125030142-32124dd30ea5
-	github.com/octelium/octelium/pkg v0.0.0-20261125030142-32124dd30ea5
+	github.com/octelium/octelium/cluster/apiserver v0.0.0-20261128033034-17b314a84135
+	github.com/octelium/octelium/cluster/common v0.0.0-20261128033034-17b314a84135
+	github.com/octelium/octelium/cluster/rscserver v0.0.0-20261128033034-17b314a84135
+	github.com/octelium/octelium/pkg v0.0.0-20261128033034-17b314a84135
 	github.com/pelletier/go-toml/v2 v2.4.3
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
@@ -28,7 +28,7 @@ require (
 )
 
 require (
-	cel.dev/cel-go v0.32.0 // indirect
+	cel.dev/cel-go v0.33.4 // indirect
 	cel.dev/expr v0.25.3 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
